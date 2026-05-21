@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>四级备考助手 - 阅读页 UI v3</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #f0ebe6; display: flex; flex-direction: column; align-items: center;
+  padding: 40px 20px; font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+}
+h1 { font-size: 28px; color: #333; margin-bottom: 8px; }
+.subtitle { color: #888; margin-bottom: 40px; font-size: 15px; }
+
+.phone {
+  width: 375px; height: 812px; background: #f8f6f0;
+  border-radius: 44px; overflow: hidden; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column;
+}
+.status-bar { padding: 14px 24px 0; display: flex; justify-content: space-between; font-size: 12px; color: #666; }
+.notch {
+  width: 160px; height: 28px; background: #000; border-radius: 0 0 18px 18px;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10;
+}
+
+/* Header */
+.header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px 6px; flex-shrink: 0; background: #f8f6f0;
+}
+.back-btn {
+  width: 34px; height: 34px; border-radius: 10px; background: rgba(84,110,122,0.1);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; color: #546e7a;
+}
+.title { flex: 1; font-size: 16px; font-weight: 700; color: #2d2d4e; }
+.type-badge {
+  font-size: 11px; color: #fff; padding: 3px 10px; border-radius: 8px;
+  background: linear-gradient(135deg, #81c784, #4caf50);
+}
+
+/* Content */
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ===== Passage section ===== */
+.passage-section {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 4px 16px 0; min-height: 0;
+}
+.passage-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
+}
+.passage-label { font-size: 11px; color: #546e7a; font-weight: 600; letter-spacing: 1px; }
+.passage-pages { font-size: 10px; color: #8a7a9a; }
+
+.passage-card {
+  flex: 1;
+  background: #eef1f3;
+  border-radius: 14px; padding: 18px 20px;
+  touch-action: pan-y;
+  display: flex; flex-direction: column;
+}
+.passage-text {
+  flex: 1;
+  font-size: 14px; line-height: 1.9; color: #2d3a4a;
+  overflow: hidden;
+}
+
+.passage-dots {
+  display: flex; justify-content: center; gap: 5px; padding: 8px 0 6px;
+}
+.passage-dot { width: 6px; height: 6px; border-radius: 50%; background: #d0c8d0; transition: 0.3s; }
+.passage-dot.on { background: #546e7a; width: 16px; border-radius: 3px; }
+
+/* ===== Divider ===== */
+.divider {
+  height: 1px; background: linear-gradient(90deg, transparent, rgba(84,110,122,0.15), transparent);
+  margin: 0 24px;
+}
+
+/* ===== Question section ===== */
+.question-section {
+  flex: 1.3; display: flex; flex-direction: column;
+  padding: 6px 16px 20px; min-height: 0;
+  background: #faf5f7;
+}
+.question-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
+}
+.question-label { font-size: 11px; color: #546e7a; font-weight: 600; letter-spacing: 1px; }
+.question-count { font-size: 10px; color: #8a7a9a; }
+
+.question-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 14px; padding: 16px 20px 14px;
+  box-shadow: 0 2px 12px rgba(84,110,122,0.04);
+  display: flex; flex-direction: column;
+  touch-action: pan-y;
+}
+
+.question-text {
+  font-size: 15px; line-height: 1.7; color: #2d2d4e; font-weight: 500;
+  margin-bottom: 12px;
+}
+
+/* Options - 2 column grid with full utilization */
+.options-grid {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.option-item {
+  flex: 1;
+  display: flex; align-items: center;
+  font-size: 14px; color: #4a4a6a;
+  padding: 14rpx 16px;
+  border-radius: 12px;
+  background: rgba(84,110,122,0.04);
+  border: 1.5px solid rgba(84,110,122,0.06);
+  line-height: 1.5;
+  transition: 0.2s;
+  min-height: 48px;
+}
+.option-item.tap {
+  background: rgba(84,110,122,0.1);
+  border-color: #546e7a;
+  color: #2d2d4e;
+  font-weight: 600;
+}
+
+/* Options grid for chips (选词填空) */
+.options-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+}
+.chip-item {
+  font-size: 14px; color: #4a4a6a; padding: 10px 18px;
+  border-radius: 10px; background: rgba(84,110,122,0.05);
+  border: 1px solid rgba(84,110,122,0.08);
+  transition: 0.2s;
+}
+.chip-item.tap {
+  background: rgba(84,110,122,0.12);
+  border-color: #546e7a;
+}
+
+.question-dots {
+  display: flex; justify-content: center; gap: 5px; padding: 8px 0 0;
+}
+.question-dot { width: 6px; height: 6px; border-radius: 50%; background: #d0c8d0; transition: 0.3s; }
+.question-dot.on { background: #546e7a; width: 16px; border-radius: 3px; }
+
+/* Sample switcher */
+.sample-bar {
+  display: flex; gap: 8px; padding: 12px 20px; justify-content: center;
+  flex-shrink: 0; background: #f8f6f0;
+}
+.sample-btn {
+  font-size: 12px; padding: 6px 16px; border-radius: 16px;
+  background: #fff; border: 1px solid #ddd; color: #666; cursor: pointer;
+}
+.sample-btn.on { background: #546e7a; color: #fff; border-color: #546e7a; }
+</style>
+</head>
+<body>
+
+<h1>📖 阅读页 UI v3</h1>
+<p class="subtitle">背景柔和过渡 · 选项充分利用空间 · 无内容被遮挡</p>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status-bar"><span>9:41</span><span>🔋 100%</span></div>
+
+  <div class="header">
+    <div class="back-btn">←</div>
+    <div class="title">仔细阅读</div>
+    <div class="type-badge">精读</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Passage -->
+    <div class="passage-section">
+      <div class="passage-header">
+        <div class="passage-label">📄 文章</div>
+        <div class="passage-pages" id="pageNum">1/3</div>
+      </div>
+      <div class="passage-card" id="passageCard">
+        <div class="passage-text" id="passageText"></div>
+      </div>
+      <div class="passage-dots" id="passageDots"></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Question -->
+    <div class="question-section">
+      <div class="question-header">
+        <div class="question-label">❓ 题目</div>
+        <div class="question-count" id="qNum">1/5</div>
+      </div>
+      <div class="question-card" id="questionCard">
+        <div class="question-text" id="questionText"></div>
+        <div id="optionsArea"></div>
+      </div>
+      <div class="question-dots" id="questionDots"></div>
+    </div>
+
+  </div>
+
+  <div class="sample-bar">
+    <div class="sample-btn on" data-type="C">仔细阅读</div>
+    <div class="sample-btn" data-type="B">长篇匹配</div>
+    <div class="sample-btn" data-type="A">选词填空</div>
+  </div>
+</div>
+
+<p style="margin-top:30px;color:#999;font-size:13px;">
+👆 文章区浅灰底 · 题目区白底+柔和阴影 · 分割线过渡 · 选项上下排列充分利用空间
+</p>
+
+<script>
+// ====== Data ======
+const samples = {
+  C: {
+    type: '仔细阅读',
+    badge: '精读',
+    passages: [
+      `In the classic marriage vow, couples promise to stay together in sickness and in health. But a new study finds that the risk of divorce among older couples rises when the wife — not the husband — becomes seriously ill. "Married women diagnosed with a serious health condition may find themselves struggling with the impact of their disease while also experiencing the stress of divorce," said researcher Amelia Karraker.`,
+      `Karraker and co-author Kenzie Latham analyzed 20 years of data on 2,717 marriages. They found that 31% of marriages ended in divorce over the period studied. "Women are doubly vulnerable to marital break-up in the face of illness," Karraker said. "They're more likely to be widowed, and if they're the ones who become ill, they're more likely to get divorced."`,
+      `While the study didn't assess why divorce is more likely when wives become seriously ill, Karraker offers possible reasons. "Gender norms and social expectations about caregiving may make it more difficult for men to provide care." She believes policymakers should offer support services to reduce marital stress and prevent divorce at older ages.`
+    ],
+    questions: [
+      { q: "46. What can we learn about marriage vows from the passage?", opts: ["A) They may not guarantee a lasting marriage.", "B) They are as binding as they used to be.", "C) They are not taken seriously any more.", "D) They may help couples tide over hard times."] },
+      { q: "47. What did Karraker find about elderly husbands?", opts: ["A) They are not good at taking care of themselves.", "B) They are more vulnerable to serious illnesses.", "C) They develop different illnesses than their wives.", "D) They are more likely to contract serious illnesses."] },
+      { q: "48. What does Karraker say about women who fall ill?", opts: ["A) They are more likely to be widowed.", "B) They are more likely to get divorced.", "C) They are less likely to receive good care.", "D) They are less likely to bother their spouses."] },
+      { q: "49. Why is it more difficult for men to care for sick spouses?", opts: ["A) They are more accustomed to receiving care.", "B) They find it more important to make money.", "C) They think it more urgent to fulfill social obligations.", "D) They expect society to do more of the job."] },
+      { q: "50. What does Karraker think is also important?", opts: ["A) Reducing marital stress on wives.", "B) Stabilizing old couples' relations.", "C) Providing extra care for divorced women.", "D) Making men pay for their wives' health costs."] }
+    ]
+  },
+  B: {
+    type: '长篇阅读',
+    badge: '匹配',
+    passages: [
+      `A) Today in the United States there are 72,000 centenarians. Worldwide, probably 450,000. If current trends continue, then by 2050 there will be more than a million in the US alone. B) Understandably, there are concerns about what this means for public finances. However, looking at the data, living longer doesn't necessarily mean living at the expense of others.`,
+      `C) Our view is that if many people are living for longer, and are healthier for longer, then this will result in an unprecedented opportunity. D) But the changes go further than that. Take, for instance, the age at which people marry. Being young no longer means what it used to.`,
+      `E) While there are numerous factors behind these shifts, one factor is surely a rise in the age at which women have their first child. F) Longevity also pushes back the age of retirement, and not only for financial reasons. G) And yet that does not mean that simply extending our careers is appealing.`
+    ],
+    questions: [
+      { q: "36. An extended lifespan will allow people to have more careers.", opts: ["A) Paragraph A", "B) Paragraph D", "C) Paragraph F", "D) Paragraph G"] },
+      { q: "37. Just extending one's career may have both positive and negative effects.", opts: ["A) Paragraph B", "B) Paragraph C", "C) Paragraph E", "D) Paragraph G"] },
+      { q: "38. Many Americans have delayed their marriage by about 7 years.", opts: ["A) Paragraph A", "B) Paragraph D", "C) Paragraph E", "D) Paragraph F"] }
+    ]
+  },
+  A: {
+    type: '选词填空',
+    badge: '选词',
+    passages: [
+      `The center of American automobile innovation has moved 2,000 miles away. It has 26 from Detroit to Silicon Valley, where self-driving vehicles are coming into life. In a 27 to take production back, lawmakers have introduced 28 that could make their state the best place to develop self-driving vehicles. "Michigan's 29 in auto research is under attack," says Senator Mike Kowall.`,
+      `If the bills pass, they would 30 a substantial update of Michigan's 2013 law. Manufacturers would have near total freedom to test self-driving technology on public roads. They would be allowed to send groups of self-driving cars on cross-state road trips, and even set up on-demand 31 of self-driving cars. Lawmakers want to make the state ready for the commercial application of self-driving technology.`
+    ],
+    questions: [
+      { q: "从以下词中选择合适的填入空格：", opts: ["bid", "replace", "contrast", "represent", "deputy", "restrictive", "dominance", "reward", "fleets", "significant", "knots", "sponsor", "legislation", "transmitted", "migrated"] }
+    ]
+  }
+};
+
+let currentType = 'C';
+let passagePage = 0;
+let questionIdx = 0;
+
+function getData() { return samples[currentType]; }
+
+function render() {
+  const data = getData();
+  
+  document.querySelector('.title').textContent = data.type;
+  document.querySelector('.type-badge').textContent = data.badge;
+  
+  // Passage
+  document.getElementById('passageText').textContent = data.passages[passagePage];
+  document.getElementById('pageNum').textContent = `${passagePage + 1}/${data.passages.length}`;
+  document.getElementById('passageDots').innerHTML = data.passages.map((_, i) =>
+    `<div class="passage-dot ${i === passagePage ? 'on' : ''}"></div>`).join('');
+  
+  // Question
+  const q = data.questions[questionIdx];
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('qNum').textContent = `${questionIdx + 1}/${data.questions.length}`;
+  
+  // Options area - use different layout based on type
+  const area = document.getElementById('optionsArea');
+  if (currentType === 'A') {
+    // 选词填空: chips layout
+    area.innerHTML = `<div class="options-chips">${q.opts.map(o => `<div class="chip-item">${o}</div>`).join('')}</div>`;
+  } else {
+    // 仔细阅读/长篇阅读: vertical list
+    area.innerHTML = `<div class="options-grid">${q.opts.map(o => `<div class="option-item">${o}</div>`).join('')}</div>`;
+  }
+  
+  document.getElementById('questionDots').innerHTML = data.questions.map((_, i) =>
+    `<div class="question-dot ${i === questionIdx ? 'on' : ''}"></div>`).join('');
+}
+
+// Swipe
+let touchStartX = 0;
+
+function onSwipe(el, onLeft, onRight) {
+  el.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx > 50) onRight();
+    else if (dx < -50) onLeft();
+  });
+  let md = false, mx = 0;
+  el.addEventListener('mousedown', e => { md = true; mx = e.clientX; });
+  el.addEventListener('mouseup', e => {
+    if (!md) return; md = false;
+    const dx = e.clientX - mx;
+    if (dx > 50) onRight();
+    else if (dx < -50) onLeft();
+  });
+  el.addEventListener('mouseleave', () => { md = false; });
+}
+
+onSwipe(document.getElementById('passageCard'), () => {
+  const d = getData();
+  if (passagePage < d.passages.length - 1) { passagePage++; render(); }
+}, () => {
+  if (passagePage > 0) { passagePage--; render(); }
+});
+
+onSwipe(document.getElementById('questionCard'), () => {
+  const d = getData();
+  if (questionIdx < d.questions.length - 1) { questionIdx++; render(); }
+}, () => {
+  if (questionIdx > 0) { questionIdx--; render(); }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') {
+    const d = getData();
+    if (e.altKey) { if (questionIdx < d.questions.length - 1) { questionIdx++; render(); } }
+    else { if (passagePage < d.passages.length - 1) { passagePage++; render(); } }
+  }
+  if (e.key === 'ArrowLeft') {
+    if (e.altKey) { if (questionIdx > 0) { questionIdx--; render(); } }
+    else { if (passagePage > 0) { passagePage--; render(); } }
+  }
+});
+
+document.addEventListener('click', e => {
+  const opt = e.target.closest('.option-item, .chip-item');
+  if (opt) {
+    const parent = opt.closest('.options-grid, .options-chips');
+    if (parent) {
+      parent.querySelectorAll('.option-item, .chip-item').forEach(o => o.classList.remove('tap'));
+      opt.classList.add('tap');
+    }
+  }
+});
+
+document.querySelectorAll('.sample-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    currentType = btn.dataset.type;
+    passagePage = 0;
+    questionIdx = 0;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

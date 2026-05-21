@@ -16,7 +16,6 @@ interface IReadingData {
   currentQ: number
   passagePage: number
   passagePages: string[]
-  currentChoices: string[]
   darkMode: boolean
   choiceLabels: string[]
   touchStartX: number
@@ -30,13 +29,10 @@ interface IReadingMethods {
   prevPassage(): void
   nextPassage(): void
   splitPassage(text: string): string[]
-  getChoicesForQuestion(item: IReadingItem, qIdx: number): string[]
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
 }
-
-const choiceLabels = ['A)', 'B)', 'C)', 'D)']
 
 Page<IReadingData, IReadingMethods>({
   data: {
@@ -45,9 +41,8 @@ Page<IReadingData, IReadingMethods>({
     currentQ: 0,
     passagePage: 0,
     passagePages: [],
-    currentChoices: [],
     darkMode: false,
-    choiceLabels,
+    choiceLabels: ['A)', 'B)', 'C)', 'D)'],
     touchStartX: 0,
   },
 
@@ -65,18 +60,12 @@ Page<IReadingData, IReadingMethods>({
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
       const pages = this.splitPassage(item.passage)
-      this.setData({
-        current: item,
-        currentQ: 0,
-        passagePage: 0,
-        passagePages: pages,
-        currentChoices: this.getChoicesForQuestion(item, 0),
-      })
+      this.setData({ current: item, currentQ: 0, passagePage: 0, passagePages: pages })
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], currentChoices: [] })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [] })
   },
 
   splitPassage(text: string): string[] {
@@ -96,22 +85,16 @@ Page<IReadingData, IReadingMethods>({
     return pages.length > 0 ? pages : [text]
   },
 
-  getChoicesForQuestion(_item: IReadingItem, _qIdx: number): string[] {
-    return []
-  },
-
   prevQ() {
     if (this.data.currentQ > 0) {
-      const q = this.data.currentQ - 1
-      this.setData({ currentQ: q, currentChoices: this.getChoicesForQuestion(this.data.current!, q) })
+      this.setData({ currentQ: this.data.currentQ - 1 })
     }
   },
 
   nextQ() {
     const total = this.data.current?.questions?.length || 0
     if (this.data.currentQ < total - 1) {
-      const q = this.data.currentQ + 1
-      this.setData({ currentQ: q, currentChoices: this.getChoicesForQuestion(this.data.current!, q) })
+      this.setData({ currentQ: this.data.currentQ + 1 })
     }
   },
 

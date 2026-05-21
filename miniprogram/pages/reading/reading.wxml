@@ -1,4 +1,5 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <!-- 列表页 -->
   <block wx:if="{{!current}}">
     <view class="rh-header">
       <view class="rh-bg"></view>
@@ -19,42 +20,55 @@
     </view>
   </block>
 
+  <!-- 详情页 -->
   <block wx:else>
     <view class="reading-detail">
 
       <!-- 顶栏 -->
-      <view class="detail-header">
-        <view class="back-btn" catchtap="back">←</view>
-        <text class="detail-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读' : '仔细阅读'}}</text>
-      </view>
-
-      <!-- 文章区：左右滑动翻页 -->
-      <view class="passage-area" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-        <scroll-view class="pa-scroll" scroll-y>
-          <text class="pa-text">{{passagePages[passagePage]}}</text>
-        </scroll-view>
-        <view class="pa-indicator" wx:if="{{passagePages.length > 1}}">
-          <text class="pa-dot {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></text>
+      <view class="topbar">
+        <view class="tb-back" catchtap="back">←</view>
+        <text class="tb-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读' : '仔细阅读'}}</text>
+        <view class="tb-badge {{'tag-' + current.sectionType}}">
+          {{current.sectionType === 'A' ? '选词' : current.sectionType === 'B' ? '匹配' : '精读'}}
         </view>
       </view>
 
-      <!-- 题目+选项区 -->
-      <view class="question-area" wx:if="{{current.questions && current.questions.length > 0}}">
-        <view class="qa-top" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
-          <text class="qa-label">第{{currentQ + 1}}/{{current.questions.length}}题</text>
-          <text class="qa-text">{{current.questions[currentQ]}}</text>
+      <!-- 文章区 -->
+      <view class="passage-wrap">
+        <view class="pw-header">
+          <text class="pw-label">📄 文章</text>
+          <text class="pw-page">{{passagePage + 1}}/{{passagePages.length}}</text>
         </view>
+        <view class="pw-card" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
+          <text class="pw-text">{{passagePages[passagePage]}}</text>
+        </view>
+        <view class="pw-dots">
+          <view class="pwd {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></view>
+        </view>
+      </view>
 
-        <!-- 选项 -->
-        <view class="qa-options" wx:if="{{current.options && current.options.length > 0}}">
-          <text class="qao-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}. {{item}}</text>
-        </view>
-        <view class="qa-options" wx:else>
-          <text class="qao-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
-        </view>
+      <!-- 分割线 -->
+      <view class="section-divider"></view>
 
-        <view class="qa-dots">
-          <view class="qad {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this"></view>
+      <!-- 题目区 -->
+      <view class="question-wrap" wx:if="{{current.questions && current.questions.length > 0}}">
+        <view class="qw-header">
+          <text class="qw-label">❓ 题目</text>
+          <text class="qw-count">{{currentQ + 1}}/{{current.questions.length}}</text>
+        </view>
+        <view class="qw-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+          <text class="qw-text">{{current.questions[currentQ]}}</text>
+
+          <!-- 选项：选词填空(chips) / 其他(列表) -->
+          <view class="qw-chips" wx:if="{{current.sectionType === 'A' && current.options && current.options.length > 0}}">
+            <text class="qwc-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+          </view>
+          <view class="qw-options" wx:else>
+            <text class="qwo-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+        <view class="qw-dots">
+          <view class="qwd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i"></view>
         </view>
       </view>
 
