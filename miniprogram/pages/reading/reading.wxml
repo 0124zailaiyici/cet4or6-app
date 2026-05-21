@@ -33,7 +33,7 @@
         <scroll-view class="ps-scroll" scroll-y>
           <view class="ps-card">{{passagePages[passagePage]}}</view>
         </scroll-view>
-        <view class="ps-nav" wx:if="{{passagePages.length > 1}}">
+        <view class="ps-nav">
           <text class="ps-btn {{passagePage === 0 ? 'disabled' : ''}}" catchtap="prevPassage">‹</text>
           <text class="ps-label">{{passagePage + 1}}/{{passagePages.length}}</text>
           <text class="ps-btn {{passagePage >= passagePages.length - 1 ? 'disabled' : ''}}" catchtap="nextPassage">›</text>
@@ -51,11 +51,11 @@
         <scroll-view class="qb-scroll" scroll-y>
           <text class="qb-text">{{current.questions[currentQ]}}</text>
 
-          <view class="qc-list" wx:if="{{current.sectionType === 'C'}}">
-            <text class="qc-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}} __</text>
-          </view>
-          <view class="qc-list qc-grid" wx:elif="{{current.sectionType === 'A'}}">
+          <view class="qc-list qc-grid" wx:if="{{current.options && current.options.length > 0}}">
             <text class="qc-item qc-chip" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+          </view>
+          <view class="qc-list" wx:elif="{{choiceLabels && choiceLabels.length > 0}}">
+            <text class="qc-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
           </view>
         </scroll-view>
 

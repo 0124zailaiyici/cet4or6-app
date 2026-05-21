@@ -81,18 +81,18 @@ Page<IReadingData, IReadingMethods>({
   splitPassage(text: string): string[] {
     if (!text) return ['']
     const clean = text.replace(/\s+/g, ' ').trim()
-    // 按句子切分，兼容无标点的情况
-    let sents = clean.split(/(?<=[.?!])\s+/).filter((s: string) => s.trim().length > 5)
-    if (sents.length < 2) {
-      // 没有完整句子，按 200 字一页分
-      sents = []
-      for (let i = 0; i < clean.length; i += 200) {
-        sents.push(clean.slice(i, i + 200))
-      }
-    }
+    // 按 . ! ? 分割（不用 lookbehind，兼容微信）
+    const parts = clean.split(/[.?!]\s*/).filter(s => s.trim().length > 5)
     const pages: string[] = []
-    for (let i = 0; i < sents.length; i += 6) {
-      pages.push(sents.slice(i, i + 6).join(' '))
+    if (parts.length >= 2) {
+      for (let i = 0; i < parts.length; i += 6) {
+        pages.push(parts.slice(i, i + 6).join('. ') + '.')
+      }
+    } else {
+      // 没有完整句子，按 300 字一页
+      for (let i = 0; i < clean.length; i += 300) {
+        pages.push(clean.slice(i, i + 300))
+      }
     }
     return pages.length > 0 ? pages : [text]
   },
