@@ -4,6 +4,11 @@
     <text class="page-subtitle">掌握 {{masteredIds.length}} / {{allSentences.length}}  ⭐ {{favoriteIds.length}} 收藏</text>
   </view>
 
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索句子、关键词或中文…" value="{{searchQuery}}" bindinput="onSearchInput" confirm-type="search" />
+    <view class="search-clear" wx:if="{{searchQuery}}" catchtap="clearSearch">✕</view>
+  </view>
+
   <scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}">
     <view class="topic-bar">
       <view
@@ -18,6 +23,11 @@
 
   <scroll-view class="card-scroll" scroll-y>
     <view class="card-list">
+      <view class="empty-tip" wx:if="{{filteredSentences.length === 0}}">
+        <text class="empty-text">没有匹配的句子</text>
+        <text class="empty-hint">试试其他关键词</text>
+      </view>
+
       <view
         class="sentence-card {{expandedIds.indexOf(item.id) !== -1 ? 'expanded' : ''}} {{masteredIds.indexOf(item.id) !== -1 ? 'mastered' : ''}} {{favoriteIds.indexOf(item.id) !== -1 ? 'favorited' : ''}}"
         wx:for="{{filteredSentences}}"

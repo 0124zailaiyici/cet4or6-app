@@ -17,6 +17,7 @@ interface ISentencesData {
   masteredIds: number[]
   expandedIds: number[]
   favoriteIds: number[]
+  searchQuery: string
 }
 
 interface ISentencesMethods {
@@ -24,6 +25,9 @@ interface ISentencesMethods {
   toggleExpand(e: WechatMiniprogram.TouchEvent): void
   toggleMaster(e: WechatMiniprogram.TouchEvent): void
   toggleFavorite(e: WechatMiniprogram.TouchEvent): void
+  onSearchInput(e: WechatMiniprogram.Input): void
+  clearSearch(): void
+  doFilter(): void
   highlightText(text: string, keywords: string[]): string
 }
 
@@ -36,6 +40,7 @@ Page<ISentencesData, ISentencesMethods>({
     masteredIds: [],
     expandedIds: [],
     favoriteIds: [],
+    searchQuery: '',
   },
 
   onLoad() {
@@ -53,12 +58,39 @@ Page<ISentencesData, ISentencesMethods>({
     })
   },
 
+  doFilter() {
+    const q = this.data.searchQuery.toLowerCase().trim()
+    let filtered = this.data.allSentences
+
+    if (this.data.currentTopic !== '全部') {
+      filtered = filtered.filter(s => s.topic === this.data.currentTopic)
+    }
+
+    if (q) {
+      filtered = filtered.filter(s =>
+        s.english.toLowerCase().indexOf(q) !== -1 ||
+        s.chinese.indexOf(q) !== -1 ||
+        s.keywords.some(k => k.toLowerCase().indexOf(q) !== -1)
+      )
+    }
+
+    this.setData({ filteredSentences: filtered })
+  },
+
+  onSearchInput(e: WechatMiniprogram.Input) {
+    this.setData({ searchQuery: e.detail.value })
+    this.doFilter()
+  },
+
+  clearSearch() {
+    this.setData({ searchQuery: '' })
+    this.doFilter()
+  },
+
   filterByTopic(e: WechatMiniprogram.TouchEvent) {
     const topic = e.currentTarget.dataset.topic as string
-    const filtered = topic === '全部'
-      ? this.data.allSentences
-      : this.data.allSentences.filter(s => s.topic === topic)
-    this.setData({ currentTopic: topic, filteredSentences: filtered })
+    this.setData({ currentTopic: topic })
+    this.doFilter()
   },
 
   toggleExpand(e: WechatMiniprogram.TouchEvent) {
