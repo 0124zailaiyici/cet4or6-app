@@ -251,8 +251,8 @@ async function main() {
       if (sections.listening.length > 5) {
         const items = parseListening(sections.listening, year)
         if (items.length) {
-          const matchAudio = audioFiles.find(a => f.replace(/[^0-9]/g, '').includes(a.replace(/[^0-9]/g, '')))
-          if (matchAudio) items[0].audioUrl = `http://localhost:3000/audio/${matchAudio}`
+          const matchAudio = audioFiles.find(a => f.replace(/[^0-9]/g, '').includes(a.filename.replace(/[^0-9]/g, '')))
+          if (matchAudio) items[0].audioUrl = `http://localhost:3000/audio/${matchAudio.filename}`
           items[0].title += '（PDF导入，仅题目，使用TTS听正文需手动编辑）'
           const existing = fs.existsSync(path.join(DATA_DIR, 'listening.json'))
             ? JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'listening.json'), 'utf-8'))

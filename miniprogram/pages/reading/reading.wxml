@@ -12,7 +12,7 @@
       <view class="rcard" wx:for="{{readings}}" wx:key="id" data-id="{{item.id}}" catchtap="select">
         <view class="rc-badge rc-{{item.sectionType}}">{{item.sectionType === 'A' ? '选词' : item.sectionType === 'B' ? '匹配' : '精读'}}</view>
         <text class="rc-title">{{item.title}}</text>
-        <text class="rc-meta">{{item.questions.length}} 题 | {{item.options?.length || 0}} 选项</text>
+        <text class="rc-meta">{{item.questions.length}} 题 | {{item.options ? item.options.length : 0}} 选项</text>
       </view>
     </view>
   </block>
@@ -29,10 +29,10 @@
         <view class="passage-card">
           <text class="passage-text">{{current.passage}}</text>
         </view>
-        <view class="options-card" wx:if="{{current.options?.length > 0}}">
+        <view class="options-card" wx:if="{{current.options && current.options.length > 0}}">
           <text class="opt-title">可选词：</text>
           <view class="opt-grid">
-            <text class="opt-item" wx:for="{{current.options}}" wx:key="*this">{{String.fromCharCode(65 + index)}}. {{item}}</text>
+            <text class="opt-item" wx:for="{{current.options}}" wx:key="*this">{{item}}</text>
           </view>
         </view>
       </block>
@@ -53,7 +53,7 @@
         <view class="passage-card">
           <text class="passage-text">{{current.passage}}</text>
         </view>
-        <view class="questions-card" wx:if="{{current.questions?.length > 0}}">
+        <view class="questions-card" wx:if="{{current.questions && current.questions.length > 0}}">
           <text class="q-title">题目：</text>
           <text class="q-item" wx:for="{{current.questions}}" wx:key="*this">{{item}}</text>
         </view>
