@@ -35,7 +35,7 @@
 
 .subtitle {
   font-size: 26rpx;
-  color: #9a8aaa;
+  color: var(--text-tertiary);
 }
 
 .checkin-section {
@@ -78,8 +78,8 @@
 }
 
 .checkin-btn.disabled, .checkin-btn.done {
-  background: #e8e0ec;
-  color: #b5a0c0;
+  background: var(--tag-bg);
+  color: var(--text-secondary);
   box-shadow: none;
 }
 

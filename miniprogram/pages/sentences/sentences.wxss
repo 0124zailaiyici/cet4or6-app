@@ -71,7 +71,7 @@
 
 .empty-hint {
   font-size: 24rpx;
-  color: #b5a0c0;
+  color: var(--text-secondary);
 }
 
 .topic-scroll {
@@ -166,7 +166,7 @@
 
 .fav-btn {
   font-size: 32rpx;
-  color: #d0c0d8;
+  color: var(--text-secondary);
   padding: 4rpx;
   line-height: 1;
 }

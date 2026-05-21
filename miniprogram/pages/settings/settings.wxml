@@ -60,7 +60,7 @@
         <text class="goal-icon">🌙</text>
         <text class="goal-label">暗黑模式</text>
       </view>
-      <view class="toggle-btn {{darkMode ? 'on' : ''}}" catchtap="toggleDark">
+      <view class="toggle-btn {{darkMode ? 'on' : ''}}" bindtap="toggleDark">
         <view class="toggle-knob"></view>
       </view>
     </view>

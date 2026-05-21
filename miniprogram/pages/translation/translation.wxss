@@ -71,7 +71,7 @@
   display: block;
   margin-top: 12rpx;
   font-size: 22rpx;
-  color: #9a8aaa;
+  color: var(--text-tertiary);
 }
 
 .detail-header {

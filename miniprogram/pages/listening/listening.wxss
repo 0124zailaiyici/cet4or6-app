@@ -199,7 +199,7 @@
 }
 
 .sentence-text.hidden {
-  color: #a090a8;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
@@ -273,6 +273,6 @@
   padding: 16rpx 32rpx;
   border-radius: 24rpx;
   background: rgba(197, 225, 165, 0.2);
-  color: #a8d8a0;
+  color: var(--mint);
   font-size: 26rpx;
 }
