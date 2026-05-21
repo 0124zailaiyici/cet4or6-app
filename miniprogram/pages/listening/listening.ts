@@ -70,7 +70,7 @@ function getAudioCtx(): WechatMiniprogram.InnerAudioContext {
       }
     })
     audioCtx.onError(() => {
-      wx.showToast({ title: '播放失败', icon: 'none' })
+      wx.showToast({ title: '播放失败，请确认服务器已启动', icon: 'none' })
     })
   }
   return audioCtx
@@ -190,8 +190,11 @@ Page<IListeningData, IListeningMethods>({
     this.setData({ currentIndex: index })
     const passage = this.data.currentPassage
     if (passage) {
-      const sentence = passage.sentences[index]
-      this.playText(sentence.text)
+      if (passage.audioUrl) {
+        this.playText('', passage.audioUrl)
+      } else {
+        this.playText(passage.sentences[index].text)
+      }
     }
   },
 
