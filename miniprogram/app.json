@@ -1,0 +1,19 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/listening/listening",
+    "pages/sentences/sentences",
+    "pages/translation/translation",
+    "pages/writing/writing",
+    "pages/statistics/statistics"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "四级备考助手",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#fff5f7"
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "lazyCodeLoading": "requiredComponents"
+}

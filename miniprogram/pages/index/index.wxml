@@ -1,0 +1,55 @@
+<view class="page">
+  <view class="header">
+    <text class="greeting">{{greeting}} ✨</text>
+    <text class="title">四级备考助手</text>
+    <text class="subtitle">一起加油过四级 💪</text>
+  </view>
+
+  <view class="checkin-section {{checkedIn ? 'done' : ''}}">
+    <view class="checkin-left">
+      <text class="checkin-label">{{checkedIn ? '今日已打卡 ✅' : '今日未打卡'}}</text>
+      <text class="checkin-streak">🔥 连续 {{streak}} 天</text>
+    </view>
+    <view class="checkin-btn {{checkedIn ? 'disabled' : ''}}" wx:if="{{!checkedIn}}" catchtap="handleCheckIn">打卡</view>
+    <view class="checkin-btn done" wx:else>已打卡</view>
+  </view>
+
+  <view class="module-grid">
+    <view class="module-card" wx:for="{{modules}}" wx:key="id" data-url="{{item.url}}" catchtap="goTo">
+      <view class="module-icon" style="background: {{item.color}}22">
+        <text>{{item.icon}}</text>
+      </view>
+      <view class="module-info">
+        <text class="module-title">{{item.title}}</text>
+        <text class="module-desc">{{item.desc}}</text>
+      </view>
+      <view class="module-count" style="color: {{item.color}}">{{item.count}}题</view>
+    </view>
+  </view>
+
+  <view class="stats-section">
+    <view class="section-title">📊 今日学习概览</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-num">{{todayStats.listened}}</text>
+        <text class="stat-label">精听</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{todayStats.sentences}}</text>
+        <text class="stat-label">句子</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{todayStats.translations}}</text>
+        <text class="stat-label">翻译</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{todayStats.writings}}</text>
+        <text class="stat-label">写作</text>
+      </view>
+    </view>
+    <view class="total-bar">
+      <text class="total-label">累计完成</text>
+      <text class="total-num">{{todayStats.total}} 题</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,137 @@
+<view class="page">
+  <view class="page-header">
+    <text class="page-title">写作教学</text>
+  </view>
+
+  <view class="tab-bar">
+    <view
+      class="tab-item {{tab === index ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="*this"
+      data-tab="{{index}}"
+      catchtap="switchTab"
+    >{{item}}</view>
+  </view>
+
+  <!-- 句型库 -->
+  <block wx:if="{{tab === 0}}">
+    <scroll-view class="content-scroll" scroll-y>
+      <view class="pattern-list">
+        <view
+          class="pattern-card"
+          wx:for="{{patterns}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          catchtap="togglePattern"
+        >
+          <view class="pattern-top">
+            <text class="pattern-name">{{item.pattern}}</text>
+            <text class="pattern-arrow">{{expandedPattern === item.id ? '▼' : '▶'}}</text>
+          </view>
+          <text class="pattern-chinese">{{item.chinese}}</text>
+          <view class="pattern-example" wx:if="{{expandedPattern === item.id}}">
+            <text class="example-label">例句：</text>
+            <text class="example-text">{{item.example}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="practice-block">
+        <text class="practice-label">用上方句型写一个句子：</text>
+        <textarea
+          class="practice-input"
+          placeholder="在此输入你的句子..."
+          value="{{userSentence}}"
+          bindinput="onSentenceInput"
+          maxlength="300"
+          auto-height
+        ></textarea>
+        <view class="submit-btn" catchtap="submitSentence">提交练习</view>
+      </view>
+
+      <view class="result-block" wx:if="{{showResult}}">
+        <text class="result-text">{{result}}</text>
+      </view>
+    </scroll-view>
+  </block>
+
+  <!-- 段落写作 -->
+  <block wx:elif="{{tab === 1}}">
+    <scroll-view class="content-scroll" scroll-y>
+      <view class="paragraph-prompt">
+        <text class="prompt-label">主题句：</text>
+        <text class="prompt-text">Environmental protection is everyone's responsibility.</text>
+      </view>
+
+      <view class="practice-block">
+        <text class="practice-label">续写段落（60-120词）：</text>
+        <textarea
+          class="practice-input"
+          placeholder="从此主题句开始，续写你的段落..."
+          value="{{userParagraph}}"
+          bindinput="onParagraphInput"
+          maxlength="800"
+          auto-height
+        ></textarea>
+        <view class="submit-btn" catchtap="submitParagraph">提交评审</view>
+      </view>
+
+      <view class="result-block" wx:if="{{showResult}}">
+        <text class="result-text">{{result}}</text>
+      </view>
+    </scroll-view>
+  </block>
+
+  <!-- 全文模拟 -->
+  <block wx:else>
+    <block wx:if="{{!currentWriting}}">
+      <scroll-view class="content-scroll" scroll-y>
+        <view class="writing-list">
+          <view
+            class="writing-card"
+            wx:for="{{writings}}"
+            wx:key="id"
+            data-id="{{item.id}}"
+            catchtap="enterWriting"
+          >
+            <text class="writing-title">{{item.title}}</text>
+            <text class="writing-prompt-preview">{{item.prompt.slice(0, 60)}}...</text>
+          </view>
+        </view>
+      </scroll-view>
+    </block>
+
+    <block wx:else>
+      <view class="detail-header">
+        <view class="back-btn" catchtap="backToWritingList">
+          <text>← 返回</text>
+        </view>
+        <text class="detail-title">全文写作</text>
+      </view>
+
+      <scroll-view class="content-scroll" scroll-y>
+        <view class="writing-prompt-block">
+          <text class="writing-title-lg">{{currentWriting.title}}</text>
+          <text class="writing-prompt">{{currentWriting.prompt}}</text>
+        </view>
+
+        <view class="practice-block">
+          <text class="practice-label">你的作文（120-180词）：</text>
+          <textarea
+            class="practice-input"
+            placeholder="在此输入你的作文..."
+            value="{{writingAnswer}}"
+            bindinput="onWritingInput"
+            maxlength="2000"
+            auto-height
+          ></textarea>
+          <view class="submit-btn" catchtap="submitWriting">提交批改</view>
+        </view>
+
+        <view class="result-block" wx:if="{{showResult}}">
+          <text class="result-text">{{result}}</text>
+        </view>
+      </scroll-view>
+    </block>
+  </block>
+</view>

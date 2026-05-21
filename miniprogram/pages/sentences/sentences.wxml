@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="page-header">
+    <text class="page-title">语境句子</text>
+    <text class="page-subtitle">掌握 {{masteredIds.length}} / {{allSentences.length}}</text>
+  </view>
+
+  <scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}">
+    <view class="topic-bar">
+      <view
+        class="topic-tag {{currentTopic === item ? 'active' : ''}}"
+        wx:for="{{topics}}"
+        wx:key="*this"
+        data-topic="{{item}}"
+        catchtap="filterByTopic"
+      >{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <scroll-view class="card-scroll" scroll-y>
+    <view class="card-list">
+      <view
+        class="sentence-card {{expandedIds.indexOf(item.id) !== -1 ? 'expanded' : ''}} {{masteredIds.indexOf(item.id) !== -1 ? 'mastered' : ''}}"
+        wx:for="{{filteredSentences}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        catchtap="toggleExpand"
+      >
+        <view class="card-english">
+          <rich-text nodes="{{highlightText(item.english, item.keywords)}}"></rich-text>
+        </view>
+
+        <view class="card-chinese" wx:if="{{expandedIds.indexOf(item.id) !== -1}}">
+          <text>{{item.chinese}}</text>
+        </view>
+
+        <view class="card-bottom">
+          <view class="card-topic">{{item.topic}}</view>
+          <view class="card-actions">
+            <view
+              class="master-btn {{masteredIds.indexOf(item.id) !== -1 ? 'active' : ''}}"
+              data-id="{{item.id}}"
+              catchtap="toggleMaster"
+            >
+              {{masteredIds.indexOf(item.id) !== -1 ? '✓ 已掌握' : '标记掌握'}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,72 @@
+<view class="page">
+  <block wx:if="{{mode === 'list'}}">
+    <view class="page-header">
+      <text class="page-title">翻译练习</text>
+      <text class="page-subtitle">已完成 {{history.length}} / {{translations.length}}</text>
+    </view>
+
+    <view class="trans-list">
+      <view
+        class="trans-card"
+        wx:for="{{translations}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        catchtap="enterDetail"
+      >
+        <view class="trans-top">
+          <text class="trans-chinese">{{item.chinese}}</text>
+          <view class="trans-badge {{completedIds.indexOf(item.id) !== -1 ? 'done' : ''}}">
+            {{completedIds.indexOf(item.id) !== -1 ? '✓' : '待练'}}
+          </view>
+        </view>
+        <text class="trans-source">{{item.source}}</text>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="detail-header">
+      <view class="back-btn" catchtap="backToList">
+        <text>← 返回</text>
+      </view>
+      <text class="detail-title">翻译练习</text>
+    </view>
+
+    <scroll-view class="detail-scroll" scroll-y>
+      <view class="chinese-block">
+        <text class="chinese-label">请翻译成英文：</text>
+        <text class="chinese-text">{{currentItem.chinese}}</text>
+      </view>
+
+      <view class="answer-block">
+        <textarea
+          class="answer-input"
+          placeholder="在此输入你的翻译..."
+          value="{{userAnswer}}"
+          bindinput="onInput"
+          maxlength="500"
+          auto-height
+        ></textarea>
+      </view>
+
+      <view class="submit-btn" catchtap="submit">
+        {{submitting ? '评分中...' : '提交评分'}}
+      </view>
+
+      <view class="result-block" wx:if="{{result.show}}">
+        <view class="result-score">
+          <text class="score-num">{{result.score}}</text>
+          <text class="score-label">分</text>
+        </view>
+        <view class="result-bar">
+          <view class="bar-fill" style="width: {{result.score}}%"></view>
+        </view>
+        <view class="result-suggestions">{{result.suggestions}}</view>
+        <view class="result-ref">
+          <text class="ref-label">参考译文：</text>
+          <text class="ref-text">{{currentItem.reference}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </block>
+</view>

@@ -1,0 +1,55 @@
+const API_BASE = 'http://localhost:3000'
+
+interface CorrectionResult {
+  score: number
+  suggestions: string
+  reference: string
+}
+
+interface WritingResult {
+  score: number
+  dimensions: {
+    content: number
+    structure: number
+    language: number
+  }
+  suggestions: string
+  reference: string
+}
+
+function request<T>(url: string, data: Record<string, unknown>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}${url}`,
+      method: 'POST',
+      data,
+      header: { 'Content-Type': 'application/json' },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          resolve(res.data as T)
+        } else {
+          reject(new Error(`服务器错误 ${res.statusCode}`))
+        }
+      },
+      fail: (err) => {
+        reject(new Error(`请求失败: ${err.errMsg}`))
+      },
+    })
+  })
+}
+
+export function correctTranslation(chinese: string, userAnswer: string) {
+  return request<CorrectionResult>('/correct_translation', { chinese, userAnswer })
+}
+
+export function correctWriting(prompt: string, userAnswer: string) {
+  return request<WritingResult>('/correct_writing', { prompt, userAnswer })
+}
+
+export function teachSentence(pattern: string, userSentence?: string) {
+  return request<{ explanation: string }>('/teach_sentence', { pattern, userSentence })
+}
+
+export function correctParagraph(prompt: string, userAnswer: string) {
+  return request<{ score: number; dimensions: { coherence: number; content: number; language: number }; suggestions: string }>('/correct_paragraph', { prompt, userAnswer })
+}
