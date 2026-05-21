@@ -7,6 +7,12 @@ interface IStudyData {
   writingRecords: { id: number; score: number; date: string }[]
   checkInDates: string[]
   favoriteSentenceIds: number[]
+  dailyGoal: {
+    listen: number
+    sentence: number
+    translation: number
+    writing: number
+  }
 }
 
 interface IAppOption {

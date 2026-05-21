@@ -19,6 +19,13 @@ interface IHomeData {
     writings: number
     total: number
   }
+  goalStats: {
+    listenPct: number
+    sentencePct: number
+    translationPct: number
+    writingPct: number
+    overallPct: number
+  }
   greeting: string
   checkedIn: boolean
   streak: number
@@ -46,6 +53,13 @@ Page<IHomeData, IHomeMethods>({
       writings: 0,
       total: 0,
     },
+    goalStats: {
+      listenPct: 0,
+      sentencePct: 0,
+      translationPct: 0,
+      writingPct: 0,
+      overallPct: 0,
+    },
     greeting: '',
     checkedIn: false,
     streak: 0,
@@ -67,6 +81,21 @@ Page<IHomeData, IHomeMethods>({
 
     const app = getApp<IAppOption>()
     const sd = app.globalData.studyData
+    const goal = sd.dailyGoal
+
+    const listened = sd.completedListens.length
+    const sentences = sd.masteredSentences.length
+    const translations = sd.translationRecords.length
+    const writings = sd.writingRecords.length
+
+    const calcPct = (done: number, target: number) => target > 0 ? Math.min(100, Math.round(done / target * 100)) : 0
+    const listenPct = calcPct(listened, goal.listen)
+    const sentencePct = calcPct(sentences, goal.sentence)
+    const translationPct = calcPct(translations, goal.translation)
+    const writingPct = calcPct(writings, goal.writing)
+    const totalTarget = goal.listen + goal.sentence + goal.translation + goal.writing
+    const totalDone = listened + sentences + translations + writings
+    const overallPct = calcPct(totalDone, totalTarget)
 
     const modules = this.data.modules
     modules[4].count = sd.favoriteSentenceIds.length
@@ -76,13 +105,8 @@ Page<IHomeData, IHomeMethods>({
       greeting,
       checkedIn: isCheckedInToday(),
       streak: calcStreak(sd.checkInDates),
-      todayStats: {
-        listened: sd.completedListens.length,
-        sentences: sd.masteredSentences.length,
-        translations: sd.translationRecords.length,
-        writings: sd.writingRecords.length,
-        total: sd.completedListens.length + sd.masteredSentences.length + sd.translationRecords.length + sd.writingRecords.length,
-      },
+      todayStats: { listened, sentences, translations, writings, total: totalDone },
+      goalStats: { listenPct, sentencePct, translationPct, writingPct, overallPct },
     })
   },
 

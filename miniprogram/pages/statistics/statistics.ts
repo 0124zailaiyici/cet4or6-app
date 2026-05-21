@@ -99,6 +99,7 @@ Page<IStatData, IStatMethods>({
             writingRecords: [],
             checkInDates: [],
             favoriteSentenceIds: [],
+            dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
           }
           const app = getApp<IAppOption>()
           app.globalData.studyData = empty
