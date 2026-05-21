@@ -63,7 +63,7 @@ function detectSections(text) {
     } else if (/^Part\s+II\b|listening comprehension|听力理解/i.test(head)) {
       sections.listening = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*II|listening comprehension|听力|section\s*[abc]|directions|questions\s*\d+/i.test(s))
     } else if (/^Part\s+III\b|reading comprehension|阅读理解/i.test(head)) {
-      sections.reading = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*III|reading comprehension|阅读|section\s*[abc]|directions|answer sheet/i.test(s))
+      sections.reading = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*III|reading comprehension|阅读|directions|answer sheet/i.test(s))
     } else if (/^Part\s+IV\b|translation|翻译/i.test(head)) {
       sections.translation = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*IV|translation|翻译|directions|answer sheet/i.test(s))
     }
@@ -109,45 +109,64 @@ function parseListening(lines, year) {
 // ============ 阅读解析 ============
 
 function parseReading(lines, year) {
-  const text = lines.join(' ')
+  const text = lines.join('\n')
   const passages = []
 
-  // 按 Section C 的明显文章分割（选项大写字母开头的段落作为文章正文）
-  const blocks = text.split(/(?=Directions:)/).filter(b => b.trim().length > 100)
+  // CET-4 阅读结构：
+  // Section A: 选词填空（一篇短文 + 15个选项）
+  // Section B: 长篇阅读（10个陈述 + 段落匹配）
+  // Section C: 仔细阅读（2篇短文 + 各5道选择题）
 
-  for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i]
-    const sentences = b.split(/[.?!]\s+/).filter(s => s.trim().length > 10)
+  // 按 Sections 分割
+  const sections = text.split(/(?=Section\s+[ABC])/i)
 
-    // 找最长的一段作为文章正文（去除题目和选项）
-    let passageText = ''
-    let qLines = []
-    for (const s of sentences) {
-      if (/^[A-E]\)/.test(s.trim()) || /^\d+\./.test(s.trim())) {
-        qLines.push(s)
-      } else if (s.length > 30) {
-        passageText += s + '. '
+  for (const sec of sections) {
+    const secType = sec.match(/Section\s+([ABC])/i)?.[1] || 'C'
+    const lines = sec.split('\n').map(s => s.trim()).filter(s => s.length > 5)
+
+    // 找 passage 正文：跳过 Directions 和页眉页脚
+    const clean = lines.filter(l => !/Part\s+III|reading comprehension|Directions|Answer Sheet|^\d{4}年/.test(l))
+    const passageText = sanitize(
+      clean
+        .filter(l => !/^[A-E]\)|^\d+\./.test(l) && l.length > 10 && !/第\d+页|共\d+页/.test(l))
+        .join(' ')
+    )
+
+    // 提取题目
+    const questions = lines
+      .filter(l => /^[A-E]\)/.test(l) || /^\d+\./.test(l))
+      .map(s => sanitize(s.slice(0, 200)))
+
+    // 提取选项（Section A）
+    const options = secType === 'A'
+      ? lines.filter(l => /^[A-O]\)/.test(l)).map(s => sanitize(s.replace(/^[A-O]\)\s*/, '')))
+      : []
+
+    // 对于 Section A 和 C，尝试找到 "Questions X to Y are based on" 之后的文本作为 passage
+    let finalPassage = passageText
+    if (secType !== 'B') {
+      const qi = passageText.search(/questions?\s+\d+/i)
+      if (qi > -1) {
+        const after = passageText.slice(qi)
+        // 找到题目编号之前的描述之后，取后面的实际文章
+        const match = after.match(/question[s]?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following\s+(?:passage|paragraph)/i)
+        if (match) {
+          const startIdx = after.indexOf(match[0]) + match[0].length
+          finalPassage = after.slice(startIdx).trim()
+        }
       }
     }
 
-    if (passageText.length > 100) {
+    if (finalPassage.length > 50 || (secType === 'A' && options.length > 0)) {
       passages.push({
         id: Date.now() + passages.length,
-        title: `阅读 ${year} 第${i + 1}篇`,
-        passage: sanitize(passageText.slice(0, 1200)),
-        questions: qLines.slice(0, 10).map(s => sanitize(s.slice(0, 200))),
+        title: `Section ${secType} - ${secType === 'A' ? '选词填空' : secType === 'B' ? '长篇阅读' : '仔细阅读'} ${year}`,
+        sectionType: secType,
+        passage: finalPassage.slice(0, 2000),
+        questions,
+        options,
       })
     }
-  }
-
-  // 如果上面的方法没找到，直接用全部文本
-  if (passages.length === 0 && lines.length > 5) {
-    passages.push({
-      id: Date.now(),
-      title: `阅读理解 ${year}`,
-      passage: sanitize(lines.slice(0, Math.min(lines.length, 30)).join(' ')).slice(0, 1000),
-      questions: [],
-    })
   }
 
   return passages
@@ -156,19 +175,28 @@ function parseReading(lines, year) {
 // ============ 翻译解析 ============
 
 function parseTranslation(lines, year) {
-  const items = []
-  for (const line of lines) {
-    const s = sanitize(line)
-    if (s.length > 4 && /[\u4e00-\u9fff]/.test(s)) {
-      items.push({
-        id: Date.now() + items.length,
-        chinese: s.slice(0, 200),
-        reference: '',
-        source: `CET-4 ${year}`,
-      })
-    }
+  // 过滤掉页眉页脚和题目行
+  const filtered = lines.filter(s => {
+    if (/^\d+月|\d+年|第\d+套|第\d+页|共\d+页|Directions|Part\s+IV|Translation|^[A-E]\)|^\d+\./.test(s)) return false
+    return s.length > 6 && /[\u4e00-\u9fff]{4,}/.test(s)
+  })
+
+  // 合并连续的中文段落为一篇完整的翻译
+  const merged = sanitize(filtered.join(''))
+    .replace(/\s+/g, '')
+    .replace(/([。！？])/g, '$1\n')
+    .split('\n')
+    .filter(s => s.trim().length > 10)
+
+  if (merged.length > 0) {
+    return [{
+      id: Date.now(),
+      chinese: sanitize(filtered.join(' ')).slice(0, 500),
+      reference: '',
+      source: `CET-4 ${year}`,
+    }]
   }
-  return items
+  return []
 }
 
 // ============ 主流程 ============
@@ -225,6 +253,7 @@ async function main() {
         if (items.length) {
           const matchAudio = audioFiles.find(a => f.replace(/[^0-9]/g, '').includes(a.replace(/[^0-9]/g, '')))
           if (matchAudio) items[0].audioUrl = `http://localhost:3000/audio/${matchAudio}`
+          items[0].title += '（PDF导入，仅题目，使用TTS听正文需手动编辑）'
           const existing = fs.existsSync(path.join(DATA_DIR, 'listening.json'))
             ? JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'listening.json'), 'utf-8'))
             : []

@@ -1,15 +1,19 @@
 import readingsData from '../../data/readings'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
-interface IReading {
+interface IReadingItem {
   id: number
   title: string
+  sectionType: string
   passage: string
   questions: string[]
+  options: string[]
 }
 
 interface IReadingData {
-  readings: IReading[]
-  current: IReading | null
+  readings: IReadingItem[]
+  current: IReadingItem | null
+  darkMode: boolean
 }
 
 interface IReadingMethods {
@@ -21,10 +25,16 @@ Page<IReadingData, IReadingMethods>({
   data: {
     readings: [],
     current: null,
+    darkMode: false,
   },
 
   onLoad() {
-    this.setData({ readings: readingsData as IReading[] })
+    this.setData({ readings: readingsData as IReadingItem[] })
+  },
+
+  onShow() {
+    applyTheme(getDarkMode())
+    this.setData({ darkMode: getDarkMode() })
   },
 
   select(e: WechatMiniprogram.TouchEvent) {

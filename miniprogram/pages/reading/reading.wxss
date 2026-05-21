@@ -13,12 +13,21 @@
 .rlist { padding: 20rpx 36rpx; display: flex; flex-direction: column; gap: 16rpx; }
 .rcard {
   background: #fff; border-radius: 22rpx; padding: 24rpx; box-shadow: 0 4rpx 20rpx rgba(84,110,122,0.06);
-  transition: transform 0.2s;
+  display: flex; align-items: center; gap: 16rpx; transition: transform 0.2s;
 }
 .rcard:active { transform: translateY(-2rpx); }
-.rc-title { display: block; font-size: 30rpx; font-weight: 600; color: #2d2d4e; margin-bottom: 8rpx; }
-.rc-preview { display: block; font-size: 24rpx; color: #8a7a9a; line-height: 1.5; }
-.rc-meta { display: block; font-size: 22rpx; color: #546e7a; margin-top: 10rpx; }
+
+.rc-badge {
+  width: 80rpx; height: 80rpx; border-radius: 18rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.rc-A { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+.rc-B { background: linear-gradient(135deg, #64b5f6, #1e88e5); }
+.rc-C { background: linear-gradient(135deg, #81c784, #388e3c); }
+
+.rc-title { display: block; font-size: 28rpx; font-weight: 600; color: #2d2d4e; flex: 1; }
+.rc-meta { display: block; font-size: 22rpx; color: #8a7a9a; margin-top: 4rpx; }
 
 .detail-header { display: flex; align-items: center; gap: 16rpx; padding: 24rpx 36rpx; }
 .back-btn {
@@ -31,6 +40,14 @@
 .passage-card { background: #fff; border-radius: 22rpx; padding: 28rpx; box-shadow: 0 4rpx 20rpx rgba(84,110,122,0.06); margin-bottom: 20rpx; }
 .passage-text { font-size: 28rpx; line-height: 1.9; color: #2d2d4e; }
 
+.options-card { background: #fff; border-radius: 22rpx; padding: 28rpx; box-shadow: 0 4rpx 20rpx rgba(84,110,122,0.06); margin-bottom: 20rpx; }
+.opt-title { display: block; font-size: 24rpx; font-weight: 600; color: #546e7a; margin-bottom: 16rpx; }
+.opt-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.opt-item {
+  width: calc(50% - 6rpx); font-size: 24rpx; color: #2d2d4e; line-height: 1.6;
+  padding: 12rpx; border-radius: 12rpx; background: rgba(84,110,122,0.04);
+}
+
 .questions-card { background: #fff; border-radius: 22rpx; padding: 28rpx; box-shadow: 0 4rpx 20rpx rgba(84,110,122,0.06); margin-bottom: 32rpx; }
-.q-title { display: block; font-size: 26rpx; font-weight: 600; color: #2d2d4e; margin-bottom: 16rpx; }
+.q-title { display: block; font-size: 24rpx; font-weight: 600; color: #546e7a; margin-bottom: 16rpx; }
 .q-item { display: block; font-size: 26rpx; color: #4a4a6a; line-height: 1.7; margin-bottom: 12rpx; }

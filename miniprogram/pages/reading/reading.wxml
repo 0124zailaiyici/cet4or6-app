@@ -10,9 +10,9 @@
 
     <view class="rlist">
       <view class="rcard" wx:for="{{readings}}" wx:key="id" data-id="{{item.id}}" catchtap="select">
+        <view class="rc-badge rc-{{item.sectionType}}">{{item.sectionType === 'A' ? '选词' : item.sectionType === 'B' ? '匹配' : '精读'}}</view>
         <text class="rc-title">{{item.title}}</text>
-        <text class="rc-preview">{{item.passage.slice(0, 100)}}…</text>
-        <text class="rc-meta">{{item.questions.length}} 道题</text>
+        <text class="rc-meta">{{item.questions.length}} 题 | {{item.options?.length || 0}} 选项</text>
       </view>
     </view>
   </block>
@@ -20,18 +20,44 @@
   <block wx:else>
     <view class="detail-header">
       <view class="back-btn" catchtap="back">←</view>
-      <text class="detail-title">{{current.title}}</text>
+      <text class="detail-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读' : '仔细阅读'}}</text>
     </view>
 
     <scroll-view class="passage-scroll" scroll-y>
-      <view class="passage-card">
-        <text class="passage-text">{{current.passage}}</text>
-      </view>
+      <!-- Section A: 选词填空 -->
+      <block wx:if="{{current.sectionType === 'A'}}">
+        <view class="passage-card">
+          <text class="passage-text">{{current.passage}}</text>
+        </view>
+        <view class="options-card" wx:if="{{current.options?.length > 0}}">
+          <text class="opt-title">可选词：</text>
+          <view class="opt-grid">
+            <text class="opt-item" wx:for="{{current.options}}" wx:key="*this">{{String.fromCharCode(65 + index)}}. {{item}}</text>
+          </view>
+        </view>
+      </block>
 
-      <view class="questions-card" wx:if="{{current.questions.length > 0}}">
-        <text class="q-title">题目</text>
-        <text class="q-item" wx:for="{{current.questions}}" wx:key="*this">{{index + 1}}. {{item}}</text>
-      </view>
+      <!-- Section B: 长篇阅读 -->
+      <block wx:elif="{{current.sectionType === 'B'}}">
+        <view class="passage-card">
+          <text class="passage-text">{{current.passage}}</text>
+        </view>
+        <view class="questions-card">
+          <text class="q-title">匹配陈述：</text>
+          <text class="q-item" wx:for="{{current.questions}}" wx:key="*this">{{index + 1}}. {{item}}</text>
+        </view>
+      </block>
+
+      <!-- Section C: 仔细阅读 -->
+      <block wx:else>
+        <view class="passage-card">
+          <text class="passage-text">{{current.passage}}</text>
+        </view>
+        <view class="questions-card" wx:if="{{current.questions?.length > 0}}">
+          <text class="q-title">题目：</text>
+          <text class="q-item" wx:for="{{current.questions}}" wx:key="*this">{{item}}</text>
+        </view>
+      </block>
     </scroll-view>
   </block>
 </view>
