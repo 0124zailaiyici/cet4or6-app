@@ -1,3 +1,5 @@
+import { applyTheme } from './utils/theme'
+
 App<IAppOption>({
   globalData: {
     userInfo: undefined,
@@ -18,7 +20,7 @@ App<IAppOption>({
       wx.setStorageSync('studyData', this.globalData.studyData)
     }
     if (this.globalData.darkMode) {
-      wx.setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: '#12121f' })
+      applyTheme(true)
     }
   }
 })

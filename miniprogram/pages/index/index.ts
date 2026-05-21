@@ -1,4 +1,5 @@
 import { doCheckIn, calcStreak, isCheckedInToday } from '../../utils/checkin'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IModuleItem {
   id: string
@@ -76,6 +77,7 @@ Page<IHomeData, IHomeMethods>({
   },
 
   refresh() {
+    applyTheme(getDarkMode())
     const hour = new Date().getHours()
     let greeting = '晚上好 🌙'
     if (hour < 12) greeting = '早上好 🌤'

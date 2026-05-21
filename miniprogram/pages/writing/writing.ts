@@ -2,6 +2,7 @@ import { teachSentence, correctWriting, correctParagraph } from '../../utils/api
 import { doCheckIn } from '../../utils/checkin'
 import patternsData from '../../data/sentence_patterns'
 import writingsData from '../../data/writings'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IPattern {
   id: number
@@ -67,6 +68,7 @@ Page<IWritingData, IWritingMethods>({
   },
 
   onShow() {
+    applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
   },

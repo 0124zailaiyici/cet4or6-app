@@ -1,5 +1,6 @@
 import listeningData from '../../data/listening'
 import { doCheckIn } from '../../utils/checkin'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 const API_BASE = 'http://localhost:3000'
 
@@ -106,6 +107,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   onShow() {
+    applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
   },

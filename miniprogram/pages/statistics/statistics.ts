@@ -1,4 +1,5 @@
 import { calcStreak, getMonthDays } from '../../utils/checkin'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface ICalCell {
   day: number | null
@@ -47,6 +48,7 @@ Page<IStatData, IStatMethods>({
   },
 
   onShow() {
+    applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
     this.refresh()

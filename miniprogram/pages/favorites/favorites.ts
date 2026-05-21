@@ -1,4 +1,5 @@
 import sentencesData from '../../data/sentences'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface ISentence {
   id: number
@@ -34,6 +35,7 @@ Page<IFavoritesData, IFavoritesMethods>({
   },
 
   onShow() {
+    applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
     this.refresh()

@@ -1,3 +1,5 @@
+import { getDarkMode, toggleDarkMode } from '../../utils/theme'
+
 interface ISettingsData {
   listen: number
   sentence: number
@@ -25,8 +27,12 @@ Page<ISettingsData, ISettingsMethods>({
     const g = app.globalData.studyData.dailyGoal
     this.setData({
       listen: g.listen, sentence: g.sentence, translation: g.translation, writing: g.writing,
-      darkMode: app.globalData.darkMode,
+      darkMode: getDarkMode(),
     })
+  },
+
+  onShow() {
+    this.setData({ darkMode: getDarkMode() })
   },
 
   change(e: WechatMiniprogram.TouchEvent) {
@@ -42,17 +48,7 @@ Page<ISettingsData, ISettingsMethods>({
   },
 
   toggleDark() {
-    const app = getApp<IAppOption>()
-    const newVal = !app.globalData.darkMode
-    app.globalData.darkMode = newVal
-    wx.setStorageSync('darkMode', newVal)
-
-    if (newVal) {
-      wx.setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: '#12121f' })
-    } else {
-      wx.setNavigationBarColor({ frontColor: '#000000', backgroundColor: '#ffffff' })
-    }
-
+    const newVal = toggleDarkMode()
     this.setData({ darkMode: newVal })
     wx.showToast({ title: newVal ? '已切换暗黑模式' : '已切换浅色模式', icon: 'none' })
   },

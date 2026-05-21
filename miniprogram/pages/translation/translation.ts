@@ -1,6 +1,7 @@
 import { correctTranslation } from '../../utils/api'
 import translationsData from '../../data/translations'
 import { doCheckIn } from '../../utils/checkin'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface ITranslation {
   id: number
@@ -63,6 +64,7 @@ Page<ITranslationData, ITranslationMethods>({
   },
 
   onShow() {
+    applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
   },

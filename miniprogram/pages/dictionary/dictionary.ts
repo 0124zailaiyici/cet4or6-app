@@ -1,4 +1,5 @@
 import { lookupWord } from '../../utils/api'
+import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IMeaning {
   partOfSpeech: string
@@ -46,6 +47,7 @@ Page<IDictData, IDictMethods>({
   },
 
   onShow() {
+    applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
   },
