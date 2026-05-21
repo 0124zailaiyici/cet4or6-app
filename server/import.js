@@ -112,60 +112,72 @@ function parseReading(lines, year) {
   const text = lines.join('\n')
   const passages = []
 
-  // CET-4 阅读结构：
-  // Section A: 选词填空（一篇短文 + 15个选项）
-  // Section B: 长篇阅读（10个陈述 + 段落匹配）
-  // Section C: 仔细阅读（2篇短文 + 各5道选择题）
-
-  // 按 Sections 分割
   const sections = text.split(/(?=Section\s+[ABC])/i)
 
   for (const sec of sections) {
     const secType = sec.match(/Section\s+([ABC])/i)?.[1] || 'C'
-    const lines = sec.split('\n').map(s => s.trim()).filter(s => s.length > 5)
+    const cleanLines = sec.split('\n').map(s => s.trim()).filter(s => s.length > 5)
 
-    // 找 passage 正文：跳过 Directions 和页眉页脚
-    const clean = lines.filter(l => !/Part\s+III|reading comprehension|Directions|Answer Sheet|^\d{4}年/.test(l))
-    const passageText = sanitize(
-      clean
-        .filter(l => !/^[A-E]\)|^\d+\./.test(l) && l.length > 10 && !/第\d+页|共\d+页/.test(l))
-        .join(' ')
-    )
-
-    // 提取题目
-    const questions = lines
-      .filter(l => /^[A-E]\)/.test(l) || /^\d+\./.test(l))
-      .map(s => sanitize(s.slice(0, 200)))
-
-    // 提取选项（Section A）
-    const options = secType === 'A'
-      ? lines.filter(l => /^[A-O]\)/.test(l)).map(s => sanitize(s.replace(/^[A-O]\)\s*/, '')))
-      : []
-
-    // 对于 Section A 和 C，尝试找到 "Questions X to Y are based on" 之后的文本作为 passage
-    let finalPassage = passageText
-    if (secType !== 'B') {
-      const qi = passageText.search(/questions?\s+\d+/i)
+    // === Section A: 选词填空 ===
+    if (secType === 'A') {
+      const options = cleanLines.filter(l => /^[A-O]\)/.test(l)).map(s => sanitize(s.replace(/^[A-O]\)\s*/, '')))
+      const passageLines = cleanLines.filter(l => !/Section\s+A|Directions|Answer Sheet|^[A-O]\)|^\d+\./.test(l) && l.length > 10)
+      let passage = sanitize(passageLines.join(' '))
+      // 去掉题目描述，只保留文章正文
+      const qi = passage.search(/questions?\s+\d+/i)
       if (qi > -1) {
-        const after = passageText.slice(qi)
-        // 找到题目编号之前的描述之后，取后面的实际文章
-        const match = after.match(/question[s]?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following\s+(?:passage|paragraph)/i)
-        if (match) {
-          const startIdx = after.indexOf(match[0]) + match[0].length
-          finalPassage = after.slice(startIdx).trim()
-        }
+        const after = passage.slice(qi)
+        const m = after.match(/question[s]?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following\s+(?:passage|paragraph)/i)
+        if (m) passage = after.slice(after.indexOf(m[0]) + m[0].length).trim()
       }
+      if (passage.length > 30 || options.length > 0) {
+        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 2000), questions: cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s)), options })
+      }
+      continue
     }
 
-    if (finalPassage.length > 50 || (secType === 'A' && options.length > 0)) {
-      passages.push({
-        id: Date.now() + passages.length,
-        title: `Section ${secType} - ${secType === 'A' ? '选词填空' : secType === 'B' ? '长篇阅读' : '仔细阅读'} ${year}`,
-        sectionType: secType,
-        passage: finalPassage.slice(0, 2000),
-        questions,
-        options,
-      })
+    // === Section B: 长篇阅读 ===
+    if (secType === 'B') {
+      // 提取匹配陈述（数字开头的行）
+      const statements = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s.slice(0, 200)))
+      // 提取文章正文（A), B), C) 等段落标记的行）
+      const articleLines = cleanLines.filter(l => /^[A-Z]\)\s/.test(l) && !/^Section\s+B|Directions|Answer Sheet/.test(l))
+      const article = sanitize(articleLines.join(' ')).slice(0, 2000)
+      if (statements.length > 0 || article.length > 50) {
+        passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [] })
+      }
+      continue
+    }
+
+    // === Section C: 仔细阅读 ===
+    if (secType === 'C') {
+      // 按 Passage One/Two/Three 分割
+      const subPassages = sec.split(/(?=Passage\s+(?:One|Two|Three)\b)/i)
+      for (const sub of subPassages) {
+        if (!sub.trim()) continue
+        // 提取题目行
+        const qs = sub.split('\n').map(s => s.trim()).filter(l => /^\d+\./.test(l) || /^[A-D]\)/.test(l))
+        const questions = qs.filter(l => /^\d+\./.test(l)).map(s => sanitize(s))
+        // 提取正文：在 "Questions X to Y are based on" 之后的内容
+        const passIdx = sub.search(/questions?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following/i)
+        let passageText = ''
+        if (passIdx > -1) {
+          const after = sub.slice(passIdx)
+          const m = after.match(/questions?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following\s+(?:passage|paragraph)/i)
+          if (m) {
+            const start = after.indexOf(m[0]) + m[0].length
+            passageText = after.slice(start)
+              .split('\n').map(s => s.trim()).filter(l => l.length > 5 && !/^[A-D]\)|^\d+\./.test(l) && !/Answer Sheet|第\d+页|共\d+页/.test(l))
+              .join(' ')
+          }
+        }
+        passageText = sanitize(passageText)
+        if (passageText.length > 30) {
+          const pNum = sub.match(/Passage\s+(One|Two|Three)/i)?.[1] || ''
+          const pLabel = { One: '一', Two: '二', Three: '三' }[pNum] || ''
+          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 2000), questions, options: [] })
+        }
+      }
     }
   }
 
@@ -207,7 +219,7 @@ async function main() {
 
   // 扫描音频
   const audioFiles = fs.existsSync(AUDIO_DIR)
-    ? fs.readdirSync(AUDIO_DIR).filter(f => f.endsWith('.mp3'))
+    ? fs.readdirSync(AUDIO_DIR).filter(f => f.endsWith('.mp3')).map(f => ({ filename: f, name: path.basename(f, '.mp3'), url: `http://localhost:3001/audio/${f}` }))
     : []
   console.log(`🔊 音频: ${audioFiles.length} 个`)
 
@@ -227,18 +239,17 @@ async function main() {
 
   for (const f of pdfFiles) {
     const fp = path.join(PDF_DIR, f)
-    const year = f.replace(/[^0-9]/g, '').slice(0, 7) || '真题'
-
-    console.log(`📝 解析: ${f}`)
-
     try {
+      const year = f.replace(/[^0-9]/g, '').slice(0, 7) || '真题'
+      console.log(`📝 解析: ${f}`)
       const { text } = await parsePDF(fp)
       const sections = detectSections(text)
       const counts = { writing: 0, listening: 0, reading: 0, translation: 0 }
 
       // --- 写作 ---
       if (sections.writing.length > 3) {
-        const items = parseWriting(sections.writing, year)
+        let items = []
+        items = parseWriting(sections.writing, year)
         if (items.length) {
           const existing = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'writings.json'), 'utf-8').match(/\[[\s\S]*\]/)?.[0] || '[]')
           existing.push(...items)
@@ -265,7 +276,8 @@ async function main() {
 
       // --- 阅读 ---
       if (sections.reading.length > 5) {
-        const items = parseReading(sections.reading, year)
+        let items = []
+        try { items = parseReading(sections.reading, year) } catch (e) { console.log('  ⚠️ 阅读解析错误:', e.message) }
         if (items.length) {
           let existing = []
           if (fs.existsSync(path.join(DATA_DIR, 'readings.json'))) {
