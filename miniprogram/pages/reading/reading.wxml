@@ -1,0 +1,37 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <block wx:if="{{!current}}">
+    <view class="rh-header">
+      <view class="rh-bg"></view>
+      <view class="rh-content">
+        <text class="rh-title">📖 阅读理解</text>
+        <text class="rh-sub">{{readings.length}} 篇阅读材料</text>
+      </view>
+    </view>
+
+    <view class="rlist">
+      <view class="rcard" wx:for="{{readings}}" wx:key="id" data-id="{{item.id}}" catchtap="select">
+        <text class="rc-title">{{item.title}}</text>
+        <text class="rc-preview">{{item.passage.slice(0, 100)}}…</text>
+        <text class="rc-meta">{{item.questions.length}} 道题</text>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="detail-header">
+      <view class="back-btn" catchtap="back">←</view>
+      <text class="detail-title">{{current.title}}</text>
+    </view>
+
+    <scroll-view class="passage-scroll" scroll-y>
+      <view class="passage-card">
+        <text class="passage-text">{{current.passage}}</text>
+      </view>
+
+      <view class="questions-card" wx:if="{{current.questions.length > 0}}">
+        <text class="q-title">题目</text>
+        <text class="q-item" wx:for="{{current.questions}}" wx:key="*this">{{index + 1}}. {{item}}</text>
+      </view>
+    </scroll-view>
+  </block>
+</view>

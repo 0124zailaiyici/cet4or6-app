@@ -76,5 +76,11 @@
       <text class="mc-name">英语词典</text>
       <text class="mc-brief">音标 · 释义 · 例句</text>
     </view>
+    <view class="module-card mc-reading" data-url="/pages/reading/reading" catchtap="goTo">
+      <view class="mc-badge">{{readingCount}}篇</view>
+      <text class="mc-emoji">📖</text>
+      <text class="mc-name">阅读理解</text>
+      <text class="mc-brief">真题 · 解析</text>
+    </view>
   </view>
 </view>

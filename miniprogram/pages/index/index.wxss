@@ -206,6 +206,7 @@
 .mc-writing { background: linear-gradient(135deg, #ce93d8, #9c27b0); }
 .mc-favorites { background: linear-gradient(135deg, #ffd54f, #ffc107); }
 .mc-dict { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+.mc-reading { background: linear-gradient(135deg, #78909c, #455a64); }
 
 .mc-listening .mc-name,
 .mc-sentences .mc-name,

@@ -1,11 +1,14 @@
 import { doCheckIn, calcStreak, isCheckedInToday } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
+import readingsData from '../../data/readings'
+type IReadingItem = { id: number; title: string; passage: string; questions: string[] }
 
 interface IHomeData {
   greeting: string
   checkedIn: boolean
   streak: number
   favoriteCount: number
+  readingCount: number
   todayStats: {
     listened: number
     sentences: number
@@ -34,6 +37,7 @@ Page<IHomeData, IHomeMethods>({
     checkedIn: false,
     streak: 0,
     favoriteCount: 0,
+    readingCount: 0,
     todayStats: { listened: 0, sentences: 0, translations: 0, writings: 0 },
     goalStats: { listenPct: 0, sentencePct: 0, translationPct: 0, writingPct: 0, overallPct: 0 },
     darkMode: false,
@@ -72,6 +76,7 @@ Page<IHomeData, IHomeMethods>({
       checkedIn: isCheckedInToday(),
       streak: calcStreak(sd.checkInDates),
       favoriteCount: sd.favoriteSentenceIds.length,
+      readingCount: (readingsData as IReadingItem[]).length,
       todayStats: { listened, sentences, translations, writings },
       goalStats: {
         listenPct: calcPct(listened, goal.listen),

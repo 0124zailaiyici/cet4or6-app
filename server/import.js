@@ -1,16 +1,19 @@
 /**
- * 四级真题导入工具
- * 
+ * 四级真题导入工具 v2
+ *
+ * 支持整套真题 PDF（含全部题型）
+ *
  * 用法：
- *   1. 将 MP3 文件放入 server/audio/ 目录
- *   2. 将 PDF 真题放入 server/pdfs/ 目录
+ *   1. 将 MP3 放入 server/audio/（文件名含年份，如 2024_06.mp3）
+ *   2. 将 PDF 真题放入 server/pdfs/
  *   3. 运行：node import.js
- *   4. 脚本会自动解析 PDF 并更新 data/*.ts 文件
- * 
- * PDF 命名规范：
- *   - 听力：listening_*.pdf     → 更新 data/listening.ts
- *   - 翻译：translation_*.pdf   → 更新 data/translations.ts
- *   - 写作：writing_*.pdf       → 更新 data/writings.ts
+ *   4. 自动识别各部分并更新 data/*.ts
+ *
+ * PDF 结构识别（按 CET-4 标准卷）：
+ *   - Part I / Writing → data/writings.ts
+ *   - Part II / Listening → data/listening.ts
+ *   - Part III / Reading → data/readings.ts
+ *   - Part IV / Translation → data/translations.ts
  */
 
 const fs = require('fs')
@@ -23,164 +26,254 @@ const PDF_DIR = path.join(__dirname, 'pdfs')
 
 // ============ 工具函数 ============
 
-function readJSON(filePath) {
-  try {
-    const content = fs.readFileSync(filePath, 'utf-8')
-    return JSON.parse(content)
-  } catch { return [] }
-}
-
 function writeTS(filePath, varName, data) {
-  const content = `const ${varName} = ${JSON.stringify(data, null, 2)}
-export default ${varName}
-`
+  const content = `const ${varName} = ${JSON.stringify(data, null, 2)}\nexport default ${varName}\n`
   fs.writeFileSync(filePath, content, 'utf-8')
-  console.log(`  ✓ 已写入 ${path.basename(filePath)} (${data.length} 条)`)
+  console.log(`  ✓ ${path.basename(filePath)} (${data.length} 条)`)
 }
 
-function sanitize(str) {
-  return str.replace(/\s+/g, ' ').trim()
-}
+function sanitize(str) { return str.replace(/\s+/g, ' ').trim() }
 
-// ============ MP3 扫描 ============
+// ============ 段落拆分 ============
 
-function scanAudio() {
-  if (!fs.existsSync(AUDIO_DIR)) return []
-  return fs.readdirSync(AUDIO_DIR)
-    .filter(f => f.endsWith('.mp3'))
-    .map(f => ({
-      filename: f,
-      name: path.basename(f, '.mp3'),
-      url: `http://localhost:3000/audio/${f}`
-    }))
+function splitParagraphs(text) {
+  return text.split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 3)
 }
 
 // ============ PDF 解析 ============
 
-async function parseListeningPDF(filePath) {
+async function parsePDF(filePath) {
   const buf = fs.readFileSync(filePath)
   const data = await pdf(buf)
-  const lines = data.text.split('\n').map(s => s.trim()).filter(Boolean)
+  return { text: data.text, pages: data.numpages }
+}
 
-  // 尝试按段落拆分句子
-  const sentences = lines.slice(0, Math.min(lines.length, 20)).map((text, i) => ({
-    text,
+// ============ 部分检测 ============
+
+function detectSections(text) {
+  const lines = text.split('\n').map(s => s.trim()).filter(Boolean)
+  const sections = { writing: [], listening: [], reading: [], translation: [] }
+  let current = null
+
+  const patterns = [
+    { key: 'writing', re: /part\s*i|^writing|写作|作文/i },
+    { key: 'listening', re: /part\s*ii|listening comprehension|听力/i },
+    { key: 'reading', re: /part\s*iii|reading comprehension|阅读/i },
+    { key: 'translation', re: /part\s*iv|translation|翻译/i },
+  ]
+
+  for (const line of lines) {
+    let matched = false
+    for (const p of patterns) {
+      if (p.re.test(line)) {
+        current = p.key
+        matched = true
+        break
+      }
+    }
+    if (!matched && current) {
+      sections[current].push(line)
+    }
+  }
+
+  return sections
+}
+
+// ============ 写作解析 ============
+
+function parseWriting(lines, year) {
+  if (lines.length < 3) return []
+  const title = lines[0].replace(/part\s*i/i, '').replace(/写作/i, '').trim() || `CET-4 写作 ${year}`
+  return [{
+    id: Date.now(),
+    title: title.slice(0, 80),
+    prompt: sanitize(lines.join(' ')).slice(0, 500),
+    reference: '',
+  }]
+}
+
+// ============ 听力解析 ============
+
+function parseListening(lines, year) {
+  const paragraphs = splitParagraphs(lines.join('\n'))
+  if (paragraphs.length < 3) return []
+
+  const sentences = paragraphs.slice(0, Math.min(paragraphs.length, 15)).map((text, i) => ({
+    text: text.slice(0, 200),
     start: i * 3,
     end: i * 3 + 2.5,
   }))
 
-  return {
+  return [{
     id: Date.now(),
-    title: path.basename(filePath, '.pdf').replace(/^listening[_-]?/i, ''),
+    title: `CET-4 听力 ${year}`,
     audioUrl: '',
     sentences,
-    fullText: sanitize(lines.slice(0, Math.min(lines.length, 20)).join(' ')),
-  }
+    fullText: sanitize(sentences.map(s => s.text).join(' ')),
+  }]
 }
 
-async function parseTranslationPDF(filePath) {
-  const buf = fs.readFileSync(filePath)
-  const data = await pdf(buf)
-  const lines = data.text.split('\n').map(s => s.trim()).filter(Boolean)
+// ============ 阅读解析 ============
 
+function parseReading(lines, year) {
+  const paragraphs = splitParagraphs(lines.join('\n'))
+  if (paragraphs.length < 2) return []
+
+  // 按段落分组为 passage
+  const passages = []
+  let current = { id: Date.now(), title: '', passage: '', questions: [] }
+  let qMode = false
+
+  for (const p of paragraphs) {
+    if (/^(passage|text|section|短文)/i.test(p) || p.length > 80) {
+      if (current.passage && current.questions.length > 0) {
+        passages.push({ ...current })
+        current = { id: Date.now() + passages.length + 1, title: '', passage: '', questions: [] }
+      }
+      qMode = false
+      if (!current.title && p.length < 60) current.title = p
+      else current.passage += p + ' '
+    } else if (/^(问题|[A-E]\.|^\d+\.)/.test(p) || qMode) {
+      qMode = true
+      current.questions.push(p)
+    }
+  }
+  if (current.passage) passages.push(current)
+
+  return passages.slice(0, 5).map(p => ({
+    id: p.id,
+    title: p.title || `阅读理解 ${year}`,
+    passage: sanitize(p.passage.slice(0, 1000)),
+    questions: p.questions.slice(0, 10).map(s => sanitize(s.slice(0, 200))),
+  }))
+}
+
+// ============ 翻译解析 ============
+
+function parseTranslation(lines, year) {
   const items = []
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].length > 5 && /[\u4e00-\u9fff]/.test(lines[i])) {
+  for (const line of lines) {
+    const s = sanitize(line)
+    if (s.length > 4 && /[\u4e00-\u9fff]/.test(s)) {
       items.push({
         id: Date.now() + items.length,
-        chinese: lines[i],
-        reference: lines[i + 1] && /[a-zA-Z]/.test(lines[i + 1]) ? lines[i + 1] : '',
-        source: 'PDF导入',
+        chinese: s.slice(0, 200),
+        reference: '',
+        source: `CET-4 ${year}`,
       })
     }
   }
   return items
 }
 
-async function parseWritingPDF(filePath) {
-  const buf = fs.readFileSync(filePath)
-  const data = await pdf(buf)
-  const lines = data.text.split('\n').map(s => s.trim()).filter(Boolean)
-
-  const title = path.basename(filePath, '.pdf').replace(/^writing[_-]?/i, '') || '写作题目'
-  return [{
-    id: Date.now(),
-    title,
-    prompt: sanitize(lines.slice(0, Math.min(lines.length, 15)).join(' ')),
-    reference: sanitize(lines.slice(15).join(' ')) || '',
-  }]
-}
-
 // ============ 主流程 ============
 
 async function main() {
-  console.log('\n📦 四级真题导入工具\n')
+  console.log('\n📦 四级真题导入工具 v2\n')
   console.log('='.repeat(50))
 
-  // 1. 扫描音频
-  const audioFiles = scanAudio()
-  console.log(`\n🔊 音频文件: ${audioFiles.length} 个`)
-  audioFiles.forEach(a => console.log(`  - ${a.filename}`))
+  // 扫描音频
+  const audioFiles = fs.existsSync(AUDIO_DIR)
+    ? fs.readdirSync(AUDIO_DIR).filter(f => f.endsWith('.mp3'))
+    : []
+  console.log(`🔊 音频: ${audioFiles.length} 个`)
 
-  // 2. 扫描并解析 PDF
+  // 扫描 PDF
   if (!fs.existsSync(PDF_DIR)) {
-    console.log('\n❌ 请先创建 server/pdfs/ 目录并放入 PDF 文件')
+    console.log('❌ 请先创建 server/pdfs/ 目录')
     return
   }
-
   const pdfFiles = fs.readdirSync(PDF_DIR).filter(f => f.endsWith('.pdf'))
-  console.log(`\n📄 PDF 文件: ${pdfFiles.length} 个`)
-  pdfFiles.forEach(f => console.log(`  - ${f}`))
+  if (pdfFiles.length === 0) {
+    console.log('❌ server/pdfs/ 目录没有 PDF 文件')
+    return
+  }
+  console.log(`📄 PDF: ${pdfFiles.length} 个\n`)
 
-  // 3. 按类型处理
-  let listCount = 0, transCount = 0, writeCount = 0
+  let total = { writing: 0, listening: 0, reading: 0, translation: 0 }
 
   for (const f of pdfFiles) {
     const fp = path.join(PDF_DIR, f)
-    const fname = f.toLowerCase()
-    console.log(`\n📝 处理: ${f}`)
+    const year = f.replace(/[^0-9]/g, '').slice(0, 7) || '真题'
+
+    console.log(`📝 解析: ${f}`)
 
     try {
-      if (fname.startsWith('listening')) {
-        const passage = await parseListeningPDF(fp)
-        const existing = readJSON(path.join(DATA_DIR, 'listening.json'))
-        existing.push(passage)
+      const { text } = await parsePDF(fp)
+      const sections = detectSections(text)
+      const counts = { writing: 0, listening: 0, reading: 0, translation: 0 }
 
-        // 寻找匹配的音频文件
-        const matchAudio = audioFiles.find(a => fname.includes(a.name.toLowerCase()) || a.name.toLowerCase().includes(fname.replace(/listening[_-]?/i, '')))
-        if (matchAudio) passage.audioUrl = matchAudio.url
+      // --- 写作 ---
+      if (sections.writing.length > 3) {
+        const items = parseWriting(sections.writing, year)
+        if (items.length) {
+          const existing = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'writings.json'), 'utf-8').match(/\[[\s\S]*\]/)?.[0] || '[]')
+          existing.push(...items)
+          writeTS(path.join(DATA_DIR, 'writings.ts'), 'writingsData', existing)
+          counts.writing = items.length
+        }
+      }
 
-        writeTS(path.join(DATA_DIR, 'listening.ts'), 'listeningData', existing)
-        listCount++
+      // --- 听力 ---
+      if (sections.listening.length > 5) {
+        const items = parseListening(sections.listening, year)
+        if (items.length) {
+          const matchAudio = audioFiles.find(a => f.replace(/[^0-9]/g, '').includes(a.replace(/[^0-9]/g, '')))
+          if (matchAudio) items[0].audioUrl = `http://localhost:3000/audio/${matchAudio}`
+          const existing = fs.existsSync(path.join(DATA_DIR, 'listening.json'))
+            ? JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'listening.json'), 'utf-8'))
+            : []
+          existing.push(...items)
+          writeTS(path.join(DATA_DIR, 'listening.ts'), 'listeningData', existing)
+          counts.listening = items.length
+        }
       }
-      else if (fname.startsWith('translation')) {
-        const items = await parseTranslationPDF(fp)
-        const existing = readJSON(path.join(DATA_DIR, 'translations.json'))
-        existing.push(...items)
-        writeTS(path.join(DATA_DIR, 'translations.ts'), 'translationsData', existing)
-        transCount += items.length
+
+      // --- 阅读 ---
+      if (sections.reading.length > 5) {
+        const items = parseReading(sections.reading, year)
+        if (items.length) {
+          let existing = []
+          if (fs.existsSync(path.join(DATA_DIR, 'readings.json'))) {
+            existing = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'readings.json'), 'utf-8'))
+          }
+          existing.push(...items)
+          writeTS(path.join(DATA_DIR, 'readings.ts'), 'readingsData', existing)
+          counts.reading = items.length
+        }
       }
-      else if (fname.startsWith('writing')) {
-        const items = await parseWritingPDF(fp)
-        const existing = readJSON(path.join(DATA_DIR, 'writings.json'))
-        existing.push(...items)
-        writeTS(path.join(DATA_DIR, 'writings.ts'), 'writingsData', existing)
-        writeCount += items.length
+
+      // --- 翻译 ---
+      if (sections.translation.length > 2) {
+        const items = parseTranslation(sections.translation, year)
+        if (items.length) {
+          const existing = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'translations.json'), 'utf-8').match(/\[[\s\S]*\]/)?.[0] || '[]')
+          existing.push(...items)
+          writeTS(path.join(DATA_DIR, 'translations.ts'), 'translationsData', existing)
+          counts.translation = items.length
+        }
       }
-      else {
-        console.log(`  ⚠️ 跳过: 文件名不以 listening/translation/writing 开头`)
-      }
+
+      console.log(`   → 写作:${counts.writing} 听力:${counts.listening} 阅读:${counts.reading} 翻译:${counts.translation}`)
+      total.writing += counts.writing
+      total.listening += counts.listening
+      total.reading += counts.reading
+      total.translation += counts.translation
+
     } catch (err) {
       console.log(`  ❌ 解析失败: ${err.message}`)
     }
   }
 
-  console.log(`\n${'='.repeat(50)}`)
-  console.log(`✅ 导入完成:`)
-  if (listCount) console.log(`  - 听力: ${listCount} 篇`)
-  if (transCount) console.log(`  - 翻译: ${transCount} 条`)
-  if (writeCount) console.log(`  - 写作: ${writeCount} 条`)
-  console.log(`\n💡 提示: 重新编译小程序后生效`)
+  console.log('\n' + '='.repeat(50))
+  console.log('✅ 导入完成')
+  console.log(`   写作: ${total.writing} 篇`)
+  console.log(`   听力: ${total.listening} 篇`)
+  console.log(`   阅读: ${total.reading} 篇`)
+  console.log(`   翻译: ${total.translation} 条`)
+  console.log('\n💡 提示: 新建页面需要添加到 app.json 并重新编译')
 }
 
 main().catch(console.error)
