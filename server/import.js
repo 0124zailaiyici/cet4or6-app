@@ -131,7 +131,7 @@ function parseReading(lines, year) {
         if (m) passage = after.slice(after.indexOf(m[0]) + m[0].length).trim()
       }
       if (passage.length > 30 || options.length > 0) {
-        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 2000), questions: cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s)), options })
+        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 4000), questions: cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s)), options })
       }
       continue
     }
@@ -167,15 +167,17 @@ function parseReading(lines, year) {
           if (m) {
             const start = after.indexOf(m[0]) + m[0].length
             passageText = after.slice(start)
-              .split('\n').map(s => s.trim()).filter(l => l.length > 5 && !/^[A-D]\)|^\d+\./.test(l) && !/Answer Sheet|第\d+页|共\d+页/.test(l))
+              .split('\n').map(s => s.trim()).filter(l => l.length > 5 && !/^[A-D]\)|^\d+\./.test(l) && !/Answer Sheet|第\d+页|共\d+页/.test(l) && !/Part\s+III|reading comprehension|Directions/.test(l))
               .join(' ')
+              // 清理 PDF 提取的乱码
+              .replace(/\^+/g, '')
           }
         }
         passageText = sanitize(passageText)
         if (passageText.length > 30) {
           const pNum = sub.match(/Passage\s+(One|Two|Three)/i)?.[1] || ''
           const pLabel = { One: '一', Two: '二', Three: '三' }[pNum] || ''
-          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 2000), questions, options: [] })
+          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 4000), questions, options: [] })
         }
       }
     }
