@@ -22,50 +22,58 @@
 
   <block wx:else>
     <view class="reading-detail">
+
+      <!-- 顶部：返回 + 标题 -->
       <view class="detail-header">
         <view class="back-btn" catchtap="back">←</view>
         <text class="detail-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读' : '仔细阅读'}}</text>
+        <text class="detail-progress">{{currentQ + 1}}/{{current.questions.length}}</text>
       </view>
 
-      <!-- 文章正文区域（可滚动） -->
+      <!-- 文章正文（上下滚动）-->
       <scroll-view class="passage-scroll" scroll-y>
         <view class="passage-card">
           <text class="passage-text">{{current.passage}}</text>
         </view>
       </scroll-view>
 
-      <!-- 底部固定区域：题目/选项 -->
-      <view class="bottom-section">
-        <!-- Section A: 选词填空 - 显示选项 -->
+      <!-- 题目卡（左右滑动切题）-->
+      <view class="question-slider" wx:if="{{current.questions && current.questions.length > 0}}">
+        <view class="qs-inner">
+          <view class="qs-nav {{currentQ === 0 ? 'disabled' : ''}}" catchtap="prevQ">‹</view>
+          <view class="qs-content">
+            <text class="qs-num">第{{currentQ + 1}}题</text>
+            <text class="qs-text">{{current.questions[currentQ]}}</text>
+          </view>
+          <view class="qs-nav {{currentQ >= current.questions.length - 1 ? 'disabled' : ''}}" catchtap="nextQ">›</view>
+        </view>
+        <view class="qs-dots">
+          <view class="qs-dot {{i === currentQ ? 'active' : ''}}" wx:for="{{current.questions}}" wx:key="*this"></view>
+        </view>
+      </view>
+
+      <!-- 底部固定：选项 -->
+      <view class="bottom-fixed">
         <block wx:if="{{current.sectionType === 'A' && current.options && current.options.length > 0}}">
-          <view class="opt-bar">
-            <text class="opt-bar-title">📋 可选词：</text>
-            <view class="opt-tags">
-              <text class="opt-tag" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{item}}</text>
-            </view>
+          <view class="bf-label">📋 选词</view>
+          <scroll-view class="bf-scroll" scroll-x>
+            <text class="bf-chip" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+          </scroll-view>
+        </block>
+        <block wx:elif="{{current.sectionType === 'B'}}">
+          <view class="bf-label">📋 段落</view>
+          <view class="bf-letters">
+            <text class="bf-letter" wx:for="{{paraLetters}}" wx:key="*this">{{item}}</text>
           </view>
         </block>
-
-        <!-- Section B: 长篇阅读 - 显示匹配陈述 -->
-        <block wx:elif="{{current.sectionType === 'B' && current.questions && current.questions.length > 0}}">
-          <view class="q-bar">
-            <text class="q-bar-title">📋 匹配陈述：</text>
-            <scroll-view class="q-bar-scroll" scroll-x>
-              <text class="q-bar-item" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
-            </scroll-view>
-          </view>
-        </block>
-
-        <!-- Section C: 仔细阅读 - 显示题目 -->
-        <block wx:elif="{{current.sectionType === 'C' && current.questions && current.questions.length > 0}}">
-          <view class="q-bar">
-            <text class="q-bar-title">📋 题目：</text>
-            <scroll-view class="q-bar-scroll" scroll-x>
-              <text class="q-bar-item" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="idx">{{item}}</text>
-            </scroll-view>
+        <block wx:elif="{{current.sectionType === 'C'}}">
+          <view class="bf-label">📋 选项</view>
+          <view class="bf-choices">
+            <text class="bf-choice" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
           </view>
         </block>
       </view>
+
     </view>
   </block>
 </view>
