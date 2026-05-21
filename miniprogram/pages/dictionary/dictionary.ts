@@ -18,6 +18,7 @@ interface IDictData {
   error: string
   loading: boolean
   history: string[]
+  darkMode: boolean
 }
 
 interface IDictMethods {
@@ -33,10 +34,12 @@ Page<IDictData, IDictMethods>({
     error: '',
     loading: false,
     history: [],
+    darkMode: false,
   },
 
   onLoad() {
     const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
     this.setData({ history: app.globalData.studyData.favoriteSentenceIds.length > 0 ? [] : [] })
     const raw = wx.getStorageSync('dictHistory')
     if (raw) this.setData({ history: raw })

@@ -18,6 +18,7 @@ interface IStatData {
   totalCheckins: number
   calendarRows: ICalCell[][]
   monthYear: string
+  darkMode: boolean
 }
 
 interface IStatMethods {
@@ -38,6 +39,7 @@ Page<IStatData, IStatMethods>({
     totalCheckins: 0,
     calendarRows: [],
     monthYear: '',
+    darkMode: false,
   },
 
   onLoad() {
@@ -45,6 +47,8 @@ Page<IStatData, IStatMethods>({
   },
 
   onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
     this.refresh()
   },
 

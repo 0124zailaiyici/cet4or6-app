@@ -29,6 +29,7 @@ interface ITranslationData {
   history: ITranslationRecord[]
   completedIds: number[]
   submitting: boolean
+  darkMode: boolean
 }
 
 interface ITranslationMethods {
@@ -49,11 +50,13 @@ Page<ITranslationData, ITranslationMethods>({
     history: [],
     completedIds: [],
     submitting: false,
+    darkMode: false,
   },
 
   onLoad() {
-    const items = translationsData as ITranslation[]
     const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
+    const items = translationsData as ITranslation[]
     const history = app.globalData.studyData.translationRecords
     const completedIds = history.map(r => r.id)
     this.setData({ translations: items, history, completedIds })

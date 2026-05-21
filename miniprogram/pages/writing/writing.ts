@@ -29,6 +29,7 @@ interface IWritingData {
   writingAnswer: string
   result: string | null
   showResult: boolean
+  darkMode: boolean
 }
 
 interface IWritingMethods {
@@ -57,10 +58,12 @@ Page<IWritingData, IWritingMethods>({
     writingAnswer: '',
     result: null,
     showResult: false,
+    darkMode: false,
   },
 
   onLoad() {
-    this.setData({ patterns: patternsData as IPattern[], writings: writingsData as IWriting[] })
+    const app = getApp<IAppOption>()
+    this.setData({ patterns: patternsData as IPattern[], writings: writingsData as IWriting[], darkMode: app.globalData.darkMode })
   },
 
   switchTab(e: WechatMiniprogram.TouchEvent) {

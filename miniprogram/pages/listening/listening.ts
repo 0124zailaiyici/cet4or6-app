@@ -31,6 +31,7 @@ interface IListeningData {
   hardSentences: number[]
   completedPassages: number[]
   loading: boolean
+  darkMode: boolean
 }
 
 interface IListeningMethods {
@@ -89,12 +90,14 @@ Page<IListeningData, IListeningMethods>({
     hardSentences: [],
     completedPassages: [],
     loading: false,
+    darkMode: false,
   },
 
   onLoad() {
     pageRef = this
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
     const studyData = app.globalData.studyData
     this.setData({
       passages,

@@ -18,6 +18,7 @@ interface ISentencesData {
   expandedIds: number[]
   favoriteIds: number[]
   searchQuery: string
+  darkMode: boolean
 }
 
 interface ISentencesMethods {
@@ -42,14 +43,16 @@ Page<ISentencesData, ISentencesMethods>({
     expandedIds: [],
     favoriteIds: [],
     searchQuery: '',
+    darkMode: false,
   },
 
   onLoad() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
     const sentences = sentencesData as ISentence[]
     const topics = [...new Set(sentences.map(s => s.topic))]
     topics.unshift('全部')
 
-    const app = getApp<IAppOption>()
     this.setData({
       allSentences: sentences,
       filteredSentences: sentences,

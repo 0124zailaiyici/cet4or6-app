@@ -14,6 +14,7 @@ interface IFavoritesData {
   favSentences: ISentence[]
   hardListens: { text: string; passageTitle: string }[]
   masteredIds: number[]
+  darkMode: boolean
 }
 
 interface IFavoritesMethods {
@@ -29,9 +30,12 @@ Page<IFavoritesData, IFavoritesMethods>({
     favSentences: [],
     hardListens: [],
     masteredIds: [],
+    darkMode: false,
   },
 
   onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
     this.refresh()
   },
 
