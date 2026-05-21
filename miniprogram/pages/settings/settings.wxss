@@ -86,6 +86,35 @@
   text-align: center;
 }
 
+.toggle-btn {
+  width: 96rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
+  background: var(--tag-bg);
+  position: relative;
+  transition: background 0.3s;
+}
+
+.toggle-btn.on {
+  background: var(--pink);
+}
+
+.toggle-knob {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  position: absolute;
+  top: 4rpx;
+  left: 4rpx;
+  transition: left 0.3s;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15);
+}
+
+.toggle-btn.on .toggle-knob {
+  left: 48rpx;
+}
+
 .tip-block {
   margin-top: 32rpx;
   padding: 24rpx;

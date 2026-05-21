@@ -29,6 +29,7 @@ interface IHomeData {
   greeting: string
   checkedIn: boolean
   streak: number
+  darkMode: boolean
 }
 
 interface IHomeMethods {
@@ -63,6 +64,7 @@ Page<IHomeData, IHomeMethods>({
     greeting: '',
     checkedIn: false,
     streak: 0,
+    darkMode: false,
   },
 
   onLoad() {
@@ -107,6 +109,7 @@ Page<IHomeData, IHomeMethods>({
       streak: calcStreak(sd.checkInDates),
       todayStats: { listened, sentences, translations, writings, total: totalDone },
       goalStats: { listenPct, sentencePct, translationPct, writingPct, overallPct },
+      darkMode: app.globalData.darkMode,
     })
   },
 

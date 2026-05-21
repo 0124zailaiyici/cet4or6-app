@@ -18,7 +18,8 @@ interface IStudyData {
 interface IAppOption {
   globalData: {
     userInfo?: WechatMiniprogram.UserInfo,
-    studyData: IStudyData
+    studyData: IStudyData,
+    darkMode: boolean
   }
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback,
 }
