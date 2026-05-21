@@ -50,6 +50,20 @@ export function teachSentence(pattern: string, userSentence?: string) {
   return request<{ explanation: string }>('/teach_sentence', { pattern, userSentence })
 }
 
+export function lookupWord(word: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}/dictionary?word=${encodeURIComponent(word)}`,
+      method: 'GET',
+      success: (res) => {
+        if (res.statusCode === 200) resolve(res.data)
+        else reject(new Error(`查询失败 ${res.statusCode}`))
+      },
+      fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
+    })
+  })
+}
+
 export function correctParagraph(prompt: string, userAnswer: string) {
   return request<{ score: number; dimensions: { coherence: number; content: number; language: number }; suggestions: string }>('/correct_paragraph', { prompt, userAnswer })
 }

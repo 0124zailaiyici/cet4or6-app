@@ -126,6 +126,22 @@ app.get('/tts', async (req, res) => {
   }
 });
 
+app.get('/dictionary', async (req, res) => {
+  const { word } = req.query;
+  if (!word) return res.status(400).json({ error: '缺少 word' });
+
+  try {
+    const response = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { timeout: 10000 });
+    res.json(response.data);
+  } catch (err: any) {
+    if (err.response?.status === 404) {
+      res.status(404).json({ error: '未找到该单词', word });
+    } else {
+      res.status(500).json({ error: '词典查询失败', detail: err.message });
+    }
+  }
+});
+
 app.get('/health', (_, res) => {
   res.json({ status: 'ok', apiKey: !!API_KEY });
 });

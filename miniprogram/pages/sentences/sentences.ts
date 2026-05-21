@@ -28,6 +28,7 @@ interface ISentencesMethods {
   onSearchInput(e: WechatMiniprogram.Input): void
   clearSearch(): void
   doFilter(): void
+  goDict(): void
   highlightText(text: string, keywords: string[]): string
 }
 
@@ -129,6 +130,10 @@ Page<ISentencesData, ISentencesMethods>({
     const app = getApp<IAppOption>()
     app.globalData.studyData.favoriteSentenceIds = favArr
     wx.setStorageSync('studyData', app.globalData.studyData)
+  },
+
+  goDict() {
+    wx.navigateTo({ url: '/pages/dictionary/dictionary' })
   },
 
   highlightText(text: string, keywords: string[]): string {

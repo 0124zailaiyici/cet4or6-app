@@ -7,7 +7,8 @@
     "pages/writing/writing",
     "pages/statistics/statistics",
     "pages/favorites/favorites",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/dictionary/dictionary"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="page-header">
+    <text class="page-title">📖 英语词典</text>
+  </view>
+
+  <view class="search-bar">
+    <input class="search-input" placeholder="输入要查的英文单词…" value="{{query}}" bindinput="onInput" confirm-type="search" bindconfirm="search" />
+    <view class="search-clear" wx:if="{{query}}" catchtap="clear">✕</view>
+    <view class="search-btn" catchtap="search">{{loading ? '…' : '查词'}}</view>
+  </view>
+
+  <block wx:if="{{error}}">
+    <view class="error-block">
+      <text class="error-icon">😕</text>
+      <text class="error-text">{{error}}</text>
+    </view>
+  </block>
+
+  <block wx:elif="{{result}}">
+    <view class="result-header">
+      <text class="word">{{result.word}}</text>
+      <text class="phonetic" wx:if="{{result.phonetic}}">{{result.phonetic}}</text>
+    </view>
+
+    <view class="meaning-block" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
+      <view class="pos-tag">{{item.partOfSpeech}}</view>
+      <view class="def-list">
+        <view class="def-item" wx:for="{{item.definitions}}" wx:key="definition">
+          <text class="def-text">• {{item.definition}}</text>
+          <text class="def-example" wx:if="{{item.example}}">例：{{item.example}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{!query && history.length > 0}}">
+    <view class="history-section">
+      <text class="section-title">最近查询</text>
+      <view class="history-list">
+        <text class="history-item" wx:for="{{history}}" wx:key="*this" catchtap="search">{{item}}</text>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="empty-tip">
+      <text class="empty-icon">📖</text>
+      <text class="empty-text">输入英文单词查释义</text>
+      <text class="empty-hint">支持音标、词性、例句</text>
+    </view>
+  </block>
+</view>

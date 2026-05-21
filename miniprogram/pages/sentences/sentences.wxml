@@ -1,6 +1,9 @@
 <view class="page">
   <view class="page-header">
-    <text class="page-title">语境句子</text>
+    <view class="title-row">
+      <text class="page-title">语境句子</text>
+      <view class="dict-link" catchtap="goDict">📖</view>
+    </view>
     <text class="page-subtitle">掌握 {{masteredIds.length}} / {{allSentences.length}}  ⭐ {{favoriteIds.length}} 收藏</text>
   </view>
 
