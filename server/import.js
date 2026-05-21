@@ -153,11 +153,15 @@ function parseReading(lines, year) {
     if (secType === 'B') {
       // 提取匹配陈述（数字开头的行，如 36. ...）
       const statements = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s.slice(0, 200)))
-      // 提取文章段落：字母开头 + 长度 > 60 字符的为正文段落
+      // 提取文章段落：字母开头（支持 ）和 ) 两种括号）
       const articleLines = cleanLines.filter(l => {
-        if (/^[A-Z]\)/.test(l) && l.length > 60) return true
-        if (/^[A-Z]\)\s/.test(l) && /^[G-Z]\)/.test(l)) return true  // CET-4 长篇阅读段落通常从 G 开始
-        return false
+        const m = l.match(/^([A-Z])[\)）]\s*/)
+        if (!m) return false
+        const letter = m[1]
+        if (letter < 'A' || letter > 'Z') return false
+        // 去掉字母标签后的纯文本长度
+        const text = l.replace(/^[A-Z][\)）]\s*/, '').trim()
+        return text.length > 20  // 短的是干扰项（如选项），长的是段落
       })
       const article = sanitize(articleLines.join('\n')).slice(0, 3000)
       if (statements.length > 0 || article.length > 50) {
