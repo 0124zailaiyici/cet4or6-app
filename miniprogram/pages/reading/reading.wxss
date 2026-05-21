@@ -1,4 +1,4 @@
-.page { min-height: 100vh; padding-bottom: 48rpx; }
+.page { min-height: 100vh; }
 
 /* ===== List ===== */
 .rh-header { position: relative; overflow: hidden; }
@@ -10,7 +10,6 @@
 .rh-content { position: relative; padding: 48rpx 36rpx 36rpx; }
 .rh-title { font-size: 48rpx; font-weight: 800; color: #fff; }
 .rh-sub { display: block; font-size: 26rpx; color: rgba(255,255,255,0.8); margin-top: 6rpx; }
-
 .rlist { padding: 20rpx 36rpx; display: flex; flex-direction: column; gap: 16rpx; }
 .rcard {
   background: #fff; border-radius: 22rpx; padding: 24rpx; box-shadow: 0 4rpx 20rpx rgba(84,110,122,0.06);
@@ -30,11 +29,8 @@
 .rc-meta { display: block; font-size: 22rpx; color: #8a7a9a; margin-top: 4rpx; }
 .rc-arrow { font-size: 36rpx; color: #8a7a9a; }
 
-/* ===== Detail (full screen flex) ===== */
-.reading-detail {
-  display: flex; flex-direction: column;
-  height: 100vh;
-}
+/* ===== Detail ===== */
+.reading-detail { display: flex; flex-direction: column; height: 100vh; }
 
 .detail-header {
   display: flex; align-items: center; gap: 16rpx;
@@ -45,70 +41,66 @@
   display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: #546e7a;
 }
 .detail-title { flex: 1; font-size: 30rpx; font-weight: 700; color: #2d2d4e; }
-.detail-progress { font-size: 24rpx; color: #8a7a9a; }
 
-/* Passage - takes remaining space */
-.passage-scroll { flex: 1; padding: 0 32rpx; }
+/* ===== 上半：文章区域 ===== */
+.passage-area {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 0 32rpx; min-height: 0;
+}
+.passage-scroll { flex: 1; }
 .passage-card {
   background: #fff; border-radius: 22rpx; padding: 28rpx;
   box-shadow: 0 4rpx 20rpx rgba(84,110,122,0.06);
 }
 .passage-text { font-size: 28rpx; line-height: 1.9; color: #2d2d4e; }
 
-/* Question slider */
-.question-slider {
-  flex-shrink: 0;
-  background: #fff;
-  border-top: 2rpx solid #f0e8f0;
-  padding: 20rpx 32rpx 12rpx;
-}
-.qs-inner { display: flex; align-items: flex-start; gap: 16rpx; }
-.qs-nav {
-  font-size: 48rpx; color: #546e7a; padding: 12rpx 8rpx;
-  flex-shrink: 0; line-height: 1;
-}
-.qs-nav.disabled { color: #d0c8d0; }
-.qs-content { flex: 1; min-height: 80rpx; }
-.qs-num { display: block; font-size: 22rpx; color: #546e7a; font-weight: 600; margin-bottom: 8rpx; }
-.qs-text { font-size: 28rpx; line-height: 1.6; color: #2d2d4e; }
-
-.qs-dots {
-  display: flex; justify-content: center; gap: 10rpx; margin-top: 12rpx;
-}
-.qs-dot {
-  width: 12rpx; height: 12rpx; border-radius: 50%; background: #d0c8d0;
-}
-.qs-dot.active { background: #546e7a; width: 24rpx; border-radius: 6rpx; }
-
-/* Bottom fixed */
-.bottom-fixed {
-  flex-shrink: 0;
-  background: #fff;
-  border-top: 2rpx solid #f0e8f0;
-  padding: 16rpx 32rpx 40rpx;
-  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.04);
-}
-
-.bf-label { font-size: 22rpx; font-weight: 600; color: #546e7a; margin-bottom: 12rpx; }
-
-.bf-scroll { white-space: nowrap; overflow: hidden; }
-.bf-chip {
-  display: inline-block; font-size: 24rpx; color: #2d2d4e;
-  padding: 10rpx 20rpx; margin-right: 12rpx;
-  border-radius: 16rpx; background: rgba(84,110,122,0.06);
-}
-
-.bf-letters { display: flex; flex-wrap: wrap; gap: 8rpx; }
-.bf-letter {
-  width: 56rpx; height: 56rpx; border-radius: 14rpx;
+.passage-nav {
   display: flex; align-items: center; justify-content: center;
-  font-size: 24rpx; font-weight: 600; color: #2d2d4e;
+  gap: 24rpx; padding: 12rpx 0;
+}
+.pn-btn {
+  font-size: 40rpx; color: #546e7a; padding: 8rpx; line-height: 1;
+}
+.pn-btn.disabled { color: #d0c8d0; }
+.pn-label { font-size: 24rpx; color: #8a7a9a; }
+
+/* ===== 分割线 ===== */
+.divider { height: 4rpx; background: #f0e8f0; flex-shrink: 0; }
+
+/* ===== 下半：题目区域 ===== */
+.question-area {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 16rpx 32rpx 32rpx; min-height: 0;
+}
+
+.q-header {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16rpx; margin-bottom: 12rpx; flex-shrink: 0;
+}
+.q-nav {
+  font-size: 40rpx; color: #546e7a; padding: 8rpx; line-height: 1;
+}
+.q-nav.disabled { color: #d0c8d0; }
+.q-title { font-size: 24rpx; font-weight: 600; color: #546e7a; }
+
+.q-scroll { flex: 1; }
+.q-text { font-size: 28rpx; line-height: 1.7; color: #2d2d4e; display: block; }
+
+.q-choices { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 20rpx; }
+.qc-item {
+  font-size: 26rpx; color: #4a4a6a; padding: 12rpx 24rpx;
+  border-radius: 16rpx; background: rgba(84,110,122,0.04);
+}
+.qc-chip {
+  font-size: 24rpx; padding: 10rpx 20rpx;
   background: rgba(84,110,122,0.06);
 }
 
-.bf-choices { display: flex; gap: 16rpx; }
-.bf-choice {
-  font-size: 26rpx; color: #4a4a6a;
-  padding: 10rpx 20rpx; border-radius: 14rpx;
-  background: rgba(84,110,122,0.04);
+.q-dots {
+  display: flex; justify-content: center; gap: 10rpx;
+  margin-top: 12rpx; flex-shrink: 0;
 }
+.q-dot {
+  width: 12rpx; height: 12rpx; border-radius: 50%; background: #d0c8d0;
+}
+.q-dot.active { background: #546e7a; width: 24rpx; border-radius: 6rpx; }
