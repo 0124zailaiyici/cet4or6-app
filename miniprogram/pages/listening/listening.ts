@@ -212,10 +212,27 @@ Page<IListeningData, IListeningMethods>({
 
   toggleHard(e: WechatMiniprogram.TouchEvent) {
     const index = e.currentTarget.dataset.index as number
+    const passage = this.data.currentPassage
+    if (!passage) return
+    const app = getApp<IAppOption>()
+    const stored = app.globalData.studyData.hardSentences
+
     const hardSet = new Set(this.data.hardSentences)
-    if (hardSet.has(index)) hardSet.delete(index)
-    else hardSet.add(index)
+    if (hardSet.has(index)) {
+      hardSet.delete(index)
+      const idx = stored.findIndex(h => h.passageId === passage.id && h.sentenceIndex === index)
+      if (idx !== -1) stored.splice(idx, 1)
+    } else {
+      hardSet.add(index)
+      stored.push({
+        passageId: passage.id,
+        sentenceIndex: index,
+        text: passage.sentences[index].text,
+        passageTitle: passage.title,
+      })
+    }
     this.setData({ hardSentences: [...hardSet] })
+    wx.setStorageSync('studyData', app.globalData.studyData)
   },
 
   markCompleted() {

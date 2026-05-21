@@ -23,6 +23,13 @@
 .fc-tag { font-size: 20rpx; color: #ff8f00; padding: 4rpx 14rpx; border-radius: 12rpx; background: rgba(255,193,7,0.06); }
 .fc-remove { font-size: 22rpx; color: #ffd3b6; margin-left: auto; padding: 6rpx 16rpx; border-radius: 14rpx; border: 2rpx solid rgba(255,211,182,0.2); }
 
+.hcard { background: #fff; border-radius: 20rpx; padding: 24rpx; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); margin-bottom: 14rpx; }
+.hc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10rpx; }
+.hc-source { font-size: 22rpx; color: #ff9eb5; }
+.hc-index { font-size: 20rpx; color: #8a7a9a; }
+.hc-text { display: block; font-size: 28rpx; line-height: 1.7; color: #2d2d4e; }
+.hc-remove { display: inline-block; font-size: 22rpx; color: #ffd3b6; margin-top: 12rpx; padding: 6rpx 16rpx; border-radius: 14rpx; border: 2rpx solid rgba(255,211,182,0.2); }
+
 .empty-state { display: flex; flex-direction: column; align-items: center; padding: 80rpx 0; }
 .empty-emoji { font-size: 72rpx; margin-bottom: 20rpx; }
 .empty-text { font-size: 28rpx; color: #2d2d4e; font-weight: 600; margin-bottom: 8rpx; }

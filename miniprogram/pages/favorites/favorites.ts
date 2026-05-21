@@ -21,6 +21,7 @@ interface IFavoritesData {
 interface IFavoritesMethods {
   switchTab(e: WechatMiniprogram.TouchEvent): void
   removeFavorite(e: WechatMiniprogram.TouchEvent): void
+  removeHard(e: WechatMiniprogram.TouchEvent): void
   refresh(): void
 }
 
@@ -48,8 +49,19 @@ Page<IFavoritesData, IFavoritesMethods>({
 
     this.setData({
       favSentences: all.filter(s => favIds.indexOf(s.id) !== -1),
+      hardListens: app.globalData.studyData.hardSentences,
       masteredIds: app.globalData.studyData.masteredSentences,
     })
+  },
+
+  removeHard(e: WechatMiniprogram.TouchEvent) {
+    const idx = e.currentTarget.dataset.index as number
+    const app = getApp<IAppOption>()
+    const h = app.globalData.studyData.hardSentences
+    if (idx >= 0 && idx < h.length) h.splice(idx, 1)
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.refresh()
+    wx.showToast({ title: '已移除难句', icon: 'none' })
   },
 
   switchTab(e: WechatMiniprogram.TouchEvent) {

@@ -7,6 +7,7 @@ interface IStudyData {
   writingRecords: { id: number; score: number; date: string }[]
   checkInDates: string[]
   favoriteSentenceIds: number[]
+  hardSentences: { passageId: number; sentenceIndex: number; text: string; passageTitle: string }[]
   dailyGoal: {
     listen: number
     sentence: number
