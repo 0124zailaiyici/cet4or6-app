@@ -1,35 +1,11 @@
+/* ==================== Light theme ==================== */
 page, .page {
-  --bg: #fff5f7;
-  --card-bg: #ffffff;
-  --tag-bg: #fff0f3;
-  --text-primary: #2d2d4e;
-  --text-secondary: #8a7a9a;
-  --text-tertiary: #6a6a8a;
-  --pink: #ff9eb5;
-  --pink-dark: #ff8a80;
-  --mint: #c5e1a5;
-  --blue: #b5d8f7;
-  --peach: #ffd3b6;
-  --purple: #d8b4fe;
-  --gold: #ffd700;
   --shadow: rgba(255, 158, 181, 0.1);
   --border: #ffd9e0;
   --white: #ffffff;
 }
 
 .dark-theme {
-  --bg: #12121f;
-  --card-bg: #1e1e38;
-  --tag-bg: #2a2a4a;
-  --text-primary: #e0d0e8;
-  --text-secondary: #a090b0;
-  --text-tertiary: #807090;
-  --pink-dark: #e8839a;
-  --mint: #8db87a;
-  --blue: #7fa8d8;
-  --peach: #e8b898;
-  --purple: #b88ad8;
-  --gold: #e8c800;
   --shadow: rgba(0, 0, 0, 0.3);
   --border: #3a3a5a;
   --white: #1e1e38;
@@ -43,17 +19,222 @@ page {
 
 .page {
   min-height: 100vh;
-  background-color: var(--bg);
-  color: var(--text-primary);
+  background-color: #fff5f7;
+  color: #2d2d4e;
 }
 
-view, text, scroll-view {
-  box-sizing: border-box;
+.dark-theme.page,
+.page.dark-theme {
+  background-color: #12121f !important;
+  color: #e0d0e8 !important;
 }
 
-.card {
-  background: var(--card-bg);
-  border-radius: 28rpx;
-  padding: 30rpx;
-  box-shadow: 0 4rpx 20rpx var(--shadow);
+/* ==================== Cards ==================== */
+.card, .module-card, .stats-section, .checkin-section,
+.progress-section, .goal-card, .passage-card,
+.trans-card, .sentence-card, .pattern-card,
+.writing-card, .writing-prompt-block, .paragraph-prompt,
+.meaning-block, .fav-card, .dictionary-card,
+.goal-card, .section, .calendar-section,
+.chinese-block, .result-block, .result-ref,
+.answer-input, .practice-input,
+.writing-prompt-block, .paragraph-prompt {
+  background-color: #ffffff;
+  box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
+}
+
+.dark-theme .card,
+.dark-theme .module-card,
+.dark-theme .stats-section,
+.dark-theme .checkin-section,
+.dark-theme .progress-section,
+.dark-theme .goal-card,
+.dark-theme .passage-card,
+.dark-theme .trans-card,
+.dark-theme .sentence-card,
+.dark-theme .pattern-card,
+.dark-theme .writing-card,
+.dark-theme .writing-prompt-block,
+.dark-theme .paragraph-prompt,
+.dark-theme .meaning-block,
+.dark-theme .fav-card,
+.dark-theme .section,
+.dark-theme .calendar-section,
+.dark-theme .chinese-block,
+.dark-theme .result-block,
+.dark-theme .result-ref,
+.dark-theme .answer-input,
+.dark-theme .practice-input,
+.dark-theme .writing-prompt-block,
+.dark-theme .paragraph-prompt {
+  background-color: #1e1e38 !important;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ==================== Text colors ==================== */
+.page-title, .module-title, .passage-title, .card-english,
+.sentence-text, .trans-chinese, .chinese-text,
+.writing-title, .writing-title-lg, .word,
+.def-text, .fav-english, .practice-label,
+.chinese-block, .result-suggestions,
+.prompt-text, .example-text, .goal-label,
+.goal-num, .pattern-name, .mode-title,
+.ov-num, .score-num, .ci-num,
+.search-input, .answer-input, .practice-input {
+  color: #2d2d4e;
+}
+
+.dark-theme .page-title,
+.dark-theme .module-title,
+.dark-theme .passage-title,
+.dark-theme .card-english,
+.dark-theme .sentence-text,
+.dark-theme .trans-chinese,
+.dark-theme .chinese-text,
+.dark-theme .writing-title,
+.dark-theme .writing-title-lg,
+.dark-theme .word,
+.dark-theme .def-text,
+.dark-theme .fav-english,
+.dark-theme .practice-label,
+.dark-theme .result-suggestions,
+.dark-theme .prompt-text,
+.dark-theme .example-text,
+.dark-theme .goal-label,
+.dark-theme .goal-num,
+.dark-theme .ov-num,
+.dark-theme .score-num,
+.dark-theme .ci-num,
+.dark-theme .search-input,
+.dark-theme .answer-input,
+.dark-theme .practice-input {
+  color: #e0d0e8 !important;
+}
+
+/* ==================== Secondary text ==================== */
+.greeting, .subtitle, .module-desc, .page-subtitle,
+.passage-meta, .pattern-arrow, .pattern-chinese,
+.example-label, .ref-label, .chinese-label,
+.prompt-label, .stat-label, .total-label,
+.ov-label, .cal-h, .bar-label, .tip-text,
+.empty-text, .empty-hint, .fav-chinese,
+.history-hint, .event-text, .def-example,
+.card-topic, .ref-text, .fav-topic,
+.search-clear, .trans-source,
+.writing-prompt, .writing-prompt-preview,
+.practice-hint, .sentence-num {
+  color: #8a7a9a;
+}
+
+.dark-theme .greeting,
+.dark-theme .subtitle,
+.dark-theme .module-desc,
+.dark-theme .page-subtitle,
+.dark-theme .passage-meta,
+.dark-theme .pattern-arrow,
+.dark-theme .pattern-chinese,
+.dark-theme .example-label,
+.dark-theme .ref-label,
+.dark-theme .chinese-label,
+.dark-theme .prompt-label,
+.dark-theme .stat-label,
+.dark-theme .total-label,
+.dark-theme .ov-label,
+.dark-theme .cal-h,
+.dark-theme .bar-label,
+.dark-theme .tip-text,
+.dark-theme .empty-text,
+.dark-theme .empty-hint,
+.dark-theme .fav-chinese,
+.dark-theme .def-example,
+.dark-theme .card-topic,
+.dark-theme .ref-text,
+.dark-theme .fav-topic,
+.dark-theme .search-clear,
+.dark-theme .trans-source,
+.dark-theme .writing-prompt,
+.dark-theme .writing-prompt-preview,
+.dark-theme .sentence-num {
+  color: #a090b0 !important;
+}
+
+/* ==================== Tags / Badges ==================== */
+.topic-tag, .card-topic, .trans-badge,
+.speed-btn, .ctrl-btn, .s-action,
+.goal-btn, .cal-cell, .history-item,
+.nav-btn, .back-btn, .fav-topic,
+.tab-bar, .master-btn, .checkin-btn.done,
+.checkin-btn.disabled, .passage-badge,
+.fav-remove, .clear-btn {
+  background-color: #fff0f3;
+}
+
+.dark-theme .topic-tag,
+.dark-theme .card-topic,
+.dark-theme .trans-badge,
+.dark-theme .speed-btn,
+.dark-theme .ctrl-btn,
+.dark-theme .s-action,
+.dark-theme .goal-btn,
+.dark-theme .history-item,
+.dark-theme .nav-btn,
+.dark-theme .back-btn,
+.dark-theme .fav-topic,
+.dark-theme .tab-bar,
+.dark-theme .master-btn,
+.dark-theme .checkin-btn.done,
+.dark-theme .checkin-btn.disabled,
+.dark-theme .passage-badge,
+.dark-theme .fav-remove,
+.dark-theme .clear-btn {
+  background-color: #2a2a4a !important;
+  box-shadow: none !important;
+}
+
+.dark-theme .tab-item.active {
+  background-color: #1e1e38 !important;
+}
+
+.dark-theme .topic-tag.active {
+  background-color: rgba(255, 158, 181, 0.15) !important;
+}
+
+/* ==================== Specific overrides ==================== */
+.dark-theme .passage-badge {
+  color: #8db87a !important;
+}
+
+.dark-theme .trans-badge.done,
+.dark-theme .master-btn.active,
+.dark-theme .page-subtitle {
+  color: #8db87a !important;
+}
+
+.dark-theme .bar-bg,
+.dark-theme .p-bar,
+.dark-theme .result-bar {
+  background-color: #2a2a4a !important;
+}
+
+.dark-theme .checkin-btn {
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark-theme .weekend {
+  color: #e8839a !important;
+}
+
+.dark-theme .result-ref {
+  background-color: #252545 !important;
+}
+
+.dark-theme .word {
+  color: #e0d0e8 !important;
+}
+.dark-theme .phonetic {
+  color: #a090b0 !important;
+}
+.dark-theme .pos-tag {
+  color: #ff9eb5 !important;
+  background-color: rgba(255, 158, 181, 0.1) !important;
 }
