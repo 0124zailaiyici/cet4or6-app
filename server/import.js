@@ -53,28 +53,19 @@ async function parsePDF(filePath) {
 // ============ 部分检测 ============
 
 function detectSections(text) {
-  const lines = text.split('\n').map(s => s.trim()).filter(Boolean)
+  const parts = text.split(/\n(?=Part\s+[IVXL]+)/i)
   const sections = { writing: [], listening: [], reading: [], translation: [] }
-  let current = null
 
-  const patterns = [
-    { key: 'writing', re: /part\s*i|^writing|写作|作文/i },
-    { key: 'listening', re: /part\s*ii|listening comprehension|听力/i },
-    { key: 'reading', re: /part\s*iii|reading comprehension|阅读/i },
-    { key: 'translation', re: /part\s*iv|translation|翻译/i },
-  ]
-
-  for (const line of lines) {
-    let matched = false
-    for (const p of patterns) {
-      if (p.re.test(line)) {
-        current = p.key
-        matched = true
-        break
-      }
-    }
-    if (!matched && current) {
-      sections[current].push(line)
+  for (const part of parts) {
+    const head = part.slice(0, 200)
+    if (/^Part\s+I\b|^写作/i.test(head)) {
+      sections.writing = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*I|writing|写作|作文|directions/i.test(s))
+    } else if (/^Part\s+II\b|listening comprehension|听力理解/i.test(head)) {
+      sections.listening = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*II|listening comprehension|听力|section\s*[abc]|directions|questions\s*\d+/i.test(s))
+    } else if (/^Part\s+III\b|reading comprehension|阅读理解/i.test(head)) {
+      sections.reading = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*III|reading comprehension|阅读|section\s*[abc]|directions|answer sheet/i.test(s))
+    } else if (/^Part\s+IV\b|translation|翻译/i.test(head)) {
+      sections.translation = part.split('\n').map(s => s.trim()).filter(s => s.length > 2 && !/part\s*IV|translation|翻译|directions|answer sheet/i.test(s))
     }
   }
 
@@ -118,36 +109,48 @@ function parseListening(lines, year) {
 // ============ 阅读解析 ============
 
 function parseReading(lines, year) {
-  const paragraphs = splitParagraphs(lines.join('\n'))
-  if (paragraphs.length < 2) return []
-
-  // 按段落分组为 passage
+  const text = lines.join(' ')
   const passages = []
-  let current = { id: Date.now(), title: '', passage: '', questions: [] }
-  let qMode = false
 
-  for (const p of paragraphs) {
-    if (/^(passage|text|section|短文)/i.test(p) || p.length > 80) {
-      if (current.passage && current.questions.length > 0) {
-        passages.push({ ...current })
-        current = { id: Date.now() + passages.length + 1, title: '', passage: '', questions: [] }
+  // 按 Section C 的明显文章分割（选项大写字母开头的段落作为文章正文）
+  const blocks = text.split(/(?=Directions:)/).filter(b => b.trim().length > 100)
+
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i]
+    const sentences = b.split(/[.?!]\s+/).filter(s => s.trim().length > 10)
+
+    // 找最长的一段作为文章正文（去除题目和选项）
+    let passageText = ''
+    let qLines = []
+    for (const s of sentences) {
+      if (/^[A-E]\)/.test(s.trim()) || /^\d+\./.test(s.trim())) {
+        qLines.push(s)
+      } else if (s.length > 30) {
+        passageText += s + '. '
       }
-      qMode = false
-      if (!current.title && p.length < 60) current.title = p
-      else current.passage += p + ' '
-    } else if (/^(问题|[A-E]\.|^\d+\.)/.test(p) || qMode) {
-      qMode = true
-      current.questions.push(p)
+    }
+
+    if (passageText.length > 100) {
+      passages.push({
+        id: Date.now() + passages.length,
+        title: `阅读 ${year} 第${i + 1}篇`,
+        passage: sanitize(passageText.slice(0, 1200)),
+        questions: qLines.slice(0, 10).map(s => sanitize(s.slice(0, 200))),
+      })
     }
   }
-  if (current.passage) passages.push(current)
 
-  return passages.slice(0, 5).map(p => ({
-    id: p.id,
-    title: p.title || `阅读理解 ${year}`,
-    passage: sanitize(p.passage.slice(0, 1000)),
-    questions: p.questions.slice(0, 10).map(s => sanitize(s.slice(0, 200))),
-  }))
+  // 如果上面的方法没找到，直接用全部文本
+  if (passages.length === 0 && lines.length > 5) {
+    passages.push({
+      id: Date.now(),
+      title: `阅读理解 ${year}`,
+      passage: sanitize(lines.slice(0, Math.min(lines.length, 30)).join(' ')).slice(0, 1000),
+      questions: [],
+    })
+  }
+
+  return passages
 }
 
 // ============ 翻译解析 ============
