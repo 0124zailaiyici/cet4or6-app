@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>四级备考助手 - 原型设计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #f0ebe6; display: flex; flex-direction: column; align-items: center;
+  padding: 40px 20px; font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+}
+h1 { font-size: 28px; color: #333; margin-bottom: 8px; }
+.subtitle { color: #888; margin-bottom: 40px; font-size: 15px; }
+.grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; max-width: 1200px; }
+
+/* Phone frame */
+.phone {
+  width: 375px; height: 812px; background: #fff5f7;
+  border-radius: 44px; overflow: hidden; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  display: flex; flex-direction: column;
+}
+.phone-header {
+  padding: 16px 20px 0; display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: #666; flex-shrink: 0;
+}
+.phone-notch {
+  width: 160px; height: 28px; background: #000; border-radius: 0 0 18px 18px;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10;
+}
+.phone-label {
+  position: absolute; top: 812px; left: 0; right: 0; text-align: center;
+  font-size: 12px; color: #999; margin-top: 8px;
+}
+.content { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+.content::-webkit-scrollbar { display: none; }
+
+/* ===== PAGE 1: HOME ===== */
+.hero-section {
+  background: linear-gradient(135deg, #ff9eb5 0%, #ff6b8a 40%, #d8b4fe 100%);
+  padding: 20px 24px 40px; border-radius: 0 0 36px 36px; position: relative;
+}
+.hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.hero-greeting { font-size: 13px; color: rgba(255,255,255,0.85); display: block; }
+.hero-title { font-size: 32px; font-weight: 800; color: #fff; margin-top: 2px; }
+.hero-icons { display: flex; gap: 10px; }
+.hero-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.checkin-card {
+  background: rgba(255,255,255,0.92); border-radius: 16px; padding: 16px 20px;
+  display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.cc-label { font-size: 16px; font-weight: 700; color: #333; }
+.cc-streak { font-size: 12px; color: #ff9eb5; margin-top: 2px; }
+.cc-btn { padding: 10px 28px; border-radius: 24px; background: linear-gradient(135deg, #ff9eb5, #ff8a80); color: #fff; font-size: 14px; font-weight: 600; }
+
+.stat-row { display: flex; gap: 10px; padding: 0 24px; margin-top: -20px; position: relative; z-index: 2; }
+.stat-box { flex: 1; background: #fff; border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: 0 4px 16px rgba(255,158,181,0.12); }
+.stat-num { font-size: 22px; font-weight: 800; color: #ff9eb5; display: block; }
+.stat-lbl { font-size: 11px; color: #8a7a9a; margin-top: 2px; display: block; }
+
+.section-title { padding: 24px 24px 12px; font-size: 18px; font-weight: 700; color: #333; }
+.section-sub { padding: 0 24px 16px; font-size: 13px; color: #8a7a9a; }
+
+.module-grid { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 24px; }
+.mc { width: calc(50% - 6px); border-radius: 18px; padding: 20px 18px 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.mc-badge { position: absolute; top: 10px; right: 12px; font-size: 10px; color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 10px; }
+.mc-emoji { font-size: 30px; margin-bottom: 12px; }
+.mc-name { font-size: 17px; font-weight: 700; color: #fff; }
+.mc-brief { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+.mc1 { background: linear-gradient(135deg, #4fc3f7, #2196f3); }
+.mc2 { background: linear-gradient(135deg, #81c784, #4caf50); }
+.mc3 { background: linear-gradient(135deg, #ffb74d, #ff9800); }
+.mc4 { background: linear-gradient(135deg, #ce93d8, #9c27b0); }
+.mc5 { background: linear-gradient(135deg, #ffd54f, #ffc107); }
+.mc6 { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+
+/* ===== PAGE 2: SENTENCES ===== */
+.s-header {
+  background: linear-gradient(135deg, #81c784, #4caf50);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.s-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.s-title { font-size: 26px; font-weight: 800; color: #fff; }
+.s-info { font-size: 12px; color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.15); padding: 4px 14px; border-radius: 12px; }
+.s-sbox { display: flex; align-items: center; background: rgba(255,255,255,0.92); border-radius: 14px; padding: 0 16px; }
+.s-sbox input { flex: 1; height: 40px; border: none; background: transparent; font-size: 14px; outline: none; }
+.s-pills { display: flex; gap: 8px; padding: 14px 24px; overflow-x: auto; }
+.s-pill { padding: 6px 18px; border-radius: 20px; font-size: 12px; color: #4caf50; background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.15); white-space: nowrap; }
+.s-pill.active { color: #fff; background: linear-gradient(135deg,#81c784,#4caf50); border-color: transparent; }
+
+.scard-list { padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
+.scard { background: #fff; border-radius: 18px; padding: 20px; box-shadow: 0 2px 12px rgba(76,175,80,0.06); display: flex; gap: 14px; }
+.scard-num { width: 32px; height: 32px; border-radius: 10px; background: rgba(76,175,80,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #4caf50; flex-shrink: 0; }
+.scard-text { font-size: 14px; line-height: 1.6; color: #333; flex: 1; }
+.scard-text kw { color: #ff9eb5; font-weight: 600; }
+.scard-bot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.scard-tag { font-size: 10px; color: #4caf50; background: rgba(76,175,80,0.06); padding: 3px 12px; border-radius: 10px; }
+.scard-acts { display: flex; gap: 12px; }
+.scard-star { font-size: 18px; color: #ddd; }
+.scard-check { font-size: 16px; color: #ddd; }
+
+/* ===== PAGE 3: LISTENING ===== */
+.l-header {
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.l-title { font-size: 26px; font-weight: 800; color: #fff; }
+.l-sub { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+
+.lcard-list { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+.lcard { background: #fff; border-radius: 18px; padding: 20px; box-shadow: 0 2px 12px rgba(33,150,243,0.06); display: flex; align-items: center; gap: 16px; }
+.lcard-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(33,150,243,0.08); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.lcard-info { flex: 1; }
+.lcard-name { font-size: 15px; font-weight: 600; color: #333; }
+.lcard-meta { font-size: 12px; color: #8a7a9a; margin-top: 2px; }
+.lcard-arrow { font-size: 18px; color: #2196f3; }
+
+/* Player bar */
+.player { margin: 8px 24px; background: #fff; border-radius: 18px; padding: 16px 20px; box-shadow: 0 -2px 12px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 16px; }
+.p-btn { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #4fc3f7, #2196f3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+.p-text { flex: 1; font-size: 13px; color: #666; }
+.p-progress { height: 4px; border-radius: 2px; background: #e0e0e0; flex: 1; }
+.p-fill { height: 100%; width: 35%; border-radius: 2px; background: #2196f3; }
+
+/* ===== PAGE 4: TRANSLATION ===== */
+.t-header {
+  background: linear-gradient(135deg, #ffb74d, #ff9800);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.t-title { font-size: 26px; font-weight: 800; color: #fff; }
+.t-sub { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+
+.tcard-list { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+.tcard { background: #fff; border-radius: 18px; padding: 20px; box-shadow: 0 2px 12px rgba(255,152,0,0.06); }
+.tcard-cn { font-size: 15px; line-height: 1.6; color: #333; font-weight: 500; }
+.tcard-src { font-size: 11px; color: #8a7a9a; margin-top: 6px; }
+.tcard-badge { display: inline-block; font-size: 10px; color: #ffb74d; background: rgba(255,183,77,0.1); padding: 2px 10px; border-radius: 8px; margin-top: 8px; }
+
+/* ===== PAGE 5: WRITING ===== */
+.w-header {
+  background: linear-gradient(135deg, #ce93d8, #9c27b0);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.w-title { font-size: 26px; font-weight: 800; color: #fff; }
+
+.w-tabs { display: flex; gap: 4px; margin: 16px 24px; background: #f0e8f0; border-radius: 14px; padding: 4px; }
+.w-tab { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; color: #8a7a9a; border-radius: 12px; }
+.w-tab.active { background: #fff; color: #9c27b0; font-weight: 600; box-shadow: 0 2px 8px rgba(156,39,176,0.1); }
+
+.wcard-list { padding: 0 24px; display: flex; flex-direction: column; gap: 10px; }
+.wcard { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(156,39,176,0.04); }
+.wcard-pat { font-size: 14px; font-weight: 600; color: #9c27b0; font-family: monospace; }
+.wcard-cn { font-size: 12px; color: #8a7a9a; margin-top: 4px; }
+
+/* ===== PAGE 6: STATISTICS ===== */
+.st-header {
+  background: linear-gradient(135deg, #ff9eb5, #ff6b8a);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.st-title { font-size: 26px; font-weight: 800; color: #fff; }
+
+.st-summary { display: flex; gap: 10px; padding: 16px 24px; }
+.st-card { flex: 1; background: #fff; border-radius: 16px; padding: 16px 12px; text-align: center; box-shadow: 0 2px 12px rgba(255,158,181,0.08); }
+.st-num { font-size: 24px; font-weight: 800; color: #ff9eb5; display: block; }
+.st-lbl { font-size: 10px; color: #8a7a9a; margin-top: 2px; display: block; }
+
+.calendar { margin: 8px 24px; background: #fff; border-radius: 18px; padding: 20px; box-shadow: 0 2px 12px rgba(255,158,181,0.06); }
+.cal-month { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 14px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+.cal-h { font-size: 10px; color: #8a7a9a; padding: 4px 0; }
+.cal-d { font-size: 12px; color: #333; padding: 6px 0; border-radius: 8px; }
+.cal-d.checked { background: rgba(255,158,181,0.15); color: #ff9eb5; font-weight: 600; }
+.cal-d.today { border: 1px solid #ff9eb5; }
+
+/* ===== PAGE 7: FAVORITES ===== */
+.f-header {
+  background: linear-gradient(135deg, #ffd54f, #ffc107);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.f-title { font-size: 26px; font-weight: 800; color: #fff; }
+
+.f-tabs { display: flex; gap: 4px; margin: 16px 24px; background: #f5f0e0; border-radius: 14px; padding: 4px; }
+.f-tab { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; color: #8a7a9a; border-radius: 12px; }
+.f-tab.active { background: #fff; color: #ff8f00; font-weight: 600; }
+
+/* ===== PAGE 8: DICTIONARY ===== */
+.d-header {
+  background: linear-gradient(135deg, #90a4ae, #607d8b);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.d-title { font-size: 26px; font-weight: 800; color: #fff; }
+
+.d-sbox { margin: 16px 24px; display: flex; align-items: center; background: #fff; border-radius: 16px; padding: 0 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+.d-sbox input { flex: 1; height: 44px; border: none; background: transparent; font-size: 15px; outline: none; }
+.d-sbtn { padding: 8px 24px; border-radius: 24px; background: linear-gradient(135deg, #90a4ae, #607d8b); color: #fff; font-size: 13px; font-weight: 600; }
+
+/* ===== PAGE 9: SETTINGS ===== */
+.set-header {
+  background: linear-gradient(135deg, #b0bec5, #78909c);
+  padding: 20px 24px 28px; border-radius: 0 0 28px 28px;
+}
+.set-title { font-size: 26px; font-weight: 800; color: #fff; }
+
+.set-card { margin: 12px 24px; background: #fff; border-radius: 18px; padding: 4px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+.set-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #f0f0f0; }
+.set-item:last-child { border-bottom: none; }
+.set-label { font-size: 14px; color: #333; font-weight: 500; }
+.set-controls { display: flex; align-items: center; gap: 14px; }
+.set-btn { width: 32px; height: 32px; border-radius: 50%; background: #f0e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ff9eb5; }
+.set-num { font-size: 20px; font-weight: 700; color: #333; min-width: 30px; text-align: center; }
+
+.toggle { width: 50px; height: 28px; border-radius: 14px; background: #ddd; position: relative; transition: 0.3s; }
+.toggle.on { background: #ff9eb5; }
+.toggle-knob { width: 24px; height: 24px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.toggle.on .toggle-knob { left: 24px; }
+</style>
+</head>
+<body>
+<h1>📱 四级备考助手</h1>
+<p class="subtitle">所有页面原型设计 · 左右滑动查看</p>
+<div class="grid">
+
+<!-- HOME -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="hero-section">
+      <div class="hero-top">
+        <div><span class="hero-greeting">下午好 ☀️</span><div class="hero-title">四级备考</div></div>
+        <div class="hero-icons"><div class="hero-icon">⚙️</div><div class="hero-icon">📊</div></div>
+      </div>
+      <div class="checkin-card">
+        <div><div class="cc-label">签到学习</div><div class="cc-streak">🔥 0 天连续</div></div>
+        <div class="cc-btn">签到</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box"><span class="stat-num">0%</span><span class="stat-lbl">今日完成</span></div>
+      <div class="stat-box"><span class="stat-num">0</span><span class="stat-lbl">今日题数</span></div>
+      <div class="stat-box"><span class="stat-num">0</span><span class="stat-lbl">连续天数</span></div>
+    </div>
+    <div class="section-title">学习模块</div>
+    <div class="section-sub">选择模块开始学习</div>
+    <div class="module-grid">
+      <div class="mc mc1"><div class="mc-badge">5篇</div><div class="mc-emoji">🎵</div><div class="mc-name">听力精听</div><div class="mc-brief">单句循环 · 听写</div></div>
+      <div class="mc mc2"><div class="mc-badge">50句</div><div class="mc-emoji">💬</div><div class="mc-name">语境句子</div><div class="mc-brief">卡片学习 · 搜索</div></div>
+      <div class="mc mc3"><div class="mc-badge">10题</div><div class="mc-emoji">🌟</div><div class="mc-name">翻译练习</div><div class="mc-brief">AI 批改 · 评分</div></div>
+      <div class="mc mc4"><div class="mc-badge">5题</div><div class="mc-emoji">✨</div><div class="mc-name">写作教学</div><div class="mc-brief">句型 · 段落 · 全文</div></div>
+      <div class="mc mc5"><div class="mc-badge">0项</div><div class="mc-emoji">⭐</div><div class="mc-name">收藏夹</div><div class="mc-brief">收藏 · 难句本</div></div>
+      <div class="mc mc6"><div class="mc-badge">查词</div><div class="mc-emoji">📖</div><div class="mc-name">英语词典</div><div class="mc-brief">音标 · 释义 · 例句</div></div>
+    </div>
+  </div>
+  <div class="phone-label">🏠 首页</div>
+</div>
+
+<!-- SENTENCES -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="s-header">
+      <div class="s-hdr"><div class="s-title">语境句子</div><div class="s-info">0/50</div></div>
+      <div class="s-sbox"><input placeholder="搜索句子或关键词…" readonly></div>
+    </div>
+    <div class="s-pills">
+      <div class="s-pill active">全部</div>
+      <div class="s-pill">科技</div>
+      <div class="s-pill">环保</div>
+      <div class="s-pill">教育</div>
+      <div class="s-pill">社会</div>
+      <div class="s-pill">生活</div>
+    </div>
+    <div class="scard-list">
+      <div class="scard">
+        <div class="scard-num">1</div>
+        <div><div class="scard-text">The rapid development of <kw>artificial intelligence</kw> has brought both <kw>opportunities</kw> and <kw>challenges</kw>.</div>
+        <div class="scard-bot"><div class="scard-tag">科技</div><div class="scard-acts"><span class="scard-star">☆</span><span class="scard-check">○</span></div></div></div>
+      </div>
+      <div class="scard">
+        <div class="scard-num">2</div>
+        <div><div class="scard-text">It is high time that we took <kw>effective measures</kw> to reduce <kw>carbon emissions</kw>.</div>
+        <div class="scard-bot"><div class="scard-tag">环保</div><div class="scard-acts"><span class="scard-star">☆</span><span class="scard-check">○</span></div></div></div>
+      </div>
+      <div class="scard">
+        <div class="scard-num">3</div>
+        <div><div class="scard-text">Only by <kw>working together</kw> can we solve the problem of <kw>global warming</kw>.</div>
+        <div class="scard-bot"><div class="scard-tag">环保</div><div class="scard-acts"><span class="scard-star">☆</span><span class="scard-check">○</span></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="phone-label">💬 句子页 - 绿调</div>
+</div>
+
+<!-- LISTENING -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="l-header"><div class="l-title">听力精听</div><div class="l-sub">5 篇听力材料</div></div>
+    <div class="lcard-list">
+      <div class="lcard">
+        <div class="lcard-icon">🎵</div>
+        <div class="lcard-info"><div class="lcard-name">The Benefits of Reading</div><div class="lcard-meta">6 句</div></div>
+        <div class="lcard-arrow">→</div>
+      </div>
+      <div class="lcard">
+        <div class="lcard-icon">🎵</div>
+        <div class="lcard-info"><div class="lcard-name">Environmental Protection</div><div class="lcard-meta">6 句</div></div>
+        <div class="lcard-arrow">→</div>
+      </div>
+      <div class="lcard">
+        <div class="lcard-icon">🎵</div>
+        <div class="lcard-info"><div class="lcard-name">Online Learning</div><div class="lcard-meta">6 句</div></div>
+        <div class="lcard-arrow">→</div>
+      </div>
+    </div>
+  </div>
+  <div class="phone-label">🎵 听力页 - 蓝调</div>
+</div>
+
+<!-- TRANSLATION -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="t-header"><div class="t-title">翻译练习</div><div class="t-sub">10 篇翻译题目</div></div>
+    <div class="tcard-list">
+      <div class="tcard">
+        <div class="tcard-cn">中国是一个历史悠久、文化丰富的国家。</div>
+        <div class="tcard-src">四级翻译真题</div>
+        <div class="tcard-badge">待练</div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-cn">越来越多的人意识到环境保护的重要性。</div>
+        <div class="tcard-src">四级翻译模拟</div>
+        <div class="tcard-badge" style="color:#81c784;background:rgba(129,199,132,0.1)">已完成</div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-cn">春节是中国最重要的传统节日，家人会聚在一起吃年夜饭。</div>
+        <div class="tcard-src">四级翻译真题</div>
+        <div class="tcard-badge">待练</div>
+      </div>
+    </div>
+  </div>
+  <div class="phone-label">🌟 翻译页 - 橙调</div>
+</div>
+
+<!-- WRITING -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="w-header"><div class="w-title">写作教学</div></div>
+    <div class="w-tabs">
+      <div class="w-tab active">句型库</div>
+      <div class="w-tab">段落写作</div>
+      <div class="w-tab">全文模拟</div>
+    </div>
+    <div class="wcard-list">
+      <div class="wcard">
+        <div class="wcard-pat">There is no doubt that...</div>
+        <div class="wcard-cn">毫无疑问……</div>
+      </div>
+      <div class="wcard">
+        <div class="wcard-pat">The more..., the more...</div>
+        <div class="wcard-cn">越……就越……</div>
+      </div>
+      <div class="wcard">
+        <div class="wcard-pat">It is + adj. + for sb. to do...</div>
+        <div class="wcard-cn">对某人来说做某事是……的</div>
+      </div>
+    </div>
+  </div>
+  <div class="phone-label">✨ 写作页 - 紫调</div>
+</div>
+
+<!-- STATISTICS -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="st-header"><div class="st-title">学习统计</div></div>
+    <div class="st-summary">
+      <div class="st-card"><span class="st-num">0</span><span class="st-lbl">连续天数</span></div>
+      <div class="st-card"><span class="st-num">0</span><span class="st-lbl">累计打卡</span></div>
+      <div class="st-card"><span class="st-num">0</span><span class="st-lbl">完成题数</span></div>
+    </div>
+    <div class="calendar">
+      <div class="cal-month">2026年5月 打卡记录</div>
+      <div class="cal-grid">
+        <div class="cal-h">日</div><div class="cal-h">一</div><div class="cal-h">二</div><div class="cal-h">三</div><div class="cal-h">四</div><div class="cal-h">五</div><div class="cal-h">六</div>
+        <div class="cal-d"></div><div class="cal-d"></div><div class="cal-d"></div><div class="cal-d"></div><div class="cal-d"></div>
+        <div class="cal-d">1</div><div class="cal-d">2</div><div class="cal-d">3</div><div class="cal-d">4</div><div class="cal-d">5</div>
+        <div class="cal-d">6</div><div class="cal-d">7</div><div class="cal-d checked">8</div><div class="cal-d">9</div><div class="cal-d">10</div>
+        <div class="cal-d">11</div><div class="cal-d checked">12</div><div class="cal-d">13</div><div class="cal-d">14</div><div class="cal-d">15</div>
+        <div class="cal-d">16</div><div class="cal-d">17</div><div class="cal-d">18</div><div class="cal-d">19</div><div class="cal-d">20</div>
+        <div class="cal-d today checked">21</div><div class="cal-d"></div>
+      </div>
+    </div>
+  </div>
+  <div class="phone-label">📊 统计页 - 粉调</div>
+</div>
+
+<!-- FAVORITES -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="f-header"><div class="f-title">收藏夹</div></div>
+    <div class="f-tabs">
+      <div class="f-tab active">⭐ 收藏句子</div>
+      <div class="f-tab">❗ 难句记录</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:60px 0;color:#8a7a9a;gap:8px;">
+      <div style="font-size:60px;">⭐</div>
+      <div style="font-size:15px;color:#333;font-weight:600;">还没有收藏的句子</div>
+      <div style="font-size:13px;">在句子页面点击 ☆ 即可收藏</div>
+    </div>
+  </div>
+  <div class="phone-label">⭐ 收藏页 - 金调</div>
+</div>
+
+<!-- DICTIONARY -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="d-header"><div class="d-title">📖 英语词典</div></div>
+    <div class="d-sbox"><input placeholder="输入要查的英文单词…" readonly><div class="d-sbtn">查词</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:80px 0;color:#8a7a9a;gap:8px;">
+      <div style="font-size:80px;">📖</div>
+      <div style="font-size:15px;color:#333;font-weight:600;">输入英文单词查释义</div>
+      <div style="font-size:13px;">支持音标、词性、例句</div>
+    </div>
+  </div>
+  <div class="phone-label">📖 词典页 - 灰蓝调</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-header"><span>9:41</span><span>🔋 100%</span></div>
+  <div class="content">
+    <div class="set-header"><div class="set-title">学习目标</div></div>
+    <div class="set-card">
+      <div class="set-item">
+        <div class="set-label">🎵 听力精听</div>
+        <div class="set-controls"><div class="set-btn">−</div><div class="set-num">1</div><div class="set-btn">+</div></div>
+      </div>
+      <div class="set-item">
+        <div class="set-label">💬 语境句子</div>
+        <div class="set-controls"><div class="set-btn">−</div><div class="set-num">5</div><div class="set-btn">+</div></div>
+      </div>
+      <div class="set-item">
+        <div class="set-label">🌟 翻译练习</div>
+        <div class="set-controls"><div class="set-btn">−</div><div class="set-num">1</div><div class="set-btn">+</div></div>
+      </div>
+      <div class="set-item">
+        <div class="set-label">✨ 写作练习</div>
+        <div class="set-controls"><div class="set-btn">−</div><div class="set-num">1</div><div class="set-btn">+</div></div>
+      </div>
+      <div class="set-item">
+        <div class="set-label">🌙 暗黑模式</div>
+        <div class="toggle"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="phone-label">⚙️ 设置页</div>
+</div>
+
+</div>
+<p style="margin-top:40px;color:#999;font-size:13px;">📱 每个页面独立配色方案 · 渐变头部 · 圆角卡片 · 统一设计语言</p>
+</body>
+</html>

@@ -1,67 +1,50 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="page-header">
-    <view class="title-row">
-      <text class="page-title">语境句子</text>
-      <view class="dict-link" catchtap="goDict">📖</view>
+  <view class="s-header">
+    <view class="sh-bg"></view>
+    <view class="sh-content">
+      <view class="sh-top">
+        <text class="sh-title">语境句子</text>
+        <view class="sh-actions">
+          <view class="sh-btn" catchtap="goDict">📖 查词</view>
+          <text class="sh-counter">{{masteredIds.length}}/{{allSentences.length}}</text>
+        </view>
+      </view>
+      <view class="search-box">
+        <text class="sb-icon">🔍</text>
+        <input class="sb-input" placeholder="搜索句子或关键词…" value="{{searchQuery}}" bindinput="onSearchInput" confirm-type="search" />
+        <view class="sb-clear" wx:if="{{searchQuery}}" catchtap="clearSearch">✕</view>
+      </view>
     </view>
-    <text class="page-subtitle">掌握 {{masteredIds.length}} / {{allSentences.length}}  ⭐ {{favoriteIds.length}} 收藏</text>
-  </view>
-
-  <view class="search-bar">
-    <input class="search-input" placeholder="搜索句子、关键词或中文…" value="{{searchQuery}}" bindinput="onSearchInput" confirm-type="search" />
-    <view class="search-clear" wx:if="{{searchQuery}}" catchtap="clearSearch">✕</view>
   </view>
 
   <scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}">
     <view class="topic-bar">
-      <view
-        class="topic-tag {{currentTopic === item ? 'active' : ''}}"
-        wx:for="{{topics}}"
-        wx:key="*this"
-        data-topic="{{item}}"
-        catchtap="filterByTopic"
-      >{{item}}</view>
+      <view class="topic-pill {{currentTopic === item ? 'active' : ''}}" wx:for="{{topics}}" wx:key="*this" data-topic="{{item}}" catchtap="filterByTopic">{{item}}</view>
     </view>
   </scroll-view>
 
   <scroll-view class="card-scroll" scroll-y>
     <view class="card-list">
-      <view class="empty-tip" wx:if="{{filteredSentences.length === 0}}">
+      <view class="empty-state" wx:if="{{filteredSentences.length === 0}}">
+        <text class="empty-emoji">🔍</text>
         <text class="empty-text">没有匹配的句子</text>
         <text class="empty-hint">试试其他关键词</text>
       </view>
 
-      <view
-        class="sentence-card {{expandedIds.indexOf(item.id) !== -1 ? 'expanded' : ''}} {{masteredIds.indexOf(item.id) !== -1 ? 'mastered' : ''}} {{favoriteIds.indexOf(item.id) !== -1 ? 'favorited' : ''}}"
-        wx:for="{{filteredSentences}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        catchtap="toggleExpand"
-      >
-        <view class="card-english">
-          <rich-text nodes="{{highlightText(item.english, item.keywords)}}"></rich-text>
-        </view>
-
-        <view class="card-chinese" wx:if="{{expandedIds.indexOf(item.id) !== -1}}">
-          <text>{{item.chinese}}</text>
-        </view>
-
-        <view class="card-bottom">
-          <view class="card-left">
-            <view class="card-topic">{{item.topic}}</view>
-            <view
-              class="fav-btn {{favoriteIds.indexOf(item.id) !== -1 ? 'active' : ''}}"
-              data-id="{{item.id}}"
-              catchtap="toggleFavorite"
-            >{{favoriteIds.indexOf(item.id) !== -1 ? '★' : '☆'}}</view>
-          </view>
-          <view class="card-actions">
-            <view
-              class="master-btn {{masteredIds.indexOf(item.id) !== -1 ? 'active' : ''}}"
-              data-id="{{item.id}}"
-              catchtap="toggleMaster"
-            >
-              {{masteredIds.indexOf(item.id) !== -1 ? '✓ 已掌握' : '标记掌握'}}
+      <view class="s-card {{masteredIds.indexOf(item.id) !== -1 ? 'done' : ''}} {{favoriteIds.indexOf(item.id) !== -1 ? 'fav' : ''}}" wx:for="{{filteredSentences}}" wx:key="id" data-id="{{item.id}}" catchtap="toggleExpand">
+        <view class="sc-main">
+          <view class="sc-num">{{index + 1}}</view>
+          <view class="sc-body">
+            <view class="sc-english">
+              <rich-text nodes="{{highlightText(item.english, item.keywords)}}"></rich-text>
+            </view>
+            <view class="sc-chinese" wx:if="{{expandedIds.indexOf(item.id) !== -1}}">{{item.chinese}}</view>
+            <view class="sc-bottom">
+              <view class="sc-tag">{{item.topic}}</view>
+              <view class="sc-actions">
+                <view class="sc-fav {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(item.id) !== -1 ? '★' : '☆'}}</view>
+                <view class="sc-master {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">{{masteredIds.indexOf(item.id) !== -1 ? '✓' : '○'}}</view>
+              </view>
             </view>
           </view>
         </view>

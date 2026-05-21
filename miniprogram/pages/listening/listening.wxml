@@ -1,20 +1,24 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <block wx:if="{{mode === 'list'}}">
-    <view class="page-header">
-      <text class="page-title">听力精听</text>
-      <text class="page-subtitle">{{passages.length}} 篇听力材料</text>
+    <view class="l-header">
+      <view class="lh-bg"></view>
+      <view class="lh-content">
+        <text class="lh-title">听力精听</text>
+        <text class="lh-sub">{{passages.length}} 篇听力材料</text>
+      </view>
     </view>
 
-    <view class="passage-list">
-      <view class="passage-card" wx:for="{{passages}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
-        <view class="passage-top">
-          <text class="passage-title">{{item.title}}</text>
-          <view class="passage-badge" wx:if="{{completedPassages.indexOf(item.id) !== -1}}">已学</view>
+    <view class="lcard-list">
+      <view class="lcard" wx:for="{{passages}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
+        <view class="lc-icon" style="background: linear-gradient(135deg, #4fc3f7, #2196f3);">
+          <text>🎵</text>
         </view>
-        <text class="passage-meta">{{item.sentences.length}} 句</text>
-        <view class="passage-play">
-          <text>开始精听 🔊</text>
-          <text class="arrow">→</text>
+        <view class="lc-info">
+          <text class="lc-title">{{item.title}}</text>
+          <text class="lc-meta">{{item.sentences.length}} 句</text>
+        </view>
+        <view class="lc-arrow">
+          <text>→</text>
         </view>
       </view>
     </view>
@@ -22,53 +26,39 @@
 
   <block wx:else>
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">
-        <text>← 返回</text>
-      </view>
+      <view class="back-btn" catchtap="backToList">←</view>
       <text class="detail-title">{{currentPassage.title}}</text>
+      <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 
     <view class="controls-bar">
-      <view class="control-group">
-        <view class="speed-btn {{speed === s ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-      </view>
-      <view class="control-group">
-        <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
-        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
-        <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">单句</view>
-      </view>
+      <view class="speed-btn {{speed === s ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+      <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
+      <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
+      <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">单句</view>
     </view>
 
     <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}">
       <view class="sentence-list">
-        <view
-          class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}"
-          wx:for="{{currentPassage.sentences}}"
-          wx:key="start"
-          id="s-{{index}}"
-        >
-          <view class="sentence-num">{{index + 1}}</view>
-          <view class="sentence-content">
-            <text class="sentence-text" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
-            <text class="sentence-text hidden" wx:else>🔇 点击播放收听</text>
+        <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
+          <view class="se-num">{{index + 1}}</view>
+          <view class="se-text">
+            <text class="se-en" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
+            <text class="se-en hidden" wx:else>🔇 点击播放收听</text>
           </view>
-          <view class="sentence-actions">
-            <view class="s-action {{index === currentIndex && isPlaying ? 'playing' : ''}}" data-index="{{index}}" catchtap="playSentence">
-              {{index === currentIndex && loading ? '...' : '▶'}}
-            </view>
-            <view class="s-action hard-btn {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
+          <view class="se-actions">
+            <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}" data-index="{{index}}" catchtap="playSentence">{{index === currentIndex && loading ? '...' : '▶'}}</view>
+            <view class="se-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
           </view>
         </view>
       </view>
     </scroll-view>
 
-    <view class="bottom-bar">
-      <view class="bottom-controls">
-        <view class="nav-btn" catchtap="prevSentence">◀</view>
-        <view class="play-btn" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-        <view class="nav-btn" catchtap="nextSentence">▶</view>
-      </view>
-      <view class="complete-btn" catchtap="markCompleted">标记完成</view>
+    <view class="player-bar">
+      <view class="pb-prev" catchtap="prevSentence">◀</view>
+      <view class="pb-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+      <view class="pb-next" catchtap="nextSentence">▶</view>
+      <view class="pb-progress"><view class="pb-fill" style="width: {{currentIndex / currentPassage.sentences.length * 100}}%"></view></view>
     </view>
   </block>
 </view>

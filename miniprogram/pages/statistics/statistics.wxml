@@ -1,83 +1,53 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="page-header">
-    <text class="page-title">学习统计</text>
-  </view>
-
-  <view class="checkin-summary">
-    <view class="ci-card">
-      <text class="ci-num">{{streak}}</text>
-      <text class="ci-label">连续天数 🔥</text>
-    </view>
-    <view class="ci-card">
-      <text class="ci-num">{{totalCheckins}}</text>
-      <text class="ci-label">累计打卡 ✅</text>
-    </view>
-    <view class="ci-card">
-      <text class="ci-num">{{totalCompleted}}</text>
-      <text class="ci-label">完成题数 📝</text>
+  <view class="st-header">
+    <view class="sth-bg"></view>
+    <view class="sth-content">
+      <text class="sth-title">学习统计</text>
     </view>
   </view>
 
-  <view class="calendar-section">
-    <text class="section-title">📅 {{monthYear}} 打卡记录</text>
-    <view class="calendar">
-      <view class="cal-row cal-header">
-        <text class="cal-h">日</text>
-        <text class="cal-h">一</text>
-        <text class="cal-h">二</text>
-        <text class="cal-h">三</text>
-        <text class="cal-h">四</text>
-        <text class="cal-h">五</text>
-        <text class="cal-h">六</text>
-      </view>
+  <view class="st-cards">
+    <view class="st-card">
+      <text class="st-num">{{streak}}</text>
+      <text class="st-lbl">连续天数</text>
+    </view>
+    <view class="st-card">
+      <text class="st-num">{{totalCheckins}}</text>
+      <text class="st-lbl">累计打卡</text>
+    </view>
+    <view class="st-card">
+      <text class="st-num">{{totalCompleted}}</text>
+      <text class="st-lbl">完成题数</text>
+    </view>
+  </view>
+
+  <view class="calendar-card">
+    <text class="cal-title">📅 {{monthYear}} 打卡记录</text>
+    <view class="cal-grid">
+      <text class="cal-h">日</text><text class="cal-h">一</text><text class="cal-h">二</text><text class="cal-h">三</text>
+      <text class="cal-h">四</text><text class="cal-h">五</text><text class="cal-h">六</text>
       <view class="cal-row" wx:for="{{calendarRows}}" wx:key="*this">
-        <view
-          class="cal-cell {{cell.day === null ? 'empty' : ''}} {{cell.isToday ? 'today' : ''}} {{cell.checked ? 'checked' : ''}}"
-          wx:for="{{item}}"
-          wx:for-item="cell"
-          wx:key="day"
-        >
+        <view class="cal-d {{cell.day === null ? 'empty' : ''}} {{cell.isToday ? 'today' : ''}} {{cell.checked ? 'checked' : ''}}" wx:for="{{item}}" wx:for-item="cell" wx:key="day">
           <text wx:if="{{cell.day !== null}}">{{cell.day}}</text>
         </view>
       </view>
     </view>
   </view>
 
-  <view class="overview-grid">
-    <view class="overview-card">
-      <text class="ov-num">{{listenedCount}}</text>
-      <text class="ov-label">听力精听</text>
-    </view>
-    <view class="overview-card">
-      <text class="ov-num">{{masteredCount}}</text>
-      <text class="ov-label">句子掌握</text>
-    </view>
-    <view class="overview-card">
-      <text class="ov-num">{{translationCount}}</text>
-      <text class="ov-label">翻译练习</text>
-    </view>
-    <view class="overview-card">
-      <text class="ov-num">{{writingCount}}</text>
-      <text class="ov-label">写作练习</text>
-    </view>
-  </view>
-
-  <view class="section" wx:if="{{maxScores.length > 0}}">
-    <text class="section-title">翻译成绩趋势</text>
+  <view class="section-card" wx:if="{{maxScores.length > 0}}">
+    <text class="sc-title">翻译成绩趋势</text>
     <view class="chart">
-      <view class="bar-item" wx:for="{{maxScores}}" wx:key="*this">
-        <view class="bar-fill" style="height: {{item * 2.5}}rpx;"></view>
-        <text class="bar-label">{{item}}分</text>
+      <view class="chart-bar" wx:for="{{maxScores}}" wx:key="*this">
+        <view class="cb-fill" style="height: {{item * 2.5}}rpx;"></view>
+        <text class="cb-label">{{item}}分</text>
       </view>
     </view>
   </view>
 
-  <view class="section" wx:else>
-    <text class="section-title">学习建议</text>
-    <view class="tip-block">
-      <text class="tip-text">开始学习后，这里将展示你的成绩趋势和分析报告。</text>
-      <text class="tip-text">建议每天完成：1篇听力 + 5个句子 + 1篇翻译 + 1篇写作</text>
-    </view>
+  <view class="section-card" wx:else>
+    <text class="sc-title">学习建议</text>
+    <text class="tip-text">开始学习后，这里将展示成绩趋势和分析报告。</text>
+    <text class="tip-text">建议每天完成：1 篇听力 + 5 个句子 + 1 篇翻译 + 1 篇写作</text>
   </view>
 
   <view class="clear-btn" catchtap="clearData">清除所有记录</view>
