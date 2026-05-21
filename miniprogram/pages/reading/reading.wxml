@@ -13,7 +13,7 @@
         <view class="rc-badge rc-{{item.sectionType}}">{{item.sectionType === 'A' ? '选词' : item.sectionType === 'B' ? '匹配' : '精读'}}</view>
         <view class="rc-body">
           <text class="rc-title">{{item.title}}</text>
-          <text class="rc-meta">{{item.questions.length}} 题</text>
+          <text class="rc-meta">{{item.questions.length}} 题 · {{item.options ? item.options.length : 0}} 选项</text>
         </view>
         <text class="rc-arrow">›</text>
       </view>
@@ -47,29 +47,39 @@
         </view>
       </view>
 
-      <!-- 分割线 -->
+      <!-- 分割 -->
       <view class="section-divider"></view>
 
-      <!-- 题目区 -->
-      <view class="question-wrap" wx:if="{{current.questions && current.questions.length > 0}}">
-        <view class="qw-header">
-          <text class="qw-label">❓ 题目</text>
-          <text class="qw-count">{{currentQ + 1}}/{{current.questions.length}}</text>
-        </view>
-        <view class="qw-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
-          <text class="qw-text">{{current.questions[currentQ]}}</text>
+      <!-- 题目区（选词填空始终显示，其他需有题目才显示）-->
+      <view class="question-wrap" wx:if="{{current.sectionType === 'A' || (current.questions && current.questions.length > 0)}}">
 
-          <!-- 选项：选词填空(chips) / 其他(列表) -->
-          <view class="qw-chips" wx:if="{{current.sectionType === 'A' && current.options && current.options.length > 0}}">
-            <text class="qwc-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+        <!-- 题型 A：选词填空 → 显示15选项 -->
+        <block wx:if="{{current.sectionType === 'A'}}">
+          <view class="qw-header">
+            <text class="qw-label">📋 选词（15选10）</text>
+            <text class="qw-count">{{current.options ? current.options.length : 0}} 词</text>
           </view>
-          <view class="qw-options" wx:else>
-            <text class="qwo-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
+          <view class="qw-card">
+            <view class="qw-chips">
+              <text class="qwc-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+            </view>
           </view>
-        </view>
-        <view class="qw-dots">
-          <view class="qwd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i"></view>
-        </view>
+        </block>
+
+        <!-- 题型 B/C：显示题目 -->
+        <block wx:else>
+          <view class="qw-header">
+            <text class="qw-label">❓ 题目</text>
+            <text class="qw-count">{{currentQ + 1}}/{{current.questions.length}}</text>
+          </view>
+          <view class="qw-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+            <text class="qw-text">{{current.questions[currentQ]}}</text>
+          </view>
+          <view class="qw-dots">
+            <view class="qwd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i"></view>
+          </view>
+        </block>
+
       </view>
 
     </view>
