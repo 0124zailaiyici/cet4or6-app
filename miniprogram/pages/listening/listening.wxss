@@ -221,6 +221,11 @@
   color: #8a7a9a;
 }
 
+.s-action.playing {
+  background: rgba(255, 158, 181, 0.2);
+  color: #ff9eb5;
+}
+
 .hard-btn.active {
   color: #ffd3b6;
   background: rgba(255, 211, 182, 0.2);

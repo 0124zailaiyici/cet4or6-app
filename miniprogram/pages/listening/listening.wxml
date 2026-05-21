@@ -13,7 +13,7 @@
         </view>
         <text class="passage-meta">{{item.sentences.length}} 句</text>
         <view class="passage-play">
-          <text>开始精听</text>
+          <text>开始精听 🔊</text>
           <text class="arrow">→</text>
         </view>
       </view>
@@ -50,10 +50,12 @@
           <view class="sentence-num">{{index + 1}}</view>
           <view class="sentence-content">
             <text class="sentence-text" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
-            <text class="sentence-text hidden" wx:else>点击播放</text>
+            <text class="sentence-text hidden" wx:else>🔇 点击播放收听</text>
           </view>
           <view class="sentence-actions">
-            <view class="s-action" data-index="{{index}}" catchtap="playSentence">▶</view>
+            <view class="s-action {{index === currentIndex && isPlaying ? 'playing' : ''}}" data-index="{{index}}" catchtap="playSentence">
+              {{index === currentIndex && loading ? '...' : '▶'}}
+            </view>
             <view class="s-action hard-btn {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
           </view>
         </view>
@@ -63,7 +65,7 @@
     <view class="bottom-bar">
       <view class="bottom-controls">
         <view class="nav-btn" catchtap="prevSentence">◀</view>
-        <view class="play-btn" catchtap="playPause">{{isPlaying ? '⏸' : '▶'}}</view>
+        <view class="play-btn" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
         <view class="nav-btn" catchtap="nextSentence">▶</view>
       </view>
       <view class="complete-btn" catchtap="markCompleted">标记完成</view>

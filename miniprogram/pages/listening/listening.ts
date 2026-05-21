@@ -1,6 +1,8 @@
 import listeningData from '../../data/listening'
 import { doCheckIn } from '../../utils/checkin'
 
+const API_BASE = 'http://localhost:3000'
+
 interface ISentence {
   text: string
   start: number
@@ -28,12 +30,15 @@ interface IListeningData {
   loopSentence: boolean
   hardSentences: number[]
   completedPassages: number[]
+  loading: boolean
 }
 
 interface IListeningMethods {
   enterDetail(e: WechatMiniprogram.TouchEvent): void
   backToList(): void
   playPause(): void
+  playCurrent(): void
+  playText(text: string): void
   playSentence(e: WechatMiniprogram.TouchEvent): void
   prevSentence(): void
   nextSentence(): void
@@ -44,6 +49,29 @@ interface IListeningMethods {
   toggleHard(e: WechatMiniprogram.TouchEvent): void
   markCompleted(): void
   getBlankText(text: string): string
+}
+
+let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
+let pageRef: any = null
+
+function getAudioCtx(): WechatMiniprogram.InnerAudioContext {
+  if (!audioCtx) {
+    audioCtx = wx.createInnerAudioContext()
+    audioCtx.onEnded(() => {
+      if (!pageRef) return
+      if (pageRef.data.loopSentence) {
+        pageRef.playCurrent()
+      } else if (pageRef.data.currentIndex < pageRef.data.currentPassage.sentences.length - 1) {
+        pageRef.nextSentence()
+      } else {
+        pageRef.setData({ isPlaying: false })
+      }
+    })
+    audioCtx.onError(() => {
+      wx.showToast({ title: '播放失败', icon: 'none' })
+    })
+  }
+  return audioCtx
 }
 
 Page<IListeningData, IListeningMethods>({
@@ -60,9 +88,11 @@ Page<IListeningData, IListeningMethods>({
     loopSentence: false,
     hardSentences: [],
     completedPassages: [],
+    loading: false,
   },
 
   onLoad() {
+    pageRef = this
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
     const studyData = app.globalData.studyData
@@ -70,6 +100,14 @@ Page<IListeningData, IListeningMethods>({
       passages,
       completedPassages: studyData.completedListens,
     })
+  },
+
+  onUnload() {
+    pageRef = null
+    if (audioCtx) {
+      audioCtx.destroy()
+      audioCtx = null
+    }
   },
 
   enterDetail(e: WechatMiniprogram.TouchEvent) {
@@ -86,26 +124,52 @@ Page<IListeningData, IListeningMethods>({
   },
 
   backToList() {
+    if (audioCtx) audioCtx.stop()
     this.setData({ mode: 'list', currentPassage: null, isPlaying: false })
   },
 
+  playCurrent() {
+    const passage = this.data.currentPassage
+    if (!passage) return
+    const sentence = passage.sentences[this.data.currentIndex]
+    if (!sentence) return
+    this.playText(sentence.text)
+  },
+
+  playText(text: string) {
+    const ctx = getAudioCtx()
+    ctx.stop()
+    ctx.playbackRate = this.data.speed
+    ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
+    ctx.play()
+    this.setData({ isPlaying: true, loading: true })
+    ctx.onPlay(() => this.setData({ loading: false }))
+  },
+
   playPause() {
-    if (!this.data.currentPassage) return
-    if (this.data.currentPassage.audioUrl) {
-      this.setData({ isPlaying: !this.data.isPlaying })
+    if (this.data.isPlaying) {
+      getAudioCtx().pause()
+      this.setData({ isPlaying: false })
     } else {
-      wx.showToast({ title: '音频暂未配置', icon: 'none' })
+      getAudioCtx().play()
+      this.setData({ isPlaying: true })
     }
   },
 
   playSentence(e: WechatMiniprogram.TouchEvent) {
     const index = e.currentTarget.dataset.index as number
-    this.setData({ currentIndex: index, isPlaying: true })
+    this.setData({ currentIndex: index })
+    const passage = this.data.currentPassage
+    if (passage) {
+      const sentence = passage.sentences[index]
+      this.playText(sentence.text)
+    }
   },
 
   prevSentence() {
     if (this.data.currentIndex > 0) {
       this.setData({ currentIndex: this.data.currentIndex - 1 })
+      this.playCurrent()
     }
   },
 
@@ -114,12 +178,14 @@ Page<IListeningData, IListeningMethods>({
     if (!passage) return
     if (this.data.currentIndex < passage.sentences.length - 1) {
       this.setData({ currentIndex: this.data.currentIndex + 1 })
+      this.playCurrent()
     }
   },
 
   setSpeed(e: WechatMiniprogram.TouchEvent) {
     const speed = e.currentTarget.dataset.speed as number
     this.setData({ speed })
+    if (audioCtx) audioCtx.playbackRate = speed
   },
 
   toggleTranscript() {
@@ -137,11 +203,8 @@ Page<IListeningData, IListeningMethods>({
   toggleHard(e: WechatMiniprogram.TouchEvent) {
     const index = e.currentTarget.dataset.index as number
     const hardSet = new Set(this.data.hardSentences)
-    if (hardSet.has(index)) {
-      hardSet.delete(index)
-    } else {
-      hardSet.add(index)
-    }
+    if (hardSet.has(index)) hardSet.delete(index)
+    else hardSet.add(index)
     this.setData({ hardSentences: [...hardSet] })
   },
 
@@ -163,9 +226,6 @@ Page<IListeningData, IListeningMethods>({
   getBlankText(text: string): string {
     if (!this.data.dictationMode) return text
     const words = text.split(' ')
-    const blanked = words.map((w, i) => {
-      return i % 3 === 0 ? '____' : w
-    })
-    return blanked.join(' ')
+    return words.map((w, i) => i % 3 === 0 ? '____' : w).join(' ')
   },
 })
