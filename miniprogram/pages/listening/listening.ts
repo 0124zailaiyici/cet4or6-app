@@ -124,11 +124,15 @@ Page<IListeningData, IListeningMethods>({
     const id = e.currentTarget.dataset.id as number
     const passage = this.data.passages.find(p => p.id === id)
     if (passage) {
+      const app = getApp<IAppOption>()
+      const stored = app.globalData.studyData.hardSentences || []
+      const localHard = stored.filter(h => h.passageId === passage.id).map(h => h.sentenceIndex)
       this.setData({
         mode: 'detail',
         currentPassage: passage,
         currentIndex: 0,
         isPlaying: false,
+        hardSentences: localHard,
       })
     }
   },
