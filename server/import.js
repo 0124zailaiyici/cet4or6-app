@@ -151,11 +151,15 @@ function parseReading(lines, year) {
 
     // === Section B: 长篇阅读 ===
     if (secType === 'B') {
-      // 提取匹配陈述（数字开头的行）
+      // 提取匹配陈述（数字开头的行，如 36. ...）
       const statements = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s.slice(0, 200)))
-      // 提取文章正文（A), B), C) 等段落标记的行）
-      const articleLines = cleanLines.filter(l => /^[A-Z]\)\s/.test(l) && !/^Section\s+B|Directions|Answer Sheet/.test(l))
-      const article = sanitize(articleLines.join(' ')).slice(0, 2000)
+      // 提取文章段落：字母开头 + 长度 > 60 字符的为正文段落
+      const articleLines = cleanLines.filter(l => {
+        if (/^[A-Z]\)/.test(l) && l.length > 60) return true
+        if (/^[A-Z]\)\s/.test(l) && /^[G-Z]\)/.test(l)) return true  // CET-4 长篇阅读段落通常从 G 开始
+        return false
+      })
+      const article = sanitize(articleLines.join('\n')).slice(0, 3000)
       if (statements.length > 0 || article.length > 50) {
         passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [] })
       }
