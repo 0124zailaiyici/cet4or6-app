@@ -1,88 +1,62 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="header">
-    <view class="header-top">
-      <view>
-        <text class="greeting">{{greeting}} ✨</text>
-        <text class="title">四级备考助手</text>
-        <text class="subtitle">一起加油过四级 💪</text>
-      </view>
+  <view class="hero">
+    <view class="hero-text">
+      <text class="greeting">{{greeting}} ✨</text>
+      <text class="title">四级备考助手</text>
+      <text class="subtitle">每天进步一点点 💪</text>
+    </view>
+    <view class="hero-actions">
       <view class="settings-icon" data-url="/pages/settings/settings" catchtap="goTo">⚙️</view>
     </view>
   </view>
 
-  <view class="checkin-section {{checkedIn ? 'done' : ''}}">
-    <view class="checkin-left">
-      <text class="checkin-label">{{checkedIn ? '今日已打卡 ✅' : '今日未打卡'}}</text>
-      <text class="checkin-streak">🔥 连续 {{streak}} 天</text>
+  <view class="checkin-card {{checkedIn ? 'done' : ''}}">
+    <view class="ci-left">
+      <text class="ci-status">{{checkedIn ? '今日已打卡' : '今日未打卡'}}</text>
+      <text class="ci-streak">🔥 连续 {{streak}} 天</text>
     </view>
-    <view class="checkin-btn {{checkedIn ? 'disabled' : ''}}" wx:if="{{!checkedIn}}" catchtap="handleCheckIn">打卡</view>
-    <view class="checkin-btn done" wx:else>已打卡</view>
+    <view class="ci-right">
+      <view class="ci-btn {{checkedIn ? 'disabled' : ''}}" wx:if="{{!checkedIn}}" catchtap="handleCheckIn">签到</view>
+      <view class="ci-btn done" wx:else>✅</view>
+    </view>
   </view>
 
-  <view class="progress-section">
-    <view class="section-title">🎯 今日目标进度</view>
-    <view class="overall-bar">
-      <view class="bar-bg">
-        <view class="bar-fill" style="width: {{goalStats.overallPct}}%"></view>
-      </view>
-      <text class="overall-pct">{{goalStats.overallPct}}%</text>
+  <view class="day-progress">
+    <view class="dp-header">
+      <text class="dp-title">今日进度</text>
+      <text class="dp-pct">{{goalStats.overallPct}}%</text>
     </view>
-    <view class="progress-grid">
-      <view class="p-item">
-        <view class="p-bar"><view class="p-fill" style="width: {{goalStats.listenPct}}%; background: #b5d8f7"></view></view>
-        <text class="p-label">🎵 听力</text>
+    <view class="dp-bar">
+      <view class="dp-fill" style="width: {{goalStats.overallPct}}%"></view>
+    </view>
+    <view class="dp-items">
+      <view class="dp-item">
+        <view class="dp-dot" style="background: #b5d8f7"></view>
+        <text class="dp-label">听力 {{todayStats.listened}}</text>
       </view>
-      <view class="p-item">
-        <view class="p-bar"><view class="p-fill" style="width: {{goalStats.sentencePct}}%; background: #c5e1a5"></view></view>
-        <text class="p-label">💬 {{todayStats.sentences}}句子</text>
+      <view class="dp-item">
+        <view class="dp-dot" style="background: #c5e1a5"></view>
+        <text class="dp-label">句子 {{todayStats.sentences}}</text>
       </view>
-      <view class="p-item">
-        <view class="p-bar"><view class="p-fill" style="width: {{goalStats.translationPct}}%; background: #ffd3b6"></view></view>
-        <text class="p-label">🌟 {{todayStats.translations}}翻译</text>
+      <view class="dp-item">
+        <view class="dp-dot" style="background: #ffd3b6"></view>
+        <text class="dp-label">翻译 {{todayStats.translations}}</text>
       </view>
-      <view class="p-item">
-        <view class="p-bar"><view class="p-fill" style="width: {{goalStats.writingPct}}%; background: #d8b4fe"></view></view>
-        <text class="p-label">✨ {{todayStats.writings}}写作</text>
+      <view class="dp-item">
+        <view class="dp-dot" style="background: #d8b4fe"></view>
+        <text class="dp-label">写作 {{todayStats.writings}}</text>
       </view>
     </view>
   </view>
 
   <view class="module-grid">
     <view class="module-card" wx:for="{{modules}}" wx:key="id" data-url="{{item.url}}" catchtap="goTo">
-      <view class="module-icon" style="background: {{item.color}}22">
+      <view class="mc-icon" style="background: {{item.color}}18">
         <text>{{item.icon}}</text>
       </view>
-      <view class="module-info">
-        <text class="module-title">{{item.title}}</text>
-        <text class="module-desc">{{item.desc}}</text>
-      </view>
-      <view class="module-count" style="color: {{item.color}}">{{item.count}}题</view>
-    </view>
-  </view>
-
-  <view class="stats-section">
-    <view class="section-title">📊 今日学习概览</view>
-    <view class="stats-grid">
-      <view class="stat-item">
-        <text class="stat-num">{{todayStats.listened}}</text>
-        <text class="stat-label">精听</text>
-      </view>
-      <view class="stat-item">
-        <text class="stat-num">{{todayStats.sentences}}</text>
-        <text class="stat-label">句子</text>
-      </view>
-      <view class="stat-item">
-        <text class="stat-num">{{todayStats.translations}}</text>
-        <text class="stat-label">翻译</text>
-      </view>
-      <view class="stat-item">
-        <text class="stat-num">{{todayStats.writings}}</text>
-        <text class="stat-label">写作</text>
-      </view>
-    </view>
-    <view class="total-bar">
-      <text class="total-label">累计完成</text>
-      <text class="total-num">{{todayStats.total}} 题</text>
+      <text class="mc-title">{{item.title}}</text>
+      <text class="mc-desc">{{item.desc}}</text>
+      <view class="mc-meta" style="color: {{item.color}}">{{item.count}} 题</view>
     </view>
   </view>
 </view>
