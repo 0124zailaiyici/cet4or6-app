@@ -18,8 +18,8 @@ interface IReadingData {
   passagePages: string[]
   currentChoices: string[]
   darkMode: boolean
-  paraLetters: string[]
   choiceLabels: string[]
+  touchStartX: number
 }
 
 interface IReadingMethods {
@@ -31,9 +31,11 @@ interface IReadingMethods {
   nextPassage(): void
   splitPassage(text: string): string[]
   getChoicesForQuestion(item: IReadingItem, qIdx: number): string[]
+  onTouchStart(e: WechatMiniprogram.TouchEvent): void
+  onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
+  onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
 }
 
-const paraLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 const choiceLabels = ['A)', 'B)', 'C)', 'D)']
 
 Page<IReadingData, IReadingMethods>({
@@ -45,8 +47,8 @@ Page<IReadingData, IReadingMethods>({
     passagePages: [],
     currentChoices: [],
     darkMode: false,
-    paraLetters,
     choiceLabels,
+    touchStartX: 0,
   },
 
   onLoad() {
@@ -77,11 +79,9 @@ Page<IReadingData, IReadingMethods>({
     this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], currentChoices: [] })
   },
 
-  // 把文章按句子拆分，每页最多 6 句
   splitPassage(text: string): string[] {
     if (!text) return ['']
     const clean = text.replace(/\s+/g, ' ').trim()
-    // 按 . ! ? 分割（不用 lookbehind，兼容微信）
     const parts = clean.split(/[.?!]\s*/).filter(s => s.trim().length > 5)
     const pages: string[] = []
     if (parts.length >= 2) {
@@ -89,7 +89,6 @@ Page<IReadingData, IReadingMethods>({
         pages.push(parts.slice(i, i + 6).join('. ') + '.')
       }
     } else {
-      // 没有完整句子，按 300 字一页
       for (let i = 0; i < clean.length; i += 300) {
         pages.push(clean.slice(i, i + 300))
       }
@@ -97,19 +96,14 @@ Page<IReadingData, IReadingMethods>({
     return pages.length > 0 ? pages : [text]
   },
 
-  getChoicesForQuestion(item: IReadingItem, _qIdx: number): string[] {
-    if (item.sectionType === 'A') return item.options || []
-    if (item.sectionType === 'C') return choiceLabels
+  getChoicesForQuestion(_item: IReadingItem, _qIdx: number): string[] {
     return []
   },
 
   prevQ() {
     if (this.data.currentQ > 0) {
       const q = this.data.currentQ - 1
-      this.setData({
-        currentQ: q,
-        currentChoices: this.getChoicesForQuestion(this.data.current!, q),
-      })
+      this.setData({ currentQ: q, currentChoices: this.getChoicesForQuestion(this.data.current!, q) })
     }
   },
 
@@ -117,10 +111,7 @@ Page<IReadingData, IReadingMethods>({
     const total = this.data.current?.questions?.length || 0
     if (this.data.currentQ < total - 1) {
       const q = this.data.currentQ + 1
-      this.setData({
-        currentQ: q,
-        currentChoices: this.getChoicesForQuestion(this.data.current!, q),
-      })
+      this.setData({ currentQ: q, currentChoices: this.getChoicesForQuestion(this.data.current!, q) })
     }
   },
 
@@ -134,5 +125,21 @@ Page<IReadingData, IReadingMethods>({
     if (this.data.passagePage < this.data.passagePages.length - 1) {
       this.setData({ passagePage: this.data.passagePage + 1 })
     }
+  },
+
+  onTouchStart(e: WechatMiniprogram.TouchEvent) {
+    this.setData({ touchStartX: e.touches[0].clientX })
+  },
+
+  onPassageTouchEnd(e: WechatMiniprogram.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - this.data.touchStartX
+    if (dx > 50) this.prevPassage()
+    else if (dx < -50) this.nextPassage()
+  },
+
+  onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - this.data.touchStartX
+    if (dx > 50) this.prevQ()
+    else if (dx < -50) this.nextQ()
   },
 })

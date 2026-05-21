@@ -22,45 +22,47 @@
   <block wx:else>
     <view class="reading-detail">
 
-      <!-- 顶部：返回 -->
+      <!-- 顶栏 -->
       <view class="detail-header">
         <view class="back-btn" catchtap="back">←</view>
         <text class="detail-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读' : '仔细阅读'}}</text>
       </view>
 
-      <!-- 文章（固定高度区域）-->
-      <view class="passage-box">
-        <scroll-view class="ps-scroll" scroll-y>
-          <view class="ps-card">{{passagePages[passagePage]}}</view>
-        </scroll-view>
-        <view class="ps-nav">
+      <!-- ===== 文章区（左右滑动） ===== -->
+      <view class="passage-section" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
+        <view class="ps-content">
+          <text class="ps-text">{{passagePages[passagePage]}}</text>
+        </view>
+        <view class="ps-bar">
           <text class="ps-btn {{passagePage === 0 ? 'disabled' : ''}}" catchtap="prevPassage">‹</text>
-          <text class="ps-label">{{passagePage + 1}}/{{passagePages.length}}</text>
+          <text class="ps-dot" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="idx">
+            <text class="{{idx === passagePage ? 'active' : ''}}">{{idx + 1}}</text>
+          </text>
           <text class="ps-btn {{passagePage >= passagePages.length - 1 ? 'disabled' : ''}}" catchtap="nextPassage">›</text>
         </view>
       </view>
 
-      <!-- 题目区（固定高度区域）-->
-      <view class="question-box">
-        <view class="qb-header" wx:if="{{current.questions && current.questions.length > 0}}">
-          <text class="qb-nav {{currentQ === 0 ? 'disabled' : ''}}" catchtap="prevQ">‹</text>
-          <text class="qb-title">第{{currentQ + 1}}/{{current.questions.length}}题</text>
-          <text class="qb-nav {{currentQ >= current.questions.length - 1 ? 'disabled' : ''}}" catchtap="nextQ">›</text>
+      <!-- ===== 题目区（左右滑动） ===== -->
+      <view class="question-section" wx:if="{{current.questions && current.questions.length > 0}}">
+        <view class="qs-bar">
+          <text class="qs-nav {{currentQ === 0 ? 'disabled' : ''}}" catchtap="prevQ">‹</text>
+          <view class="qs-title">第{{currentQ + 1}}/{{current.questions.length}}题</view>
+          <text class="qs-nav {{currentQ >= current.questions.length - 1 ? 'disabled' : ''}}" catchtap="nextQ">›</text>
         </view>
 
-        <scroll-view class="qb-scroll" scroll-y>
-          <text class="qb-text">{{current.questions[currentQ]}}</text>
-
-          <view class="qc-list qc-grid" wx:if="{{current.options && current.options.length > 0}}">
-            <text class="qc-item qc-chip" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+        <view class="qs-content" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+          <view class="qs-text">{{current.questions[currentQ]}}</view>
+          <!-- 选项 -->
+          <view class="qs-options" wx:if="{{current.options && current.options.length > 0}}">
+            <text class="qso-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
           </view>
-          <view class="qc-list" wx:elif="{{choiceLabels && choiceLabels.length > 0}}">
-            <text class="qc-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
+          <view class="qs-options" wx:else>
+            <text class="qso-item" wx:for="{{choiceLabels}}" wx:key="*this">{{item}}</text>
           </view>
-        </scroll-view>
+        </view>
 
-        <view class="qb-dots">
-          <view class="qb-dot {{i === currentQ ? 'active' : ''}}" wx:for="{{current.questions}}" wx:key="*this"></view>
+        <view class="qs-dots">
+          <view class="qsd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this"></view>
         </view>
       </view>
 
