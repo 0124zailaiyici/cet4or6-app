@@ -120,8 +120,20 @@ function parseReading(lines, year) {
 
     // === Section A: 选词填空 ===
     if (secType === 'A') {
-      const options = cleanLines.filter(l => /^[A-O]\)/.test(l)).map(s => sanitize(s.replace(/^[A-O]\)\s*/, '')))
-      const passageLines = cleanLines.filter(l => !/Section\s+A|Directions|Answer Sheet|^[A-O]\)|^\d+\./.test(l) && l.length > 10)
+      // 提取选项：处理两列合并的情况（如 "bidI) replace" → "bid", "I) replace"）
+      let rawOptions = cleanLines.filter(l => /^[A-O]\)/.test(l) || /[A-O]\)/.test(l))
+      let options = []
+      for (const line of rawOptions) {
+        const parts = line.split(/(?=[A-O]\))/)
+        for (const p of parts) {
+          const t = p.replace(/^[A-O]\)\s*/, '').trim()
+          if (t.length > 1) options.push(t)
+        }
+      }
+      // 去重（两列合并导致的重复）
+      options = [...new Set(options)]
+
+      const passageLines = cleanLines.filter(l => !/Section\s+A|Directions|Answer Sheet|^[A-O]\)|^\d+\./.test(l) && l.length > 10 && !/第\d+页|共\d+页/.test(l))
       let passage = sanitize(passageLines.join(' '))
       // 去掉题目描述，只保留文章正文
       const qi = passage.search(/questions?\s+\d+/i)
@@ -130,8 +142,9 @@ function parseReading(lines, year) {
         const m = after.match(/question[s]?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following\s+(?:passage|paragraph)/i)
         if (m) passage = after.slice(after.indexOf(m[0]) + m[0].length).trim()
       }
+      const questions = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s))
       if (passage.length > 30 || options.length > 0) {
-        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 4000), questions: cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s)), options })
+        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 4000), questions, options })
       }
       continue
     }

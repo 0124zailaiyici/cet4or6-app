@@ -29,10 +29,10 @@
         <view class="passage-card">
           <text class="passage-text">{{current.passage}}</text>
         </view>
-        <view class="options-card" wx:if="{{current.options && current.options.length > 0}}">
-          <text class="opt-title">可选词：</text>
+        <view class="options-card">
+          <text class="opt-title">选词（15选10）：</text>
           <view class="opt-grid">
-            <text class="opt-item" wx:for="{{current.options}}" wx:key="*this">{{item}}</text>
+            <text class="opt-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}. {{item}}</text>
           </view>
         </view>
       </block>
@@ -40,10 +40,11 @@
       <!-- Section B: 长篇阅读 -->
       <block wx:elif="{{current.sectionType === 'B'}}">
         <view class="passage-card">
+          <text class="q-title">文章段落：</text>
           <text class="passage-text">{{current.passage}}</text>
         </view>
         <view class="questions-card">
-          <text class="q-title">匹配陈述：</text>
+          <text class="q-title">匹配陈述（10条）：</text>
           <text class="q-item" wx:for="{{current.questions}}" wx:key="*this">{{index + 1}}. {{item}}</text>
         </view>
       </block>
