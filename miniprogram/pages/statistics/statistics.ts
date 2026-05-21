@@ -98,6 +98,7 @@ Page<IStatData, IStatMethods>({
             translationRecords: [],
             writingRecords: [],
             checkInDates: [],
+            favoriteSentenceIds: [],
           }
           const app = getApp<IAppOption>()
           app.globalData.studyData = empty

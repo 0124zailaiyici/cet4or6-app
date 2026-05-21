@@ -37,6 +37,7 @@ Page<IHomeData, IHomeMethods>({
       { id: 'sentences', title: '语境句子', icon: '💬', desc: '卡片学习 · 关键词高亮', url: '/pages/sentences/sentences', count: 50, color: '#c5e1a5' },
       { id: 'translation', title: '翻译练习', icon: '🌟', desc: 'AI 批改 · 逐句评分', url: '/pages/translation/translation', count: 10, color: '#ffd3b6' },
       { id: 'writing', title: '写作教学', icon: '✨', desc: '句型 · 段落 · 全文', url: '/pages/writing/writing', count: 5, color: '#d8b4fe' },
+      { id: 'favorites', title: '收藏夹', icon: '⭐', desc: '收藏句子 · 难句本', url: '/pages/favorites/favorites', count: 0, color: '#ffd700' },
     ],
     todayStats: {
       listened: 0,
@@ -67,7 +68,11 @@ Page<IHomeData, IHomeMethods>({
     const app = getApp<IAppOption>()
     const sd = app.globalData.studyData
 
+    const modules = this.data.modules
+    modules[4].count = sd.favoriteSentenceIds.length
+
     this.setData({
+      modules,
       greeting,
       checkedIn: isCheckedInToday(),
       streak: calcStreak(sd.checkInDates),

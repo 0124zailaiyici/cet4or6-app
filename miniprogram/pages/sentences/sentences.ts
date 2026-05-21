@@ -16,12 +16,14 @@ interface ISentencesData {
   currentTopic: string
   masteredIds: number[]
   expandedIds: number[]
+  favoriteIds: number[]
 }
 
 interface ISentencesMethods {
   filterByTopic(e: WechatMiniprogram.TouchEvent): void
   toggleExpand(e: WechatMiniprogram.TouchEvent): void
   toggleMaster(e: WechatMiniprogram.TouchEvent): void
+  toggleFavorite(e: WechatMiniprogram.TouchEvent): void
   highlightText(text: string, keywords: string[]): string
 }
 
@@ -33,6 +35,7 @@ Page<ISentencesData, ISentencesMethods>({
     currentTopic: '全部',
     masteredIds: [],
     expandedIds: [],
+    favoriteIds: [],
   },
 
   onLoad() {
@@ -41,13 +44,12 @@ Page<ISentencesData, ISentencesMethods>({
     topics.unshift('全部')
 
     const app = getApp<IAppOption>()
-    const masteredIds = app.globalData.studyData.masteredSentences
-
     this.setData({
       allSentences: sentences,
       filteredSentences: sentences,
       topics,
-      masteredIds,
+      masteredIds: app.globalData.studyData.masteredSentences,
+      favoriteIds: app.globalData.studyData.favoriteSentenceIds,
     })
   },
 
@@ -62,11 +64,8 @@ Page<ISentencesData, ISentencesMethods>({
   toggleExpand(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
     const expanded = new Set(this.data.expandedIds)
-    if (expanded.has(id)) {
-      expanded.delete(id)
-    } else {
-      expanded.add(id)
-    }
+    if (expanded.has(id)) expanded.delete(id)
+    else expanded.add(id)
     this.setData({ expandedIds: [...expanded] })
   },
 
@@ -84,6 +83,19 @@ Page<ISentencesData, ISentencesMethods>({
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr
+    wx.setStorageSync('studyData', app.globalData.studyData)
+  },
+
+  toggleFavorite(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as number
+    const fav = new Set(this.data.favoriteIds)
+    if (fav.has(id)) fav.delete(id)
+    else fav.add(id)
+    const favArr = [...fav]
+    this.setData({ favoriteIds: favArr })
+
+    const app = getApp<IAppOption>()
+    app.globalData.studyData.favoriteSentenceIds = favArr
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
 

@@ -6,6 +6,7 @@ interface IStudyData {
   translationRecords: { id: number; userAnswer: string; score: number; date: string }[]
   writingRecords: { id: number; score: number; date: string }[]
   checkInDates: string[]
+  favoriteSentenceIds: number[]
 }
 
 interface IAppOption {

@@ -98,12 +98,33 @@
   margin-top: 20rpx;
 }
 
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .card-topic {
   font-size: 22rpx;
   color: #8a7a9a;
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
   background: #fff0f3;
+}
+
+.fav-btn {
+  font-size: 32rpx;
+  color: #d0c0d8;
+  padding: 4rpx;
+  line-height: 1;
+}
+
+.fav-btn.active {
+  color: #ffd700;
+}
+
+.sentence-card.favorited {
+  box-shadow: 0 4rpx 20rpx rgba(255, 215, 0, 0.12);
 }
 
 .master-btn {

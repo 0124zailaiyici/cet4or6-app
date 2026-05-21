@@ -1,7 +1,7 @@
 <view class="page">
   <view class="page-header">
     <text class="page-title">语境句子</text>
-    <text class="page-subtitle">掌握 {{masteredIds.length}} / {{allSentences.length}}</text>
+    <text class="page-subtitle">掌握 {{masteredIds.length}} / {{allSentences.length}}  ⭐ {{favoriteIds.length}} 收藏</text>
   </view>
 
   <scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}">
@@ -19,7 +19,7 @@
   <scroll-view class="card-scroll" scroll-y>
     <view class="card-list">
       <view
-        class="sentence-card {{expandedIds.indexOf(item.id) !== -1 ? 'expanded' : ''}} {{masteredIds.indexOf(item.id) !== -1 ? 'mastered' : ''}}"
+        class="sentence-card {{expandedIds.indexOf(item.id) !== -1 ? 'expanded' : ''}} {{masteredIds.indexOf(item.id) !== -1 ? 'mastered' : ''}} {{favoriteIds.indexOf(item.id) !== -1 ? 'favorited' : ''}}"
         wx:for="{{filteredSentences}}"
         wx:key="id"
         data-id="{{item.id}}"
@@ -34,7 +34,14 @@
         </view>
 
         <view class="card-bottom">
-          <view class="card-topic">{{item.topic}}</view>
+          <view class="card-left">
+            <view class="card-topic">{{item.topic}}</view>
+            <view
+              class="fav-btn {{favoriteIds.indexOf(item.id) !== -1 ? 'active' : ''}}"
+              data-id="{{item.id}}"
+              catchtap="toggleFavorite"
+            >{{favoriteIds.indexOf(item.id) !== -1 ? '★' : '☆'}}</view>
+          </view>
           <view class="card-actions">
             <view
               class="master-btn {{masteredIds.indexOf(item.id) !== -1 ? 'active' : ''}}"

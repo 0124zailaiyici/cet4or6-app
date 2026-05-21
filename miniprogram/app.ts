@@ -6,7 +6,8 @@ App<IAppOption>({
       masteredSentences: [],
       translationRecords: [],
       writingRecords: [],
-      checkInDates: []
+      checkInDates: [],
+      favoriteSentenceIds: []
     }
   },
   onLaunch() {

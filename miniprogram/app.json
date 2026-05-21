@@ -5,7 +5,8 @@
     "pages/sentences/sentences",
     "pages/translation/translation",
     "pages/writing/writing",
-    "pages/statistics/statistics"
+    "pages/statistics/statistics",
+    "pages/favorites/favorites"
   ],
   "window": {
     "navigationBarTextStyle": "black",

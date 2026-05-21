@@ -1,0 +1,39 @@
+<view class="page">
+  <view class="page-header">
+    <text class="page-title">收藏夹</text>
+  </view>
+
+  <view class="tab-bar">
+    <view class="tab-item {{tab === index ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" data-tab="{{index}}" catchtap="switchTab">{{item}}</view>
+  </view>
+
+  <scroll-view class="content-scroll" scroll-y>
+    <block wx:if="{{tab === 0}}">
+      <view class="empty-tip" wx:if="{{favSentences.length === 0}}">
+        <text class="empty-icon">⭐</text>
+        <text class="empty-text">还没有收藏的句子</text>
+        <text class="empty-hint">在句子页面点击 ☆ 即可收藏</text>
+      </view>
+
+      <view class="fav-list" wx:else>
+        <view class="fav-card" wx:for="{{favSentences}}" wx:key="id" data-id="{{item.id}}">
+          <view class="fav-english">{{item.english}}</view>
+          <view class="fav-chinese">{{item.chinese}}</view>
+          <view class="fav-bottom">
+            <view class="fav-topic">{{item.topic}}</view>
+            <view class="fav-master" wx:if="{{masteredIds.indexOf(item.id) !== -1}}">✓ 已掌握</view>
+            <view class="fav-remove" data-id="{{item.id}}" catchtap="removeFavorite">取消收藏</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:elif="{{tab === 1}}">
+      <view class="empty-tip">
+        <text class="empty-icon">❗</text>
+        <text class="empty-text">难句记录功能开发中</text>
+        <text class="empty-hint">在听力页面标记难句后将在这里展示</text>
+      </view>
+    </block>
+  </scroll-view>
+</view>
