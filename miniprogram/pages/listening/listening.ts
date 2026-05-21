@@ -226,6 +226,7 @@ Page<IListeningData, IListeningMethods>({
       hardSet.delete(index)
       const idx = stored.findIndex(h => h.passageId === passage.id && h.sentenceIndex === index)
       if (idx !== -1) stored.splice(idx, 1)
+      wx.showToast({ title: '已取消难句', icon: 'none' })
     } else {
       hardSet.add(index)
       stored.push({
@@ -234,6 +235,7 @@ Page<IListeningData, IListeningMethods>({
         text: passage.sentences[index].text,
         passageTitle: passage.title,
       })
+      wx.showToast({ title: '已标记难句', icon: 'none' })
     }
     this.setData({ hardSentences: [...hardSet] })
     wx.setStorageSync('studyData', app.globalData.studyData)

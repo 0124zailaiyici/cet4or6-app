@@ -73,7 +73,7 @@
   display: flex; align-items: center; justify-content: center; font-size: 22rpx; color: #8a7a9a;
 }
 .se-play.playing { background: rgba(33,150,243,0.12); color: #2196f3; }
-.se-hard.active { background: rgba(255,158,181,0.12); color: #ff9eb5; }
+.se-hard.active { background: rgba(255,158,181,0.2); color: #ff6b8a; font-weight: 700; }
 
 /* Player bar */
 .player-bar {
