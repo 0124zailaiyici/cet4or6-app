@@ -8,7 +8,8 @@
       </view>
     </view>
 
-    <view class="lcard-list">
+    <scroll-view class="lcard-scroll" scroll-y>
+      <view class="lcard-list">
       <view class="lcard" wx:for="{{passages}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
         <view class="lc-icon" style="background: linear-gradient(135deg, #4fc3f7, #2196f3);">
           <text>🎵</text>
@@ -22,6 +23,7 @@
         </view>
       </view>
     </view>
+    </scroll-view>
   </block>
 
   <block wx:else>

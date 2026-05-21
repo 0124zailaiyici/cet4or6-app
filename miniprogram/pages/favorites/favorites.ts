@@ -19,7 +19,7 @@ interface IFavoritesData {
 }
 
 interface IFavoritesMethods {
-  switchTab(e: WechatMiniprogram.TouchEvent): void
+  onSwitchTab(e: WechatMiniprogram.TouchEvent): void
   removeFavorite(e: WechatMiniprogram.TouchEvent): void
   removeHard(e: WechatMiniprogram.TouchEvent): void
   refresh(): void
@@ -64,7 +64,7 @@ Page<IFavoritesData, IFavoritesMethods>({
     wx.showToast({ title: '已移除难句', icon: 'none' })
   },
 
-  switchTab(e: WechatMiniprogram.TouchEvent) {
+  onSwitchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.tab as number
     this.setData({ tab })
   },

@@ -1,4 +1,4 @@
-.page { min-height: 100vh; padding-bottom: 48rpx; }
+.page { min-height: 100vh; padding-bottom: 48rpx; display: flex; flex-direction: column; }
 
 /* Header */
 .l-header { position: relative; margin-bottom: 0; overflow: hidden; }
@@ -12,6 +12,7 @@
 .lh-sub { display: block; font-size: 26rpx; color: rgba(255,255,255,0.8); margin-top: 6rpx; }
 
 /* Card list */
+.lcard-scroll { flex: 1; }
 .lcard-list { padding: 20rpx 36rpx; display: flex; flex-direction: column; gap: 16rpx; }
 .lcard {
   background: #fff; border-radius: 22rpx; padding: 24rpx; box-shadow: 0 4rpx 20rpx rgba(33,150,243,0.06);

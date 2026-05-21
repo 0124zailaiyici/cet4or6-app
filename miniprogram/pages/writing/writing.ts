@@ -34,7 +34,7 @@ interface IWritingData {
 }
 
 interface IWritingMethods {
-  switchTab(e: WechatMiniprogram.TouchEvent): void
+  onSwitchTab(e: WechatMiniprogram.TouchEvent): void
   togglePattern(e: WechatMiniprogram.TouchEvent): void
   onSentenceInput(e: WechatMiniprogram.Input): void
   onParagraphInput(e: WechatMiniprogram.Input): void
@@ -73,7 +73,7 @@ Page<IWritingData, IWritingMethods>({
     this.setData({ darkMode: app.globalData.darkMode })
   },
 
-  switchTab(e: WechatMiniprogram.TouchEvent) {
+  onSwitchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.tab as number
     this.setData({ tab, showResult: false, result: null })
   },
