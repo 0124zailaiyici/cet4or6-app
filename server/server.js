@@ -3,9 +3,11 @@ const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
 
+const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/audio', express.static(path.join(__dirname, 'audio')));
 
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.DEEPSEEK_API_KEY;

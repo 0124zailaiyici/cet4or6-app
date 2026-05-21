@@ -40,7 +40,7 @@ interface IListeningMethods {
   backToList(): void
   playPause(): void
   playCurrent(): void
-  playText(text: string): void
+  playText(text: string, useAudioUrl?: string): void
   playSentence(e: WechatMiniprogram.TouchEvent): void
   prevSentence(): void
   nextSentence(): void
@@ -150,11 +150,15 @@ Page<IListeningData, IListeningMethods>({
     this.playText(sentence.text)
   },
 
-  playText(text: string) {
+  playText(text: string, useAudioUrl?: string) {
     const ctx = getAudioCtx()
     ctx.stop()
     ctx.playbackRate = this.data.speed
-    ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
+    if (useAudioUrl) {
+      ctx.src = useAudioUrl
+    } else {
+      ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
+    }
     ctx.play()
     this.setData({ isPlaying: true, loading: true })
     ctx.onPlay(() => this.setData({ loading: false }))
@@ -165,8 +169,19 @@ Page<IListeningData, IListeningMethods>({
       getAudioCtx().pause()
       this.setData({ isPlaying: false })
     } else {
-      getAudioCtx().play()
-      this.setData({ isPlaying: true })
+      const ctx = getAudioCtx()
+      if (ctx.src) {
+        ctx.play()
+        this.setData({ isPlaying: true })
+      } else {
+        const passage = this.data.currentPassage
+        if (!passage) return
+        if (passage.audioUrl) {
+          this.playText('', passage.audioUrl)
+        } else {
+          this.playCurrent()
+        }
+      }
     }
   },
 
