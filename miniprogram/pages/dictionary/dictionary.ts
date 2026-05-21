@@ -45,6 +45,11 @@ Page<IDictData, IDictMethods>({
     if (raw) this.setData({ history: raw })
   },
 
+  onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
+  },
+
   onInput(e: WechatMiniprogram.Input) {
     this.setData({ query: e.detail.value, error: '', result: null })
   },

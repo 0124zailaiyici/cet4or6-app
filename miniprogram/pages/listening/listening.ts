@@ -97,12 +97,17 @@ Page<IListeningData, IListeningMethods>({
     pageRef = this
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
-    this.setData({ darkMode: app.globalData.darkMode })
     const studyData = app.globalData.studyData
     this.setData({
       passages,
+      darkMode: app.globalData.darkMode,
       completedPassages: studyData.completedListens,
     })
+  },
+
+  onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
   },
 
   onUnload() {

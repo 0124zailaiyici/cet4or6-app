@@ -62,6 +62,11 @@ Page<ISentencesData, ISentencesMethods>({
     })
   },
 
+  onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
+  },
+
   doFilter() {
     const q = this.data.searchQuery.toLowerCase().trim()
     let filtered = this.data.allSentences

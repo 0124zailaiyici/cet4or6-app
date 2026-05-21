@@ -62,6 +62,11 @@ Page<ITranslationData, ITranslationMethods>({
     this.setData({ translations: items, history, completedIds })
   },
 
+  onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
+  },
+
   enterDetail(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
     const item = this.data.translations.find(t => t.id === id) || null

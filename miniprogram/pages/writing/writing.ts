@@ -66,6 +66,11 @@ Page<IWritingData, IWritingMethods>({
     this.setData({ patterns: patternsData as IPattern[], writings: writingsData as IWriting[], darkMode: app.globalData.darkMode })
   },
 
+  onShow() {
+    const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode })
+  },
+
   switchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.tab as number
     this.setData({ tab, showResult: false, result: null })
