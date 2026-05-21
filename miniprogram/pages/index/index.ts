@@ -1,18 +1,11 @@
 import { doCheckIn, calcStreak, isCheckedInToday } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
-interface IModuleItem {
-  id: string
-  title: string
-  icon: string
-  desc: string
-  url: string
-  count: number
-  color: string
-}
-
 interface IHomeData {
-  modules: IModuleItem[]
+  greeting: string
+  checkedIn: boolean
+  streak: number
+  favoriteCount: number
   todayStats: {
     listened: number
     sentences: number
@@ -26,9 +19,6 @@ interface IHomeData {
     writingPct: number
     overallPct: number
   }
-  greeting: string
-  checkedIn: boolean
-  streak: number
   darkMode: boolean
 }
 
@@ -40,18 +30,12 @@ interface IHomeMethods {
 
 Page<IHomeData, IHomeMethods>({
   data: {
-    modules: [
-      { id: 'listening', title: '听力精听', icon: '🎵', desc: '单句循环 · 听写', url: '/pages/listening/listening', count: 5, color: '#b5d8f7' },
-      { id: 'sentences', title: '语境句子', icon: '💬', desc: '卡片学习 · 搜索', url: '/pages/sentences/sentences', count: 50, color: '#c5e1a5' },
-      { id: 'translation', title: '翻译练习', icon: '🌟', desc: 'AI 批改 · 评分', url: '/pages/translation/translation', count: 10, color: '#ffd3b6' },
-      { id: 'writing', title: '写作教学', icon: '✨', desc: '句型 · 段落 · 全文', url: '/pages/writing/writing', count: 5, color: '#d8b4fe' },
-      { id: 'favorites', title: '收藏夹', icon: '⭐', desc: '收藏句子 · 难句', url: '/pages/favorites/favorites', count: 0, color: '#ffd700' },
-    ],
-    todayStats: { listened: 0, sentences: 0, translations: 0, writings: 0 },
-    goalStats: { listenPct: 0, sentencePct: 0, translationPct: 0, writingPct: 0, overallPct: 0 },
     greeting: '',
     checkedIn: false,
     streak: 0,
+    favoriteCount: 0,
+    todayStats: { listened: 0, sentences: 0, translations: 0, writings: 0 },
+    goalStats: { listenPct: 0, sentencePct: 0, translationPct: 0, writingPct: 0, overallPct: 0 },
     darkMode: false,
   },
 
@@ -83,14 +67,11 @@ Page<IHomeData, IHomeMethods>({
     const totalTarget = goal.listen + goal.sentence + goal.translation + goal.writing
     const totalDone = listened + sentences + translations + writings
 
-    const modules = this.data.modules
-    modules[4].count = sd.favoriteSentenceIds.length
-
     this.setData({
-      modules,
       greeting,
       checkedIn: isCheckedInToday(),
       streak: calcStreak(sd.checkInDates),
+      favoriteCount: sd.favoriteSentenceIds.length,
       todayStats: { listened, sentences, translations, writings },
       goalStats: {
         listenPct: calcPct(listened, goal.listen),

@@ -1,62 +1,80 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="hero">
-    <view class="hero-text">
-      <text class="greeting">{{greeting}} ✨</text>
-      <text class="title">四级备考助手</text>
-      <text class="subtitle">每天进步一点点 💪</text>
-    </view>
-    <view class="hero-actions">
-      <view class="settings-icon" data-url="/pages/settings/settings" catchtap="goTo">⚙️</view>
+  <view class="hero-section">
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+      <view class="hero-top">
+        <view class="hero-text">
+          <text class="hero-greeting">{{greeting}}</text>
+          <text class="hero-title">四级备考</text>
+        </view>
+        <view class="hero-actions">
+          <view class="hero-btn" data-url="/pages/settings/settings" catchtap="goTo">⚙️</view>
+          <view class="hero-btn" data-url="/pages/statistics/statistics" catchtap="goTo">📊</view>
+        </view>
+      </view>
+      <view class="hero-checkin {{checkedIn ? 'done' : ''}}" catchtap="handleCheckIn">
+        <text class="hc-label">{{checkedIn ? '已打卡' : '签到学习'}}</text>
+        <text class="hc-streak">🔥 {{streak}} 天连续</text>
+      </view>
     </view>
   </view>
 
-  <view class="checkin-card {{checkedIn ? 'done' : ''}}">
-    <view class="ci-left">
-      <text class="ci-status">{{checkedIn ? '今日已打卡' : '今日未打卡'}}</text>
-      <text class="ci-streak">🔥 连续 {{streak}} 天</text>
+  <view class="stats-banner">
+    <view class="stat-card">
+      <text class="stat-num">{{goalStats.overallPct}}%</text>
+      <text class="stat-label">今日完成</text>
     </view>
-    <view class="ci-right">
-      <view class="ci-btn {{checkedIn ? 'disabled' : ''}}" wx:if="{{!checkedIn}}" catchtap="handleCheckIn">签到</view>
-      <view class="ci-btn done" wx:else>✅</view>
+    <view class="stat-card">
+      <text class="stat-num">{{todayStats.listened + todayStats.sentences + todayStats.translations + todayStats.writings}}</text>
+      <text class="stat-label">今日题数</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{streak}}</text>
+      <text class="stat-label">连续天数</text>
     </view>
   </view>
 
-  <view class="day-progress">
-    <view class="dp-header">
-      <text class="dp-title">今日进度</text>
-      <text class="dp-pct">{{goalStats.overallPct}}%</text>
-    </view>
-    <view class="dp-bar">
-      <view class="dp-fill" style="width: {{goalStats.overallPct}}%"></view>
-    </view>
-    <view class="dp-items">
-      <view class="dp-item">
-        <view class="dp-dot" style="background: #b5d8f7"></view>
-        <text class="dp-label">听力 {{todayStats.listened}}</text>
-      </view>
-      <view class="dp-item">
-        <view class="dp-dot" style="background: #c5e1a5"></view>
-        <text class="dp-label">句子 {{todayStats.sentences}}</text>
-      </view>
-      <view class="dp-item">
-        <view class="dp-dot" style="background: #ffd3b6"></view>
-        <text class="dp-label">翻译 {{todayStats.translations}}</text>
-      </view>
-      <view class="dp-item">
-        <view class="dp-dot" style="background: #d8b4fe"></view>
-        <text class="dp-label">写作 {{todayStats.writings}}</text>
-      </view>
-    </view>
+  <view class="section-header">
+    <text class="section-title">学习模块</text>
+    <text class="section-subtitle">选择模块开始学习</text>
   </view>
 
   <view class="module-grid">
-    <view class="module-card" wx:for="{{modules}}" wx:key="id" data-url="{{item.url}}" catchtap="goTo">
-      <view class="mc-icon" style="background: {{item.color}}18">
-        <text>{{item.icon}}</text>
-      </view>
-      <text class="mc-title">{{item.title}}</text>
-      <text class="mc-desc">{{item.desc}}</text>
-      <view class="mc-meta" style="color: {{item.color}}">{{item.count}} 题</view>
+    <view class="module-card mc-listening" data-url="/pages/listening/listening" catchtap="goTo">
+      <view class="mc-badge">5篇</view>
+      <text class="mc-emoji">🎵</text>
+      <text class="mc-name">听力精听</text>
+      <text class="mc-brief">单句循环 · 听写</text>
+    </view>
+    <view class="module-card mc-sentences" data-url="/pages/sentences/sentences" catchtap="goTo">
+      <view class="mc-badge">50句</view>
+      <text class="mc-emoji">💬</text>
+      <text class="mc-name">语境句子</text>
+      <text class="mc-brief">卡片学习 · 搜索</text>
+    </view>
+    <view class="module-card mc-translation" data-url="/pages/translation/translation" catchtap="goTo">
+      <view class="mc-badge">10题</view>
+      <text class="mc-emoji">🌟</text>
+      <text class="mc-name">翻译练习</text>
+      <text class="mc-brief">AI 批改 · 评分</text>
+    </view>
+    <view class="module-card mc-writing" data-url="/pages/writing/writing" catchtap="goTo">
+      <view class="mc-badge">5题</view>
+      <text class="mc-emoji">✨</text>
+      <text class="mc-name">写作教学</text>
+      <text class="mc-brief">句型 · 段落 · 全文</text>
+    </view>
+    <view class="module-card mc-favorites" data-url="/pages/favorites/favorites" catchtap="goTo">
+      <view class="mc-badge">{{favoriteCount}}项</view>
+      <text class="mc-emoji">⭐</text>
+      <text class="mc-name">收藏夹</text>
+      <text class="mc-brief">收藏 · 难句本</text>
+    </view>
+    <view class="module-card mc-dict" data-url="/pages/dictionary/dictionary" catchtap="goTo">
+      <view class="mc-badge">查词</view>
+      <text class="mc-emoji">📖</text>
+      <text class="mc-name">英语词典</text>
+      <text class="mc-brief">音标 · 释义 · 例句</text>
     </view>
   </view>
 </view>
