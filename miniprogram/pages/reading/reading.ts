@@ -80,7 +80,16 @@ Page<IReadingData, IReadingMethods>({
   // 把文章按句子拆分，每页最多 6 句
   splitPassage(text: string): string[] {
     if (!text) return ['']
-    const sents = text.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 5)
+    const clean = text.replace(/\s+/g, ' ').trim()
+    // 按句子切分，兼容无标点的情况
+    let sents = clean.split(/(?<=[.?!])\s+/).filter((s: string) => s.trim().length > 5)
+    if (sents.length < 2) {
+      // 没有完整句子，按 200 字一页分
+      sents = []
+      for (let i = 0; i < clean.length; i += 200) {
+        sents.push(clean.slice(i, i + 200))
+      }
+    }
     const pages: string[] = []
     for (let i = 0; i < sents.length; i += 6) {
       pages.push(sents.slice(i, i + 6).join(' '))
