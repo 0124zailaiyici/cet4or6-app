@@ -7,9 +7,9 @@
   </view>
 
   <view class="w-tabs">
-    <view class="wt-item {{tab === 0 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="0">句型库</view>
-    <view class="wt-item {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="1">段落写作</view>
-    <view class="wt-item {{tab === 2 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="2">全文模拟</view>
+    <view class="wt-item {{tab === 0 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{0}}">句型库</view>
+    <view class="wt-item {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">段落写作</view>
+    <view class="wt-item {{tab === 2 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{2}}">全文模拟</view>
   </view>
 
   <!-- Tab 0: Patterns -->
