@@ -2,7 +2,7 @@ import listeningData from '../../data/listening'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = 'http://localhost:3001'
 
 interface ISentence {
   text: string

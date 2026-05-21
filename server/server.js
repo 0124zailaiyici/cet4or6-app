@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const API_KEY = process.env.DEEPSEEK_API_KEY;
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 
@@ -135,7 +135,7 @@ app.get('/dictionary', async (req, res) => {
   try {
     const response = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { timeout: 10000 });
     res.json(response.data);
-  } catch (err: any) {
+  } catch (err) {
     if (err.response?.status === 404) {
       res.status(404).json({ error: '未找到该单词', word });
     } else {

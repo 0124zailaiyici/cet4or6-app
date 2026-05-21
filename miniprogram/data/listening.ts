@@ -192,7 +192,7 @@ const listeningData = [
   {
     "id": 1779360841729,
     "title": "CET-4 听力 2019061（PDF导入，仅题目，使用TTS听正文需手动编辑）",
-    "audioUrl": "http://localhost:3000/audio/2019年06月四级听力音频第1套.mp3",
+    "audioUrl": "http://localhost:3001/audio/2019年06月四级听力音频第1套.mp3",
     "sentences": [
       {
         "text": "you hear two  or three  questions.  Both  the news  report and the questions  will be spoken",
