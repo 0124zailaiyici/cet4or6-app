@@ -22,14 +22,14 @@
 
 .greeting {
   font-size: 28rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .title {
   display: block;
   font-size: 48rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
   margin: 8rpx 0 4rpx;
 }
 
@@ -42,7 +42,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 24rpx 28rpx;
   margin-bottom: 28rpx;
@@ -56,7 +56,7 @@
 .checkin-label {
   font-size: 28rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
   display: block;
 }
 
@@ -70,7 +70,7 @@
 .checkin-btn {
   padding: 16rpx 36rpx;
   border-radius: 40rpx;
-  background: linear-gradient(135deg, #ff9eb5, #ff8a80);
+  background: linear-gradient(135deg, #ff9eb5, var(--pink-dark));
   color: #fff;
   font-size: 26rpx;
   font-weight: 600;
@@ -84,7 +84,7 @@
 }
 
 .progress-section {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 24rpx 28rpx;
   margin-bottom: 28rpx;
@@ -102,14 +102,14 @@
   flex: 1;
   height: 20rpx;
   border-radius: 10rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
   border-radius: 10rpx;
-  background: linear-gradient(90deg, #ff9eb5, #ff8a80);
+  background: linear-gradient(90deg, #ff9eb5, var(--pink-dark));
   transition: width 0.5s;
 }
 
@@ -138,7 +138,7 @@
   width: 100%;
   height: 8rpx;
   border-radius: 4rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
   overflow: hidden;
 }
 
@@ -150,7 +150,7 @@
 
 .p-label {
   font-size: 20rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .module-grid {
@@ -162,7 +162,7 @@
 
 .module-card {
   width: calc(50% - 12rpx);
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 28rpx 24rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -193,12 +193,12 @@
 .module-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .module-desc {
   font-size: 22rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .module-count {
@@ -208,7 +208,7 @@
 }
 
 .stats-section {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -217,7 +217,7 @@
 .section-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
   margin-bottom: 24rpx;
 }
 
@@ -242,7 +242,7 @@
 
 .stat-label {
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .total-bar {
@@ -250,16 +250,16 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 24rpx;
-  border-top: 2rpx solid #fff0f3;
+  border-top: 2rpx solid var(--tag-bg);
 }
 
 .total-label {
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .total-num {
   font-size: 32rpx;
   font-weight: 700;
-  color: #b5d8f7;
+  color: var(--blue);
 }

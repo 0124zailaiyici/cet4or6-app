@@ -12,13 +12,13 @@
 .page-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .page-subtitle {
   display: block;
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   margin-top: 8rpx;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .passage-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -49,12 +49,12 @@
 .passage-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .passage-badge {
   font-size: 22rpx;
-  color: #c5e1a5;
+  color: var(--mint);
   background: rgba(197, 225, 165, 0.15);
   padding: 4rpx 16rpx;
   border-radius: 20rpx;
@@ -62,7 +62,7 @@
 
 .passage-meta {
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .passage-play {
@@ -91,16 +91,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff0f3;
+  background: var(--tag-bg);
   border-radius: 16rpx;
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .detail-title {
   font-size: 34rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
   flex: 1;
 }
 
@@ -121,8 +121,8 @@
   padding: 8rpx 16rpx;
   border-radius: 16rpx;
   font-size: 24rpx;
-  color: #8a7a9a;
-  background: #fff0f3;
+  color: var(--text-secondary);
+  background: var(--tag-bg);
 }
 
 .speed-btn.active {
@@ -134,12 +134,12 @@
   padding: 8rpx 16rpx;
   border-radius: 16rpx;
   font-size: 24rpx;
-  color: #8a7a9a;
-  background: #fff0f3;
+  color: var(--text-secondary);
+  background: var(--tag-bg);
 }
 
 .ctrl-btn.active {
-  color: #c5e1a5;
+  color: var(--mint);
   background: rgba(197, 225, 165, 0.2);
 }
 
@@ -160,7 +160,7 @@
   gap: 16rpx;
   padding: 24rpx;
   border-radius: 24rpx;
-  background: #ffffff;
+  background: var(--card-bg);
   box-shadow: 0 2rpx 12rpx rgba(255, 158, 181, 0.08);
   transition: all 0.3s;
 }
@@ -179,12 +179,12 @@
   width: 44rpx;
   height: 44rpx;
   border-radius: 14rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
@@ -195,7 +195,7 @@
 .sentence-text {
   font-size: 28rpx;
   line-height: 1.7;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .sentence-text.hidden {
@@ -213,12 +213,12 @@
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: #fff0f3;
+  background: var(--tag-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .s-action.playing {
@@ -227,7 +227,7 @@
 }
 
 .hard-btn.active {
-  color: #ffd3b6;
+  color: var(--peach);
   background: rgba(255, 211, 182, 0.2);
 }
 
@@ -248,19 +248,19 @@
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  background: #fff0f3;
+  background: var(--tag-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .play-btn {
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff9eb5, #ff8a80);
+  background: linear-gradient(135deg, #ff9eb5, var(--pink-dark));
   display: flex;
   align-items: center;
   justify-content: center;

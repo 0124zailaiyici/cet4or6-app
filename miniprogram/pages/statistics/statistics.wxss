@@ -10,7 +10,7 @@
 .page-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .overview-grid {
@@ -22,7 +22,7 @@
 
 .overview-card {
   width: calc(33.33% - 11rpx);
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 24rpx;
   padding: 24rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -33,18 +33,18 @@
   display: block;
   font-size: 48rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .ov-label {
   display: block;
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   margin-top: 8rpx;
 }
 
 .section {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 28rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -55,7 +55,7 @@
   display: block;
   font-size: 28rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
   margin-bottom: 24rpx;
 }
 
@@ -82,13 +82,13 @@
   max-width: 40rpx;
   border-radius: 8rpx 8rpx 0 0;
   min-height: 8rpx;
-  background: linear-gradient(180deg, #ff9eb5, #ff8a80);
+  background: linear-gradient(180deg, #ff9eb5, var(--pink-dark));
   transition: height 0.6s;
 }
 
 .bar-label {
   font-size: 20rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .tip-block {
@@ -99,7 +99,7 @@
 
 .tip-text {
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 
@@ -111,7 +111,7 @@
 
 .ci-card {
   flex: 1;
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 24rpx;
   padding: 24rpx 16rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -128,12 +128,12 @@
 .ci-label {
   display: block;
   font-size: 22rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   margin-top: 6rpx;
 }
 
 .calendar-section {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 28rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -167,7 +167,7 @@
   justify-content: center;
   border-radius: 16rpx;
   font-size: 26rpx;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .cal-cell.empty {
@@ -189,8 +189,8 @@
   width: 100%;
   height: 80rpx;
   border-radius: 40rpx;
-  border: 2rpx solid #ffd3b6;
-  color: #ffd3b6;
+  border: 2rpx solid var(--peach);
+  color: var(--peach);
   font-size: 28rpx;
   display: flex;
   align-items: center;

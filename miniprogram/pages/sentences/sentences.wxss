@@ -23,20 +23,20 @@
 .page-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .page-subtitle {
   display: block;
   font-size: 26rpx;
-  color: #c5e1a5;
+  color: var(--mint);
   margin-top: 8rpx;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 24rpx;
   padding: 0 24rpx;
   margin-bottom: 20rpx;
@@ -47,12 +47,12 @@
   flex: 1;
   height: 80rpx;
   font-size: 28rpx;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .search-clear {
   font-size: 28rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   padding: 8rpx;
 }
 
@@ -65,7 +65,7 @@
 
 .empty-text {
   font-size: 28rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   margin-bottom: 8rpx;
 }
 
@@ -89,8 +89,8 @@
   padding: 12rpx 28rpx;
   border-radius: 24rpx;
   font-size: 26rpx;
-  color: #8a7a9a;
-  background: #fff0f3;
+  color: var(--text-secondary);
+  background: var(--tag-bg);
 }
 
 .topic-tag.active {
@@ -109,7 +109,7 @@
 }
 
 .sentence-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -124,7 +124,7 @@
 .card-english {
   font-size: 30rpx;
   line-height: 1.7;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .card-english .kw {
@@ -137,9 +137,9 @@
   margin-top: 20rpx;
   padding: 20rpx;
   border-radius: 20rpx;
-  background: #fff5f7;
+  background: var(--bg);
   font-size: 28rpx;
-  color: #6a6a8a;
+  color: var(--text-tertiary);
   line-height: 1.6;
 }
 
@@ -158,10 +158,10 @@
 
 .card-topic {
   font-size: 22rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
 }
 
 .fav-btn {
@@ -172,7 +172,7 @@
 }
 
 .fav-btn.active {
-  color: #ffd700;
+  color: var(--gold);
 }
 
 .sentence-card.favorited {
@@ -181,13 +181,13 @@
 
 .master-btn {
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   padding: 8rpx 20rpx;
   border-radius: 20rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
 }
 
 .master-btn.active {
-  color: #c5e1a5;
+  color: var(--mint);
   background: rgba(197, 225, 165, 0.2);
 }

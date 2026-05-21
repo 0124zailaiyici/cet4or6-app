@@ -12,14 +12,14 @@
 .page-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .tab-bar {
   display: flex;
   gap: 8rpx;
   margin-bottom: 24rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
   border-radius: 20rpx;
   padding: 6rpx;
 }
@@ -29,12 +29,12 @@
   text-align: center;
   padding: 16rpx 0;
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   border-radius: 16rpx;
 }
 
 .tab-item.active {
-  background: #ffffff;
+  background: var(--card-bg);
   color: #ff9eb5;
   font-weight: 600;
   box-shadow: 0 2rpx 12rpx rgba(255, 158, 181, 0.15);
@@ -58,14 +58,14 @@
 
 .empty-text {
   font-size: 30rpx;
-  color: #2d2d4e;
+  color: var(--text-primary);
   font-weight: 600;
   margin-bottom: 12rpx;
 }
 
 .empty-hint {
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .fav-list {
@@ -75,7 +75,7 @@
 }
 
 .fav-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 24rpx;
   padding: 28rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 215, 0, 0.1);
@@ -84,12 +84,12 @@
 .fav-english {
   font-size: 30rpx;
   line-height: 1.7;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .fav-chinese {
   font-size: 26rpx;
-  color: #6a6a8a;
+  color: var(--text-tertiary);
   margin-top: 12rpx;
   line-height: 1.6;
 }
@@ -103,20 +103,20 @@
 
 .fav-topic {
   font-size: 22rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
 }
 
 .fav-master {
   font-size: 22rpx;
-  color: #c5e1a5;
+  color: var(--mint);
 }
 
 .fav-remove {
   font-size: 24rpx;
-  color: #ffd3b6;
+  color: var(--peach);
   margin-left: auto;
   padding: 8rpx 16rpx;
   border-radius: 16rpx;

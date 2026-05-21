@@ -12,13 +12,13 @@
 .page-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .page-subtitle {
   display: block;
   font-size: 26rpx;
-  color: #b5d8f7;
+  color: var(--blue);
   margin-top: 8rpx;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .trans-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 28rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -49,21 +49,21 @@
 .trans-chinese {
   font-size: 30rpx;
   line-height: 1.6;
-  color: #2d2d4e;
+  color: var(--text-primary);
   flex: 1;
 }
 
 .trans-badge {
   font-size: 22rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
   flex-shrink: 0;
 }
 
 .trans-badge.done {
-  color: #c5e1a5;
+  color: var(--mint);
   background: rgba(197, 225, 165, 0.2);
 }
 
@@ -87,16 +87,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff0f3;
+  background: var(--tag-bg);
   border-radius: 16rpx;
   font-size: 26rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .detail-title {
   font-size: 34rpx;
   font-weight: 600;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .detail-scroll {
@@ -104,7 +104,7 @@
 }
 
 .chinese-block {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -113,7 +113,7 @@
 
 .chinese-label {
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 12rpx;
 }
@@ -121,7 +121,7 @@
 .chinese-text {
   font-size: 32rpx;
   line-height: 1.7;
-  color: #2d2d4e;
+  color: var(--text-primary);
 }
 
 .answer-block {
@@ -133,9 +133,9 @@
   min-height: 200rpx;
   padding: 28rpx;
   border-radius: 24rpx;
-  background: #ffffff;
-  border: 2rpx solid #ffd9e0;
-  color: #2d2d4e;
+  background: var(--card-bg);
+  border: 2rpx solid var(--border);
+  color: var(--text-primary);
   font-size: 28rpx;
   line-height: 1.7;
 }
@@ -144,7 +144,7 @@
   width: 100%;
   height: 88rpx;
   border-radius: 44rpx;
-  background: linear-gradient(135deg, #ff9eb5, #ff8a80);
+  background: linear-gradient(135deg, #ff9eb5, var(--pink-dark));
   color: #fff;
   font-size: 30rpx;
   font-weight: 600;
@@ -156,7 +156,7 @@
 }
 
 .result-block {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 20rpx rgba(255, 158, 181, 0.1);
@@ -179,13 +179,13 @@
 
 .score-label {
   font-size: 32rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
 }
 
 .result-bar {
   height: 8rpx;
   border-radius: 4rpx;
-  background: #fff0f3;
+  background: var(--tag-bg);
   margin-bottom: 24rpx;
   overflow: hidden;
 }
@@ -193,13 +193,13 @@
 .bar-fill {
   height: 100%;
   border-radius: 4rpx;
-  background: linear-gradient(90deg, #ff9eb5, #ff8a80);
+  background: linear-gradient(90deg, #ff9eb5, var(--pink-dark));
   transition: width 0.6s;
 }
 
 .result-suggestions {
   font-size: 28rpx;
-  color: #2d2d4e;
+  color: var(--text-primary);
   line-height: 1.7;
   margin-bottom: 20rpx;
 }
@@ -207,18 +207,18 @@
 .result-ref {
   padding: 20rpx;
   border-radius: 20rpx;
-  background: #fff5f7;
+  background: var(--bg);
 }
 
 .ref-label {
   font-size: 24rpx;
-  color: #8a7a9a;
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 8rpx;
 }
 
 .ref-text {
   font-size: 28rpx;
-  color: #6a6a8a;
+  color: var(--text-tertiary);
   line-height: 1.7;
 }
