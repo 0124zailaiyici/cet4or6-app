@@ -1,6 +1,6 @@
 .page { min-height: 100vh; padding-bottom: 48rpx; }
 
-.f-header { position: relative; }
+.f-header { position: relative; overflow: hidden; }
 .fh-bg {
   position: absolute; top: 0; left: 0; right: 0; height: 200rpx;
   background: linear-gradient(135deg, #ffd54f, #ffc107);

@@ -1,7 +1,7 @@
 .page { min-height: 100vh; padding-bottom: 48rpx; }
 
 /* Header */
-.t-header { position: relative; }
+.t-header { position: relative; overflow: hidden; }
 .th-bg {
   position: absolute; top: 0; left: 0; right: 0; height: 220rpx;
   background: linear-gradient(135deg, #ffb74d, #ff9800);

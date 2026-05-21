@@ -7,6 +7,7 @@
 .s-header {
   position: relative;
   margin-bottom: 0;
+  overflow: hidden;
 }
 
 .sh-bg {
