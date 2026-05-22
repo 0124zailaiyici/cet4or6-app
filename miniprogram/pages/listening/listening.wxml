@@ -54,7 +54,7 @@
       <view class="page-area">
         <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
           <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
-            <view class="page-card" wx:for="{{pages}}" wx:key="*this" wx:for-index="pi">
+            <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
               <!-- Directions page -->
               <view wx:if="{{item.type === 'dir'}}" class="p-dir">
                 <view class="p-section">{{item.section}}</view>
