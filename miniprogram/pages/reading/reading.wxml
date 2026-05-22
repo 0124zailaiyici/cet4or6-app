@@ -98,16 +98,10 @@
           <view class="qz-label">❓ 第{{currentQ + 1}}/{{current.questions.length}}题</view>
           <scroll-view class="qz-q-scroll" scroll-y>
             <text class="qz-question">{{current.questions[currentQ]}}</text>
-
-            <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
-              <text class="qzo {{cAnswers[currentQ] && item.indexOf(cAnswers[currentQ]) === 0 ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" data-choice="{{item}}" bindtap="onChoiceTap">{{item}}</text>
-            </view>
-
-            <!-- Section B 没有选项时显示提示 -->
-            <view class="qz-opts" wx:elif="{{current.sectionType === 'B'}}">
-              <view class="qzo-ref">请将每题匹配到上方文章对应段落（A-N）</view>
-            </view>
           </scroll-view>
+          <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
+            <view class="qzo {{cAnswers[currentQ] && item.indexOf(cAnswers[currentQ]) === 0 ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" data-choice="{{item}}" catchtap="onChoiceTap">{{item}}</view>
+          </view>
 
           <view class="qz-dots">
             <view class="qzd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i"></view>
