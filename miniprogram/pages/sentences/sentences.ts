@@ -16,9 +16,6 @@ interface ISentencesData {
   filteredSentences: ISentence[]
   topics: string[]
   topicCounts: Record<string, number>
-  currentTopic: string
-  masteredIds: number[]
-  expandedIds: number[]
   favoriteIds: number[]
   searchQuery: string
   darkMode: boolean
@@ -37,9 +34,8 @@ interface ISentencesData {
 
 interface ISentencesMethods {
   filterByTopic(e: WechatMiniprogram.TouchEvent): void
-  toggleExpand(e: WechatMiniprogram.TouchEvent): void
-  toggleMaster(e: WechatMiniprogram.TouchEvent): void
   toggleFavorite(e: WechatMiniprogram.TouchEvent): void
+  toggleMaster(e: WechatMiniprogram.TouchEvent): void
   onSearchInput(e: WechatMiniprogram.Input): void
   clearSearch(): void
   doFilter(): void
@@ -69,7 +65,6 @@ Page<ISentencesData, ISentencesMethods>({
     topicCounts: {},
     currentTopic: '全部',
     masteredIds: [],
-    expandedIds: [],
     favoriteIds: [],
     searchQuery: '',
     darkMode: false,
@@ -155,14 +150,6 @@ Page<ISentencesData, ISentencesMethods>({
     const topic = e.currentTarget.dataset.topic as string
     this.setData({ currentTopic: topic })
     this.doFilter()
-  },
-
-  toggleExpand(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as number
-    const expanded = new Set(this.data.expandedIds)
-    if (expanded.has(id)) expanded.delete(id)
-    else expanded.add(id)
-    this.setData({ expandedIds: [...expanded] })
   },
 
   toggleMaster(e: WechatMiniprogram.TouchEvent) {
