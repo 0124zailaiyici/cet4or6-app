@@ -17,13 +17,13 @@
     </view>
   </view>
 
-  <scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}">
+  <scroll-view class="topic-scroll" scroll-x>
     <view class="topic-bar">
       <view class="topic-pill {{currentTopic === item ? 'active' : ''}}" wx:for="{{topics}}" wx:key="*this" data-topic="{{item}}" catchtap="filterByTopic">{{item}}</view>
     </view>
   </scroll-view>
 
-  <scroll-view class="card-scroll" scroll-y show-scrollbar="{{false}}">
+  <scroll-view class="card-scroll" scroll-y>
     <view class="card-list">
       <view class="empty-state" wx:if="{{filteredSentences.length === 0}}">
         <text class="empty-emoji">🔍</text>

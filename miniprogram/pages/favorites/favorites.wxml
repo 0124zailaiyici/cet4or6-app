@@ -11,7 +11,7 @@
     <view class="ft-item {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">❗ 难句记录</view>
   </view>
 
-  <scroll-view class="f-content" scroll-y show-scrollbar="{{false}}">
+  <scroll-view class="f-content" scroll-y>
     <block wx:if="{{tab === 0}}">
       <view class="empty-state" wx:if="{{favSentences.length === 0}}">
         <text class="empty-emoji">⭐</text>

@@ -49,10 +49,3 @@ view, text, scroll-view { box-sizing: border-box; }
   color: #a090b0 !important;
   background-color: #2a2a4a !important;
 }
-
-/* Hidden scrollbar for all scroll-views */
-scroll-view ::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
-}

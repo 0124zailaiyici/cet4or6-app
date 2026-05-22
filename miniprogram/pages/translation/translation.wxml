@@ -27,7 +27,7 @@
       <text class="detail-title">翻译练习</text>
     </view>
 
-    <scroll-view class="detail-scroll" scroll-y show-scrollbar="{{false}}">
+    <scroll-view class="detail-scroll" scroll-y>
       <view class="question-card">
         <text class="q-label">请翻译成英文：</text>
         <text class="q-text">{{currentItem.chinese}}</text>
