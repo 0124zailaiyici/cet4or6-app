@@ -50,6 +50,7 @@ interface IListeningData {
   selectedAnswers: Record<number, number>
   pageTouchX: number
   optionLetters: string[]
+  dataWarning: string
 }
 
 interface IListeningMethods {
@@ -244,6 +245,7 @@ Page<IListeningData, IListeningMethods>({
     selectedAnswers: {},
     pageTouchX: 0,
     optionLetters: ['A','B','C','D'],
+    dataWarning: '',
   },
 
   onLoad() {
@@ -286,10 +288,18 @@ Page<IListeningData, IListeningMethods>({
           : `${API_BASE}${encodeURI(passage.audioUrl!)}`
         const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
         const pages = buildPages(passage)
+        // 检查数据完整性
+        let warns: string[] = []
+        for (const p of pages) {
+          if (p.type !== 'q') continue
+          const n = p.opts?.length || 0
+          if (n < 4) warns.push(`${p.stem}缺${4-n}个选项`)
+        }
         this.setData({
           mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: true,
           hardSentences: localHard, audioMode: true, audioTime: 0, audioDuration: 0,
           pages, currentPage: 0, selectedAnswers: saved,
+          dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
         })
       } else {
         this.setData({
@@ -303,7 +313,7 @@ Page<IListeningData, IListeningMethods>({
 
   backToList() {
     if (audioCtx) { audioCtx.destroy(); audioCtx = null }
-    this.setData({ mode: 'list', currentPassage: null, isPlaying: false, audioMode: false, pages: [], currentPage: 0 })
+    this.setData({ mode: 'list', currentPassage: null, isPlaying: false, audioMode: false, pages: [], currentPage: 0, dataWarning: '' })
   },
 
   // ===== Page navigation (audio mode) =====

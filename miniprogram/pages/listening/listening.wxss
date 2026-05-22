@@ -120,6 +120,13 @@
   color: #2196f3; background: rgba(33,150,243,0.08); border-color: rgba(33,150,243,0.2);
 }
 
+/* Data warning banner */
+.dwarn {
+  margin: 0 20rpx 6rpx; padding: 10rpx 16rpx; border-radius: 12rpx;
+  background: #fff3e0; border: 2rpx solid #ffcc80;
+  font-size: 22rpx; color: #e65100; line-height: 1.4; flex-shrink: 0;
+}
+
 /* Swipe area */
 .page-area { flex: 1; padding: 0 12rpx 4rpx; min-height: 0; overflow: hidden; }
 .page-view {

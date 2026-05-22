@@ -51,6 +51,10 @@
         <view class="ctl {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
       </view>
 
+      <view class="dwarn" wx:if="{{dataWarning}}">
+        <text>{{dataWarning}} — 编辑 listening.ts 补全</text>
+      </view>
+
       <view class="page-area">
         <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
           <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
