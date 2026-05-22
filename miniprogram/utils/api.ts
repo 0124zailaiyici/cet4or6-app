@@ -2,6 +2,12 @@ const API_BASE = 'http://localhost:3001'
 
 interface CorrectionResult {
   score: number
+  dimensions?: {
+    vocabulary: number
+    grammar: number
+    semantics: number
+    expression: number
+  }
   suggestions: string
   reference: string
 }

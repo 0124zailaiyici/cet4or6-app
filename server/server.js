@@ -41,7 +41,7 @@ app.post('/correct_translation', async (req, res) => {
 
   try {
     const result = await callDeepSeek([
-      { role: 'system', content: '你是一名四级英语翻译考官。请对用户翻译进行评分（百分制），并给出修改建议和参考译文。返回 JSON：{"score": 85, "suggestions": "修改建议", "reference": "参考译文"}' },
+      { role: 'system', content: '你是一名四级英语翻译考官。请从以下四个维度对用户翻译评分（百分制），并给出逐句修改建议和参考译文：\n1. vocabulary(词汇): 用词是否准确、贴切、丰富\n2. grammar(语法): 语法结构是否正确，句式是否多样\n3. semantics(语义): 是否准确传达原文意思，有无漏译\n4. expression(表达): 表达是否地道、自然，符合英语习惯\n\n返回 JSON: {"score": 85, "dimensions": {"vocabulary": 80, "grammar": 85, "semantics": 90, "expression": 82}, "suggestions": "逐句/逐点给出具体修改建议", "reference": "完整的参考译文"}' },
       { role: 'user', content: `中文：${chinese}\n用户翻译：${userAnswer}` },
     ], 0.3);
     res.json(JSON.parse(result));
