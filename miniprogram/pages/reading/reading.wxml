@@ -43,6 +43,8 @@
                 </block>
               </text>
             </block>
+            <!-- Section B：纯文本段落 -->
+            <text wx:elif="{{current.sectionType === 'B'}}" class="pz-text">{{passagePages[passagePage]}}</text>
             <!-- 其他类型：富文本段落 -->
             <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
             <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
