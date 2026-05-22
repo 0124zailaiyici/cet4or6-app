@@ -8,6 +8,7 @@ interface IReadingItem {
   passage: string
   questions: string[]
   options: string[]
+  choices: string[][]
 }
 
 interface IReadingData {

@@ -172,14 +172,35 @@ function parseReading(lines, year) {
 
     // === Section C: 仔细阅读 ===
     if (secType === 'C') {
-      // 按 Passage One/Two/Three 分割
       const subPassages = sec.split(/(?=Passage\s+(?:One|Two|Three)\b)/i)
       for (const sub of subPassages) {
         if (!sub.trim()) continue
-        // 提取题目行
-        const qs = sub.split('\n').map(s => s.trim()).filter(l => /^\d+\./.test(l) || /^[A-D]\)/.test(l))
-        const questions = qs.filter(l => /^\d+\./.test(l)).map(s => sanitize(s))
-        // 提取正文：在 "Questions X to Y are based on" 之后的内容
+        // 提取所有行（题目+选项）
+        const allLines = sub.split('\n').map(s => s.trim()).filter(l => l.length > 3 && !/Answer Sheet|第\d+页|共\d+页|Part\s+III|Directions/.test(l))
+        
+        // 配对：题目 stem + 紧跟的 4 个选项
+        const stems = []
+        const choices = []
+        let currentStem = ''
+        let currentChoices = []
+        for (const line of allLines) {
+          if (/^\d+\./.test(line)) {
+            if (currentStem) {
+              stems.push(sanitize(currentStem))
+              choices.push(currentChoices)
+            }
+            currentStem = line
+            currentChoices = []
+          } else if (/^[A-D]\)/.test(line) && currentStem) {
+            currentChoices.push(sanitize(line))
+          }
+        }
+        if (currentStem) {
+          stems.push(sanitize(currentStem))
+          choices.push(currentChoices)
+        }
+
+        // 提取正文
         const passIdx = sub.search(/questions?\s+[\d\s]+to\s+[\d\s]+are\s+based\s+on\s+the\s+following/i)
         let passageText = ''
         if (passIdx > -1) {
@@ -190,7 +211,6 @@ function parseReading(lines, year) {
             passageText = after.slice(start)
               .split('\n').map(s => s.trim()).filter(l => l.length > 5 && !/^[A-D]\)|^\d+\./.test(l) && !/Answer Sheet|第\d+页|共\d+页/.test(l) && !/Part\s+III|reading comprehension|Directions/.test(l))
               .join(' ')
-              // 清理 PDF 提取的乱码
               .replace(/\^+/g, '')
           }
         }
@@ -198,7 +218,7 @@ function parseReading(lines, year) {
         if (passageText.length > 30) {
           const pNum = sub.match(/Passage\s+(One|Two|Three)/i)?.[1] || ''
           const pLabel = { One: '一', Two: '二', Three: '三' }[pNum] || ''
-          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 4000), questions, options: [] })
+          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 4000), questions: stems, options: [], choices })
         }
       }
     }
