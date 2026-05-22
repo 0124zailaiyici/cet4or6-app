@@ -45,6 +45,7 @@ interface IReadingMethods {
   prevPassage(): void
   nextPassage(): void
   splitPassage(text: string): string[]
+  formatBPassage(text: string): string[]
   parseSegments(page: string): ISegment[]
   saveAnswers(): void
   onBlankTap(e: WechatMiniprogram.TouchEvent): void
@@ -87,11 +88,24 @@ Page<IReadingData, IReadingMethods>({
     this.setData({ darkMode: getDarkMode() })
   },
 
+  formatBPassage(text: string): string[] {
+    if (!text) return ['']
+    // 按段落标签分割 (A) B) C) 或 A）B）C）)
+    const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
+    const pages: string[] = []
+    for (let i = 0; i < parts.length; i += 4) {
+      pages.push(parts.slice(i, i + 4).join('\n\n'))
+    }
+    return pages.length > 0 ? pages : [text]
+  },
+
   select(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
-      const pages = this.splitPassage(item.passage)
+      const pages = item.sectionType === 'B'
+        ? this.formatBPassage(item.passage)
+        : this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
       const formatted = pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
       // 从存储加载已有答案
@@ -221,8 +235,10 @@ Page<IReadingData, IReadingMethods>({
   },
 
   selectStmt(e: WechatMiniprogram.TouchEvent) {
-    const idx = e.currentTarget.dataset.idx as number
-    this.setData({ activeStmt: this.data.activeStmt === idx ? null : idx })
+    const sIdx = parseInt(e.currentTarget.dataset.idx as string)
+    const newVal = this.data.activeStmt === sIdx ? null : sIdx
+    this.setData({ activeStmt: newVal })
+    if (newVal !== null) wx.showToast({ title: `已选第${newVal + 1}题，请选字母`, icon: 'none' })
   },
 
   assignLetter(e: WechatMiniprogram.TouchEvent) {
@@ -240,6 +256,7 @@ Page<IReadingData, IReadingMethods>({
     }
     this.setData({ matchAnswers: ma, activeStmt: null, matchCount: Object.keys(ma).length })
     this.saveMatchAnswers()
+    wx.showToast({ title: (ma[stmt!] ? '已匹配 ' : '已取消 ') + letter, icon: 'none' })
   },
 
   saveMatchAnswers() {

@@ -120,7 +120,8 @@
 
 /* Section B: 长篇匹配 */
 .qz-b-scroll {
-  flex: 1; background: #fff; border-radius: 18rpx; padding: 14rpx 0;
+  flex: 1;
+  background: #fff; border-radius: 18rpx; padding: 14rpx 0;
   box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
 .qb-stmt {
@@ -128,7 +129,7 @@
   padding: 14rpx 24rpx; border-bottom: 1rpx solid #f5f0f0;
 }
 .qb-stmt:last-child { border-bottom: none; }
-.qb-stmt.active { background: rgba(100,181,246,0.06); }
+.qb-stmt.active { background: rgba(30,136,229,0.1); border-left: 4rpx solid #1e88e5; }
 .qb-stmt.done { background: rgba(129,199,132,0.04); }
 
 .qbs-num { font-size: 26rpx; color: #546e7a; font-weight: 600; min-width: 40rpx; }
