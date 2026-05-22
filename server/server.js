@@ -144,6 +144,29 @@ app.get('/dictionary', async (req, res) => {
   }
 });
 
+app.post('/generate_sentence', async (req, res) => {
+  const { word, topic, count = 1 } = req.body;
+  if (!word && !topic) {
+    return res.status(400).json({ error: '至少提供 word 或 topic' });
+  }
+
+  try {
+    const prompt = word
+      ? `请为四级英语单词"${word}"生成 ${count} 个适合大学生英语四级(CET-4)难度的语境句子。每个句子控制在15-25词，语法多样（包含定语从句、虚拟语气、倒装、强调句等四级常考句型），词汇以四级大纲词为主。返回 JSON 数组：[{"english":"...", "chinese":"...", "keywords":["...","..."], "topic":"科技/环保/教育/社会/生活/学习/励志/校园/就业/文化/品德"}]`
+      : `请围绕话题"${topic}"生成 ${count} 个适合大学生英语四级(CET-4)难度的语境句子。每个句子控制在15-25词，语法多样（包含定语从句、虚拟语气、倒装、强调句等四级常考句型），词汇以四级大纲词为主。返回 JSON 数组：[{"english":"...", "chinese":"...", "keywords":["...","..."], "topic":"${topic}"}]`;
+
+    const result = await callDeepSeek([
+      { role: 'system', content: '你是大学英语四级(CET-4)教学专家。你生成的句子必须：1) 词汇在四级大纲范围内 2) 句长15-25词 3) 包含四级常见语法结构 4) 话题贴近大学生生活。只返回纯 JSON 数组，不要 markdown 格式。' },
+      { role: 'user', content: prompt },
+    ], 0.8);
+
+    const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    res.json(JSON.parse(cleaned));
+  } catch (err) {
+    res.status(500).json({ error: '生成失败', detail: err.message });
+  }
+});
+
 app.get('/health', (_, res) => {
   res.json({ status: 'ok', apiKey: !!API_KEY });
 });

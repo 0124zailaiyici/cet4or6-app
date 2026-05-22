@@ -67,3 +67,14 @@ export function lookupWord(word: string): Promise<any> {
 export function correctParagraph(prompt: string, userAnswer: string) {
   return request<{ score: number; dimensions: { coherence: number; content: number; language: number }; suggestions: string }>('/correct_paragraph', { prompt, userAnswer })
 }
+
+export interface GeneratedSentence {
+  english: string
+  chinese: string
+  keywords: string[]
+  topic: string
+}
+
+export function generateSentence(params: { word?: string; topic?: string; count?: number }) {
+  return request<GeneratedSentence[]>('/generate_sentence', params)
+}

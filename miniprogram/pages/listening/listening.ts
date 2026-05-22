@@ -65,6 +65,8 @@ let pageRef: any = null
 function getAudioCtx(): WechatMiniprogram.InnerAudioContext {
   if (!audioCtx) {
     audioCtx = wx.createInnerAudioContext()
+    audioCtx.obeyMuteSwitch = false
+    audioCtx.volume = 1
     audioCtx.onEnded(() => {
       if (!pageRef) return
       if (pageRef.data.audioMode) {
@@ -166,6 +168,7 @@ Page<IListeningData, IListeningMethods>({
       if (isAudio) {
         const ctx = getAudioCtx()
         ctx.stop()
+        ctx.playbackRate = this.data.speed
         const src = passage.audioUrl!.startsWith('http')
           ? passage.audioUrl!
           : `${API_BASE}${encodeURI(passage.audioUrl!)}`
@@ -228,6 +231,7 @@ Page<IListeningData, IListeningMethods>({
         ctx.pause()
         this.setData({ isPlaying: false })
       } else {
+        ctx.playbackRate = this.data.speed
         ctx.play()
         this.setData({ isPlaying: true })
       }
