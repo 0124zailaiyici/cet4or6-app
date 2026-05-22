@@ -124,7 +124,7 @@
   background: rgba(30,136,229,0.04);
   box-shadow: 0 2rpx 12rpx rgba(30,136,229,0.1);
 }
-.qz-opts.compact .qzo { width: auto; flex: 0 1 auto; padding: 16rpx 22rpx; white-space: nowrap; }
+.qz-opts.compact .qzo { width: calc(50% - 6rpx); padding: 14rpx 20rpx; font-size: 24rpx; border-radius: 16rpx; }
 .qzo {
   width: calc(50% - 8rpx);
   font-size: 26rpx; color: #4a4a6a; line-height: 1.5;

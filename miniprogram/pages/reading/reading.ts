@@ -243,11 +243,21 @@ Page<IReadingData, IReadingMethods>({
   },
 
   prevQ() {
-    if (this.data.currentQ > 0) { this.setData({ currentQ: this.data.currentQ - 1 }); this.updateCompact() }
+    if (this.data.currentQ > 0) {
+      const q = this.data.currentQ - 1
+      const sl = String(this.data.cAnswers[q] || '')
+      this.setData({ currentQ: q, cSelIdx: 'ABCD'.indexOf(sl) })
+      this.updateCompact()
+    }
   },
   nextQ() {
     const t = this.data.current?.questions?.length || 0
-    if (this.data.currentQ < t - 1) { this.setData({ currentQ: this.data.currentQ + 1 }); this.updateCompact() }
+    if (this.data.currentQ < t - 1) {
+      const q = this.data.currentQ + 1
+      const sl = String(this.data.cAnswers[q] || '')
+      this.setData({ currentQ: q, cSelIdx: 'ABCD'.indexOf(sl) })
+      this.updateCompact()
+    }
   },
   prevPassage() {
     if (this.data.passagePage > 0) this.setData({ passagePage: this.data.passagePage - 1 })
