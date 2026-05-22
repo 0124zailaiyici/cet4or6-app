@@ -59,14 +59,8 @@
             <view class="sc-bottom">
               <view class="sc-tag">{{item.topic}}</view>
               <view class="sc-actions">
-                <view class="sc-fav {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">
-                  <text>{{favoriteIds.indexOf(item.id) !== -1 ? '★' : '☆'}}</text>
-                  <text class="sc-action-label">收藏</text>
-                </view>
-                <view class="sc-master {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">
-                  <text>{{masteredIds.indexOf(item.id) !== -1 ? '✓' : '○'}}</text>
-                  <text class="sc-action-label">掌握</text>
-                </view>
+                <view class="sc-fav {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(item.id) !== -1 ? '★' : '☆'}}<text class="sc-action-label">收藏</text></view>
+                <view class="sc-master {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">{{masteredIds.indexOf(item.id) !== -1 ? '✓' : '○'}}<text class="sc-action-label">掌握</text></view>
               </view>
             </view>
           </view>
