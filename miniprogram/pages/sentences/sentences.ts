@@ -15,6 +15,7 @@ interface ISentencesData {
   allSentences: ISentence[]
   filteredSentences: ISentence[]
   topics: string[]
+  topicCounts: Record<string, number>
   currentTopic: string
   masteredIds: number[]
   expandedIds: number[]
@@ -23,6 +24,7 @@ interface ISentencesData {
   darkMode: boolean
   viewMode: 'list' | 'immersion'
   immersionIndex: number
+  scrollHeight: number
   showGenModal: boolean
   genInput: string
   genType: 'word' | 'topic'
@@ -64,6 +66,7 @@ Page<ISentencesData, ISentencesMethods>({
     allSentences: [],
     filteredSentences: [],
     topics: [],
+    topicCounts: {},
     currentTopic: '全部',
     masteredIds: [],
     expandedIds: [],
@@ -72,6 +75,7 @@ Page<ISentencesData, ISentencesMethods>({
     darkMode: false,
     viewMode: 'list',
     immersionIndex: 0,
+    scrollHeight: 600,
     showGenModal: false,
     genInput: '',
     genType: 'word',
@@ -85,14 +89,28 @@ Page<ISentencesData, ISentencesMethods>({
   onLoad() {
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
+
+    const sysInfo = wx.getSystemInfoSync()
+    const pxPerRpx = sysInfo.windowWidth / 750
+    const headerH = Math.ceil(310 * pxPerRpx)
+    const topicH = Math.ceil(80 * pxPerRpx)
+    const modeH = Math.ceil(90 * pxPerRpx)
+    const sbH = sysInfo.statusBarHeight || 20
+    const scrollH = Math.floor(sysInfo.windowHeight - headerH - topicH - modeH - sbH - 10)
+    this.setData({ scrollHeight: scrollH > 200 ? scrollH : 400 })
     const sentences = sentencesData as ISentence[]
     const topics = [...new Set(sentences.map(s => s.topic))]
     topics.unshift('全部')
+    const topicCounts: Record<string, number> = {}
+    sentences.forEach(s => {
+      topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1
+    })
 
     this.setData({
       allSentences: sentences,
       filteredSentences: sentences,
       topics,
+      topicCounts,
       masteredIds: app.globalData.studyData.masteredSentences,
       favoriteIds: app.globalData.studyData.favoriteSentenceIds,
     })
@@ -271,10 +289,15 @@ Page<ISentencesData, ISentencesMethods>({
       const allSentences = [...this.data.allSentences, ...newSentences]
       const topics = [...new Set(allSentences.map(s => s.topic))]
       topics.unshift('全部')
+      const topicCounts: Record<string, number> = {}
+      allSentences.forEach(s => {
+        topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1
+      })
 
       this.setData({
         allSentences,
         topics,
+        topicCounts,
         showGenModal: false,
         generating: false,
       })
@@ -322,10 +345,15 @@ Page<ISentencesData, ISentencesMethods>({
       const allSentences = [...this.data.allSentences, ...newSentences]
       const topics = [...new Set(allSentences.map(s => s.topic))]
       topics.unshift('全部')
+      const topicCounts2: Record<string, number> = {}
+      allSentences.forEach(s => {
+        topicCounts2[s.topic] = (topicCounts2[s.topic] || 0) + 1
+      })
 
       this.setData({
         allSentences,
         topics,
+        topicCounts: topicCounts2,
         showPasteModal: false,
         parsing: false,
       })
