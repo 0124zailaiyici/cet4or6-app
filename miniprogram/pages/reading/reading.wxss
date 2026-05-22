@@ -50,7 +50,7 @@
 /* === Passage zone === */
 .pass-zone {
   flex: 1; display: flex; flex-direction: column;
-  padding: 0 20rpx; min-height: 0; overflow: hidden;
+  padding: 0 20rpx; min-height: 0;
 }
 .pz-scroll {
   flex: 1;
@@ -71,8 +71,8 @@
 
 /* === Question zone === */
 .quest-zone {
-  flex: 1; display: flex; flex-direction: column;
-  padding: 0 20rpx 24rpx; min-height: 0; overflow: hidden;
+  flex: 1.3; display: flex; flex-direction: column;
+  padding: 0 20rpx 24rpx; min-height: 0;
   background: #f7f0ef;
 }
 
@@ -119,7 +119,7 @@
 
 /* Section B: 长篇匹配 */
 .qb-grid {
-  flex: 1; overflow: hidden;
+  flex: 1;
   background: #fff; border-radius: 18rpx; padding: 2rpx 0;
   box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
