@@ -58,7 +58,7 @@ Page<IDictData>({
     this._applyDarkMode()
     const raw = wx.getStorageSync('dictHistory')
     if (raw) this.setData({ history: raw })
-    this.setData({ aiEnabled: wx.getStorageSync('dictAiEnabled') !== false })
+    this.setData({ aiEnabled: wx.getStorageSync('dictAiEnabled') === true })
     checkHealth().then(r => {
       if (r.apiKey) this.setData({ aiAvailable: true })
     }).catch(() => {})

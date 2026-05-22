@@ -276,7 +276,7 @@ Page<IWritingData, IWritingMethods>({
     writingWordCount: 0,
     submitting: false,
     aiAvailable: false,
-    aiEnabled: wx.getStorageSync('writingAiEnabled') !== false,
+    aiEnabled: wx.getStorageSync('writingAiEnabled') === true,
     detailMode: false,
   },
 

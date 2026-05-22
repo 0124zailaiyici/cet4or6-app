@@ -105,7 +105,7 @@ Page({
     completedIds: [],
     submitting: false,
     aiAvailable: false,
-    aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
+    aiEnabled: wx.getStorageSync('translationAiEnabled') === true,
     darkMode: false,
     wordCount: 0,
     pct: 0,

@@ -11,14 +11,9 @@
     <view class="ft-item {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">❗ 难句记录</view>
   </view>
 
-  <scroll-view class="f-content" scroll-y>
+  <scroll-view class="f-content" scroll-y scroll-top="{{scrollTop}}">
     <block wx:if="{{tab === 0}}">
-      <view class="empty-state" wx:if="{{favSentences.length === 0}}">
-        <text class="empty-emoji">⭐</text>
-        <text class="empty-text">还没有收藏的句子</text>
-        <text class="empty-hint">在句子页面点击 ☆ 即可收藏</text>
-      </view>
-      <view class="f-list" wx:else>
+      <view class="f-list" wx:if="{{favSentences.length > 0}}">
         <view class="fcard" wx:for="{{favSentences}}" wx:key="id">
           <text class="fc-english">{{item.english}}</text>
           <text class="fc-chinese">{{item.chinese}}</text>
@@ -28,14 +23,14 @@
           </view>
         </view>
       </view>
+      <view class="empty-state" wx:else>
+        <text class="empty-emoji">⭐</text>
+        <text class="empty-text">还没有收藏的句子</text>
+        <text class="empty-hint">在句子页面点击 ☆ 即可收藏</text>
+      </view>
     </block>
     <block wx:elif="{{tab === 1}}">
-      <view class="empty-state" wx:if="{{hardListens.length === 0}}">
-        <text class="empty-emoji">❗</text>
-        <text class="empty-text">还没有难句记录</text>
-        <text class="empty-hint">在听力页面点击 ! 标记难句</text>
-      </view>
-      <view class="f-list" wx:else>
+      <view class="f-list" wx:if="{{hardListens.length > 0}}">
         <view class="hcard" wx:for="{{hardListens}}" wx:for-index="idx" wx:key="passageId + '-' + sentenceIndex">
           <view class="hc-header">
             <text class="hc-source">🎵 {{item.passageTitle}}</text>
@@ -44,6 +39,11 @@
           <text class="hc-text">{{item.text}}</text>
           <view class="hc-remove" data-index="{{idx}}" catchtap="removeHard">移除</view>
         </view>
+      </view>
+      <view class="empty-state" wx:else>
+        <text class="empty-emoji">❗</text>
+        <text class="empty-text">还没有难句记录</text>
+        <text class="empty-hint">在听力页面点击 ! 标记难句</text>
       </view>
     </block>
   </scroll-view>

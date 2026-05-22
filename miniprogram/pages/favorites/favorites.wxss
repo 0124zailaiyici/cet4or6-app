@@ -23,7 +23,7 @@
 .fc-tag { font-size: 20rpx; color: #ff8f00; padding: 4rpx 14rpx; border-radius: 12rpx; background: rgba(255,193,7,0.06); }
 .fc-remove { font-size: 22rpx; color: #ffd3b6; margin-left: auto; padding: 6rpx 16rpx; border-radius: 14rpx; border: 2rpx solid rgba(255,211,182,0.2); }
 
-.hcard { background: #fff; border-radius: 20rpx; padding: 24rpx; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); margin-bottom: 14rpx; }
+.hcard { background: #fff; border-radius: 20rpx; padding: 24rpx; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); }
 .hc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10rpx; }
 .hc-source { font-size: 22rpx; color: #ff9eb5; }
 .hc-index { font-size: 20rpx; color: #8a7a9a; }

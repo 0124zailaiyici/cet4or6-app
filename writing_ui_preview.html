@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>写作教学 UI 预览</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+  background: #f2ecf6; display: flex; justify-content: center;
+  padding: 16px 0 48px;
+}
+
+.phone {
+  width: 375px; background: #fff;
+  box-shadow: 0 8px 40px rgba(80,30,100,0.1);
+  position: relative; overflow: hidden;
+}
+
+/* ===== Header ===== */
+.header {
+  background: linear-gradient(135deg, #d4a0dc 0%, #9c27b0 100%);
+  padding: 44px 20px 18px; position: relative;
+}
+.header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: rgba(255,255,255,0.08);
+}
+.header-row { display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.18); display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+.header-title { font-size: 19px; font-weight: 700; color: #fff; letter-spacing: 0.3px; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+.header-ai {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 17px;
+}
+
+/* ===== Detail Header ===== */
+.detail-header {
+  background: linear-gradient(135deg, #d4a0dc 0%, #9c27b0 100%);
+  padding: 44px 20px 14px; display: none;
+}
+.dh-top { display: flex; align-items: center; gap: 10px; }
+.dh-back {
+  padding: 6px 14px; border-radius: 8px;
+  background: rgba(255,255,255,0.15); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500; color: #fff; cursor: pointer;
+  flex-shrink: 0;
+}
+.dh-title { font-size: 16px; font-weight: 600; color: #fff; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dh-ai {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 15px;
+}
+
+/* ===== Tabs ===== */
+.tabs {
+  display: flex; gap: 3px; margin: 12px 16px 0;
+  background: #f5f0f8; border-radius: 10px; padding: 3px;
+}
+.tab {
+  flex: 1; text-align: center; padding: 8px 0; font-size: 12px;
+  color: #a090b0; border-radius: 8px; cursor: pointer; font-weight: 500;
+}
+.tab.active { background: #fff; color: #9c27b0; font-weight: 700; }
+
+/* ===== Content ===== */
+.content { padding: 16px 16px 32px; }
+.page-pane { display: none; }
+.page-pane.show { display: block; }
+
+/* ===== Section hint ===== */
+.hint { font-size: 12px; color: #b09bc0; margin-bottom: 12px; }
+
+/* ===== Pattern Card ===== */
+.pcard {
+  background: #fff; border-radius: 12px; padding: 12px 14px;
+  border-left: 3px solid #d4a0dc;
+  box-shadow: 0 1px 4px rgba(156,39,176,0.03); margin-bottom: 8px;
+  cursor: pointer;
+}
+.pcard-row { display: flex; align-items: center; justify-content: space-between; }
+.pcard-pat { font-size: 13px; font-weight: 600; color: #9c27b0; font-family: 'Menlo', monospace; }
+.pcard-arrow { font-size: 10px; color: #ccb8d8; transition: transform 0.15s; }
+.pcard-arrow.open { transform: rotate(90deg); }
+.pcard-cn { font-size: 12px; color: #b09bc0; margin-top: 2px; display: block; }
+.pcard-ex {
+  margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+  background: rgba(156,39,176,0.03); font-size: 12px; color: #504060; line-height: 1.6;
+}
+
+/* ===== Practice ===== */
+.practice { margin: 16px 0; }
+.practice-h {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.practice-label { font-size: 13px; font-weight: 600; color: #504060; }
+.practice-hint { font-size: 11px; color: #c0b0cc; }
+.p-input-wrap { position: relative; margin-bottom: 10px; }
+.p-input {
+  width: 100%; min-height: 72px; padding: 10px 12px 28px; border-radius: 10px;
+  border: 1.5px solid #ede4f0; font-size: 14px; line-height: 1.6; color: #3a2a4a;
+  resize: none; outline: none; font-family: inherit;
+  transition: border 0.15s;
+}
+.p-input:focus { border-color: #ce93d8; }
+.p-input::placeholder { color: #d0c0d8; }
+.p-wc {
+  position: absolute; right: 10px; bottom: 6px; font-size: 10px; color: #c0b0cc;
+}
+.p-wc.on { color: #9c27b0; }
+
+/* ===== Button ===== */
+.btn {
+  display: block; width: 100%; height: 40px; border-radius: 20px; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  line-height: 40px; text-align: center;
+}
+.btn-primary { background: linear-gradient(135deg, #d4a0dc, #9c27b0); color: #fff; }
+.btn-outline { background: transparent; border: 1.5px solid #ede4f0; color: #a090b0; margin-top: 6px; }
+
+/* ===== Result ===== */
+.result {
+  background: #fff; border-radius: 14px; padding: 16px 18px;
+  box-shadow: 0 2px 12px rgba(156,39,176,0.03); margin-top: 14px;
+}
+.r-h { font-size: 12px; font-weight: 600; color: #504060; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+.r-line { font-size: 12px; color: #504060; line-height: 1.6; margin: 2px 0; }
+.r-line b { color: #9c27b0; }
+.r-item { font-size: 12px; margin: 3px 0; display: flex; align-items: center; gap: 5px; }
+.r-item.green { color: #43a047; }
+.r-item.orange { color: #ef6c00; }
+.r-div { height: 1px; background: #f5f0f8; margin: 8px 0; }
+.r-foot { font-size: 11px; color: #c0b0cc; }
+
+/* ===== Topic Pills ===== */
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.pill {
+  padding: 5px 14px; border-radius: 14px; font-size: 12px;
+  background: #f5f0f8; color: #b09bc0; cursor: pointer;
+}
+.pill.on { background: rgba(156,39,176,0.08); color: #9c27b0; font-weight: 600; }
+
+/* ===== Bubble ===== */
+.bubble {
+  background: #fff; border-radius: 12px; padding: 16px;
+  border: 1.5px solid #f0e4f8; position: relative; margin-bottom: 14px;
+}
+.bubble::before {
+  content: '💬'; position: absolute; top: -9px; left: 12px;
+  font-size: 13px; background: #fff; padding: 0 4px;
+}
+.bubble-text { font-size: 13px; line-height: 1.6; color: #504060; }
+
+/* ===== Score ===== */
+.s-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.s-ring {
+  width: 60px; height: 60px; border-radius: 50%; flex-shrink: 0;
+  background: conic-gradient(#9c27b0 0deg 270deg, #f0e4f8 270deg 360deg);
+  display: flex; align-items: center; justify-content: center;
+}
+.s-in {
+  width: 48px; height: 48px; border-radius: 50%; background: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.s-num { font-size: 18px; font-weight: 800; color: #9c27b0; line-height: 1; }
+.s-unit { font-size: 9px; color: #c0b0cc; }
+.s-stars { display: flex; gap: 1px; margin-top: 1px; }
+.s-stars text { font-size: 9px; color: #ede4f0; }
+.s-stars text.on { color: #ffc107; }
+
+.s-meta { flex: 1; }
+.s-m { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; }
+.s-ml { color: #c0b0cc; }
+.s-mr { font-weight: 600; }
+.s-mr.green { color: #43a047; }
+.s-mr.orange { color: #ef6c00; }
+
+.dims { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.dim-r { display: flex; align-items: center; gap: 6px; }
+.dim-l { width: 28px; font-size: 11px; color: #c0b0cc; text-align: right; flex-shrink: 0; }
+.dim-b { flex: 1; height: 6px; border-radius: 3px; background: #f0e4f8; overflow: hidden; }
+.dim-f { height: 100%; border-radius: 3px; }
+.dim-f.green { background: linear-gradient(90deg,#a5d6a7,#43a047); }
+.dim-f.orange { background: linear-gradient(90deg,#ffcc80,#ef6c00); }
+.dim-v { width: 22px; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
+.dim-v.green { color: #43a047; }
+.dim-v.orange { color: #ef6c00; }
+
+.sb { margin-bottom: 8px; }
+.sb:last-child { margin-bottom: 0; }
+.sb-label { font-size: 11px; color: #c0b0cc; margin-bottom: 4px; display: flex; align-items: center; gap: 3px; }
+.sb-body {
+  padding: 8px 10px; border-radius: 8px; font-size: 12px; line-height: 1.6;
+}
+.sb-body.gray { background: #faf5fc; color: #5a4a5a; }
+.sb-body.purple { background: rgba(156,39,176,0.04); color: #5a4a5a; }
+
+/* ===== Word count bar ===== */
+.wc-bar { margin-bottom: 10px; }
+.wc-bar-h { display: flex; justify-content: space-between; font-size: 10px; color: #c0b0cc; margin-bottom: 3px; }
+.wc-bar-h strong { color: #9c27b0; }
+.wc-bar-t { height: 3px; border-radius: 2px; background: #f0e4f8; overflow: hidden; }
+.wc-bar-f { height: 100%; border-radius: 2px; background: linear-gradient(90deg,#d4a0dc,#9c27b0); }
+.wc-bar-f.under { background: linear-gradient(90deg,#ffcc80,#ef6c00); }
+.wc-bar-m { display: flex; justify-content: space-between; font-size: 8px; color: #e0d0e8; margin-top: 1px; }
+
+/* ===== Writing List ===== */
+.wl { display: flex; flex-direction: column; gap: 8px; }
+.wi {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: #fff; border-radius: 12px;
+  border-left: 3px solid #d4a0dc;
+  box-shadow: 0 1px 4px rgba(156,39,176,0.03); cursor: pointer;
+}
+.wi.gray { border-left-color: #e0d0e8; }
+.wi-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(156,39,176,0.05); display: flex;
+  align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+}
+.wi-body { flex: 1; min-width: 0; }
+.wi-title { font-size: 13px; font-weight: 600; color: #504060; }
+.wi-meta { font-size: 10px; color: #c0b0cc; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ══ Normal Header ══ -->
+  <div class="header" id="normalHeader">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="header-icon">✍️</div>
+        <div>
+          <div class="header-title">写作教学</div>
+          <div class="header-sub">CET-4 写作训练</div>
+        </div>
+      </div>
+      <div class="header-ai">🤖</div>
+    </div>
+  </div>
+
+  <!-- ══ Detail Header ══ -->
+  <div class="detail-header" id="detailHeader">
+    <div class="dh-top">
+      <div class="dh-back" onclick="showList()">返回</div>
+      <div class="dh-title" id="dhTitle">The Importance of Time Management</div>
+      <div class="dh-ai">🤖</div>
+    </div>
+  </div>
+
+  <!-- ══ Tabs ══ -->
+  <div class="tabs">
+    <div class="tab" onclick="goTab(0)">📖 句型库</div>
+    <div class="tab" onclick="goTab(1)">📝 段落写作</div>
+    <div class="tab active" onclick="goTab(2)">📄 全文模拟</div>
+  </div>
+
+  <!-- ═══════════ TAB 0: 句型库 ═══════════ -->
+  <div class="content page-pane" id="p0">
+
+    <div class="hint">📚 点击卡片展开例句，选一个句型练手</div>
+
+    <div class="pcard" onclick="toggleP(this)">
+      <div class="pcard-row">
+        <span class="pcard-pat">There is no doubt that…</span>
+        <span class="pcard-arrow">▶</span>
+      </div>
+      <span class="pcard-cn">毫无疑问……</span>
+      <div class="pcard-ex" style="display:none">
+        There is no doubt that education plays a vital role in personal development.
+      </div>
+    </div>
+
+    <div class="pcard" onclick="toggleP(this)">
+      <div class="pcard-row">
+        <span class="pcard-pat">The more…, the more…</span>
+        <span class="pcard-arrow">▶</span>
+      </div>
+      <span class="pcard-cn">越……就越……</span>
+      <div class="pcard-ex" style="display:none">
+        The more we practice, the more fluent our English will become.
+      </div>
+    </div>
+
+    <div class="pcard" onclick="toggleP(this)">
+      <div class="pcard-row">
+        <span class="pcard-pat">It is + adj. + for sb. to do…</span>
+        <span class="pcard-arrow">▶</span>
+      </div>
+      <span class="pcard-cn">对某人来说做某事是……的</span>
+      <div class="pcard-ex" style="display:none">
+        It is important for college students to learn a second language.
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-h">
+        <span class="practice-label">用上方句型造句</span>
+        <span class="practice-hint">当前：There is no doubt that…</span>
+      </div>
+      <div class="p-input-wrap">
+        <textarea class="p-input" rows="2" placeholder="在此输入你的句子…">There is no doubt that practicing English every day can improve our writing skills.</textarea>
+        <span class="p-wc on">14 词</span>
+      </div>
+      <button class="btn btn-primary">提交练习</button>
+    </div>
+
+    <div class="result">
+      <div class="r-h">🔍 基础评审</div>
+      <div class="r-line"><b>句型：</b>There is no doubt that…</div>
+      <div class="r-line"><b>你的句子：</b>There is no doubt that practicing English every day can improve our writing skills.</div>
+      <div class="r-div"></div>
+      <div class="r-item green">✅ 长度适中（14 词）</div>
+      <div class="r-item green">✅ 首字母大写 &amp; 句末标点正确</div>
+      <div class="r-item green">✅ 句型使用正确</div>
+      <div class="r-div"></div>
+      <div class="r-foot">💡 开启 AI 可获得深度语法纠错</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ TAB 1: 段落写作 ═══════════ -->
+  <div class="content page-pane" id="p1">
+
+    <div class="hint">🎯 选主题 → 读主题句 → 续写</div>
+
+    <div class="pills">
+      <span class="pill on">🌿 环保</span>
+      <span class="pill">💻 科技</span>
+      <span class="pill">📚 教育</span>
+      <span class="pill">💪 健康</span>
+      <span class="pill">🤝 社会</span>
+      <span class="pill">🏫 校园</span>
+    </div>
+
+    <div class="bubble">
+      <div class="bubble-text">Environmental protection is everyone's responsibility.</div>
+    </div>
+
+    <div class="practice" style="margin-top:0">
+      <div class="practice-h">
+        <span class="practice-label">续写段落</span>
+        <span class="practice-hint">建议 60–120 词</span>
+      </div>
+      <div class="p-input-wrap">
+        <textarea class="p-input" rows="3" placeholder="从此主题句开始续写……">Environmental protection is everyone's responsibility. Firstly, we can reduce plastic use in daily life. Bringing our own shopping bags instead of using plastic ones can make a real difference. Secondly, saving energy by turning off unused lights and devices is also important.</textarea>
+        <span class="p-wc on">56 词</span>
+      </div>
+      <button class="btn btn-primary">提交评审</button>
+    </div>
+
+    <div class="result">
+      <div class="r-h">📊 评审结果</div>
+
+      <div class="s-row">
+        <div class="s-ring">
+          <div class="s-in">
+            <span class="s-num">75</span>
+            <span class="s-unit">分</span>
+            <div class="s-stars">
+              <text class="on">★</text>
+              <text class="on">★</text>
+              <text class="on">★</text>
+              <text>★</text>
+              <text>★</text>
+            </div>
+          </div>
+        </div>
+        <div class="s-meta">
+          <div class="s-m"><span class="s-ml">最高</span><span class="s-mr green">82</span></div>
+          <div class="s-m"><span class="s-ml">最低</span><span class="s-mr orange">65</span></div>
+          <div class="s-m"><span class="s-ml">趋势</span><span class="s-mr green">↗ 上升</span></div>
+        </div>
+      </div>
+
+      <div class="dims">
+        <div class="dim-r">
+          <span class="dim-l">连贯</span>
+          <div class="dim-b"><div class="dim-f orange" style="width:68%"></div></div>
+          <span class="dim-v orange">68</span>
+        </div>
+        <div class="dim-r">
+          <span class="dim-l">内容</span>
+          <div class="dim-b"><div class="dim-f green" style="width:82%"></div></div>
+          <span class="dim-v green">82</span>
+        </div>
+        <div class="dim-r">
+          <span class="dim-l">语言</span>
+          <div class="dim-b"><div class="dim-f orange" style="width:72%"></div></div>
+          <span class="dim-v orange">72</span>
+        </div>
+      </div>
+
+      <div class="sb">
+        <div class="sb-label">💡 修改建议</div>
+        <div class="sb-body gray">
+          ✅ 词数适中 · ✅ 紧扣环保主题 · 💡 试试 however / therefore 增强连贯
+        </div>
+      </div>
+
+      <button class="btn btn-outline">🔄 换主题重写</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ TAB 2: 全文模拟 ═══════════ -->
+
+  <!-- List -->
+  <div class="content page-pane show" id="p2-list">
+    <div class="hint">📝 选一道题，模拟考场写作</div>
+
+    <div class="wl">
+      <div class="wi" onclick="showDetail('The Importance of Time Management')">
+        <div class="wi-icon">📄</div>
+        <div class="wi-body">
+          <div class="wi-title">The Importance of Time Management</div>
+          <div class="wi-meta">120–180 词 · 四级真题 · ✅ 已完成</div>
+        </div>
+      </div>
+      <div class="wi gray" onclick="showDetail('Should College Students Take Part-time Jobs?')">
+        <div class="wi-icon">📄</div>
+        <div class="wi-body">
+          <div class="wi-title">Should College Students Take Part-time Jobs?</div>
+          <div class="wi-meta">120–180 词 · 四级模拟 · ○ 未完成</div>
+        </div>
+      </div>
+      <div class="wi gray" onclick="showDetail('My View on Lifelong Learning')">
+        <div class="wi-icon">📄</div>
+        <div class="wi-body">
+          <div class="wi-title">My View on Lifelong Learning</div>
+          <div class="wi-meta">120–180 词 · 四级模拟 · ○ 未完成</div>
+        </div>
+      </div>
+      <div class="wi gray" onclick="showDetail('How to Relieve Stress in Modern Life')">
+        <div class="wi-icon">📄</div>
+        <div class="wi-body">
+          <div class="wi-title">How to Relieve Stress in Modern Life</div>
+          <div class="wi-meta">120–180 词 · 四级模拟 · ○ 未完成</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail -->
+  <div class="content page-pane" id="p2-detail">
+
+    <div class="bubble">
+      <div style="font-size:10px;color:#c0b0cc;margin-bottom:4px">📋 题目</div>
+      <div class="bubble-text" style="font-size:12px">Directions: For this part, you are allowed 30 minutes to write a composition on the topic 'The Importance of Time Management for College Students'. You should write at least 120 words but no more than 180 words.</div>
+    </div>
+
+    <div class="practice" style="margin-top:0">
+      <div class="practice-h">
+        <span class="practice-label">你的作文</span>
+        <span class="practice-hint">120–180 词</span>
+      </div>
+
+      <div class="wc-bar">
+        <div class="wc-bar-h">
+          <span>词数</span>
+          <span><strong>86</strong> / 120–180</span>
+        </div>
+        <div class="wc-bar-t">
+          <div class="wc-bar-f under" style="width:48%"></div>
+        </div>
+        <div class="wc-bar-m"><span>0</span><span>120</span><span>180</span></div>
+      </div>
+
+      <div class="p-input-wrap">
+        <textarea class="p-input" rows="5" style="min-height:110px" placeholder="在此输入你的作文……">Time management is of great importance for college students. First of all, effective time management helps students balance their studies and activities. With proper planning, they can have enough time for both learning and relaxation.
+
+Secondly, good time management can reduce stress and improve efficiency. Students who manage their time well are more likely to achieve goals.
+
+In conclusion, mastering time management is essential for a successful college life.</textarea>
+        <span class="p-wc on">86 词</span>
+      </div>
+      <button class="btn btn-primary">提交批改</button>
+    </div>
+
+    <div class="result">
+      <div class="r-h">📊 批改结果</div>
+
+      <div class="s-row">
+        <div class="s-ring" style="background:conic-gradient(#9c27b0 0deg 295deg, #f0e4f8 295deg 360deg)">
+          <div class="s-in">
+            <span class="s-num">82</span>
+            <span class="s-unit">分</span>
+            <div class="s-stars">
+              <text class="on">★</text>
+              <text class="on">★</text>
+              <text class="on">★</text>
+              <text class="on">★</text>
+              <text>★</text>
+            </div>
+          </div>
+        </div>
+        <div class="s-meta">
+          <div class="s-m"><span class="s-ml">最高</span><span class="s-mr green">82</span></div>
+          <div class="s-m"><span class="s-ml">最低</span><span class="s-mr orange">65</span></div>
+          <div class="s-m"><span class="s-ml">趋势</span><span class="s-mr green">↗ 上升</span></div>
+        </div>
+      </div>
+
+      <div class="dims">
+        <div class="dim-r">
+          <span class="dim-l">内容</span>
+          <div class="dim-b"><div class="dim-f green" style="width:82%"></div></div>
+          <span class="dim-v green">82</span>
+        </div>
+        <div class="dim-r">
+          <span class="dim-l">结构</span>
+          <div class="dim-b"><div class="dim-f green" style="width:78%"></div></div>
+          <span class="dim-v green">78</span>
+        </div>
+        <div class="dim-r">
+          <span class="dim-l">语言</span>
+          <div class="dim-b"><div class="dim-f orange" style="width:74%"></div></div>
+          <span class="dim-v orange">74</span>
+        </div>
+      </div>
+
+      <div class="sb">
+        <div class="sb-label">💡 修改建议</div>
+        <div class="sb-body gray">
+          ✅ 总—分—总结构清晰 · ✅ 内容紧扣主题<br>
+          💡 词数偏少（86/120），建议扩展 · 💡 多使用连接词
+        </div>
+      </div>
+
+      <div class="sb">
+        <div class="sb-label">📖 参考范文</div>
+        <div class="sb-body purple" style="font-size:11px;line-height:1.6">
+          Time management is of great importance for college students. Firstly, effective time management helps students to balance their academic studies and extracurricular activities. With proper planning, they can ensure that they have enough time for both learning and relaxation. Secondly, good time management skills can reduce stress and improve efficiency. Students who manage their time well are more likely to achieve their goals. In conclusion, mastering time management is essential for a successful and fulfilling college life.
+        </div>
+      </div>
+
+      <button class="btn btn-outline">🔄 重新写作</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const headers = ['normalHeader', 'detailHeader'];
+const panes = ['p0', 'p1', 'p2-list', 'p2-detail'];
+
+function showPane(id) {
+  panes.forEach(p => document.getElementById(p).classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+
+function goTab(n) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  document.getElementById('normalHeader').style.display = '';
+  document.getElementById('detailHeader').style.display = 'none';
+  if (n === 0) showPane('p0');
+  else if (n === 1) showPane('p1');
+  else showPane('p2-list');
+}
+
+function showDetail(title) {
+  document.getElementById('dhTitle').textContent = title;
+  document.getElementById('normalHeader').style.display = 'none';
+  document.getElementById('detailHeader').style.display = 'block';
+  showPane('p2-detail');
+}
+
+function showList() {
+  document.getElementById('normalHeader').style.display = '';
+  document.getElementById('detailHeader').style.display = 'none';
+  showPane('p2-list');
+}
+
+function toggleP(el) {
+  const ex = el.querySelector('.pcard-ex');
+  const ar = el.querySelector('.pcard-arrow');
+  const open = ex.style.display !== 'none';
+  ex.style.display = open ? 'none' : 'block';
+  ar.textContent = open ? '▶' : '▼';
+}
+</script>
+</body>
+</html>
