@@ -97,8 +97,10 @@ function getAudioCtx(): WechatMiniprogram.InnerAudioContext {
         })
       }
     })
-    audioCtx.onError(() => {
-      wx.showToast({ title: '播放失败，请确认服务器已启动', icon: 'none' })
+    audioCtx.onError((res) => {
+      const code = (res as any).errCode
+      wx.showToast({ title: `播放失败${code ? '(' + code + ')' : ''}`, icon: 'none' })
+      if (pageRef) pageRef.setData({ isPlaying: false, loading: false })
     })
   }
   return audioCtx
@@ -166,7 +168,7 @@ Page<IListeningData, IListeningMethods>({
         ctx.stop()
         const src = passage.audioUrl!.startsWith('http')
           ? passage.audioUrl!
-          : `${API_BASE}${passage.audioUrl}`
+          : `${API_BASE}${encodeURI(passage.audioUrl!)}`
         ctx.src = src
       }
       this.setData({
@@ -200,7 +202,7 @@ Page<IListeningData, IListeningMethods>({
     ctx.stop()
     ctx.playbackRate = this.data.speed
     if (useAudioUrl) {
-      ctx.src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${useAudioUrl}`
+      ctx.src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${encodeURI(useAudioUrl)}`
     } else {
       ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
     }
@@ -227,8 +229,7 @@ Page<IListeningData, IListeningMethods>({
         this.setData({ isPlaying: false })
       } else {
         ctx.play()
-        this.setData({ isPlaying: true, loading: true })
-        ctx.onPlay(() => this.setData({ loading: false }))
+        this.setData({ isPlaying: true })
       }
     } else if (this.data.isPlaying) {
       ctx.pause()
