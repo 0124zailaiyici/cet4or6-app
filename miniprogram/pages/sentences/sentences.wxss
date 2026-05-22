@@ -231,6 +231,11 @@
 
 .sc-master.on { color: #81c784; }
 
+.sh-btn-ai {
+  background: rgba(255,255,255,0.3);
+  font-weight: 600;
+}
+
 /* Empty state */
 .empty-state {
   display: flex;
@@ -242,3 +247,144 @@
 .empty-emoji { font-size: 80rpx; margin-bottom: 20rpx; }
 .empty-text { font-size: 30rpx; color: #2d2d4e; font-weight: 600; margin-bottom: 8rpx; }
 .empty-hint { font-size: 26rpx; color: #8a7a9a; }
+
+/* ===== Generate Modal ===== */
+.gen-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.gen-modal {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 40rpx 36rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+}
+
+.gen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.gen-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #2d2d4e;
+}
+
+.gen-close {
+  font-size: 36rpx;
+  color: #8a7a9a;
+  padding: 8rpx;
+}
+
+.gen-type-switch {
+  display: flex;
+  background: rgba(76,175,80,0.06);
+  border-radius: 20rpx;
+  padding: 6rpx;
+  margin-bottom: 28rpx;
+}
+
+.gen-type-btn {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #6a6a8a;
+}
+
+.gen-type-btn.active {
+  background: linear-gradient(135deg, #81c784, #4caf50);
+  color: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(76,175,80,0.2);
+}
+
+.gen-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 28rpx;
+  border-radius: 20rpx;
+  background: rgba(76,175,80,0.04);
+  font-size: 28rpx;
+  color: #2d2d4e;
+  box-sizing: border-box;
+  margin-bottom: 28rpx;
+}
+
+.gen-count-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.gen-count-label {
+  font-size: 28rpx;
+  color: #6a6a8a;
+}
+
+.gen-count-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.gen-count-btn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: rgba(76,175,80,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.gen-count-num {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2d2d4e;
+  min-width: 40rpx;
+  text-align: center;
+}
+
+.gen-submit {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #81c784, #4caf50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 8rpx 28rpx rgba(76,175,80,0.25);
+  margin-bottom: 20rpx;
+}
+
+.gen-submit:active {
+  opacity: 0.85;
+}
+
+.gen-submit.loading {
+  opacity: 0.6;
+}
+
+.gen-hint {
+  text-align: center;
+  font-size: 24rpx;
+  color: #b0b0c8;
+}

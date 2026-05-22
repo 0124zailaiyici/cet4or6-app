@@ -1,6 +1,7 @@
 import sentencesData from '../../data/sentences'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
+import { generateSentence } from '../../utils/api'
 
 interface ISentence {
   id: number
@@ -20,6 +21,11 @@ interface ISentencesData {
   favoriteIds: number[]
   searchQuery: string
   darkMode: boolean
+  showGenModal: boolean
+  genInput: string
+  genType: 'word' | 'topic'
+  genCount: number
+  generating: boolean
 }
 
 interface ISentencesMethods {
@@ -32,6 +38,12 @@ interface ISentencesMethods {
   doFilter(): void
   goDict(): void
   highlightText(text: string, keywords: string[]): string
+  openGenModal(): void
+  closeGenModal(): void
+  onGenInput(e: WechatMiniprogram.Input): void
+  setGenType(e: WechatMiniprogram.TouchEvent): void
+  adjustGenCount(e: WechatMiniprogram.TouchEvent): void
+  doGenerate(): void
 }
 
 Page<ISentencesData, ISentencesMethods>({
@@ -45,6 +57,11 @@ Page<ISentencesData, ISentencesMethods>({
     favoriteIds: [],
     searchQuery: '',
     darkMode: false,
+    showGenModal: false,
+    genInput: '',
+    genType: 'word',
+    genCount: 3,
+    generating: false,
   },
 
   onLoad() {
@@ -158,5 +175,77 @@ Page<ISentencesData, ISentencesMethods>({
       }
     }
     return result
+  },
+
+  openGenModal() {
+    this.setData({ showGenModal: true, genInput: '' })
+  },
+
+  closeGenModal() {
+    this.setData({ showGenModal: false })
+  },
+
+  onGenInput(e: WechatMiniprogram.Input) {
+    this.setData({ genInput: e.detail.value })
+  },
+
+  setGenType(e: WechatMiniprogram.TouchEvent) {
+    this.setData({ genType: e.currentTarget.dataset.type as 'word' | 'topic' })
+  },
+
+  adjustGenCount(e: WechatMiniprogram.TouchEvent) {
+    const delta = e.currentTarget.dataset.delta as number
+    const next = this.data.genCount + delta
+    if (next >= 1 && next <= 5) {
+      this.setData({ genCount: next })
+    }
+  },
+
+  async doGenerate() {
+    const input = this.data.genInput.trim()
+    if (!input) {
+      wx.showToast({ title: '请输入单词或话题', icon: 'none' })
+      return
+    }
+
+    this.setData({ generating: true })
+    try {
+      const params: { word?: string; topic?: string; count: number } = {
+        count: this.data.genCount,
+      }
+      if (this.data.genType === 'word') {
+        params.word = input
+      } else {
+        params.topic = input
+      }
+
+      const results = await generateSentence(params)
+
+      const maxId = Math.max(0, ...this.data.allSentences.map(s => s.id))
+      const newSentences: ISentence[] = results.map((item, i) => ({
+        id: maxId + i + 1,
+        english: item.english,
+        chinese: item.chinese,
+        keywords: item.keywords,
+        topic: item.topic,
+      }))
+
+      const allSentences = [...this.data.allSentences, ...newSentences]
+      const topics = [...new Set(allSentences.map(s => s.topic))]
+      topics.unshift('全部')
+
+      this.setData({
+        allSentences,
+        topics,
+        showGenModal: false,
+        generating: false,
+      })
+      this.doFilter()
+
+      wx.showToast({ title: `已生成 ${results.length} 个句子`, icon: 'success' })
+    } catch (err: any) {
+      wx.showToast({ title: err.message || '生成失败', icon: 'none' })
+      this.setData({ generating: false })
+    }
   },
 })

@@ -6,6 +6,7 @@
         <text class="sh-title">语境句子</text>
         <view class="sh-actions">
           <view class="sh-btn" catchtap="goDict">📖 查词</view>
+          <view class="sh-btn sh-btn-ai" catchtap="openGenModal">✨ AI生成</view>
           <text class="sh-counter">{{masteredIds.length}}/{{allSentences.length}}</text>
         </view>
       </view>
@@ -51,4 +52,35 @@
       </view>
     </view>
   </scroll-view>
+
+  <view class="gen-overlay" wx:if="{{showGenModal}}" catchtap="closeGenModal">
+    <view class="gen-modal" catchtap="stopPropagation">
+      <view class="gen-header">
+        <text class="gen-title">AI 生成语境句子</text>
+        <view class="gen-close" catchtap="closeGenModal">✕</view>
+      </view>
+
+      <view class="gen-type-switch">
+        <view class="gen-type-btn {{genType === 'word' ? 'active' : ''}}" data-type="word" catchtap="setGenType">按单词</view>
+        <view class="gen-type-btn {{genType === 'topic' ? 'active' : ''}}" data-type="topic" catchtap="setGenType">按话题</view>
+      </view>
+
+      <input class="gen-input" placeholder="{{genType === 'word' ? '输入四级单词，如：sustainable' : '输入话题，如：环保'}}" value="{{genInput}}" bindinput="onGenInput" confirm-type="done" />
+
+      <view class="gen-count-row">
+        <text class="gen-count-label">生成数量</text>
+        <view class="gen-count-ctrl">
+          <view class="gen-count-btn" data-delta="-1" catchtap="adjustGenCount">−</view>
+          <text class="gen-count-num">{{genCount}}</text>
+          <view class="gen-count-btn" data-delta="1" catchtap="adjustGenCount">+</view>
+        </view>
+      </view>
+
+      <view class="gen-submit {{generating ? 'loading' : ''}}" catchtap="doGenerate">
+        {{generating ? '生成中…' : '生成句子'}}
+      </view>
+
+      <view class="gen-hint">基于四级大纲难度，生成含关键词的语境句子</view>
+    </view>
+  </view>
 </view>
