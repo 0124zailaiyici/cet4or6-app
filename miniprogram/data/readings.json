@@ -1,4 +1,4 @@
-const readingsData = [
+[
   {
     "id": 1779441964372,
     "title": "选词填空 2019061",
@@ -271,4 +271,3 @@ const readingsData = [
     ]
   }
 ]
-export default readingsData

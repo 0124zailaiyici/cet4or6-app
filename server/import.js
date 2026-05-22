@@ -29,6 +29,9 @@ const PDF_DIR = path.join(__dirname, 'pdfs')
 function writeTS(filePath, varName, data) {
   const content = `const ${varName} = ${JSON.stringify(data, null, 2)}\nexport default ${varName}\n`
   fs.writeFileSync(filePath, content, 'utf-8')
+  // 同步更新 JSON 缓存（供后续导入使用）
+  const jsonPath = filePath.replace(/\.ts$/, '.json')
+  fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2), 'utf-8')
   console.log(`  ✓ ${path.basename(filePath)} (${data.length} 条)`)
 }
 
@@ -126,68 +129,19 @@ function parseListening(lines, year) {
   }
   if (curQ) questions.push(curQ)
 
-  // 清理：去重时检测重复字母 → 顺延给下题（这些重复字母实际是下题的选项）
-  for (let i = 0; i < questions.length; i++) {
-    const q = questions[i]
+  // 每题只保留自己行上的选项，不跨题借用
+  for (const q of questions) {
     const seen = new Set()
-    const overflow = []
-    const cleaned = []
+    const dedup = []
     for (const o of q.rawOpts) {
       const m = o.match(/^([A-D])\)/)
-      if (m && seen.has(m[1])) {
-        overflow.push(o)
-      } else {
-        if (m) seen.add(m[1])
-        cleaned.push(o)
+      if (m && !seen.has(m[1])) {
+        seen.add(m[1])
+        dedup.push(o)
       }
     }
-    q.rawOpts = cleaned
-    if (overflow.length > 0 && i + 1 < questions.length) {
-      questions[i + 1].rawOpts.unshift(...overflow)
-    }
-  }
-
-  // 修复 Q6：Q6的C,D在Q7行上，挪回来
-  if (questions.length >= 7) {
-    const q6 = questions[5]
-    const q7 = questions[6]
-    if (q6.rawOpts.length === 2 && q7.rawOpts.length >= 2) {
-      const ci = q7.rawOpts.findIndex(o => o.startsWith('C)'))
-      const di = q7.rawOpts.findIndex(o => o.startsWith('D)'))
-      if (ci >= 0 && di >= 0 && ci < di) {
-        const d = q7.rawOpts.splice(di, 1)[0]
-        const c = q7.rawOpts.splice(ci, 1)[0]
-        q6.rawOpts.push(c, d)
-      }
-    }
-  }
-
-  // 排序，trim 到 4（不跨题借）
-  for (const q of questions) {
-    q.rawOpts.sort((a, b) => a[0].localeCompare(b[0]))
-    q.rawOpts = q.rawOpts.slice(0, 4)
-  }
-
-  // 修复 Q6：Q6只有A,B，Q7中找C,D（跳过Q6顺延的A,B）
-  if (questions.length >= 7) {
-    const q6 = questions[5]
-    const q7 = questions[6]
-    if (q6.rawOpts.length === 2 && q7.rawOpts.length >= 4) {
-      const ci = q7.rawOpts.findIndex(o => o.startsWith('C)'))
-      const di = q7.rawOpts.findIndex(o => o.startsWith('D)'))
-      if (ci >= 0 && di >= 0 && ci < di) {
-        // C,D 在 Q7 中，挪到 Q6（从后往前取，避免索引变动）
-        const d = q7.rawOpts.splice(di, 1)[0]
-        const c = q7.rawOpts.splice(ci, 1)[0]
-        q6.rawOpts.push(c, d)
-      }
-    }
-  }
-
-  // 排序，trim 到 4
-  for (const q of questions) {
-    q.rawOpts.sort((a, b) => a[0].localeCompare(b[0]))
-    q.rawOpts = q.rawOpts.slice(0, 4)
+    // 不排序，保留原始提取顺序
+    q.rawOpts = dedup
   }
 
   // 收集方向说明（非题目标记之前的行）
@@ -492,42 +446,69 @@ function reportMissingOpts() {
   const fp = path.join(DATA_DIR, 'listening.ts')
   if (!fs.existsSync(fp)) return
   const txt = fs.readFileSync(fp, 'utf-8')
-  const idx = txt.lastIndexOf('"id":')
-  if (idx === -1) return
-  const chunk = txt.slice(idx)
-  // 解析 sentences
-  const lines = chunk.split('\n').map(l => l.trim()).filter(Boolean)
-  let inSent = false, texts = []
-  for (const l of lines) {
-    if (l.includes('"sentences"')) { inSent = true; continue }
-    if (inSent && l.startsWith(']')) break
-    if (!inSent) continue
-    const m = l.match(/"text": "([^"]*)"/)
-    if (m) texts.push(m[1])
+
+  // Find all CET-4 passages (last entries that have audioUrl)
+  const passageStarts = []
+  let idx = 0
+  while ((idx = txt.indexOf('"title": "CET-4', idx)) !== -1) {
+    passageStarts.push(idx)
+    idx++
   }
-  let missing = []
-  for (const t of texts) {
-    const qm = t.match(/^Q?(\d+)\./)
-    if (!qm) continue
-    const letters = [...t.matchAll(/([A-D])\)/g)]
-    const uniq = new Set(letters.map(m => m[1]))
-    const before = t.replace(/^Q?\d+\.\s*/, '').search(/[A-D]\)/)
-    if (uniq.size < 4) {
-      missing.push({ q: parseInt(qm[1]), n: uniq.size, text: t.slice(0, 80) })
+
+  for (const start of passageStarts) {
+    const chunk = txt.slice(start)
+    const titleM = chunk.match(/"title": "([^"]+)"/)
+    const title = titleM ? titleM[1] : '?'
+    console.log(`\n📋 【${title}】`)
+
+    // Parse sentences
+    const lines = chunk.split('\n').map(l => l.trim()).filter(Boolean)
+    let inSent = false, texts = []
+    for (const l of lines) {
+      if (l.includes('"sentences"')) { inSent = true; continue }
+      if (inSent && l.startsWith(']')) break
+      if (!inSent) continue
+      const m = l.match(/"text": "([^"]*)"/)
+      if (m) texts.push(m[1])
     }
-    if (uniq.size === 4 && before > 5) {
-      missing.push({ q: parseInt(qm[1]), n: 4, text: t.slice(0, 80), note: '选项前有残余文本' })
+
+    let all = [], missing = [], suspicious = []
+    for (const t of texts) {
+      const qm = t.match(/^Q?(\d+)\./)
+      if (!qm) continue
+      const letters = [...t.matchAll(/([A-D])\)/g)]
+      const uniq = new Set(letters.map(m => m[1]))
+      const q = parseInt(qm[1])
+      const sorted = [...uniq].sort().join('')
+      const notStartA = letters.length > 0 && letters[0][1] !== 'A'
+      all.push({ q, n: uniq.size, seq: sorted })
+      if (uniq.size !== 4) {
+        missing.push({ q, n: uniq.size, text: t.slice(0, 60) })
+      }
+      if (uniq.size === 4 && notStartA) {
+        suspicious.push({ q, text: letters.map(m => m[1]).join('') + ' ' + t.slice(0, 40) })
+      }
     }
-  }
-  if (missing.length > 0) {
-    console.log('\n⚠️  听力选项不完整：')
-    for (const m of missing) {
-      console.log(`  Q${m.q}: ${m.n}/4个选项 ${m.note || ''}`)
-      console.log(`    ${m.text}`)
+
+    if (all.length === 0) { console.log('  (无可解析的题目)'); continue }
+
+    for (const a of all) {
+      const m = a.n !== 4 ? ' ⚠️ 缺选项' : ''
+      console.log(`  Q${a.q}: ${a.n}/4 [${a.seq}]${m}`)
     }
-    console.log('\n💡 如需补全，请手动编辑 miniprogram/data/listening.ts')
-  } else {
-    console.log('\n✅ 听力选项全部完整')
+    if (suspicious.length > 0) {
+      console.log(`\n  🔍 以下题选项✓但行上首个选项非A)开头，可能混入其他题内容:`)
+      for (const s of suspicious) {
+        console.log(`    Q${s.q}: [${s.text}]`)
+      }
+      console.log('  (需手动检查 miniprogram/data/listening.ts)')
+    }
+    if (missing.length > 0) {
+      console.log(`\n  ⚠️ 缺选项（需手动补全）：`)
+      for (const m of missing) {
+        console.log(`    Q${m.q}: ${m.n}/4 — ${m.text}`)
+      }
+    }
   }
 }
 

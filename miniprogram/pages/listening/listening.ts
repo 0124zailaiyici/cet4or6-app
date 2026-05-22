@@ -145,41 +145,18 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     pages.push({ type: 'q', ...currentQ, opts: currentQ.opts.map(o => o.t) })
   }
 
-  // Clean up each question: dedup by letter, sort, trim to 4
-  // Re-run with the raw opts to get correct mapping
-  currentQ = null
-  const rawPages: Array<{ section: string; stem: string; opts: Array<{l: string; t: string}> }> = []
-  for (const line of lines) {
-    if (/\d{4}年\d+月/.test(line) && /第\d+页/.test(line)) continue
-    const qMatch = line.match(/^(?:Q)?(\d+)\.\s*(.*)/)
-    if (qMatch) {
-      if (currentQ) rawPages.push(currentQ)
-      currentQ = { section: sectionLabel(parseInt(qMatch[1])), stem: `Q${qMatch[1]}.`, opts: [] }
-      addOpts(qMatch[2].trim())
-    } else if (/^[A-D]\)/.test(line) && currentQ) {
-      addOpts(line)
-    }
-  }
-  if (currentQ) rawPages.push(currentQ)
-
-  // Dedup, sort, trim for each raw page
-  for (const rp of rawPages) {
+  // 每题去重（保留首次出现的字母）
+  for (const p of pages) {
+    if (p.type !== 'q' || !p.opts) continue
     const seen = new Set<string>()
-    const clean: Array<{l: string; t: string}> = []
-    for (const o of rp.opts) {
-      if (seen.has(o.l)) continue
-      seen.add(o.l)
+    const clean: string[] = []
+    for (const o of p.opts) {
+      const key = o.match(/^[A-D]/)?.[0] || ''
+      if (!key || seen.has(key)) continue
+      seen.add(key)
       clean.push(o)
     }
-    clean.sort((a, b) => a.l.localeCompare(b.l))
-    const trimmed = clean.slice(0, 4)
-    // Push as q-page (replace existing or add new)
-    const existing = pages.findIndex(p => p.type === 'q' && p.stem === rp.stem)
-    if (existing > -1) {
-      pages[existing].opts = trimmed.map(o => o.t)
-    } else {
-      pages.push({ type: 'q', section: rp.section, stem: rp.stem, opts: trimmed.map(o => o.t) })
-    }
+    p.opts = clean
   }
 
   if (pages.every(p => p.type === 'dir')) return []
