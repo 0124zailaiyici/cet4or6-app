@@ -33,6 +33,44 @@
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 
+    <!-- === 整段MP3模式 === -->
+    <block wx:if="{{audioMode}}">
+      <view class="audio-player">
+        <view class="ap-bar" catchtap="seekAudio">
+          <view class="ap-fill" style="width: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>
+          <view class="ap-thumb" style="left: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>
+        </view>
+        <view class="ap-time">
+          <text>{{audioTimeStr}}</text>
+          <text>{{audioDurationStr}}</text>
+        </view>
+      </view>
+
+      <view class="controls-bar">
+        <view class="speed-btn {{speed === s ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+        <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">循环</view>
+      </view>
+
+      <scroll-view class="sentence-scroll" scroll-y>
+        <view class="sentence-list">
+          <view class="sentence-item sref" wx:for="{{currentPassage.sentences}}" wx:key="start">
+            <view class="se-num">{{index + 1}}</view>
+            <view class="se-text">
+              <text class="se-en">{{item.text}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="player-bar audio-bar">
+        <view class="pb-prev" catchtap="prevSentence">⏪ 15s</view>
+        <view class="pb-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+        <view class="pb-next" catchtap="nextSentence">15s ⏩</view>
+      </view>
+    </block>
+
+    <!-- === 逐句精听模式（原） === -->
+    <block wx:else>
     <view class="controls-bar">
       <view class="speed-btn {{speed === s ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
       <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
@@ -62,5 +100,6 @@
       <view class="pb-next" catchtap="nextSentence">▶</view>
       <view class="pb-progress"><view class="pb-fill" style="width: {{currentIndex / currentPassage.sentences.length * 100}}%"></view></view>
     </view>
+    </block>
   </block>
 </view>

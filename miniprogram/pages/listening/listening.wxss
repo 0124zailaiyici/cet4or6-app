@@ -92,3 +92,40 @@
 }
 .pb-progress { flex: 1; height: 6rpx; border-radius: 3rpx; background: #fff0f3; overflow: hidden; }
 .pb-fill { height: 100%; border-radius: 3rpx; background: #2196f3; transition: width 0.3s; }
+
+/* ===== 整段MP3模式 ===== */
+.audio-player { padding: 20rpx 36rpx 12rpx; }
+.ap-bar {
+  height: 10rpx; border-radius: 5rpx; background: #e8e0e8; position: relative;
+  margin-bottom: 8rpx;
+}
+.ap-fill {
+  height: 100%; border-radius: 5rpx;
+  background: linear-gradient(90deg, #4fc3f7, #2196f3);
+  transition: width 0.3s; min-width: 0;
+}
+.ap-thumb {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 24rpx; height: 24rpx; border-radius: 50%;
+  background: #2196f3; box-shadow: 0 2rpx 8rpx rgba(33,150,243,0.4);
+}
+.ap-time { display: flex; justify-content: space-between; font-size: 20rpx; color: #8a7a9a; }
+
+.sentence-item.sref {
+  border-color: transparent;
+}
+.sentence-item.sref .se-num {
+  background: rgba(84,110,122,0.06); color: #8a7a9a;
+}
+
+.player-bar.audio-bar {
+  justify-content: space-between; gap: 12rpx;
+}
+.player-bar.audio-bar .pb-prev,
+.player-bar.audio-bar .pb-next {
+  width: auto; height: 64rpx; border-radius: 16rpx; padding: 0 24rpx;
+  font-size: 22rpx; color: #546e7a; font-weight: 600;
+}
+.player-bar.audio-bar .pb-play {
+  width: 96rpx; height: 96rpx;
+}

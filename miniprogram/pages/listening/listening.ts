@@ -33,6 +33,11 @@ interface IListeningData {
   completedPassages: number[]
   loading: boolean
   darkMode: boolean
+  audioMode: boolean
+  audioTime: number
+  audioDuration: number
+  audioTimeStr: string
+  audioDurationStr: string
 }
 
 interface IListeningMethods {
@@ -51,6 +56,7 @@ interface IListeningMethods {
   toggleHard(e: WechatMiniprogram.TouchEvent): void
   markCompleted(): void
   getBlankText(text: string): string
+  seekAudio(e: WechatMiniprogram.TouchEvent): void
 }
 
 let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
@@ -61,12 +67,34 @@ function getAudioCtx(): WechatMiniprogram.InnerAudioContext {
     audioCtx = wx.createInnerAudioContext()
     audioCtx.onEnded(() => {
       if (!pageRef) return
-      if (pageRef.data.loopSentence) {
+      if (pageRef.data.audioMode) {
+        if (pageRef.data.loopSentence) {
+          audioCtx!.seek(0)
+          audioCtx!.play()
+        } else {
+          pageRef.setData({ isPlaying: false })
+        }
+      } else if (pageRef.data.loopSentence) {
         pageRef.playCurrent()
       } else if (pageRef.data.currentIndex < pageRef.data.currentPassage.sentences.length - 1) {
         pageRef.nextSentence()
       } else {
         pageRef.setData({ isPlaying: false })
+      }
+    })
+    audioCtx.onTimeUpdate(() => {
+      if (pageRef && pageRef.data.audioMode && audioCtx) {
+        const fmt = (t: number) => {
+          const m = Math.floor(t / 60)
+          const s = Math.floor(t % 60)
+          return `${m}:${s < 10 ? '0' : ''}${s}`
+        }
+        pageRef.setData({
+          audioTime: audioCtx.currentTime,
+          audioDuration: audioCtx.duration,
+          audioTimeStr: fmt(audioCtx.currentTime),
+          audioDurationStr: fmt(audioCtx.duration),
+        })
       }
     })
     audioCtx.onError(() => {
@@ -92,6 +120,11 @@ Page<IListeningData, IListeningMethods>({
     completedPassages: [],
     loading: false,
     darkMode: false,
+    audioMode: false,
+    audioTime: 0,
+    audioDuration: 0,
+    audioTimeStr: '0:00',
+    audioDurationStr: '0:00',
   },
 
   onLoad() {
@@ -127,19 +160,31 @@ Page<IListeningData, IListeningMethods>({
       const app = getApp<IAppOption>()
       const stored = app.globalData.studyData.hardSentences || []
       const localHard = stored.filter(h => h.passageId === passage.id).map(h => h.sentenceIndex)
+      const isAudio = !!passage.audioUrl
+      if (isAudio) {
+        const ctx = getAudioCtx()
+        ctx.stop()
+        const src = passage.audioUrl!.startsWith('http')
+          ? passage.audioUrl!
+          : `${API_BASE}${passage.audioUrl}`
+        ctx.src = src
+      }
       this.setData({
         mode: 'detail',
         currentPassage: passage,
         currentIndex: 0,
         isPlaying: false,
         hardSentences: localHard,
+        audioMode: isAudio,
+        audioTime: 0,
+        audioDuration: 0,
       })
     }
   },
 
   backToList() {
-    if (audioCtx) audioCtx.stop()
-    this.setData({ mode: 'list', currentPassage: null, isPlaying: false })
+    if (audioCtx) { audioCtx.destroy(); audioCtx = null }
+    this.setData({ mode: 'list', currentPassage: null, isPlaying: false, audioMode: false })
   },
 
   playCurrent() {
@@ -155,7 +200,7 @@ Page<IListeningData, IListeningMethods>({
     ctx.stop()
     ctx.playbackRate = this.data.speed
     if (useAudioUrl) {
-      ctx.src = useAudioUrl
+      ctx.src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${useAudioUrl}`
     } else {
       ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
     }
@@ -164,12 +209,31 @@ Page<IListeningData, IListeningMethods>({
     ctx.onPlay(() => this.setData({ loading: false }))
   },
 
+  seekAudio(e: WechatMiniprogram.TouchEvent) {
+    if (!this.data.audioMode || !audioCtx) return
+    const rect = (e.currentTarget as any).boundingClientRect
+    if (!rect) return
+    const x = e.detail.x - rect.left
+    const ratio = Math.max(0, Math.min(1, x / rect.width))
+    const seekTime = ratio * this.data.audioDuration
+    audioCtx.seek(seekTime)
+  },
+
   playPause() {
-    if (this.data.isPlaying) {
-      getAudioCtx().pause()
+    const ctx = getAudioCtx()
+    if (this.data.audioMode) {
+      if (this.data.isPlaying) {
+        ctx.pause()
+        this.setData({ isPlaying: false })
+      } else {
+        ctx.play()
+        this.setData({ isPlaying: true, loading: true })
+        ctx.onPlay(() => this.setData({ loading: false }))
+      }
+    } else if (this.data.isPlaying) {
+      ctx.pause()
       this.setData({ isPlaying: false })
     } else {
-      const ctx = getAudioCtx()
       if (ctx.src) {
         ctx.play()
         this.setData({ isPlaying: true })
@@ -199,18 +263,26 @@ Page<IListeningData, IListeningMethods>({
   },
 
   prevSentence() {
-    if (this.data.currentIndex > 0) {
+    if (this.data.audioMode) {
+      const ctx = getAudioCtx()
+      ctx.seek(Math.max(0, ctx.currentTime - 15))
+    } else if (this.data.currentIndex > 0) {
       this.setData({ currentIndex: this.data.currentIndex - 1 })
       this.playCurrent()
     }
   },
 
   nextSentence() {
-    const passage = this.data.currentPassage
-    if (!passage) return
-    if (this.data.currentIndex < passage.sentences.length - 1) {
-      this.setData({ currentIndex: this.data.currentIndex + 1 })
-      this.playCurrent()
+    if (this.data.audioMode) {
+      const ctx = getAudioCtx()
+      ctx.seek(Math.min(ctx.duration, ctx.currentTime + 15))
+    } else {
+      const passage = this.data.currentPassage
+      if (!passage) return
+      if (this.data.currentIndex < passage.sentences.length - 1) {
+        this.setData({ currentIndex: this.data.currentIndex + 1 })
+        this.playCurrent()
+      }
     }
   },
 
