@@ -220,7 +220,8 @@ Page({
     wx.setStorageSync('studyData', app.globalData.studyData)
     doCheckIn()
 
-    const allIds = [...new Set(records.map(r => r.id))]
+    const validIds = new Set(this.data.translations.map(t => t.id))
+    const allIds = [...new Set(records.map(r => r.id))].filter(id => validIds.has(id))
     const questionHistory = records.filter(r => r.id === currentItem.id)
     const hScores = questionHistory.map(r => r.score)
     const hMax = hScores.length > 0 ? Math.max(...hScores) : score
