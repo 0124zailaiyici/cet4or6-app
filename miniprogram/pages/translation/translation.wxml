@@ -43,7 +43,7 @@
           </view>
         </view>
         <view class="lc-right">
-          <text class="lc-check {{completedIds.indexOf(item.id) !== -1 ? 'done' : 'pending'}}">{{completedIds.indexOf(item.id) !== -1 ? '✅' : '⏳'}}</text>
+          <text class="lc-check done" wx:if="{{completedIds.indexOf(item.id) !== -1}}">✅</text>
           <text class="lc-score {{item._scoreClass || ''}}" wx:if="{{item._score}}">{{item._score}}</text>
         </view>
       </view>
