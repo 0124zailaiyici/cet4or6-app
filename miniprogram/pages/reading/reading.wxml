@@ -33,9 +33,10 @@
 
       <!-- 文章区：每4句一页，左右滑动翻页 -->
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-        <scroll-view class="pz-scroll" scroll-y>
-          <text class="pz-text">{{passagePages[passagePage]}}</text>
-        </scroll-view>
+          <scroll-view class="pz-scroll" scroll-y>
+            <rich-text wx:if="{{blankedPages.length > 0}}" nodes="{{blankedPages[passagePage]}}"></rich-text>
+            <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
+          </scroll-view>
         <view class="pz-nav" wx:if="{{passagePages.length > 1}}">
           <view class="pz-dots">
             <view class="pzd {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></view>

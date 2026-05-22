@@ -17,6 +17,7 @@ interface IReadingData {
   currentQ: number
   passagePage: number
   passagePages: string[]
+  blankedPages: string[]
   darkMode: boolean
   choiceLabels: string[]
   optionLetters: string[]
@@ -31,6 +32,7 @@ interface IReadingMethods {
   prevPassage(): void
   nextPassage(): void
   splitPassage(text: string): string[]
+  highlightBlanks(text: string): string
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
@@ -43,6 +45,7 @@ Page<IReadingData, IReadingMethods>({
     currentQ: 0,
     passagePage: 0,
     passagePages: [],
+    blankedPages: [],
     darkMode: false,
     choiceLabels: ['A)', 'B)', 'C)', 'D)'],
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
@@ -63,7 +66,8 @@ Page<IReadingData, IReadingMethods>({
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
       const pages = this.splitPassage(item.passage)
-      this.setData({ current: item, currentQ: 0, passagePage: 0, passagePages: pages })
+      const blanked = item.sectionType === 'A' ? pages.map(p => this.highlightBlanks(p)) : []
+      this.setData({ current: item, currentQ: 0, passagePage: 0, passagePages: pages, blankedPages: blanked })
     }
   },
 
@@ -111,6 +115,10 @@ Page<IReadingData, IReadingMethods>({
     if (this.data.passagePage < this.data.passagePages.length - 1) {
       this.setData({ passagePage: this.data.passagePage + 1 })
     }
+  },
+
+  highlightBlanks(text: string): string {
+    return text.replace(/\b(\d{2})\b/g, '<span style="color:#ff6b8a;font-weight:700;border-bottom:2px solid #ff6b8a">$1</span>')
   },
 
   onTouchStart(e: WechatMiniprogram.TouchEvent) {
