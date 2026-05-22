@@ -241,7 +241,7 @@ Page<IListeningData, IListeningMethods>({
     dataWarning: '',
   },
 
-  onLoad() {
+  onLoad(options: { passageId?: string }) {
     pageRef = this
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
@@ -251,6 +251,12 @@ Page<IListeningData, IListeningMethods>({
       darkMode: app.globalData.darkMode,
       completedPassages: studyData.completedListens,
     })
+    if (options.passageId) {
+      const passage = passages.find(p => p.id === Number(options.passageId))
+      if (passage) {
+        this.enterDetail({ currentTarget: { dataset: { id: passage.id } } } as WechatMiniprogram.TouchEvent)
+      }
+    }
   },
 
   onShow() {

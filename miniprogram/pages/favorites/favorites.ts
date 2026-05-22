@@ -9,11 +9,18 @@ interface ISentence {
   topic: string
 }
 
+interface IHardSentence {
+  passageId: number
+  sentenceIndex: number
+  text: string
+  passageTitle: string
+}
+
 interface IFavoritesData {
   tab: number
   tabs: string[]
-  favSentences: ISentence[]
-  hardListens: { text: string; passageTitle: string }[]
+  favSentences: (ISentence & { mastered: boolean })[]
+  hardListens: IHardSentence[]
   scrollTop: number
   darkMode: boolean
 }
@@ -40,9 +47,16 @@ Page<IFavoritesData, {}>({
     const all = sentencesData as ISentence[]
     const favIds = app.globalData.studyData.favoriteSentenceIds
     const idSet = new Set(favIds)
+    const masteredIds = app.globalData.studyData.masteredSentences || []
+    const masteredSet = new Set(masteredIds)
+
+    const favSentences = all
+      .filter(s => idSet.has(s.id))
+      .reverse()
+      .map(s => ({ ...s, mastered: masteredSet.has(s.id) }))
 
     this.setData({
-      favSentences: all.filter(s => idSet.has(s.id)),
+      favSentences,
       hardListens: app.globalData.studyData.hardSentences || [],
     })
   },
@@ -88,5 +102,15 @@ Page<IFavoritesData, {}>({
         }
       }
     })
+  },
+
+  gotoSentence(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as number
+    wx.navigateTo({ url: `/pages/sentences/sentences?id=${id}` })
+  },
+
+  goToListening(e: WechatMiniprogram.TouchEvent) {
+    const passageId = e.currentTarget.dataset.passageid as number
+    wx.navigateTo({ url: `/pages/listening/listening?passageId=${passageId}` })
   },
 })

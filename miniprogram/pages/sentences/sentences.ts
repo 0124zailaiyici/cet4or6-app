@@ -86,7 +86,7 @@ Page<ISentencesData, ISentencesMethods>({
     masterTexts: [],
   },
 
-  onLoad() {
+  onLoad(options: { id?: string }) {
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
 
@@ -120,6 +120,13 @@ Page<ISentencesData, ISentencesMethods>({
       favTexts: sentences.map(s => (app.globalData.studyData.favoriteSentenceIds || []).indexOf(s.id) >= 0 ? '已收藏' : '收藏'),
       masterTexts: sentences.map(s => (app.globalData.studyData.masteredSentences || []).indexOf(s.id) >= 0 ? '已掌握' : '掌握'),
     })
+
+    if (options.id) {
+      const idx = sentences.findIndex(s => s.id === Number(options.id))
+      if (idx >= 0) {
+        this.setData({ viewMode: 'immersion', immersionIndex: idx })
+      }
+    }
   },
 
   onShow() {
