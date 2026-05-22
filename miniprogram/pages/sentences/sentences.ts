@@ -16,6 +16,8 @@ interface ISentencesData {
   filteredSentences: ISentence[]
   topics: string[]
   topicCounts: Record<string, number>
+  currentTopic: string
+  masteredIds: number[]
   favoriteIds: number[]
   searchQuery: string
   darkMode: boolean
