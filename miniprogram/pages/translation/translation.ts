@@ -117,7 +117,8 @@ Page({
     this.setData({ darkMode: app.globalData.darkMode })
     const items = (translationsData as ITranslation[]).filter(t => t && t.chinese)
     const history = (app.globalData.studyData.translationRecords || []) as ITranslationRecord[]
-    const completedIds = [...new Set(history.map(r => r.id))]
+    const currentIds = new Set(items.map(t => t.id))
+    const completedIds = [...new Set(history.map(r => r.id))].filter(id => currentIds.has(id))
 
     const pct = completedIds.length > 0 ? Math.round(completedIds.length / items.length * 100) : 0
     const ringDeg = Math.round(pct / 100 * 360)
