@@ -152,17 +152,18 @@
   box-shadow: 0 2rpx 8rpx rgba(30,136,229,0.2);
 }
 
-.qb-bar {
-  padding: 10rpx 0 4rpx; flex-shrink: 0; min-height: 48rpx;
-  display: flex; align-items: center; gap: 8rpx;
+.qb-bar { padding: 10rpx 0 4rpx; flex-shrink: 0; min-height: 48rpx; }
+.qb-bar-letters {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8rpx;
+  padding: 0 12rpx;
 }
-.qb-bar-hint { font-size: 22rpx; color: #8a7a9a; }
-.qb-bar-label { font-size: 22rpx; font-weight: 600; color: #1e88e5; flex-shrink: 0; }
-.qb-bar-letters { display: flex; gap: 6rpx; flex-wrap: wrap; }
 .qb-l {
-  width: 52rpx; height: 52rpx; border-radius: 12rpx;
+  aspect-ratio: 1;
+  border-radius: 12rpx;
   display: flex; align-items: center; justify-content: center;
-  font-size: 26rpx; font-weight: 700; color: #fff;
+  font-size: 28rpx; font-weight: 700; color: #fff;
   background: linear-gradient(135deg, #64b5f6, #1e88e5);
   box-shadow: 0 2rpx 8rpx rgba(30,136,229,0.25);
 }

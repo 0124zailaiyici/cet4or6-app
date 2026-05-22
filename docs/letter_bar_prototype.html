@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字母栏 UI 设计稿</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#f0ebe6; display:flex; flex-direction:column; align-items:center; padding:40px 20px; font-family:-apple-system,'PingFang SC',sans-serif; }
+h1 { font-size:26px; color:#333; margin-bottom:6px; }
+.sub { color:#888; font-size:14px; margin-bottom:36px; }
+.grid { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; }
+
+.phone {
+  width:375px; background:#faf5f7; border-radius:36px; overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,0.12);
+}
+.top { padding:12px 16px; display:flex; align-items:center; gap:8px; }
+.back { width:28px; height:28px; border-radius:8px; background:rgba(84,110,122,0.08); display:flex; align-items:center; justify-content:center; font-size:12px; color:#546e7a; }
+.ttl { flex:1; font-size:14px; font-weight:700; color:#2d2d4e; }
+.badge { font-size:9px; color:#fff; padding:3px 10px; border-radius:8px; background:linear-gradient(135deg,#64b5f6,#1e88e5); }
+
+.content { padding:8px 16px 20px; }
+.stmt-box { background:#fff; border-radius:14px; padding:12px 16px; box-shadow:0 2px 12px rgba(0,0,0,0.04); margin-bottom:10px; }
+.stmt { padding:10px 0; border-bottom:1px solid #f5f0f0; display:flex; align-items:center; gap:8px; font-size:12px; color:#2d2d4e; }
+.stmt:last-child { border-bottom:none; }
+.stmt .num { width:24px; height:24px; border-radius:6px; background:rgba(30,136,229,0.06); display:flex; align-items:center; justify-content:center; font-size:11px; color:#1e88e5; font-weight:700; flex-shrink:0; }
+.stmt .txt { flex:1; font-size:12px; }
+.stmt .ans { width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,#64b5f6,#1e88e5); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; flex-shrink:0; }
+
+.dots { display:flex; justify-content:center; gap:5px; padding:6px 0; }
+.dot { width:8px; height:8px; border-radius:50%; background:#d0c8d0; }
+.dot.on { background:#546e7a; width:18px; border-radius:4px; }
+
+.label { font-size:11px; color:#8a7a9a; padding:4px 0 8px; text-align:center; }
+</style>
+</head>
+<body>
+
+<h1>🔤 字母栏 UI 设计稿</h1>
+<p class="sub">Section B · 长篇阅读匹配 · 段落字母选择</p>
+
+<div class="grid">
+
+<!-- V1: 当前 - 流式排列 -->
+<div class="phone">
+  <div class="top">
+    <div class="back">←</div>
+    <div class="ttl">长篇匹配</div>
+    <div class="badge">匹配</div>
+  </div>
+  <div class="content">
+    <div class="stmt-box">
+      <div class="stmt"><div class="num">1</div><div class="txt">An extended lifespan...</div><div class="ans">A</div></div>
+      <div class="stmt"><div class="num">2</div><div class="txt">Just extending one's...</div><div class="ans">D</div></div>
+      <div class="stmt"><div class="num">3</div><div class="txt">Nowadays, many Americans...</div></div>
+      <div class="stmt"><div class="num">4</div><div class="txt">Because of their longer...</div></div>
+      <div class="stmt"><div class="num">5</div><div class="txt">More people will be...</div></div>
+    </div>
+    <div class="dots"><div class="dot on"></div><div class="dot"></div></div>
+    <div class="label">V1 · 当前流式（flex-wrap）</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:8px">
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">A</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">B</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">C</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">D</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">E</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">F</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">G</div>
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;box-shadow:0 2px 8px rgba(30,136,229,0.2)">H</div>
+    </div>
+  </div>
+</div>
+
+<!-- V2: 两行网格 -->
+<div class="phone">
+  <div class="top">
+    <div class="back">←</div>
+    <div class="ttl">长篇匹配</div>
+    <div class="badge">匹配</div>
+  </div>
+  <div class="content">
+    <div class="stmt-box">
+      <div class="stmt"><div class="num">1</div><div class="txt">An extended lifespan...</div><div class="ans">A</div></div>
+      <div class="stmt"><div class="num">2</div><div class="txt">Just extending one's...</div><div class="ans">D</div></div>
+      <div class="stmt"><div class="num">3</div><div class="txt">Nowadays, many Americans...</div></div>
+      <div class="stmt"><div class="num">4</div><div class="txt">Because of their longer...</div></div>
+      <div class="stmt"><div class="num">5</div><div class="txt">More people will be...</div></div>
+    </div>
+    <div class="dots"><div class="dot on"></div><div class="dot"></div></div>
+    <div class="label">V2 · 两行网格（justify-center）</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;justify-items:center;padding:8px">
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">A</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">B</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">C</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">D</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">E</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">F</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">G</div>
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">H</div>
+    </div>
+  </div>
+</div>
+
+<!-- V3: 水平滑动 -->
+<div class="phone">
+  <div class="top">
+    <div class="back">←</div>
+    <div class="ttl">长篇匹配</div>
+    <div class="badge">匹配</div>
+  </div>
+  <div class="content">
+    <div class="stmt-box">
+      <div class="stmt"><div class="num">1</div><div class="txt">An extended lifespan...</div><div class="ans">A</div></div>
+      <div class="stmt"><div class="num">2</div><div class="txt">Just extending one's...</div><div class="ans">D</div></div>
+      <div class="stmt"><div class="num">3</div><div class="txt">Nowadays, many Americans...</div></div>
+      <div class="stmt"><div class="num">4</div><div class="txt">Because of their longer...</div></div>
+      <div class="stmt"><div class="num">5</div><div class="txt">More people will be...</div></div>
+    </div>
+    <div class="dots"><div class="dot on"></div><div class="dot"></div></div>
+    <div class="label">V3 · 水平滑动（overflow-x:auto）</div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:8px 0;-webkit-overflow-scrolling:touch">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">A</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">B</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">C</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">D</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">E</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">F</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">G</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,0.15)">H</div>
+    </div>
+  </div>
+</div>
+
+<!-- V4: 大号等宽 -->
+<div class="phone">
+  <div class="top">
+    <div class="back">←</div>
+    <div class="ttl">长篇匹配</div>
+    <div class="badge">匹配</div>
+  </div>
+  <div class="content">
+    <div class="stmt-box">
+      <div class="stmt"><div class="num">1</div><div class="txt">An extended lifespan...</div><div class="ans">A</div></div>
+      <div class="stmt"><div class="num">2</div><div class="txt">Just extending one's...</div><div class="ans">D</div></div>
+      <div class="stmt"><div class="num">3</div><div class="txt">Nowadays, many Americans...</div></div>
+      <div class="stmt"><div class="num">4</div><div class="txt">Because of their longer...</div></div>
+      <div class="stmt"><div class="num">5</div><div class="txt">More people will be...</div></div>
+    </div>
+    <div class="dots"><div class="dot on"></div><div class="dot"></div></div>
+    <div class="label">V4 · 大号等宽（flex:1）</div>
+    <div style="display:flex;gap:4px;padding:8px 0">
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">A</div>
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">B</div>
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">C</div>
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">D</div>
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">E</div>
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">F</div>
+      <div style="flex:1;height:48px;border-radius:12px;background:linear-gradient(135deg,#64b5f6,#1e88e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(30,136,229,0.15)">G</div>
+    </div>
+  </div>
+</div>
+
+</div>
+<p style="margin-top:30px;color:#999;font-size:13px;">👆 4 种方案，选一个喜欢的，我改代码</p>
+</body>
+</html>
