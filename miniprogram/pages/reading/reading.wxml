@@ -100,7 +100,7 @@
             <text class="qz-question">{{current.questions[currentQ]}}</text>
           </scroll-view>
           <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
-            <view class="qzo {{cAnswers[currentQ] && item.indexOf(cAnswers[currentQ]) === 0 ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" data-choice="{{item}}" catchtap="onChoiceTap">{{item}}</view>
+            <view class="qzo" wx:for="{{current.choices[currentQ]}}" wx:key="*this" data-choice="{{item}}" catchtap="onChoiceTap">{{item}} 【点我】</view>
           </view>
 
           <view class="qz-dots">
