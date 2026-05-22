@@ -187,14 +187,6 @@
   box-shadow: 0 6rpx 28rpx rgba(56,142,60,0.08);
 }
 
-.s-card.marked {
-  opacity: 0.55;
-}
-
-.s-card.marked .sc-english {
-  color: #999;
-}
-
 .sc-main {
   display: flex;
   gap: 18rpx;

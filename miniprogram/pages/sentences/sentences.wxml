@@ -47,7 +47,7 @@
         </view>
       </view>
 
-      <view class="s-card {{masteredIds.indexOf(item.id) !== -1 || favoriteIds.indexOf(item.id) !== -1 ? 'marked' : ''}}" wx:for="{{filteredSentences}}" wx:key="id" data-id="{{item.id}}" catchtap="toggleExpand">
+      <view class="s-card" wx:for="{{filteredSentences}}" wx:key="id" data-id="{{item.id}}" catchtap="toggleExpand">
         <view class="sc-main">
           <view class="sc-num">{{index + 1}}</view>
           <view class="sc-body">
