@@ -111,28 +111,22 @@ Page<ISentencesData, ISentencesMethods>({
       filteredSentences: sentences,
       topics,
       topicCounts,
-      masteredIds: app.globalData.studyData.masteredSentences,
-      favoriteIds: app.globalData.studyData.favoriteSentenceIds,
+      masteredIds: [],
+      favoriteIds: [],
     })
 
     const sentenceHash = sentences.length + '|' + sentences[0]?.english + '|' + sentences[sentences.length - 1]?.english
     const storedHash = wx.getStorageSync('sentenceHash')
-    if (storedHash !== sentenceHash) {
+    if (storedHash === sentenceHash) {
+      this.setData({
+        masteredIds: app.globalData.studyData.masteredSentences || [],
+        favoriteIds: app.globalData.studyData.favoriteSentenceIds || [],
+      })
+    } else {
       wx.setStorageSync('sentenceHash', sentenceHash)
       app.globalData.studyData.favoriteSentenceIds = []
       app.globalData.studyData.masteredSentences = []
       wx.setStorageSync('studyData', app.globalData.studyData)
-      this.setData({ favoriteIds: [], masteredIds: [] })
-    } else {
-      const validSentenceIds = new Set(sentences.map(s => s.id))
-      const cleanFav = this.data.favoriteIds.filter((id: number) => validSentenceIds.has(id))
-      const cleanMastered = this.data.masteredIds.filter((id: number) => validSentenceIds.has(id))
-      if (cleanFav.length !== this.data.favoriteIds.length || cleanMastered.length !== this.data.masteredIds.length) {
-        this.setData({ favoriteIds: cleanFav, masteredIds: cleanMastered })
-        app.globalData.studyData.favoriteSentenceIds = cleanFav
-        app.globalData.studyData.masteredSentences = cleanMastered
-        wx.setStorageSync('studyData', app.globalData.studyData)
-      }
     }
   },
 
