@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>语境句子 - 重设计方案</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f5f7f8;
+  color: #2d2d4e;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ========== Header ========== */
+.header {
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  padding: 32px 20px 20px;
+  color: #fff;
+  border-radius: 0 0 32px 32px;
+  box-shadow: 0 4px 20px rgba(56,142,60,0.15);
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.counter {
+  font-size: 14px;
+  background: rgba(255,255,255,0.2);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.search-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-box {
+  width: 100%;
+  height: 48px;
+  border-radius: 16px;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  padding: 0 40px 0 16px;
+  font-size: 15px;
+  color: #2d2d4e;
+  outline: none;
+}
+
+.search-box::placeholder { color: #aaa; }
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #999;
+}
+
+.search-box { padding-left: 38px; }
+
+.action-row {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.action-btn:active { background: rgba(255,255,255,0.35); }
+
+.action-btn.primary {
+  background: rgba(255,255,255,0.35);
+  font-weight: 700;
+}
+
+/* ========== Tabs ========== */
+.topic-section {
+  padding: 14px 20px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+
+.topic-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.topic-scroll::-webkit-scrollbar { display: none; }
+
+.topic-pill {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #388e3c;
+  background: rgba(56,142,60,0.06);
+  border: 1.5px solid rgba(56,142,60,0.1);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.topic-pill.active {
+  color: #fff;
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(56,142,60,0.2);
+}
+
+.topic-count {
+  font-size: 11px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+/* ========== Mode Toggle ========== */
+.mode-bar {
+  display: flex;
+  padding: 12px 20px;
+  gap: 10px;
+  background: #fff;
+}
+
+.mode-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #888;
+  background: rgba(0,0,0,0.03);
+  transition: all 0.2s;
+}
+
+.mode-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  box-shadow: 0 2px 10px rgba(56,142,60,0.2);
+}
+
+/* ========== Card List ========== */
+.card-area {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 40px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.card:active { transform: translateY(-1px); }
+
+.card.mastered {
+  border-left-color: #66bb6a;
+  background: linear-gradient(135deg, #f7fdf5, #fff);
+}
+
+.card.mastered .card-english { color: #999; }
+
+.card.fav { border-left-color: #ffc107; }
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.card-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(56,142,60,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #388e3c;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.card.mastered .card-num {
+  background: #66bb6a;
+  color: #fff;
+}
+
+.card-body { flex: 1; min-width: 0; }
+
+.card-english {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #2d2d4e;
+  word-break: break-word;
+}
+
+.card-english .kw {
+  color: #e65100;
+  font-weight: 600;
+  background: rgba(230,81,0,0.08);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.card-chinese {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(56,142,60,0.04);
+  font-size: 14px;
+  color: #777;
+  line-height: 1.5;
+  display: none;
+}
+
+.card.expanded .card-chinese { display: block; }
+
+.card-expand-hint {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #bbb;
+}
+
+.card.expanded .card-expand-hint { display: none; }
+
+.card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.card-tag {
+  font-size: 12px;
+  color: #388e3c;
+  padding: 4px 14px;
+  border-radius: 14px;
+  background: rgba(56,142,60,0.06);
+  font-weight: 500;
+}
+
+.card-actions {
+  display: flex;
+  gap: 20px;
+}
+
+.card-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: #bbb;
+  transition: all 0.15s;
+}
+
+.card-action.fav-on { color: #e6a800; background: rgba(230,168,0,0.08); }
+.card-action.master-on { color: #388e3c; background: rgba(56,142,60,0.08); }
+
+.card-action-label { font-size: 12px; }
+
+/* ========== Immersion Mode ========== */
+.immersion-area {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  min-height: 60vh;
+}
+
+.immersion-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 24px;
+  width: 100%;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+.imm-num {
+  font-size: 14px;
+  color: #bbb;
+  margin-bottom: 24px;
+}
+
+.imm-english {
+  font-size: 22px;
+  line-height: 1.7;
+  color: #2d2d4e;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.imm-english .kw {
+  color: #e65100;
+  font-weight: 700;
+  background: rgba(230,81,0,0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.imm-chinese {
+  font-size: 16px;
+  color: #888;
+  line-height: 1.6;
+  padding: 16px;
+  background: rgba(56,142,60,0.04);
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.imm-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.imm-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+
+.imm-btn.fav { background: rgba(230,168,0,0.1); color: #e6a800; }
+.imm-btn.master { background: rgba(56,142,60,0.1); color: #388e3c; }
+
+.imm-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.nav-btn {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(56,142,60,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:active { opacity: 0.8; }
+
+.imm-progress {
+  font-size: 14px;
+  color: #888;
+}
+
+/* ========== Modal ========== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+  display: none;
+}
+
+.overlay.show { display: flex; }
+
+.modal {
+  width: 100%;
+  background: #fff;
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px calc(28px + env(safe-area-inset-bottom, 20px));
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-title { font-size: 20px; font-weight: 700; }
+
+.modal-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #888;
+  cursor: pointer;
+}
+
+.type-switch {
+  display: flex;
+  background: rgba(56,142,60,0.04);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.type-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.type-btn.active {
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(56,142,60,0.15);
+}
+
+.input-field {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: none;
+  background: rgba(56,142,60,0.04);
+  font-size: 15px;
+  color: #2d2d4e;
+  margin-bottom: 20px;
+  outline: none;
+}
+
+.paste-field {
+  width: 100%;
+  min-height: 180px;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: rgba(56,142,60,0.04);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2d2d4e;
+  margin-bottom: 20px;
+  outline: none;
+  resize: vertical;
+}
+
+.count-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.count-label { font-size: 14px; color: #888; }
+
+.count-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.count-btn {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(56,142,60,0.08);
+  color: #388e3c;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.count-num { font-size: 18px; font-weight: 700; }
+
+.submit-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(56,142,60,0.25);
+  margin-bottom: 14px;
+}
+
+.submit-btn:active { opacity: 0.85; }
+
+.hint {
+  text-align: center;
+  font-size: 12px;
+  color: #bbb;
+}
+
+/* ========== Empty State ========== */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-icon { font-size: 56px; margin-bottom: 16px; }
+.empty-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.empty-desc { font-size: 14px; color: #999; margin-bottom: 24px; }
+
+.empty-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.empty-btn {
+  padding: 12px 28px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.empty-btn.gen {
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  color: #fff;
+}
+
+.empty-btn.paste {
+  background: rgba(56,142,60,0.08);
+  color: #388e3c;
+}
+
+/* ========== Demo: show some cards ========== */
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-row">
+    <span class="title">语境句子</span>
+    <span class="counter">12/80</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-box" placeholder="搜索句子或关键词…">
+  </div>
+  <div class="action-row">
+    <div class="action-btn" onclick="document.getElementById('dictToast').style.opacity='1'; setTimeout(()=>document.getElementById('dictToast').style.opacity='0',1200)">📖 查词</div>
+    <div class="action-btn" onclick="document.getElementById('pasteModal').classList.add('show')">📋 导入</div>
+    <div class="action-btn primary" onclick="document.getElementById('genModal').classList.add('show')">✨ AI生成</div>
+  </div>
+</div>
+
+<!-- Topics -->
+<div class="topic-section">
+  <div class="topic-scroll">
+    <div class="topic-pill active">全部<span class="topic-count">80</span></div>
+    <div class="topic-pill">科技<span class="topic-count">12</span></div>
+    <div class="topic-pill">环保<span class="topic-count">8</span></div>
+    <div class="topic-pill">教育<span class="topic-count">10</span></div>
+    <div class="topic-pill">社会<span class="topic-count">9</span></div>
+    <div class="topic-pill">生活<span class="topic-count">11</span></div>
+    <div class="topic-pill">学习<span class="topic-count">7</span></div>
+    <div class="topic-pill">励志<span class="topic-count">6</span></div>
+    <div class="topic-pill">校园<span class="topic-count">7</span></div>
+    <div class="topic-pill">就业<span class="topic-count">5</span></div>
+    <div class="topic-pill">文化<span class="topic-count">5</span></div>
+  </div>
+</div>
+
+<!-- Mode Toggle -->
+<div class="mode-bar" id="modeBar">
+  <div class="mode-btn active" id="listModeBtn" onclick="switchMode('list')">📋 列表浏览</div>
+  <div class="mode-btn" id="immModeBtn" onclick="switchMode('immersion')">🎯 沉浸学习</div>
+</div>
+
+<!-- Card List Area -->
+<div class="card-area" id="cardArea">
+  <div class="card mastered" onclick="this.classList.toggle('expanded')">
+    <div class="card-top">
+      <div class="card-num">1</div>
+      <div class="card-body">
+        <div class="card-english">
+          The rapid development of <span class="kw">artificial intelligence</span> has brought both <span class="kw">opportunities</span> and challenges.
+        </div>
+        <div class="card-chinese">人工智能的快速发展带来了机遇与挑战。</div>
+        <div class="card-expand-hint">▾ 点击查看翻译</div>
+      </div>
+    </div>
+    <div class="card-bottom">
+      <span class="card-tag">科技</span>
+      <div class="card-actions">
+        <div class="card-action" onclick="event.stopPropagation(); this.classList.toggle('fav-on')">
+          <span>★</span><span class="card-action-label">收藏</span>
+        </div>
+        <div class="card-action master-on" onclick="event.stopPropagation(); this.classList.toggle('master-on')">
+          <span>✓</span><span class="card-action-label">掌握</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card fav" onclick="this.classList.toggle('expanded')">
+    <div class="card-top">
+      <div class="card-num">2</div>
+      <div class="card-body">
+        <div class="card-english">
+          It is <span class="kw">high time</span> that we took <span class="kw">effective measures</span> to reduce carbon emissions.
+        </div>
+        <div class="card-chinese">我们早就该采取有效措施减少碳排放了。</div>
+        <div class="card-expand-hint">▾ 点击查看翻译</div>
+      </div>
+    </div>
+    <div class="card-bottom">
+      <span class="card-tag">环保</span>
+      <div class="card-actions">
+        <div class="card-action fav-on" onclick="event.stopPropagation(); this.classList.toggle('fav-on')">
+          <span>★</span><span class="card-action-label">收藏</span>
+        </div>
+        <div class="card-action" onclick="event.stopPropagation(); this.classList.toggle('master-on')">
+          <span>✓</span><span class="card-action-label">掌握</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('expanded')">
+    <div class="card-top">
+      <div class="card-num">3</div>
+      <div class="card-body">
+        <div class="card-english">
+          Only by <span class="kw">working together</span> can we solve the problem of <span class="kw">global warming</span>.
+        </div>
+        <div class="card-chinese">只有共同努力，我们才能解决全球变暖的问题。</div>
+        <div class="card-expand-hint">▾ 点击查看翻译</div>
+      </div>
+    </div>
+    <div class="card-bottom">
+      <span class="card-tag">环保</span>
+      <div class="card-actions">
+        <div class="card-action" onclick="event.stopPropagation(); this.classList.toggle('fav-on')">
+          <span>★</span><span class="card-action-label">收藏</span>
+        </div>
+        <div class="card-action" onclick="event.stopPropagation(); this.classList.toggle('master-on')">
+          <span>✓</span><span class="card-action-label">掌握</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('expanded')">
+    <div class="card-top">
+      <div class="card-num">4</div>
+      <div class="card-body">
+        <div class="card-english">
+          There is <span class="kw">no doubt</span> that education plays a <span class="kw">vital role</span> in personal development.
+        </div>
+        <div class="card-chinese">毫无疑问，教育在个人发展中起着至关重要的作用。</div>
+        <div class="card-expand-hint">▾ 点击查看翻译</div>
+      </div>
+    </div>
+    <div class="card-bottom">
+      <span class="card-tag">教育</span>
+      <div class="card-actions">
+        <div class="card-action" onclick="event.stopPropagation(); this.classList.toggle('fav-on')">
+          <span>★</span><span class="card-action-label">收藏</span>
+        </div>
+        <div class="card-action" onclick="event.stopPropagation(); this.classList.toggle('master-on')">
+          <span>✓</span><span class="card-action-label">掌握</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Immersion Mode Area -->
+<div class="immersion-area" id="immersionArea">
+  <div class="immersion-card">
+    <div class="imm-num">1 / 80</div>
+    <div class="imm-english">
+      The rapid development of <span class="kw">artificial intelligence</span> has brought both <span class="kw">opportunities</span> and challenges.
+    </div>
+    <div class="imm-chinese">人工智能的快速发展带来了机遇与挑战。</div>
+    <div class="imm-actions">
+      <button class="imm-btn fav" onclick="this.style.color=this.style.color==='rgb(230,168,0)'?'#bbb':'rgb(230,168,0)'">★</button>
+      <button class="imm-btn master" onclick="this.style.color=this.style.color==='rgb(56,142,60)'?'#bbb':'rgb(56,142,60)'">✓</button>
+    </div>
+  </div>
+  <div class="imm-nav">
+    <button class="nav-btn">‹</button>
+    <span class="imm-progress">1 / 80</span>
+    <button class="nav-btn">›</button>
+  </div>
+</div>
+
+<!-- Generate Modal -->
+<div class="overlay" id="genModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">AI 生成语境句子</span>
+      <div class="modal-close" onclick="document.getElementById('genModal').classList.remove('show')">✕</div>
+    </div>
+    <div class="type-switch">
+      <div class="type-btn active" onclick="document.querySelectorAll('.type-switch .type-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active')">按单词</div>
+      <div class="type-btn" onclick="document.querySelectorAll('.type-switch .type-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active')">按话题</div>
+    </div>
+    <input class="input-field" placeholder="输入四级单词，如：sustainable">
+    <div class="count-row">
+      <span class="count-label">生成数量</span>
+      <div class="count-ctrl">
+        <button class="count-btn">−</button>
+        <span class="count-num">3</span>
+        <button class="count-btn">+</button>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="document.getElementById('genToast').style.opacity='1'; setTimeout(()=>document.getElementById('genToast').style.opacity='0',1500)">生成句子</button>
+    <p class="hint">基于四级大纲难度，生成含关键词的语境句子</p>
+  </div>
+</div>
+
+<!-- Paste Modal -->
+<div class="overlay" id="pasteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">粘贴文本导入句子</span>
+      <div class="modal-close" onclick="document.getElementById('pasteModal').classList.remove('show')">✕</div>
+    </div>
+    <textarea class="paste-field" placeholder="粘贴英文文章或段落（如四级真题阅读、英语新闻等），AI 自动拆句并标注翻译、关键词、话题"></textarea>
+    <button class="submit-btn" onclick="document.getElementById('pasteToast').style.opacity='1'; setTimeout(()=>document.getElementById('pasteToast').style.opacity='0',1500)">开始解析导入</button>
+    <p class="hint">支持英文段落、文章，AI 自动拆句并适配四级难度</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="genToast" style="position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 28px;border-radius:20px;font-size:14px;opacity:0;transition:opacity 0.2s;z-index:200;pointer-events:none">已生成 3 个句子 ✓</div>
+<div id="pasteToast" style="position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 28px;border-radius:20px;font-size:14px;opacity:0;transition:opacity 0.2s;z-index:200;pointer-events:none">已导入 5 个句子 ✓</div>
+<div id="dictToast" style="position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 28px;border-radius:20px;font-size:14px;opacity:0;transition:opacity 0.2s;z-index:200;pointer-events:none">跳转词典页面 →</div>
+
+<script>
+function switchMode(mode) {
+  const listBtn = document.getElementById('listModeBtn');
+  const immBtn = document.getElementById('immModeBtn');
+  const cardArea = document.getElementById('cardArea');
+  const immArea = document.getElementById('immersionArea');
+
+  listBtn.classList.toggle('active', mode === 'list');
+  immBtn.classList.toggle('active', mode === 'immersion');
+
+  if (mode === 'list') {
+    cardArea.style.display = 'flex';
+    immArea.style.display = 'none';
+  } else {
+    cardArea.style.display = 'none';
+    immArea.style.display = 'flex';
+  }
+}
+</script>
+</body>
+</html>

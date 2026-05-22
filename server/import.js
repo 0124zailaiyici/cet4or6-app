@@ -126,30 +126,33 @@ function parseListening(lines, year) {
   }
   if (curQ) questions.push(curQ)
 
-  // 清理：每题保持4个，按字母排序去重；多余选项顺延补偿下题
+  // 清理：去重时检测重复字母 → 顺延给下题；排序；trim 到 4
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i]
-    const dedup = []
     const seen = new Set()
+    const overflow = []
+    const cleaned = []
     for (const o of q.rawOpts) {
       const m = o.match(/^([A-D])\)/)
-      if (m && !seen.has(m[1])) {
-        seen.add(m[1])
-        dedup.push(o)
+      if (m && seen.has(m[1])) {
+        // 重复字母 → 属于下题
+        overflow.push(o)
+      } else {
+        if (m) seen.add(m[1])
+        cleaned.push(o)
       }
     }
-    // 按字母排序
-    dedup.sort((a, b) => a[0].localeCompare(b[0]))
-    q.rawOpts = dedup
+    q.rawOpts = cleaned
+    if (overflow.length > 0 && i + 1 < questions.length) {
+      // 顺延给下题（插到开头，保持相对顺序）
+      questions[i + 1].rawOpts.unshift(...overflow)
+    }
+  }
 
-    // 若本题目选项溢出，补偿给下一题
-    while (q.rawOpts.length > 4 && i + 1 < questions.length) {
-      questions[i + 1].rawOpts.unshift(q.rawOpts.pop())
-    }
-    // 若本题目不足4个，从下一题借
-    while (q.rawOpts.length < 4 && i + 1 < questions.length && questions[i + 1].rawOpts.length > 4) {
-      q.rawOpts.push(questions[i + 1].rawOpts.shift())
-    }
+  // 每个题目按字母排序，trim 到 4
+  for (const q of questions) {
+    q.rawOpts.sort((a, b) => a[0].localeCompare(b[0]))
+    q.rawOpts = q.rawOpts.slice(0, 4)
   }
 
   // 收集方向说明（非题目标记之前的行）

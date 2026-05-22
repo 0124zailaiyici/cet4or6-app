@@ -21,6 +21,8 @@ interface ISentencesData {
   favoriteIds: number[]
   searchQuery: string
   darkMode: boolean
+  viewMode: 'list' | 'immersion'
+  immersionIndex: number
   showGenModal: boolean
   genInput: string
   genType: 'word' | 'topic'
@@ -42,6 +44,9 @@ interface ISentencesMethods {
   goDict(): void
   noop(): void
   highlightText(text: string, keywords: string[]): string
+  switchMode(e: WechatMiniprogram.TouchEvent): void
+  prevSentence(): void
+  nextSentence(): void
   openGenModal(): void
   closeGenModal(): void
   onGenInput(e: WechatMiniprogram.Input): void
@@ -65,6 +70,8 @@ Page<ISentencesData, ISentencesMethods>({
     favoriteIds: [],
     searchQuery: '',
     darkMode: false,
+    viewMode: 'list',
+    immersionIndex: 0,
     showGenModal: false,
     genInput: '',
     genType: 'word',
@@ -175,6 +182,24 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   noop() {},
+
+  switchMode(e: WechatMiniprogram.TouchEvent) {
+    const mode = e.currentTarget.dataset.mode as 'list' | 'immersion'
+    this.setData({ viewMode: mode, immersionIndex: 0 })
+  },
+
+  prevSentence() {
+    if (this.data.immersionIndex > 0) {
+      this.setData({ immersionIndex: this.data.immersionIndex - 1 })
+    }
+  },
+
+  nextSentence() {
+    const max = this.data.filteredSentences.length - 1
+    if (this.data.immersionIndex < max) {
+      this.setData({ immersionIndex: this.data.immersionIndex + 1 })
+    }
+  },
 
   highlightText(text: string, keywords: string[]): string {
     let result = text

@@ -190,7 +190,7 @@ const listeningData = [
     "fullText": "Healthy eating habits are essential for maintaining good health. A balanced diet should include a variety of fruits, vegetables, and whole grains. It is also important to limit the intake of sugar and processed foods. Many young people tend to skip breakfast, which is harmful to their health. Experts suggest that we should eat three regular meals a day. A healthy diet, combined with regular exercise, can help us live a longer and happier life."
   },
   {
-    "id": 1779438758482,
+    "id": 1779439442841,
     "title": "CET-4 听力 2019061",
     "audioUrl": "/audio/2019年06月四级听力音频第1套.mp3",
     "sentences": [
@@ -235,97 +235,97 @@ const listeningData = [
         "end": 0
       },
       {
-        "text": "Q8. A) He had a driving lesson. B) He got his driver's license. C) He took the driver's theory exam. D) He passed the driver's road test.",
+        "text": "Q8. A) He had a driving lesson. B) He got his driver's license. C) Settle a legal dispute. D) Expand their business.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q9. A) He was not well prepared. B) He did not get to the exam in time. C) He was not used to the test format. D) He did not follow the test procedure.",
+        "text": "Q9. A) He was not well prepared. B) He did not get to the exam in time. C) He took the driver's theory exam. D) He passed the driver's road test.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q10. A) They are tough. B) They are costly. A) Pass his road test the first time. C) They are helpful.",
+        "text": "Q10. A) They are tough. B) They are costly. C) He was not used to the test format. D) He did not follow the test procedure.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q11. B) Test-drive a few times on highways. C) Find an experienced driving instructor. D) They are too short.",
+        "text": "Q11. A) Pass his road test the first time. B) Test-drive a few times on highways. C) They are helpful. D) They are too short.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q12. A) Where the woman studies. B) The acceptance rate at Leeds. C) Leeds' tuition for international students. D) How to apply for studies at a university.",
+        "text": "Q12. A) Where the woman studies. B) The acceptance rate at Leeds. C) Find an experienced driving instructor. D) Earn enough money for driving lessons.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q13. A) Apply to an American university. B) Do research on higher education. C) Perform in a famous musical. D) Pursue postgraduate studies.",
+        "text": "Q13. A) Apply to an American university. B) Do research on higher education. C) Leeds' tuition for international students. D) How to apply for studies at a university.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q14. A) His favorable recommendations. B) His outstanding musical talent. C) His academic excellence. D) His unique experience.",
+        "text": "Q14. A) His favorable recommendations. B) His outstanding musical talent. C) Perform in a famous musical. D) Pursue postgraduate studies.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q15. A) Do a master's degree. B) Settle down in England. C) Travel widely. D) Teach overseas.",
+        "text": "Q15. A) Do a master's degree. B) Settle down in England. C) His academic excellence. D) His unique experience.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q16. A) They help farmers keep diseases in check. B) Many species remain unknown to scientists. C) Only a few species cause trouble to humans. D) They live in incredibly well-organized colonies.",
+        "text": "Q16. A) They help farmers keep diseases in check. B) Many species remain unknown to scientists. C) Travel widely. D) Teach overseas.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q17. A) They are larger than many other species. B) They can cause damage to people's homes. C) They can survive a long time without water. D) They like to form colonies in electrical units.",
+        "text": "Q17. A) They are larger than many other species. B) They can cause damage to people's homes. C) Only a few species cause trouble to humans. D) They live in incredibly well-organized colonies.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q18. A) Deny them access to any food. B) Keep doors and windows shut. C) Destroy their colonies close by. D) Refrain from eating sugary food.",
+        "text": "Q18. A) Deny them access to any food. B) Keep doors and windows shut. C) They can survive a long time without water. D) They like to form colonies in electrical units.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q19. A) The function of the human immune system. B) The cause of various auto-immune diseases. C) The viruses that may infect the human immune system. D) The change in people's immune system as they get older.",
+        "text": "Q19. A) The function of the human immune system. B) The cause of various auto-immune diseases. C) Destroy their colonies close by. D) Refrain from eating sugary food.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q20. A) Report their illnesses. B) Offer blood samples. C) Act as research assistants. D) Help to interview patients.",
+        "text": "Q20. A) Report their illnesses. B) Offer blood samples. C) The viruses that may infect the human immune system. D) The change in people's immune system as they get older.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q21. immune system. A) Strengthening people's immunity to infection. B) Better understanding patients C) Helping improve old people's health conditions. D) Further reducing old patients' medical expenses.",
+        "text": "Q21. immune system. A) Strengthening people's immunity to infection. B) Better understanding patients C) Act as research assistants. D) Help to interview patients.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q22. A) His students had trouble getting on with each other. B) A lot of kids stayed at school to do their homework. C) His students were struggling to follow his lessons. D) A group of kids were playing chess after school.",
+        "text": "Q22. A) His students had trouble getting on with each other. B) A lot of kids stayed at school to do their homework. C) Helping improve old people's health conditions. D) Further reducing old patients' medical expenses.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q23. A) Visit a chess team in Nashville. B) Join the schooPs chess team. C) Participate in a national chess competition. D) Receive training for a chess competition.",
+        "text": "Q23. A) Visit a chess team in Nashville. B) Join the schooPs chess team. C) His students were struggling to follow his lessons. D) A group of kids were playing chess after school.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q24. A) Most of them come from low-income families. B) Many have become national chess champions. C) A couple of them have got involved in crimes. D) Many became chess coaches after graduation.",
+        "text": "Q24. A) Most of them come from low-income families. B) Many have become national chess champions. C) Participate in a national chess competition. D) Receive training for a chess competition.",
         "start": 0,
         "end": 0
       },
       {
-        "text": "Q25. A) Actions speak louder than words. B) Think twice before taking action. C) Translate their words into action. D) Take action before it gets too late.",
+        "text": "Q25. A) Actions speak louder than words. B) Think twice before taking action. C) A couple of them have got involved in crimes. D) Many became chess coaches after graduation.",
         "start": 0,
         "end": 0
       }
     ],
-    "fullText": "you hear two or three questions. Both the news report and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday on a small island. C) He visited a prison located on a faraway island. D) He swam around an island near San Francisco. A) He doubled the reward. B) He set him an example. C) He cheered him on all the way. D) He had the event covered on TV. A) To end the one-child policy. B) To encourage late marriage. C) To increase working efficiency. D) To give people more time to travel. s economic growth. A) They will not be welcomed by young people. B) They will help to popularize early marriage. C) They will boost China D) They will not come into immediate effect. A) Cleaning service in great demand all over the world. B) Two ladies giving up well-paid jobs to do cleaning. C) A new company to clean up the mess after parties. D) Cleaners gainfully employed at nights and weekends. A) It takes a lot of time to prepare. B) It leaves the house in a mess. A) Hire an Australian lawyer. B) Visit the U.S. and Canada. C) It makes party goers exhausted. D) It creates noise and misconduct. A) He had a driving lesson. B) He got his driver's license. C) He took the driver's theory exam. D) He passed the driver's road test. A) He was not well prepared. B) He did not get to the exam in time. C) He was not used to the test format. D) He did not follow the test procedure. A) They are tough. B) They are costly. A) Pass his road test the first time. C) They are helpful. B) Test-drive a few times on highways. C) Find an experienced driving instructor. D) They are too short. A) Where the woman studies. B) The acceptance rate at Leeds. C) Leeds' tuition for international students. D) How to apply for studies at a university. A) Apply to an American university. B) Do research on higher education. C) Perform in a famous musical. D) Pursue postgraduate studies. A) His favorable recommendations. B) His outstanding musical talent. C) His academic excellence. D) His unique experience. A) Do a master's degree. B) Settle down in England. C) Travel widely. D) Teach overseas. A) They help farmers keep diseases in check. B) Many species remain unknown to scientists. C) Only a few species cause trouble to humans. D) They live in incredibly well-organized colonies. A) They are larger than many other species. B) They can cause damage to people's homes. C) They can survive a long time without water. D) They like to form colonies in electrical units. A) Deny them access to any food. B) Keep doors and windows shut. C) Destroy their colonies close by. D) Refrain from eating sugary food. A) The function of the human immune system. B) The cause of various auto-immune diseases. C) The viruses that may infect the human immune system. D) The change in people's immune system as they get older. A) Report their illnesses. B) Offer blood samples. C) Act as research assistants. D) Help to interview patients. immune system. A) Strengthening people's immunity to infection. B) Better understanding patients C) Helping improve old people's health conditions. D) Further reducing old patients' medical expenses. A) His students had trouble getting on with each other. B) A lot of kids stayed at school to do their homework. C) His students were struggling to follow his lessons. D) A group of kids were playing chess after school. A) Visit a chess team in Nashville. B) Join the schooPs chess team. C) Participate in a national chess competition. D) Receive training for a chess competition. A) Most of them come from low-income families. B) Many have become national chess champions. C) A couple of them have got involved in crimes. D) Many became chess coaches after graduation. A) Actions speak louder than words. B) Think twice before taking action. C) Translate their words into action. D) Take action before it gets too late."
+    "fullText": "you hear two or three questions. Both the news report and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday on a small island. C) He visited a prison located on a faraway island. D) He swam around an island near San Francisco. A) He doubled the reward. B) He set him an example. C) He cheered him on all the way. D) He had the event covered on TV. A) To end the one-child policy. B) To encourage late marriage. C) To increase working efficiency. D) To give people more time to travel. s economic growth. A) They will not be welcomed by young people. B) They will help to popularize early marriage. C) They will boost China D) They will not come into immediate effect. A) Cleaning service in great demand all over the world. B) Two ladies giving up well-paid jobs to do cleaning. C) A new company to clean up the mess after parties. D) Cleaners gainfully employed at nights and weekends. A) It takes a lot of time to prepare. B) It leaves the house in a mess. A) Hire an Australian lawyer. B) Visit the U.S. and Canada. C) It makes party goers exhausted. D) It creates noise and misconduct. A) He had a driving lesson. B) He got his driver's license. C) Settle a legal dispute. D) Expand their business. A) He was not well prepared. B) He did not get to the exam in time. C) He took the driver's theory exam. D) He passed the driver's road test. A) They are tough. B) They are costly. C) He was not used to the test format. D) He did not follow the test procedure. A) Pass his road test the first time. B) Test-drive a few times on highways. C) They are helpful. D) They are too short. A) Where the woman studies. B) The acceptance rate at Leeds. C) Find an experienced driving instructor. D) Earn enough money for driving lessons. A) Apply to an American university. B) Do research on higher education. C) Leeds' tuition for international students. D) How to apply for studies at a university. A) His favorable recommendations. B) His outstanding musical talent. C) Perform in a famous musical. D) Pursue postgraduate studies. A) Do a master's degree. B) Settle down in England. C) His academic excellence. D) His unique experience. A) They help farmers keep diseases in check. B) Many species remain unknown to scientists. C) Travel widely. D) Teach overseas. A) They are larger than many other species. B) They can cause damage to people's homes. C) Only a few species cause trouble to humans. D) They live in incredibly well-organized colonies. A) Deny them access to any food. B) Keep doors and windows shut. C) They can survive a long time without water. D) They like to form colonies in electrical units. A) The function of the human immune system. B) The cause of various auto-immune diseases. C) Destroy their colonies close by. D) Refrain from eating sugary food. A) Report their illnesses. B) Offer blood samples. C) The viruses that may infect the human immune system. D) The change in people's immune system as they get older. immune system. A) Strengthening people's immunity to infection. B) Better understanding patients C) Act as research assistants. D) Help to interview patients. A) His students had trouble getting on with each other. B) A lot of kids stayed at school to do their homework. C) Helping improve old people's health conditions. D) Further reducing old patients' medical expenses. A) Visit a chess team in Nashville. B) Join the schooPs chess team. C) His students were struggling to follow his lessons. D) A group of kids were playing chess after school. A) Most of them come from low-income families. B) Many have become national chess champions. C) Participate in a national chess competition. D) Receive training for a chess competition. A) Actions speak louder than words. B) Think twice before taking action. C) A couple of them have got involved in crimes. D) Many became chess coaches after graduation."
   }
 ]
 export default listeningData
