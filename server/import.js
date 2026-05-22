@@ -91,10 +91,9 @@ function parseListening(lines, year) {
   const paragraphs = splitParagraphs(lines.join('\n'))
   if (paragraphs.length < 3) return []
 
-  // 合并短行：选项续行合并到前一行，避免破碎
+  // 合并续行
   const merged = []
   for (const p of paragraphs) {
-    // 过滤页脚
     if (/\d{4}年\d+月/.test(p) && /第\d+页/.test(p)) continue
     if (/^[A-D]\)/.test(p) && merged.length > 0 && !/^\d+\./.test(p)) {
       merged[merged.length - 1] += '  ' + p
@@ -103,18 +102,72 @@ function parseListening(lines, year) {
     }
   }
 
-  const sentences = merged.map((text) => ({
-    text: sanitize(text),
-    start: 0,
-    end: 0,
-  }))
+  // 解析为逐题结构
+  const questions = []
+  let curQ = null
+  for (const line of merged) {
+    const qm = line.match(/^(\d+)\.\s*(.*)/)
+    if (qm) {
+      if (curQ) questions.push(curQ)
+      curQ = { num: parseInt(qm[1]), text: '', rawOpts: [] }
+      // 从同一行提取选项
+      const parts = qm[2].split(/(?=[A-D]\))/).filter(Boolean)
+      for (const p of parts) {
+        if (/^[A-D]\)/.test(p)) curQ.rawOpts.push(p)
+        else curQ.text += ' ' + p
+      }
+    } else if (curQ && curQ.rawOpts.length < 4) {
+      const parts = line.split(/(?=[A-D]\))/).filter(Boolean)
+      for (const p of parts) {
+        if (/^[A-D]\)/.test(p)) curQ.rawOpts.push(p)
+        else curQ.text += ' ' + p
+      }
+    }
+  }
+  if (curQ) questions.push(curQ)
+
+  // 清理：每题保持4个，按字母排序去重；多余选项顺延补偿下题
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i]
+    const dedup = []
+    const seen = new Set()
+    for (const o of q.rawOpts) {
+      const m = o.match(/^([A-D])\)/)
+      if (m && !seen.has(m[1])) {
+        seen.add(m[1])
+        dedup.push(o)
+      }
+    }
+    // 按字母排序
+    dedup.sort((a, b) => a[0].localeCompare(b[0]))
+    q.rawOpts = dedup
+
+    // 若本题目选项溢出，补偿给下一题
+    while (q.rawOpts.length > 4 && i + 1 < questions.length) {
+      questions[i + 1].rawOpts.unshift(q.rawOpts.pop())
+    }
+    // 若本题目不足4个，从下一题借
+    while (q.rawOpts.length < 4 && i + 1 < questions.length && questions[i + 1].rawOpts.length > 4) {
+      q.rawOpts.push(questions[i + 1].rawOpts.shift())
+    }
+  }
+
+  // 收集方向说明（非题目标记之前的行）
+  const dirLines = []
+  for (const line of merged) {
+    if (/^\d+\./.test(line)) break
+    dirLines.push(line)
+  }
+  const dirText = sanitize(dirLines.join(' '))
+  const sentences = dirText.length > 3 ? [{ text: dirText, start: 0, end: 0 }].concat(questions.map(q => ({ text: sanitize(`Q${q.num}. ${q.text} ${q.rawOpts.join(' ')}`), start: 0, end: 0 }))) : questions.map(q => ({ text: sanitize(`Q${q.num}. ${q.text} ${q.rawOpts.join(' ')}`), start: 0, end: 0 }))
+  const allText = sanitize(dirLines.concat(questions.map(q => q.text + ' ' + q.rawOpts.join(' '))).join(' '))
 
   return [{
     id: Date.now(),
     title: `CET-4 听力 ${year}`,
     audioUrl: '',
     sentences,
-    fullText: sanitize(sentences.map(s => s.text).join(' ')),
+    fullText: sanitize(allText),
   }]
 }
 

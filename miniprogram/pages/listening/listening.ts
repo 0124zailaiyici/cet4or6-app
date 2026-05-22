@@ -94,10 +94,9 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
   const lines = passage.sentences.map(s => s.text.trim()).filter(Boolean)
 
   const dirs: string[] = []
-  let currentQ: { section: string; stem: string; opts: string[] } | null = null
+  let currentQ: { section: string; stem: string; opts: Array<{l: string; t: string}> } | null = null
   let hasContent = false
 
-  // Section boundary detection: text that isn't a question or option
   function pushDir() {
     if (dirs.length > 0) {
       const txt = dirs.join(' ').replace(/\s+/g, ' ').trim()
@@ -106,55 +105,83 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     }
   }
 
+  function addOpts(text: string) {
+    if (!currentQ) return
+    const parts = text.split(/(?=[A-D]\))/).filter(Boolean)
+    for (const p of parts) {
+      const m = p.match(/^([A-D])\)\s*(.*)/)
+      if (m) currentQ.opts.push({ l: m[1], t: m[2].trim() })
+    }
+  }
+
   for (const line of lines) {
-    // Skip page footers
     if (/\d{4}年\d+月/.test(line) && /第\d+页/.test(line)) continue
 
-    const qMatch = line.match(/^(\d+)\.\s*(.*)/)
+    const qMatch = line.match(/^(?:Q)?(\d+)\.\s*(.*)/)
     if (qMatch) {
-      // Finish previous question
       if (currentQ) {
         pushDir()
-        pages.push({ type: 'q', ...currentQ })
+        pages.push({ type: 'q', ...currentQ, opts: currentQ.opts.map(o => o.t) })
       }
       const qNum = parseInt(qMatch[1])
       const rest = qMatch[2].trim()
       currentQ = { section: sectionLabel(qNum), stem: `Q${qNum}.`, opts: [] }
       hasContent = true
-
-      // Parse options from the same line
-      const opts = rest.split(/(?=[A-D]\))/).filter(Boolean)
-      for (const opt of opts) {
-        const m = opt.match(/^([A-D])\)\s*(.*)/)
-        if (m) currentQ.opts.push(m[2].trim())
-      }
+      addOpts(rest)
       continue
     }
 
-    // Option continuation line
-    if (/^[A-D]\)/.test(line)) {
-      const opts = line.split(/(?=[A-D]\))/).filter(Boolean)
-      for (const opt of opts) {
-        const m = opt.match(/^([A-D])\)\s*(.*)/)
-        if (m && currentQ) currentQ.opts.push(m[2].trim())
-      }
+    if (/^[A-D]\)/.test(line) && currentQ) {
+      addOpts(line)
       continue
     }
 
-    // Plain text (directions)
-    if (!hasContent) {
-      dirs.push(line)
-    } else if (line.length > 5) {
-      // Could be section text between question groups (e.g., "Questions 8-11 are based on...")
-      // Push as a dir page before the next question
-      dirs.push(line)
+    if (!hasContent) dirs.push(line)
+    else if (line.length > 5) dirs.push(line)
+  }
+
+  if (currentQ) {
+    pushDir()
+    pages.push({ type: 'q', ...currentQ, opts: currentQ.opts.map(o => o.t) })
+  }
+
+  // Clean up each question: dedup by letter, sort, trim to 4
+  // Re-run with the raw opts to get correct mapping
+  currentQ = null
+  const rawPages: Array<{ section: string; stem: string; opts: Array<{l: string; t: string}> }> = []
+  for (const line of lines) {
+    if (/\d{4}年\d+月/.test(line) && /第\d+页/.test(line)) continue
+    const qMatch = line.match(/^(?:Q)?(\d+)\.\s*(.*)/)
+    if (qMatch) {
+      if (currentQ) rawPages.push(currentQ)
+      currentQ = { section: sectionLabel(parseInt(qMatch[1])), stem: `Q${qMatch[1]}.`, opts: [] }
+      addOpts(qMatch[2].trim())
+    } else if (/^[A-D]\)/.test(line) && currentQ) {
+      addOpts(line)
+    }
+  }
+  if (currentQ) rawPages.push(currentQ)
+
+  // Dedup, sort, trim for each raw page
+  for (const rp of rawPages) {
+    const seen = new Set<string>()
+    const clean: Array<{l: string; t: string}> = []
+    for (const o of rp.opts) {
+      if (seen.has(o.l)) continue
+      seen.add(o.l)
+      clean.push(o)
+    }
+    clean.sort((a, b) => a.l.localeCompare(b.l))
+    const trimmed = clean.slice(0, 4)
+    // Push as q-page (replace existing or add new)
+    const existing = pages.findIndex(p => p.type === 'q' && p.stem === rp.stem)
+    if (existing > -1) {
+      pages[existing].opts = trimmed.map(o => o.t)
+    } else {
+      pages.push({ type: 'q', section: rp.section, stem: rp.stem, opts: trimmed.map(o => o.t) })
     }
   }
 
-  // Last question
-  if (currentQ) { pushDir(); pages.push({ type: 'q', ...currentQ }) }
-
-  // If no questions found (TTS mode), return empty
   if (pages.every(p => p.type === 'dir')) return []
 
   // Add section dir pages at natural boundaries
