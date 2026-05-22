@@ -207,7 +207,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   adjustGenCount(e: WechatMiniprogram.TouchEvent) {
-    const delta = e.currentTarget.dataset.delta as number
+    const delta = parseInt(e.currentTarget.dataset.delta as string, 10)
     const next = this.data.genCount + delta
     if (next >= 1 && next <= 5) {
       this.setData({ genCount: next })
