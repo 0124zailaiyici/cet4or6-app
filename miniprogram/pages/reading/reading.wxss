@@ -85,7 +85,17 @@
   font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
   padding: 14rpx 20rpx; border-radius: 14rpx;
   background: rgba(84,110,122,0.04); border: 2rpx solid rgba(84,110,122,0.06);
+  transition: 0.2s;
 }
+.qzc.used { opacity: 0.3; border-color: #ccc; background: #f0f0f0; }
+
+/* 交互式空白标签 */
+.bk-tag {
+  display: inline; color: #ff6b8a; font-weight: 700;
+  border-bottom: 3rpx solid #ff6b8a; padding: 0 4rpx;
+}
+.bk-tag.filled { color: #2d2d4e; border-color: #81c784; background: rgba(129,199,132,0.1); }
+.bk-tag.active { color: #fff; background: #ff6b8a; border-color: #ff6b8a; border-radius: 6rpx; padding: 0 8rpx; }
 
 /* 题目滚动区 */
 .qz-q-scroll {
