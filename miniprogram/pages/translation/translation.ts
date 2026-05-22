@@ -77,6 +77,8 @@ interface ITranslationData {
   hMax: number
   hMin: number
   hTrend: string
+  pct: number
+  ringDeg: number
 }
 
 function genSuggestions(s: ScorerResult): string {
@@ -106,6 +108,8 @@ Page({
     aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
     darkMode: false,
     wordCount: 0,
+    pct: 0,
+    ringDeg: 0,
   },
 
   onLoad() {
@@ -115,13 +119,15 @@ Page({
     const history = (app.globalData.studyData.translationRecords || []) as ITranslationRecord[]
     const completedIds = [...new Set(history.map(r => r.id))]
 
+    const pct = completedIds.length > 0 ? Math.round(completedIds.length / items.length * 100) : 0
+    const ringDeg = Math.round(pct / 100 * 360)
     const listItems = items.map(t => ({
       ...t,
       _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese,
       _emoji: getEmoji(t.chinese),
       _tag: getTag(t),
     }))
-    this.setData({ translations: listItems, history, completedIds })
+    this.setData({ translations: listItems, history, completedIds, pct, ringDeg })
 
     checkHealth().then(r => {
       if (r.apiKey) this.setData({ aiAvailable: true })

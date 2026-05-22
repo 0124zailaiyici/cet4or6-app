@@ -17,12 +17,12 @@
 
   <!-- ═══ 进度卡片 ═══ -->
   <view class="progress-card">
-    <view class="pc-ring"><view class="pc-ring-in"><text class="pc-num">{{completedIds.length}}</text><text class="pc-unit">/{{translations.length}}</text></view></view>
+    <view class="pc-ring" style="background: conic-gradient(#f472b6 0deg {{ringDeg}}deg, rgba(244,114,182,0.08) {{ringDeg}}deg 360deg)"><view class="pc-ring-in"><text class="pc-num">{{completedIds.length}}</text><text class="pc-unit">/{{translations.length}}</text></view></view>
     <view class="pc-body">
       <text class="pc-tip">已完成 {{completedIds.length}} 题 ✨</text>
       <text class="pc-sub">{{translations.length - completedIds.length > 0 ? '还剩 ' + (translations.length - completedIds.length) + ' 题，加油哦' : '全部完成啦，太棒了 🎉'}}</text>
     </view>
-    <text class="pc-badge">{{completedIds.length > 0 ? Math.round(completedIds.length / translations.length * 100) + '%' : '0%'}}</text>
+    <text class="pc-badge">{{pct}}%</text>
   </view>
 
   <!-- ═══ 标签 ═══ -->
