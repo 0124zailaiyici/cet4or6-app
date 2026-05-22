@@ -114,20 +114,6 @@ Page<ISentencesData, ISentencesMethods>({
       masteredIds: [],
       favoriteIds: [],
     })
-
-    const sentenceHash = sentences.length + '|' + sentences[0]?.english + '|' + sentences[sentences.length - 1]?.english
-    const storedHash = wx.getStorageSync('sentenceHash')
-    if (storedHash === sentenceHash) {
-      this.setData({
-        masteredIds: app.globalData.studyData.masteredSentences || [],
-        favoriteIds: app.globalData.studyData.favoriteSentenceIds || [],
-      })
-    } else {
-      wx.setStorageSync('sentenceHash', sentenceHash)
-      app.globalData.studyData.favoriteSentenceIds = []
-      app.globalData.studyData.masteredSentences = []
-      wx.setStorageSync('studyData', app.globalData.studyData)
-    }
   },
 
   onShow() {
