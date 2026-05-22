@@ -265,20 +265,20 @@
   border-radius: 16rpx;
 }
 
-.sc-fav {
+.page .sc-fav {
   color: #fff !important;
   background: #e6a800 !important;
 }
-.sc-fav.on {
+.page .sc-fav.on {
   color: #fff !important;
   background: #bbb !important;
 }
 
-.sc-master {
+.page .sc-master {
   color: #fff !important;
   background: #388e3c !important;
 }
-.sc-master.on {
+.page .sc-master.on {
   color: #fff !important;
   background: #bbb !important;
 }
@@ -390,11 +390,11 @@
   font-weight: 500;
 }
 
-.imm-btn.fav { color: #fff !important; background: #e6a800 !important; }
-.imm-btn.fav.on { color: #fff !important; background: #bbb !important; }
+.page .imm-btn.fav { color: #fff !important; background: #e6a800 !important; }
+.page .imm-btn.fav.on { color: #fff !important; background: #bbb !important; }
 
-.imm-btn.master { color: #fff !important; background: #388e3c !important; }
-.imm-btn.master.on { color: #fff !important; background: #bbb !important; }
+.page .imm-btn.master { color: #fff !important; background: #388e3c !important; }
+.page .imm-btn.master.on { color: #fff !important; background: #bbb !important; }
 
 .imm-nav {
   display: flex;
