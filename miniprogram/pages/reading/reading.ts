@@ -30,6 +30,7 @@ interface IReadingData {
   activeBlank: string | null
   matchAnswers: Record<number, string>
   matchCount: number
+  usedLetters: string[]
   activeStmt: number | null
   bStmtPage: number
   bStmtPages: string[][] // 5条一页
@@ -55,8 +56,10 @@ interface IReadingMethods {
   onBlankTap(e: WechatMiniprogram.TouchEvent): void
   onOptionTap(e: WechatMiniprogram.TouchEvent): void
   selectStmt(e: WechatMiniprogram.TouchEvent): void
+  removeMatch(e: WechatMiniprogram.TouchEvent): void
   assignLetter(e: WechatMiniprogram.TouchEvent): void
   saveMatchAnswers(): void
+  updateUsedLetters(): void
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
@@ -76,6 +79,7 @@ Page<IReadingData, IReadingMethods>({
     activeBlank: null,
     matchAnswers: {},
     matchCount: 0,
+    usedLetters: [],
     activeStmt: null,
     bStmtPage: 0,
     bStmtPages: [],
@@ -96,12 +100,12 @@ Page<IReadingData, IReadingMethods>({
 
   formatBPassage(text: string): string[] {
     if (!text) return ['']
-    // 按段落标签 (A) B) C) 或 A）B）C）) 分组，每组作为一个独立段落
+    // 按 A）B）C) 拆分，每个标签作为独立段落开头
     const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
-    // 每页最多3段
+    // 每页3段，段间用双换行
     const pages: string[] = []
     for (let i = 0; i < parts.length; i += 3) {
-      pages.push(parts.slice(i, i + 3).map(p => p.trim()).join('\n\n'))
+      pages.push(parts.slice(i, i + 3).map(p => p.trim()).join('\n'))
     }
     return pages.length > 0 ? pages : [text]
   },
@@ -114,7 +118,9 @@ Page<IReadingData, IReadingMethods>({
         ? this.formatBPassage(item.passage)
         : this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
-      const formatted = pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
+      const formatted = item.sectionType === 'B'
+        ? pages.map(p => `<div style="line-height:1.9;margin:0 0 0.6em">${p.replace(/\n/g, '<br>')}</div>`)
+        : pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
       // 从存储加载已有答案
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
@@ -132,6 +138,7 @@ Page<IReadingData, IReadingMethods>({
         usedFlags: saved?.usedFlags || [],
         matchAnswers: matchSaved,
         matchCount: Object.keys(matchSaved).length,
+        usedLetters: [...new Set(Object.values(matchSaved))],
         bStmtPage: 0, bStmtPages: bPages,
         activeBlank: null, activeStmt: null,
       })
@@ -261,22 +268,34 @@ Page<IReadingData, IReadingMethods>({
     if (newVal !== null) wx.showToast({ title: `已选第${newVal + 1}题，请选字母`, icon: 'none' })
   },
 
+  updateUsedLetters() {
+    const used = [...new Set(Object.values(this.data.matchAnswers))]
+    this.setData({ usedLetters: used, matchCount: Object.keys(this.data.matchAnswers).length })
+  },
+
+  removeMatch(e: WechatMiniprogram.TouchEvent) {
+    const sIdx = parseInt(e.currentTarget.dataset.idx as string)
+    const ma = { ...this.data.matchAnswers }
+    delete ma[sIdx]
+    this.setData({ matchAnswers: ma })
+    this.updateUsedLetters()
+    this.saveMatchAnswers()
+  },
+
   assignLetter(e: WechatMiniprogram.TouchEvent) {
     const letter = e.currentTarget.dataset.letter as string
     const stmt = this.data.activeStmt
-    if (stmt === null) {
-      wx.showToast({ title: '请先点击要匹配的陈述', icon: 'none' })
-      return
-    }
+    if (stmt === null) return
     const ma = { ...this.data.matchAnswers }
     if (ma[stmt] === letter) {
       delete ma[stmt]
     } else {
       ma[stmt] = letter
     }
-    this.setData({ matchAnswers: ma, activeStmt: null, matchCount: Object.keys(ma).length })
+    this.setData({ matchAnswers: ma, activeStmt: null })
+    this.updateUsedLetters()
     this.saveMatchAnswers()
-    wx.showToast({ title: (ma[stmt!] ? '已匹配 ' : '已取消 ') + letter, icon: 'none' })
+    wx.showToast({ title: (ma[stmt] ? '已匹配 ' : '已取消 ') + letter, icon: 'none' })
   },
 
   saveMatchAnswers() {

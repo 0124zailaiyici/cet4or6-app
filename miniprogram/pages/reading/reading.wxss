@@ -161,6 +161,7 @@
   box-shadow: 0 2rpx 8rpx rgba(30,136,229,0.25);
 }
 .qb-l:active { transform: scale(0.9); }
+.qb-l.used { opacity: 0; width: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
 
 /* dots */
 .qz-dots { display: flex; justify-content: center; gap: 6rpx; padding: 8rpx 0 0; flex-shrink: 0; }

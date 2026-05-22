@@ -78,7 +78,7 @@
             <view class="qb-item {{activeStmt === (i + bStmtPage * 5) ? 'active' : ''}} {{matchAnswers[i + bStmtPage * 5] ? 'done' : ''}}" wx:for="{{bStmtPages[bStmtPage]}}" wx:key="*this" wx:for-index="i" wx:for-item="s" data-idx="{{i + bStmtPage * 5}}" catchtap="selectStmt">
               <text class="qbi-num">{{i + bStmtPage * 5 + 1}}</text>
               <text class="qbi-txt">{{s}}</text>
-              <view class="qbi-ans" wx:if="{{matchAnswers[i + bStmtPage * 5]}}">
+              <view class="qbi-ans" wx:if="{{matchAnswers[i + bStmtPage * 5]}}" data-idx="{{i + bStmtPage * 5}}" catchtap="removeMatch">
                 <text>{{matchAnswers[i + bStmtPage * 5]}}</text>
               </view>
             </view>
@@ -92,7 +92,7 @@
             <block wx:else>
               <text class="qb-bar-label">第{{activeStmt + 1}}题 → </text>
               <view class="qb-bar-letters">
-                <text class="qb-l" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter">{{l}}</text>
+                <text class="qb-l {{usedLetters.indexOf(l) !== -1 ? 'used' : ''}}" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter" wx:if="{{usedLetters.indexOf(l) === -1}}">{{l}}</text>
               </view>
             </block>
           </view>
