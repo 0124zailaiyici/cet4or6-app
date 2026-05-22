@@ -33,7 +33,7 @@
 
       <!-- 文章区 -->
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-          <scroll-view class="pz-scroll" scroll-y enhanced="{{true}}">
+          <scroll-view class="pz-scroll" scroll-y>
             <!-- Section A：交互式填空 -->
             <block wx:if="{{passageSeg.length > 0 && passageSeg[passagePage]}}">
               <text class="pz-text">
@@ -73,21 +73,25 @@
 
         <!-- Section B：长篇匹配 -->
         <block wx:elif="{{current.sectionType === 'B'}}">
-          <view class="qz-label">📋 匹配陈述（{{matchCount}}/{{current.questions.length}} 已答）</view>
-          <scroll-view class="qz-b-scroll" scroll-y>
-            <view class="qb-stmt {{activeStmt === i ? 'active' : ''}} {{matchAnswers[i] ? 'done' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" catchtap="selectStmt">
-              <text class="qbs-num">{{i + 1}}.</text>
-              <text class="qbs-text">{{item}}</text>
-              <text class="qbs-ans" wx:if="{{matchAnswers[i]}}">→ {{matchAnswers[i]}}</text>
+          <view class="qz-label">📋 匹配陈述 {{matchCount}}/{{current.questions.length}} 已答</view>
+          <scroll-view class="qb-scroll" scroll-y>
+            <view class="qb-item {{activeStmt === i ? 'active' : ''}} {{matchAnswers[i] ? 'done' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" bindtap="selectStmt">
+              <text class="qbi-num">{{i + 1}}</text>
+              <text class="qbi-txt">{{item}}</text>
+              <view class="qbi-ans" wx:if="{{matchAnswers[i]}}">
+                <text>{{matchAnswers[i]}}</text>
+              </view>
             </view>
           </scroll-view>
 
-          <view class="qb-letters">
-            <text class="qbl-hint" wx:if="{{activeStmt === null}}">👆 先点上面的陈述，再点字母匹配</text>
-            <text class="qbl-hint" wx:else>为第{{activeStmt + 1}}题选择段落：</text>
-            <view class="qbl-chips" wx:if="{{activeStmt !== null}}">
-              <text class="qblc" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter">{{l}}</text>
-            </view>
+          <view class="qb-bar">
+            <text wx:if="{{activeStmt === null}}" class="qb-bar-hint">👆 点击上方陈述开始匹配</text>
+            <block wx:else>
+              <text class="qb-bar-label">第{{activeStmt + 1}}题 → 选段落：</text>
+              <view class="qb-bar-letters">
+                <text class="qb-l" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter">{{l}}</text>
+              </view>
+            </block>
           </view>
         </block>
 
