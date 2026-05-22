@@ -166,7 +166,17 @@ function parseReading(lines, year) {
         }
       }
       if (currentLabel) articleParts.push(currentLabel.trim())
-      const article = sanitize(articleParts.join('\n')).slice(0, 8000)
+      let article = sanitize(articleParts.join('\n'))
+      // 清理页脚、乱码等无关内容
+      article = article
+        .replace(/\d{4}年\d+月.{0,40}第\d+页.{0,20}共\d+页\s*/g, '')
+        .replace(/\d{4}年\d+月.{0,40}四级真题.{0,20}第\d+套.{0,10}/g, '')
+        .replace(/cog.{0,15}ifive.{0,20}认知.{0,10}/g, '')
+        .replace(/[）\)]\s*and\s+/g, '. ')
+        .replace(/\s+/g, ' ')
+        .replace(/\.\s*\./g, '.')
+        .trim()
+      article = article.slice(0, 8000)
       if (statements.length > 0 || article.length > 50) {
         passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [], choices: [] })
       }
