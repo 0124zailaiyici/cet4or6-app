@@ -5,3 +5,4 @@ server/.env
 server/audio/
 server/pdfs/
 *.png
+miniprogram/pages/sentences_orig.wxml

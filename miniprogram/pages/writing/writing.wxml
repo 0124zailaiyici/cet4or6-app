@@ -17,7 +17,10 @@
     <scroll-view class="w-content" scroll-y>
       <view class="wlist">
         <view class="wcard" wx:for="{{patterns}}" wx:key="id" data-id="{{item.id}}" catchtap="togglePattern">
-          <view class="wc-pat">{{item.pattern}}</view>
+          <view class="wcard-row">
+            <view class="wc-pat">{{item.pattern}}</view>
+            <view class="wc-badge {{expandedPattern === item.id ? 'active' : ''}}">{{expandedPattern === item.id ? '收起' : '展开'}}</view>
+          </view>
           <text class="wc-cn">{{item.chinese}}</text>
           <view class="wc-example" wx:if="{{expandedPattern === item.id}}">
             <text class="wc-el">例句：</text>
@@ -27,9 +30,16 @@
       </view>
 
       <view class="practice-area">
-        <text class="pa-label">用上方句型写一个句子：</text>
-        <textarea class="pa-input" placeholder="在此输入你的句子…" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height></textarea>
-        <view class="pa-btn" catchtap="submitSentence">提交练习</view>
+        <text class="pa-label">
+          用上方句型写一个句子
+          <text wx:if="{{selectedPattern}}" class="pa-hint">（当前句型：{{selectedPattern.pattern}}）</text>
+          <text wx:else class="pa-hint dim">（请先点开一个句型）</text>
+        </text>
+        <view class="pa-input-wrap">
+          <textarea class="pa-input" placeholder="在此输入你的句子…" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
+          <text class="wc-count {{sentenceWordCount > 0 ? 'show' : ''}}">{{sentenceWordCount}}词</text>
+        </view>
+        <view class="pa-btn {{submitting ? 'disabled' : ''}}" catchtap="submitSentence">{{submitting ? '提交中…' : '提交练习'}}</view>
       </view>
 
       <view class="result-box" wx:if="{{showResult}}">
@@ -41,14 +51,23 @@
   <!-- Tab 1: Paragraph -->
   <block wx:elif="{{tab === 1}}">
     <scroll-view class="w-content" scroll-y>
+      <view class="topic-pills">
+        <view class="tp-label">选择主题：</view>
+        <view class="tp-list">
+          <view class="tp-item {{currentTopic.label === item.label ? 'active' : ''}}" wx:for="{{paragraphTopics}}" wx:key="label" data-index="{{index}}" catchtap="selectTopic">{{item.label}}</view>
+        </view>
+      </view>
       <view class="prompt-card">
         <text class="pc-label">主题句：</text>
-        <text class="pc-text">Environmental protection is everyone's responsibility.</text>
+        <text class="pc-text">{{currentTopic.text}}</text>
       </view>
       <view class="practice-area">
-        <text class="pa-label">续写段落（60-120词）：</text>
-        <textarea class="pa-input" placeholder="从此主题句开始续写…" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height></textarea>
-        <view class="pa-btn" catchtap="submitParagraph">提交评审</view>
+        <text class="pa-label">续写段落（建议 60-120 词）：</text>
+        <view class="pa-input-wrap">
+          <textarea class="pa-input" placeholder="从此主题句开始续写…" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
+          <text class="wc-count {{paragraphWordCount > 0 ? 'show' : ''}}">{{paragraphWordCount}}词</text>
+        </view>
+        <view class="pa-btn {{submitting ? 'disabled' : ''}}" catchtap="submitParagraph">{{submitting ? '提交中…' : '提交评审'}}</view>
       </view>
       <view class="result-box" wx:if="{{showResult}}">
         <text class="rb-text">{{result}}</text>
@@ -79,9 +98,12 @@
           <text class="pc-text">{{currentWriting.prompt}}</text>
         </view>
         <view class="practice-area">
-          <text class="pa-label">你的作文（120-180词）：</text>
-          <textarea class="pa-input" placeholder="在此输入你的作文…" value="{{writingAnswer}}" bindinput="onWritingInput" maxlength="2000" auto-height></textarea>
-          <view class="pa-btn" catchtap="submitWriting">提交批改</view>
+          <text class="pa-label">你的作文（建议 120-180 词）：</text>
+          <view class="pa-input-wrap">
+            <textarea class="pa-input" placeholder="在此输入你的作文…" value="{{writingAnswer}}" bindinput="onWritingInput" maxlength="2000" auto-height disabled="{{submitting}}"></textarea>
+            <text class="wc-count {{writingWordCount > 0 ? 'show' : ''}}">{{writingWordCount}}词</text>
+          </view>
+          <view class="pa-btn {{submitting ? 'disabled' : ''}}" catchtap="submitWriting">{{submitting ? '提交中…' : '提交批改'}}</view>
         </view>
         <view class="result-box" wx:if="{{showResult}}">
           <text class="rb-text">{{result}}</text>
