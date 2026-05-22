@@ -57,6 +57,14 @@
   background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx;
   --scroll-bar-color: transparent;
 }
+
+/* Scroll wrapper + fade hint */
+.scroll-box { position: relative; flex: 1; }
+.scroll-fade {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 36rpx;
+  background: linear-gradient(to top, rgba(0,0,0,0.06), transparent);
+  pointer-events: none; border-radius: 0 0 18rpx 18rpx;
+}
 .pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; }
 .pz-nav {
   display: flex; justify-content: center; align-items: center;
