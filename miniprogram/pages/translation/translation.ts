@@ -122,11 +122,13 @@ Page({
 
     const pct = completedIds.length > 0 ? Math.round(completedIds.length / items.length * 100) : 0
     const ringDeg = Math.round(pct / 100 * 360)
+    const doneSet = new Set(completedIds)
     const listItems = items.map(t => ({
       ...t,
       _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese,
       _emoji: getEmoji(t.chinese),
       _tag: getTag(t),
+      _done: doneSet.has(t.id),
     }))
     this.setData({ translations: listItems, history, completedIds, pct, ringDeg })
 
@@ -222,6 +224,7 @@ Page({
 
     const validIds = new Set(this.data.translations.map(t => t.id))
     const allIds = [...new Set(records.map(r => r.id))].filter(id => validIds.has(id))
+    const doneSet = new Set(allIds)
     const questionHistory = records.filter(r => r.id === currentItem.id)
     const hScores = questionHistory.map(r => r.score)
     const hMax = hScores.length > 0 ? Math.max(...hScores) : score
@@ -238,6 +241,10 @@ Page({
       hMin,
       hTrend,
     })
+
+    /* update _done on list items */
+    const updated = this.data.translations.map(t => ({ ...t, _done: doneSet.has(t.id) }))
+    this.setData({ translations: updated })
   },
 
   retry() {
