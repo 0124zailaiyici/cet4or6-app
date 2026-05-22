@@ -64,6 +64,6 @@ const translationsData = [
     "chinese": "舞狮作为中国传统民间表演已有2000多年历史。在狮子舞中，两位表演者同披一件 狮子服，一个舞动头部，另一个舞动身体和尾巴。他们熟练配合，模仿狮子的各种动作。 狮子是兽中之王，象征幸福和好运，所以人们通常在春节和其他节日期间表演狮子舞。狮 子舞也可能出现在其他重要场合，如商店开业和结婚典礼，往往吸引许多人观赏。",
     "reference": "Lion dance, as a traditional Chinese folk performance, has a history of more than 2,000 years. In the lion dance, two performers share one lion costume, one manipulating the head and the other manipulating the body and tail. They skillfully cooperate to imitate various movements of the lion. The lion is the king of beasts, symbolizing happiness and good luck, so people usually perform the lion dance during the Spring Festival and other festivals. The lion dance may also appear on other important occasions, such as store openings and wedding ceremonies, often attracting many spectators.",
     "source": "CET-4 2019061"
-  }
+  },
 ]
 export default translationsData

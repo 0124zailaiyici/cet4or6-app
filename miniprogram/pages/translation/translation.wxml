@@ -11,11 +11,11 @@
     <view class="tlist">
       <view class="tcard" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
         <view class="tc-main">
-          <text class="tc-cn">{{item.chinese}}</text>
+          <text class="tc-cn">{{item.chinese.length > 40 ? item.chinese.slice(0, 40) + '…' : item.chinese}}</text>
           <text class="tc-src">{{item.source}}</text>
         </view>
         <view class="tc-status {{completedIds.indexOf(item.id) !== -1 ? 'done' : ''}}">
-          {{completedIds.indexOf(item.id) !== -1 ? '✓ 已完成' : '待练'}}
+          {{completedIds.indexOf(item.id) !== -1 ? '✓' : '待练'}}
         </view>
       </view>
     </view>
@@ -23,7 +23,7 @@
 
   <block wx:else>
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">返回</view>
+      <view class="back-btn" catchtap="backToList">←</view>
       <text class="detail-title">翻译练习</text>
     </view>
 
@@ -34,10 +34,12 @@
       </view>
 
       <view class="answer-area">
-        <textarea class="answer-input" placeholder="在此输入你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height></textarea>
+        <textarea class="answer-input" placeholder="在此输入你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height disabled="{{submitting}}"></textarea>
       </view>
 
-      <view class="submit-btn" catchtap="submit">{{submitting ? '评分中…' : '提交评分'}}</view>
+      <view class="submit-btn {{submitting ? 'disabled' : ''}}" catchtap="submit">
+        {{submitting ? '评分中…' : '提交评分'}}
+      </view>
 
       <view class="result-card" wx:if="{{result.show}}">
         <view class="rc-score">
@@ -45,10 +47,36 @@
           <text class="rc-label">分</text>
         </view>
         <view class="rc-bar"><view class="rc-fill" style="width: {{result.score}}%"></view></view>
+
+        <view class="rc-dims" wx:if="{{result.dimensions}}">
+          <view class="rc-dim" wx:for="{{[result.dimensions.vocabulary, result.dimensions.grammar, result.dimensions.semantics, result.dimensions.expression]}}" wx:for-index="i" wx:key="i">
+            <text class="rc-dl">{{['词汇', '语法', '语义', '表达'][i]}}</text>
+            <view class="rc-dbar"><view class="rc-dfill" style="width: {{item}}%"></view></view>
+            <text class="rc-dn">{{item}}</text>
+          </view>
+        </view>
+
+        <text class="rc-suggest-title">修改建议</text>
         <text class="rc-suggest">{{result.suggestions}}</text>
+
         <view class="rc-ref">
-          <text class="rc-rl">参考译文：</text>
-          <text class="rc-rt">{{currentItem.reference}}</text>
+          <text class="rc-rl">参考译文</text>
+          <text class="rc-rt">{{result.reference}}</text>
+        </view>
+      </view>
+
+      <view class="action-bar" wx:if="{{result.show}}">
+        <view class="retry-btn" catchtap="retry">重新翻译</view>
+      </view>
+
+      <view class="history-area" wx:if="{{questionHistory.length > 0}}">
+        <text class="h-title">历史记录</text>
+        <view class="h-item" wx:for="{{questionHistory}}" wx:for-index="i" wx:key="index">
+          <view class="h-head">
+            <text class="h-date">第 {{questionHistory.length - i}} 次 · {{item.date}}</text>
+            <text class="h-score {{item.score >= 80 ? 'h-good' : item.score >= 60 ? 'h-mid' : 'h-low'}}">{{item.score}} 分</text>
+          </view>
+          <text class="h-answer">{{item.userAnswer}}</text>
         </view>
       </view>
     </scroll-view>
