@@ -100,7 +100,7 @@
             <scroll-view class="qz-q-scroll" scroll-y>
               <text class="qz-question">{{current.questions[currentQ]}}</text>
             </scroll-view>
-          <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
+          <view class="qz-opts {{compactOpts ? 'compact' : ''}}" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
             <view class="qzo {{cSelIdx === i ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" wx:for-index="i" data-letter="{{optionLetters[i]}}" catchtap="onChoiceTap">{{item}}</view>
             </view>
           </view>

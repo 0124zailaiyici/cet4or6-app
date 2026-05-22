@@ -38,6 +38,7 @@ interface IReadingData {
   // Section C
   cAnswers: Record<number, string>
   cSelIdx: number
+  compactOpts: boolean
   darkMode: boolean
   optionLetters: string[]
   touchStartX: number
@@ -61,6 +62,7 @@ interface IReadingMethods {
   // Section C
   onChoiceTap(e: WechatMiniprogram.TouchEvent): void
   saveCAnswer(): void
+  updateCompact(): void
   // Section B
   formatBPassage(text: string): string[]
   selectStmt(e: WechatMiniprogram.TouchEvent): void
@@ -92,6 +94,7 @@ Page<IReadingData, IReadingMethods>({
     availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
     cAnswers: {},
     cSelIdx: -1,
+    compactOpts: false,
   },
 
   onLoad() {
@@ -138,6 +141,7 @@ Page<IReadingData, IReadingMethods>({
           return 'ABCD'.indexOf(sl)
         })(),
       })
+      this.updateCompact()
     }
   },
 
@@ -239,11 +243,11 @@ Page<IReadingData, IReadingMethods>({
   },
 
   prevQ() {
-    if (this.data.currentQ > 0) this.setData({ currentQ: this.data.currentQ - 1 })
+    if (this.data.currentQ > 0) { this.setData({ currentQ: this.data.currentQ - 1 }); this.updateCompact() }
   },
   nextQ() {
     const t = this.data.current?.questions?.length || 0
-    if (this.data.currentQ < t - 1) this.setData({ currentQ: this.data.currentQ + 1 })
+    if (this.data.currentQ < t - 1) { this.setData({ currentQ: this.data.currentQ + 1 }); this.updateCompact() }
   },
   prevPassage() {
     if (this.data.passagePage > 0) this.setData({ passagePage: this.data.passagePage - 1 })
@@ -318,6 +322,13 @@ Page<IReadingData, IReadingMethods>({
       this.setData({ cAnswers: ca, cSelIdx: ci })
     }
     this.saveCAnswer()
+  },
+
+  updateCompact() {
+    const choices = this.data.current?.choices?.[this.data.currentQ]
+    if (!choices || choices.length < 4) { this.setData({ compactOpts: false }); return }
+    const allShort = choices.every((c: string) => c.length < 25)
+    this.setData({ compactOpts: allShort })
   },
 
   saveCAnswer() {
