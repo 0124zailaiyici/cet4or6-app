@@ -121,7 +121,7 @@
 /* Section B: 长篇匹配 */
 .qb-grid {
   flex: 1; overflow: hidden;
-  background: #fff; border-radius: 18rpx; padding: 4rpx 0;
+  background: #fff; border-radius: 18rpx; padding: 2rpx 0;
   box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
 .qb-grid {
@@ -130,8 +130,9 @@
   box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
 .qb-item {
-  display: flex; align-items: center; gap: 12rpx;
-  padding: 12rpx 24rpx; border-bottom: 1rpx solid #f5f0f0;
+  display: flex; align-items: center; gap: 10rpx;
+  padding: 10rpx 24rpx; border-bottom: 1rpx solid #f5f0f0;
+  flex-shrink: 0;
 }
 .qb-item:last-child { border-bottom: none; }
 .qb-item.active { background: rgba(30,136,229,0.08); border-left: 4rpx solid #1e88e5; padding-left: 20rpx; }
@@ -160,10 +161,9 @@
   padding: 0 12rpx;
 }
 .qb-l {
-  aspect-ratio: 1;
-  border-radius: 12rpx;
+  height: 64rpx; border-radius: 12rpx;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28rpx; font-weight: 700; color: #fff;
+  font-size: 26rpx; font-weight: 700; color: #fff;
   background: linear-gradient(135deg, #64b5f6, #1e88e5);
   box-shadow: 0 2rpx 8rpx rgba(30,136,229,0.25);
 }
