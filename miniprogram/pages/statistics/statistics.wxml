@@ -23,23 +23,56 @@
 
   <view class="calendar-card">
     <text class="cal-title">📅 {{monthYear}} 打卡记录</text>
+    <view class="cal-progress">
+      <view class="cal-bar">
+        <view class="cal-fill" style="width: {{monthTotal > 0 ? (monthChecked / monthTotal * 100) : 0}}%;"></view>
+      </view>
+      <text class="cal-stat">{{monthChecked}} / {{monthTotal}} 天</text>
+    </view>
     <view class="cal-grid">
-      <text class="cal-h">日</text><text class="cal-h">一</text><text class="cal-h">二</text><text class="cal-h">三</text>
-      <text class="cal-h">四</text><text class="cal-h">五</text><text class="cal-h">六</text>
-      <view class="cal-row" wx:for="{{calendarRows}}" wx:key="*this">
-        <view class="cal-d {{cell.day === null ? 'empty' : ''}} {{cell.isToday ? 'today' : ''}} {{cell.checked ? 'checked' : ''}}" wx:for="{{item}}" wx:for-item="cell" wx:key="day">
+      <view class="cal-h-row">
+        <text class="cal-h">日</text><text class="cal-h">一</text><text class="cal-h">二</text><text class="cal-h">三</text>
+        <text class="cal-h">四</text><text class="cal-h">五</text><text class="cal-h">六</text>
+      </view>
+      <view class="cal-row" wx:for="{{calendarRows}}" wx:for-item="row" wx:key="index">
+        <view class="cal-d {{cell.day === null ? 'empty' : ''}} {{cell.isToday ? 'today' : ''}} {{cell.checked ? 'checked' : ''}}" wx:for="{{row}}" wx:for-item="cell" wx:key="day">
           <text wx:if="{{cell.day !== null}}">{{cell.day}}</text>
         </view>
       </view>
     </view>
   </view>
 
+  <view class="section-card">
+    <text class="sc-title">各模块完成进度</text>
+    <view class="dim-row">
+      <text class="dim-lbl">🎧 听力</text>
+      <view class="dim-bar"><view class="dim-fill" style="width: {{listenedRatio * 100}}%;"></view></view>
+      <text class="dim-num">{{listenedCount}}题</text>
+    </view>
+    <view class="dim-row">
+      <text class="dim-lbl">📝 句子</text>
+      <view class="dim-bar"><view class="dim-fill" style="width: {{masteredRatio * 100}}%;"></view></view>
+      <text class="dim-num">{{masteredCount}}题</text>
+    </view>
+    <view class="dim-row">
+      <text class="dim-lbl">🌐 翻译</text>
+      <view class="dim-bar"><view class="dim-fill" style="width: {{translationRatio * 100}}%;"></view></view>
+      <text class="dim-num">{{translationCount}}题</text>
+    </view>
+    <view class="dim-row">
+      <text class="dim-lbl">✍️ 写作</text>
+      <view class="dim-bar"><view class="dim-fill" style="width: {{writingRatio * 100}}%;"></view></view>
+      <text class="dim-num">{{writingCount}}题</text>
+    </view>
+  </view>
+
   <view class="section-card" wx:if="{{maxScores.length > 0}}">
     <text class="sc-title">翻译成绩趋势</text>
     <view class="chart">
-      <view class="chart-bar" wx:for="{{maxScores}}" wx:key="*this">
-        <view class="cb-fill" style="height: {{item * 2.5}}rpx;"></view>
-        <text class="cb-label">{{item}}分</text>
+      <view class="chart-bar" wx:for="{{maxScores}}" wx:key="index">
+        <view class="cb-fill" style="height: {{item.score * 2.5}}rpx;"></view>
+        <text class="cb-val">{{item.score}}分</text>
+        <text class="cb-label">{{item.label}}</text>
       </view>
     </view>
   </view>

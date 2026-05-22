@@ -24,6 +24,7 @@
 .cal-title { display: block; font-size: 28rpx; font-weight: 600; color: #2d2d4e; margin-bottom: 20rpx; }
 .cal-grid { display: flex; flex-direction: column; gap: 8rpx; }
 .cal-row { display: flex; gap: 8rpx; }
+.cal-h-row { display: flex; gap: 8rpx; }
 .cal-h { flex: 1; text-align: center; font-size: 22rpx; color: #8a7a9a; padding: 8rpx 0; }
 .cal-d {
   flex: 1; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
@@ -40,10 +41,22 @@
 .sc-title { display: block; font-size: 28rpx; font-weight: 600; color: #2d2d4e; margin-bottom: 16rpx; }
 .tip-text { display: block; font-size: 24rpx; color: #8a7a9a; line-height: 1.7; margin-bottom: 8rpx; }
 
+.cal-progress { display: flex; align-items: center; gap: 12rpx; margin-bottom: 16rpx; }
+.cal-bar { flex: 1; height: 12rpx; background: rgba(255,158,181,0.1); border-radius: 6rpx; overflow: hidden; }
+.cal-fill { height: 100%; background: linear-gradient(90deg, #ff9eb5, #ff6b8a); border-radius: 6rpx; transition: width 0.6s; }
+.cal-stat { font-size: 22rpx; color: #ff9eb5; font-weight: 600; white-space: nowrap; }
+
 .chart { display: flex; align-items: flex-end; gap: 12rpx; height: 240rpx; }
 .chart-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6rpx; height: 100%; justify-content: flex-end; }
 .cb-fill { width: 100%; max-width: 36rpx; border-radius: 6rpx 6rpx 0 0; min-height: 6rpx; background: linear-gradient(180deg, #ff9eb5, #ff6b8a); transition: height 0.6s; }
+.cb-val { font-size: 18rpx; color: #ff9eb5; font-weight: 600; }
 .cb-label { font-size: 18rpx; color: #8a7a9a; }
+
+.dim-row { display: flex; align-items: center; gap: 12rpx; margin-bottom: 12rpx; }
+.dim-lbl { width: 80rpx; font-size: 24rpx; color: #2d2d4e; font-weight: 500; }
+.dim-bar { flex: 1; height: 16rpx; background: rgba(255,158,181,0.1); border-radius: 8rpx; overflow: hidden; }
+.dim-fill { height: 100%; border-radius: 8rpx; background: linear-gradient(90deg, #ff9eb5, #ff6b8a); transition: width 0.6s; }
+.dim-num { width: 60rpx; text-align: right; font-size: 22rpx; color: #8a7a9a; }
 
 .clear-btn {
   margin: 24rpx 36rpx; height: 80rpx; border-radius: 40rpx;
