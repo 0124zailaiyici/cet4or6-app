@@ -151,3 +151,6 @@
 .dark-theme .h-title { color: #e0e0f0; }
 .dark-theme .h-item { background: #25253e; }
 .dark-theme .h-answer { color: #a0a0c0; }
+.dark-theme .ai-label { color: #8a7a9a; }
+.dark-theme .ai-track { background: #3a3a5a; }
+.dark-theme .ai-track.on { background: #ff9800; }
