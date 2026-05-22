@@ -388,7 +388,7 @@ Page<ISentencesData, ISentencesMethods>({
       this.setData({
         allSentences,
         topics,
-        topicCounts: topicCounts2,
+        topicCounts: tc,
         showPasteModal: false,
     parsing: false,
     favTexts: [],
