@@ -257,7 +257,7 @@
   gap: 28rpx;
 }
 
-.sc-fav, .sc-master {
+.fav-btn, .master-btn {
   display: flex;
   align-items: center;
   font-size: 24rpx;
@@ -265,20 +265,20 @@
   border-radius: 16rpx;
 }
 
-.page .sc-fav {
+.fav-btn {
   color: #fff !important;
   background: #e6a800 !important;
 }
-.page .sc-fav.on {
+.fav-btn.on {
   color: #fff !important;
   background: #bbb !important;
 }
 
-.page .sc-master {
+.master-btn {
   color: #fff !important;
   background: #388e3c !important;
 }
-.page .sc-master.on {
+.master-btn.on {
   color: #fff !important;
   background: #bbb !important;
 }
