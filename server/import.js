@@ -152,16 +152,21 @@ function parseReading(lines, year) {
     // === Section B: 长篇阅读 ===
     if (secType === 'B') {
       const statements = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s.slice(0, 200)))
-      const articleLines = cleanLines.filter(l => {
-        const m = l.match(/^([A-Z])[\)）]\s*/)
-        if (!m) return false
-        const letter = m[1]
-        if (letter < 'A' || letter > 'Z') return false
-        // 去掉字母标签后的纯文本长度
-        const text = l.replace(/^[A-Z][\)）]\s*/, '').trim()
-        return text.length > 20  // 短的是干扰项（如选项），长的是段落
-      })
-      const article = sanitize(articleLines.join('\n')).slice(0, 6000)
+      // 收集完整段落：标签行 + 续行，直到下一个标签或陈述
+      const articleParts = []
+      let currentLabel = ''
+      for (const line of cleanLines) {
+        const m = line.match(/^([A-Z])[\)）]\s*/)
+        if (m) {
+          if (currentLabel) articleParts.push(currentLabel.trim())
+          currentLabel = line
+        } else if (currentLabel && !/^\d+\./.test(line) && line.length > 5) {
+          // 续行：加到当前段落
+          currentLabel += ' ' + line
+        }
+      }
+      if (currentLabel) articleParts.push(currentLabel.trim())
+      const article = sanitize(articleParts.join('\n')).slice(0, 8000)
       if (statements.length > 0 || article.length > 50) {
         passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [], choices: [] })
       }
