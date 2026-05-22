@@ -59,7 +59,7 @@ interface ISentencesMethods {
   doParse(): void
 }
 
-Page({
+Page<ISentencesData, ISentencesMethods>({
   data: {
     allSentences: [],
     filteredSentences: [],
@@ -89,10 +89,9 @@ Page({
 
     let scrollH = 400
     try {
-      const win = wx.getWindowInfo()
-      const dev = wx.getDeviceInfo()
-      const px = win.windowWidth / 750
-      scrollH = Math.floor(win.windowHeight - 310 * px - 80 * px - 90 * px - (dev.statusBarHeight || 20) - 10)
+      const sys = wx.getSystemInfoSync()
+      const px = sys.windowWidth / 750
+      scrollH = Math.floor(sys.windowHeight - 310 * px - 80 * px - 90 * px - (sys.statusBarHeight || 20) - 10)
       if (scrollH < 200) scrollH = 400
     } catch (_) {}
 
