@@ -114,6 +114,17 @@ Page<ISentencesData, ISentencesMethods>({
       masteredIds: app.globalData.studyData.masteredSentences,
       favoriteIds: app.globalData.studyData.favoriteSentenceIds,
     })
+
+    const validIds = new Set(sentences.map(s => s.id))
+    const cleanFav = this.data.favoriteIds.filter((id: number) => validIds.has(id))
+    const cleanMastered = this.data.masteredIds.filter((id: number) => validIds.has(id))
+    if (cleanFav.length !== this.data.favoriteIds.length || cleanMastered.length !== this.data.masteredIds.length) {
+      this.setData({ favoriteIds: cleanFav, masteredIds: cleanMastered })
+      const app2 = getApp<IAppOption>()
+      app2.globalData.studyData.favoriteSentenceIds = cleanFav
+      app2.globalData.studyData.masteredSentences = cleanMastered
+      wx.setStorageSync('studyData', app2.globalData.studyData)
+    }
   },
 
   onShow() {
