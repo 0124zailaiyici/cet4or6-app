@@ -131,6 +131,7 @@ Page<ISentencesData, ISentencesMethods>({
   doFilter() {
     const q = this.data.searchQuery.toLowerCase().trim()
     const masteredSet = new Set(this.data.masteredIds)
+    const favSet = new Set(this.data.favoriteIds)
     let filtered = this.data.allSentences
 
     if (this.data.currentTopic === '已掌握') {
@@ -149,7 +150,9 @@ Page<ISentencesData, ISentencesMethods>({
       )
     }
 
-    this.setData({ filteredSentences: filtered })
+    const favTexts = filtered.map(s => favSet.has(s.id) ? '已收藏' : '收藏')
+    const masterTexts = filtered.map(s => masteredSet.has(s.id) ? '已掌握' : '掌握')
+    this.setData({ filteredSentences: filtered, favTexts, masterTexts })
   },
 
   onSearchInput(e: WechatMiniprogram.Input) {
@@ -176,7 +179,8 @@ Page<ISentencesData, ISentencesMethods>({
     if (mastered.has(idNum)) mastered.delete(idNum)
     else mastered.add(idNum)
     const masteredArr = [...mastered]
-    const masterTexts = this.data.allSentences.map(s => masteredArr.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
+    const masteredSet = new Set(masteredArr)
+    const masterTexts = this.data.filteredSentences.map(s => masteredSet.has(s.id) ? '已掌握' : '掌握')
     this.setData({
       masteredIds: masteredArr,
       masterTexts,
@@ -198,7 +202,8 @@ Page<ISentencesData, ISentencesMethods>({
     if (fav.has(idNum)) fav.delete(idNum)
     else fav.add(idNum)
     const favArr = [...fav]
-    const favTexts = this.data.allSentences.map(s => favArr.indexOf(s.id) >= 0 ? '已收藏' : '收藏')
+    const favSet = new Set(favArr)
+    const favTexts = this.data.filteredSentences.map(s => favSet.has(s.id) ? '已收藏' : '收藏')
     this.setData({ favoriteIds: favArr, favTexts, filteredSentences: this.data.filteredSentences.slice() })
 
     const app = getApp<IAppOption>()
