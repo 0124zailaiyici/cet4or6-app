@@ -70,6 +70,20 @@ export function lookupWord(word: string): Promise<any> {
   })
 }
 
+export function aiTranslateWord(word: string): Promise<{ chinese: string }> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}/dictionary/ai?word=${encodeURIComponent(word)}`,
+      method: 'GET',
+      success: (res) => {
+        if (res.statusCode === 200) resolve(res.data as { chinese: string })
+        else reject(new Error(`翻译失败 ${res.statusCode}`))
+      },
+      fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
+    })
+  })
+}
+
 export function correctParagraph(prompt: string, userAnswer: string) {
   return request<{ score: number; dimensions: { coherence: number; content: number; language: number }; suggestions: string }>('/correct_paragraph', { prompt, userAnswer })
 }

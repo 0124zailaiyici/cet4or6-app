@@ -10,6 +10,15 @@ app.use(express.json());
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
 
 const PORT = process.env.PORT || 3001;
+
+const dictCache = new Map()
+const CACHE_TTL = 30 * 60 * 1000
+setInterval(() => {
+  const now = Date.now()
+  for (const [k, v] of dictCache) {
+    if (now - v.ts > CACHE_TTL) dictCache.delete(k)
+  }
+}, 60000)
 const API_KEY = process.env.DEEPSEEK_API_KEY;
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 
@@ -132,15 +141,55 @@ app.get('/dictionary', async (req, res) => {
   const { word } = req.query;
   if (!word) return res.status(400).json({ error: '缺少 word' });
 
+  const cached = dictCache.get(word.toLowerCase())
+  if (cached) return res.json(cached.data)
+
   try {
-    const response = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { timeout: 10000 });
-    res.json(response.data);
+    const [dictRes, transRes] = await Promise.allSettled([
+      axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { timeout: 10000 }),
+      axios.get(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-CN`, { timeout: 5000 }),
+    ]);
+
+    if (dictRes.status === 'rejected') {
+      return res.status(404).json({ error: '未找到该单词', word });
+    }
+
+    const data = dictRes.value.data;
+    let chinese = '';
+    if (transRes.status === 'fulfilled' && transRes.value.data?.responseData?.translatedText) {
+      chinese = transRes.value.data.responseData.translatedText;
+    }
+
+    if (Array.isArray(data) && data[0]) {
+      data[0].chinese = chinese;
+    } else if (data && typeof data === 'object') {
+      data.chinese = chinese;
+    }
+
+    dictCache.set(word.toLowerCase(), { data, ts: Date.now() })
+    res.json(data);
   } catch (err) {
     if (err.response?.status === 404) {
       res.status(404).json({ error: '未找到该单词', word });
     } else {
       res.status(500).json({ error: '词典查询失败', detail: err.message });
     }
+  }
+});
+
+app.get('/dictionary/ai', async (req, res) => {
+  const { word } = req.query;
+  if (!word) return res.status(400).json({ error: '缺少 word' });
+  if (!API_KEY) return res.status(400).json({ error: 'API Key 未配置' });
+
+  try {
+    const chinese = await callDeepSeek([
+      { role: 'system', content: '你是一个英汉词典助手。将用户输入的英文单词翻译成中文，给出2-3个最常见的中文释义，用逗号分隔。只返回中文翻译，不要多余内容。' },
+      { role: 'user', content: word },
+    ], 0.3);
+    res.json({ chinese });
+  } catch (err) {
+    res.status(500).json({ error: 'AI 翻译失败', detail: err.message });
   }
 });
 

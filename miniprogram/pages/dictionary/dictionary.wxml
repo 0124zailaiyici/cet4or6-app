@@ -1,12 +1,21 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="page-header">
     <text class="page-title">📖 英语词典</text>
+    <view class="ai-badge {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">
+      <text class="ai-dot"></text>
+      <text>AI</text>
+    </view>
   </view>
 
   <view class="search-bar">
     <input class="search-input" placeholder="输入要查的英文单词…" value="{{query}}" bindinput="onInput" confirm-type="search" bindconfirm="search" />
-    <view class="search-clear" wx:if="{{query}}" catchtap="clear">✕</view>
     <view class="search-btn" catchtap="search">{{loading ? '…' : '查词'}}</view>
+    <view class="search-clear" wx:if="{{query}}" catchtap="clear">✕</view>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">
+    <text class="loading-dot">•</text>
+    <text>查询中…</text>
   </view>
 
   <block wx:if="{{error}}">
@@ -23,15 +32,20 @@
       <text class="audio-btn" wx:if="{{result.audio}}" catchtap="playAudio">🔊</text>
     </view>
 
-    <view class="meaning-block" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
-      <view class="pos-tag">{{item.partOfSpeech}}</view>
-      <view class="def-list">
-        <view class="def-item" wx:for="{{item.definitions}}" wx:key="definition">
-          <text class="def-text">• {{item.definition}}</text>
-          <text class="def-example" wx:if="{{item.example}}">例：{{item.example}}</text>
+      <view class="meaning-block" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
+        <view class="pos-tag">{{item.partOfSpeech}}</view>
+        <view class="def-list">
+          <view class="def-item" wx:for="{{item.definitions}}" wx:key="definition">
+            <text class="def-text">• {{item.definition}}</text>
+            <text class="def-example" wx:if="{{item.example}}">例：{{item.example}}</text>
+          </view>
         </view>
       </view>
-    </view>
+
+      <view class="chinese-block" wx:if="{{result.chinese}}">
+        <text class="chinese-label">{{aiEnabled && aiAvailable ? '🤖 AI 翻译' : '🌐 中文释义'}}</text>
+        <text class="chinese-text">{{result.chinese}}</text>
+      </view>
   </block>
 
   <block wx:elif="{{!query && history.length > 0}}">

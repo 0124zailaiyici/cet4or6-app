@@ -1,4 +1,4 @@
-import { lookupWord } from '../../utils/api'
+import { lookupWord, checkHealth, aiTranslateWord } from '../../utils/api'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IMeaning {
@@ -10,6 +10,7 @@ interface IWordResult {
   word: string
   phonetic: string
   audio: string
+  chinese: string
   meanings: IMeaning[]
   sourceUrls: string[]
 }
@@ -21,6 +22,8 @@ interface IDictData {
   loading: boolean
   history: string[]
   darkMode: boolean
+  aiAvailable: boolean
+  aiEnabled: boolean
 }
 
 Page<IDictData>({
@@ -31,12 +34,18 @@ Page<IDictData>({
     loading: false,
     history: [],
     darkMode: false,
+    aiAvailable: false,
+    aiEnabled: true,
   },
 
   onLoad() {
     this._applyDarkMode()
     const raw = wx.getStorageSync('dictHistory')
     if (raw) this.setData({ history: raw })
+    this.setData({ aiEnabled: wx.getStorageSync('dictAiEnabled') !== false })
+    checkHealth().then(r => {
+      if (r.apiKey) this.setData({ aiAvailable: true })
+    }).catch(() => {})
   },
 
   onShow() {
@@ -66,10 +75,20 @@ Page<IDictData>({
       const phonetics = entry.phonetics || []
       const phonetic = entry.phonetic || phonetics.find((p: any) => p.text)?.text || ''
       const audio = phonetics.find((p: any) => p.audio)?.audio || ''
+
+      let chinese = entry.chinese || ''
+      if (this.data.aiAvailable && this.data.aiEnabled) {
+        try {
+          const ai = await aiTranslateWord(q)
+          if (ai.chinese) chinese = ai.chinese
+        } catch {}
+      }
+
       const result: IWordResult = {
         word: entry.word,
         phonetic,
         audio,
+        chinese,
         meanings: entry.meanings?.map((m: any) => ({
           partOfSpeech: m.partOfSpeech,
           definitions: m.definitions?.slice(0, 3).map((d: any) => ({
@@ -95,6 +114,12 @@ Page<IDictData>({
 
   clear() {
     this.setData({ query: '', result: null, error: '' })
+  },
+
+  toggleAi() {
+    const val = !this.data.aiEnabled
+    this.setData({ aiEnabled: val })
+    wx.setStorageSync('dictAiEnabled', val)
   },
 
   playAudio() {
