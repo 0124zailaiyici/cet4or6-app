@@ -74,7 +74,7 @@
           </view>
           <view class="qw-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
             <text class="qw-text">{{current.questions[currentQ]}}</text>
-            <view class="qw-options" wx:if="{{current.choices && current.choices.length > currentQ}}">
+            <view class="qw-options" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
               <text class="qwo-item" wx:for="{{current.choices[currentQ]}}" wx:key="*this">{{item}}</text>
             </view>
           </view>

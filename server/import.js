@@ -151,9 +151,7 @@ function parseReading(lines, year) {
 
     // === Section B: 长篇阅读 ===
     if (secType === 'B') {
-      // 提取匹配陈述（数字开头的行，如 36. ...）
       const statements = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s.slice(0, 200)))
-      // 提取文章段落：字母开头（支持 ）和 ) 两种括号）
       const articleLines = cleanLines.filter(l => {
         const m = l.match(/^([A-Z])[\)）]\s*/)
         if (!m) return false
@@ -165,7 +163,7 @@ function parseReading(lines, year) {
       })
       const article = sanitize(articleLines.join('\n')).slice(0, 3000)
       if (statements.length > 0 || article.length > 50) {
-        passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [] })
+        passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [], choices: [] })
       }
       continue
     }

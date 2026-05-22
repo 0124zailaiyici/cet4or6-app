@@ -75,8 +75,8 @@ Page<IReadingData, IReadingMethods>({
     const parts = clean.split(/[.?!]\s*/).filter(s => s.trim().length > 5)
     const pages: string[] = []
     if (parts.length >= 2) {
-      for (let i = 0; i < parts.length; i += 6) {
-        pages.push(parts.slice(i, i + 6).join('. ') + '.')
+      for (let i = 0; i < parts.length; i += 4) {
+        pages.push(parts.slice(i, i + 4).join('. ') + '.')
       }
     } else {
       for (let i = 0; i < clean.length; i += 300) {

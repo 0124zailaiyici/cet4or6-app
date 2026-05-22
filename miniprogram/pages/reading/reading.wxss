@@ -70,7 +70,7 @@
 .pw-text {
   flex: 1;
   font-size: 28rpx; line-height: 1.9; color: #2d3a4a;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .pw-dots {
@@ -112,10 +112,10 @@
 
 /* Options: vertical list (Section B/C) */
 .qw-options {
-  flex: 1; display: flex; flex-direction: column; gap: 12rpx;
+  flex: 1; display: flex; flex-wrap: wrap; gap: 12rpx; align-content: flex-start;
 }
 .qwo-item {
-  flex: 1; display: flex; align-items: center;
+  width: calc(50% - 6rpx);
   font-size: 26rpx; color: #4a4a6a;
   padding: 18rpx 24rpx;
   border-radius: 16rpx;
