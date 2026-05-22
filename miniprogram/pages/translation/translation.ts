@@ -82,10 +82,16 @@ Page({
   onLoad() {
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
-    const items = translationsData as ITranslation[]
+    const items = (translationsData as ITranslation[]).filter(t => t && t.chinese)
     const history = (app.globalData.studyData.translationRecords || []) as ITranslationRecord[]
     const completedIds = [...new Set(history.map(r => r.id))]
-    this.setData({ translations: items, history, completedIds })
+
+    /* pre-compute display text for list to avoid WXML expression issues */
+    const listItems = items.map(t => ({
+      ...t,
+      _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese
+    }))
+    this.setData({ translations: listItems, history, completedIds })
 
     checkHealth().then(r => {
       if (r.apiKey) this.setData({ aiAvailable: true })
