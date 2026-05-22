@@ -112,12 +112,19 @@
 /* 选项区域 - 内联自然排列，不设固定宽度 */
 .qz-opts { }
 .qzo {
-  display: inline-block;
-  font-size: 26rpx; color: #4a4a6a; line-height: 1.8;
-  margin-right: 32rpx; margin-bottom: 8rpx; padding: 6rpx 12rpx; border-radius: 10rpx;
-  border: 2rpx solid transparent; transition: 0.2s;
+  display: block; width: 100%;
+  font-size: 26rpx; color: #4a4a6a; line-height: 1.6;
+  padding: 20rpx 24rpx; margin-bottom: 10rpx;
+  border-radius: 14rpx;
+  background: #fff; border: 2rpx solid #e8e0e8;
+  transition: 0.2s;
 }
-.qzo.on { color: #1e88e5; font-weight: 600; background: rgba(30,136,229,0.06); border-color: rgba(30,136,229,0.2); }
+.qzo.on {
+  color: #1e88e5; font-weight: 700;
+  background: rgba(30,136,229,0.08);
+  border-color: #1e88e5;
+  box-shadow: 0 2rpx 12rpx rgba(30,136,229,0.12);
+}
 .qzo-ref { font-size: 22rpx; color: #8a7a9a; line-height: 1.6; font-style: italic; }
 
 /* dots */
