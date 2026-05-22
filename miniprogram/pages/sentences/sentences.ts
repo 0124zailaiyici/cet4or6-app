@@ -300,15 +300,22 @@ Page<ISentencesData, ISentencesMethods>({
       const allSentences = [...this.data.allSentences, ...newSentences]
       const topics = [...new Set(allSentences.map(s => s.topic))]
       topics.unshift('全部')
+      topics.push('已掌握', '未掌握')
       const topicCounts: Record<string, number> = {}
       allSentences.forEach(s => {
         topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1
       })
+      topicCounts['已掌握'] = this.data.masteredIds.length
+      topicCounts['未掌握'] = allSentences.length - this.data.masteredIds.length
+      const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏')
+      const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
 
       this.setData({
         allSentences,
         topics,
         topicCounts,
+        favTexts,
+        masterTexts,
         showGenModal: false,
         generating: false,
       })
@@ -358,9 +365,24 @@ Page<ISentencesData, ISentencesMethods>({
       const allSentences = [...this.data.allSentences, ...newSentences]
       const topics = [...new Set(allSentences.map(s => s.topic))]
       topics.unshift('全部')
-      const topicCounts2: Record<string, number> = {}
+      topics.push('已掌握', '未掌握')
+      const tc: Record<string, number> = {}
       allSentences.forEach(s => {
-        topicCounts2[s.topic] = (topicCounts2[s.topic] || 0) + 1
+        tc[s.topic] = (tc[s.topic] || 0) + 1
+      })
+      tc['已掌握'] = this.data.masteredIds.length
+      tc['未掌握'] = allSentences.length - this.data.masteredIds.length
+      const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏')
+      const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
+
+      this.setData({
+        allSentences,
+        topics,
+        topicCounts: tc,
+        favTexts,
+        masterTexts,
+        showPasteModal: false,
+        parsing: false,
       })
 
       this.setData({
