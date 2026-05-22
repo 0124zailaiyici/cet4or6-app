@@ -1,6 +1,6 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="page-header">
-    <text class="page-title">📖 英语词典</text>
+    <text class="page-title">英语词典</text>
     <view class="ai-badge {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">
       <text class="ai-dot"></text>
       <text>AI</text>
@@ -8,9 +8,10 @@
   </view>
 
   <view class="search-bar">
+    <text class="search-icon">🔍</text>
     <input class="search-input" placeholder="输入要查的英文单词…" value="{{query}}" bindinput="onInput" confirm-type="search" bindconfirm="search" />
-    <view class="search-btn" catchtap="search">{{loading ? '…' : '查词'}}</view>
-    <view class="search-clear" wx:if="{{query}}" catchtap="clear">✕</view>
+    <text class="search-clear" wx:if="{{query}}" catchtap="clear">✕</text>
+    <text class="search-btn" catchtap="search">{{loading ? '…' : '搜索'}}</text>
   </view>
 
   <view class="loading-tip" wx:if="{{loading}}">
@@ -19,33 +20,53 @@
   </view>
 
   <block wx:if="{{error}}">
-    <view class="error-block">
-      <text class="error-icon">😕</text>
-      <text class="error-text">{{error}}</text>
+    <view class="empty-state">
+      <text class="empty-icon">😕</text>
+      <text class="empty-text">{{error}}</text>
+      <view class="history-section" wx:if="{{history.length > 0}}">
+        <text class="section-title">试试这些：</text>
+        <view class="history-list">
+          <text class="history-item" wx:for="{{history}}" wx:key="*this" catchtap="search" data-word="{{item}}">{{item}}</text>
+        </view>
+      </view>
     </view>
   </block>
 
   <block wx:elif="{{result}}">
-    <view class="result-header">
-      <text class="word">{{result.word}}</text>
-      <text class="phonetic" wx:if="{{result.phonetic}}">{{result.phonetic}}</text>
-      <text class="audio-btn" wx:if="{{result.audio}}" catchtap="playAudio">🔊</text>
-    </view>
-
-      <view class="meaning-block" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
-        <view class="pos-tag">{{item.partOfSpeech}}</view>
-        <view class="def-list">
-          <view class="def-item" wx:for="{{item.definitions}}" wx:key="definition">
-            <text class="def-text">• {{item.definition}}</text>
-            <text class="def-example" wx:if="{{item.example}}">例：{{item.example}}</text>
-          </view>
+    <view class="result-card">
+      <view class="card-word">
+        <view class="word-row">
+          <text class="word-large">{{result.word}}</text>
+          <text class="word-phonetic" wx:if="{{result.phonetic}}">{{result.phonetic}}</text>
+          <text class="word-audio" wx:if="{{result.audio}}" catchtap="playAudio">🔊</text>
+        </view>
+        <view class="word-chinese" wx:if="{{result.chinese}}">
+          <text class="chinese-label">{{aiEnabled && aiAvailable ? '🤖' : '🌐'}}</text>
+          <text class="chinese-value">{{result.chinese}}</text>
         </view>
       </view>
 
-      <view class="chinese-block" wx:if="{{result.chinese}}">
-        <text class="chinese-label">{{aiEnabled && aiAvailable ? '🤖 AI 翻译' : '🌐 中文释义'}}</text>
-        <text class="chinese-text">{{result.chinese}}</text>
+      <view class="card-body">
+        <view class="meaning-group" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
+          <view class="pos-row">
+            <text class="pos-badge {{item.partOfSpeech}}">{{item.partOfSpeech}}</text>
+            <view class="pos-words" wx:if="{{item.synonyms.length > 0}}">
+              <text class="pos-label">同义</text>
+              <text class="pos-word" wx:for="{{item.synonyms}}" wx:for-index="si" wx:key="si">{{item}}</text>
+            </view>
+          </view>
+          <view class="def-list">
+            <view class="def-item" wx:for="{{item.definitions}}" wx:key="definition">
+              <text class="def-num">{{index + 1}}.</text>
+              <view class="def-body">
+                <text class="def-text">{{item.definition}}</text>
+                <text class="def-example" wx:if="{{item.example}}">{{item.example}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
+    </view>
   </block>
 
   <block wx:elif="{{!query && history.length > 0}}">
@@ -58,10 +79,10 @@
   </block>
 
   <block wx:else>
-    <view class="empty-tip">
+    <view class="empty-state">
       <text class="empty-icon">📖</text>
       <text class="empty-text">输入英文单词查释义</text>
-      <text class="empty-hint">支持音标、词性、例句</text>
+      <text class="empty-hint">支持音标、词性、例句、发音</text>
     </view>
   </block>
 </view>

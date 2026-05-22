@@ -3,6 +3,8 @@ import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IMeaning {
   partOfSpeech: string
+  synonyms: string[]
+  antonyms: string[]
   definitions: { definition: string; example?: string }[]
 }
 
@@ -91,6 +93,8 @@ Page<IDictData>({
         chinese,
         meanings: entry.meanings?.map((m: any) => ({
           partOfSpeech: m.partOfSpeech,
+          synonyms: m.synonyms?.slice(0, 5) || [],
+          antonyms: m.antonyms?.slice(0, 5) || [],
           definitions: m.definitions?.slice(0, 3).map((d: any) => ({
             definition: d.definition,
             example: d.example || '',
