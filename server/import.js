@@ -126,7 +126,7 @@ function parseListening(lines, year) {
   }
   if (curQ) questions.push(curQ)
 
-  // 清理：去重时检测重复字母 → 顺延给下题
+  // 清理：去重时检测重复字母 → 顺延给下题（这些重复字母实际是下题的选项）
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i]
     const seen = new Set()
@@ -145,6 +145,27 @@ function parseListening(lines, year) {
     if (overflow.length > 0 && i + 1 < questions.length) {
       questions[i + 1].rawOpts.unshift(...overflow)
     }
+  }
+
+  // 修复 Q6：Q6的C,D在Q7行上，挪回来
+  if (questions.length >= 7) {
+    const q6 = questions[5]
+    const q7 = questions[6]
+    if (q6.rawOpts.length === 2 && q7.rawOpts.length >= 2) {
+      const ci = q7.rawOpts.findIndex(o => o.startsWith('C)'))
+      const di = q7.rawOpts.findIndex(o => o.startsWith('D)'))
+      if (ci >= 0 && di >= 0 && ci < di) {
+        const d = q7.rawOpts.splice(di, 1)[0]
+        const c = q7.rawOpts.splice(ci, 1)[0]
+        q6.rawOpts.push(c, d)
+      }
+    }
+  }
+
+  // 排序，trim 到 4（不跨题借）
+  for (const q of questions) {
+    q.rawOpts.sort((a, b) => a[0].localeCompare(b[0]))
+    q.rawOpts = q.rawOpts.slice(0, 4)
   }
 
   // 修复 Q6：Q6只有A,B，Q7中找C,D（跳过Q6顺延的A,B）
@@ -461,7 +482,53 @@ async function main() {
   console.log(`   听力: ${total.listening} 篇`)
   console.log(`   阅读: ${total.reading} 篇`)
   console.log(`   翻译: ${total.translation} 条`)
+  reportMissingOpts()
   console.log('\n💡 提示: 新建页面需要添加到 app.json 并重新编译')
+}
+
+// ============ 选项完整性报告 ============
+
+function reportMissingOpts() {
+  const fp = path.join(DATA_DIR, 'listening.ts')
+  if (!fs.existsSync(fp)) return
+  const txt = fs.readFileSync(fp, 'utf-8')
+  const idx = txt.lastIndexOf('"id":')
+  if (idx === -1) return
+  const chunk = txt.slice(idx)
+  // 解析 sentences
+  const lines = chunk.split('\n').map(l => l.trim()).filter(Boolean)
+  let inSent = false, texts = []
+  for (const l of lines) {
+    if (l.includes('"sentences"')) { inSent = true; continue }
+    if (inSent && l.startsWith(']')) break
+    if (!inSent) continue
+    const m = l.match(/"text": "([^"]*)"/)
+    if (m) texts.push(m[1])
+  }
+  let missing = []
+  for (const t of texts) {
+    const qm = t.match(/^Q?(\d+)\./)
+    if (!qm) continue
+    const letters = [...t.matchAll(/([A-D])\)/g)]
+    const uniq = new Set(letters.map(m => m[1]))
+    const before = t.replace(/^Q?\d+\.\s*/, '').search(/[A-D]\)/)
+    if (uniq.size < 4) {
+      missing.push({ q: parseInt(qm[1]), n: uniq.size, text: t.slice(0, 80) })
+    }
+    if (uniq.size === 4 && before > 5) {
+      missing.push({ q: parseInt(qm[1]), n: 4, text: t.slice(0, 80), note: '选项前有残余文本' })
+    }
+  }
+  if (missing.length > 0) {
+    console.log('\n⚠️  听力选项不完整：')
+    for (const m of missing) {
+      console.log(`  Q${m.q}: ${m.n}/4个选项 ${m.note || ''}`)
+      console.log(`    ${m.text}`)
+    }
+    console.log('\n💡 如需补全，请手动编辑 miniprogram/data/listening.ts')
+  } else {
+    console.log('\n✅ 听力选项全部完整')
+  }
 }
 
 main().catch(console.error)
