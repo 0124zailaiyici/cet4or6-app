@@ -28,16 +28,8 @@ interface IReadingData {
   blankAnswers: Record<string, string>
   usedFlags: boolean[]
   activeBlank: string | null
-  matchAnswers: Record<number, string>
-  matchCount: number
-  usedLetters: string[]
-  availLetters: string[]
-  activeStmt: number | null
-  bStmtPage: number
-  bStmtPages: string[][] // 5条一页
   darkMode: boolean
   optionLetters: string[]
-  paraLetters: string[]
   touchStartX: number
 }
 
@@ -48,19 +40,11 @@ interface IReadingMethods {
   nextQ(): void
   prevPassage(): void
   nextPassage(): void
-  prevStmts(): void
-  nextStmts(): void
   splitPassage(text: string): string[]
-  formatBPassage(text: string): string[]
   parseSegments(page: string): ISegment[]
   saveAnswers(): void
   onBlankTap(e: WechatMiniprogram.TouchEvent): void
   onOptionTap(e: WechatMiniprogram.TouchEvent): void
-  selectStmt(e: WechatMiniprogram.TouchEvent): void
-  removeMatch(e: WechatMiniprogram.TouchEvent): void
-  assignLetter(e: WechatMiniprogram.TouchEvent): void
-  saveMatchAnswers(): void
-  updateUsedLetters(): void
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
@@ -78,16 +62,8 @@ Page<IReadingData, IReadingMethods>({
     blankAnswers: {},
     usedFlags: [],
     activeBlank: null,
-    matchAnswers: {},
-    matchCount: 0,
-    usedLetters: [],
-    availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
-    activeStmt: null,
-    bStmtPage: 0,
-    bStmtPages: [],
     darkMode: false,
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
-    paraLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
     touchStartX: 0,
   },
 
@@ -100,50 +76,22 @@ Page<IReadingData, IReadingMethods>({
     this.setData({ darkMode: getDarkMode() })
   },
 
-  formatBPassage(text: string): string[] {
-    if (!text) return ['']
-    // 按 A）B）C) 拆分，每个标签作为独立段落开头
-    const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
-    // 每页1段（长篇文字多，避免溢出）
-    const pages: string[] = []
-    for (let i = 0; i < parts.length; i++) {
-      pages.push(parts[i].trim())
-    }
-    return pages.length > 0 ? pages : [text]
-  },
-
   select(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
-      const pages = item.sectionType === 'B'
-        ? this.formatBPassage(item.passage)
-        : this.splitPassage(item.passage)
+      const pages = this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
-      const formatted = item.sectionType === 'B'
-        ? pages.map(p => `<div style="line-height:1.9;margin:0 0 0.6em">${p.replace(/\n/g, '<br>')}</div>`)
-        : pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
+      const formatted = pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
       // 从存储加载已有答案
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
-      const matchSaved = saved?.matchAnswers || {}
-      const bPages: string[][] = []
-      if (item.sectionType === 'B' && item.questions.length > 0) {
-        for (let i = 0; i < item.questions.length; i += 5) {
-          bPages.push(item.questions.slice(i, i + 5))
-        }
-      }
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
         blankAnswers: saved?.blankAnswers || {},
         usedFlags: saved?.usedFlags || [],
-        matchAnswers: matchSaved,
-        matchCount: Object.keys(matchSaved).length,
-        usedLetters: [...new Set(Object.values(matchSaved))],
-        availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(matchSaved).includes(l)),
-        bStmtPage: 0, bStmtPages: bPages,
-        activeBlank: null, activeStmt: null,
+        activeBlank: null,
       })
     }
   },
@@ -235,11 +183,9 @@ Page<IReadingData, IReadingMethods>({
     const id = this.data.current?.id
     if (!id) return
     const app = getApp<IAppOption>()
-    const existing = app.globalData.studyData.readingAnswers[id] || { matchAnswers: {} }
     app.globalData.studyData.readingAnswers[id] = {
       blankAnswers: { ...this.data.blankAnswers },
       usedFlags: [...this.data.usedFlags],
-      matchAnswers: existing.matchAnswers || {},
     }
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
@@ -257,59 +203,6 @@ Page<IReadingData, IReadingMethods>({
   nextPassage() {
     if (this.data.passagePage < this.data.passagePages.length - 1) this.setData({ passagePage: this.data.passagePage + 1 })
   },
-  prevStmts() {
-    if (this.data.bStmtPage > 0) this.setData({ bStmtPage: this.data.bStmtPage - 1 })
-  },
-  nextStmts() {
-    if (this.data.bStmtPage < this.data.bStmtPages.length - 1) this.setData({ bStmtPage: this.data.bStmtPage + 1 })
-  },
-
-  selectStmt(e: WechatMiniprogram.TouchEvent) {
-    const sIdx = parseInt(e.currentTarget.dataset.idx as string)
-    const newVal = this.data.activeStmt === sIdx ? null : sIdx
-    this.setData({ activeStmt: newVal })
-    if (newVal !== null) wx.showToast({ title: `已选第${newVal + 1}题，请选字母`, icon: 'none' })
-  },
-
-  updateUsedLetters() {
-    const used = [...new Set(Object.values(this.data.matchAnswers))]
-    this.setData({ usedLetters: used, matchCount: Object.keys(this.data.matchAnswers).length, availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => used.indexOf(l) === -1) })
-  },
-
-  removeMatch(e: WechatMiniprogram.TouchEvent) {
-    const sIdx = parseInt(e.currentTarget.dataset.idx as string)
-    const ma = { ...this.data.matchAnswers }
-    delete ma[sIdx]
-    this.setData({ matchAnswers: ma })
-    this.updateUsedLetters()
-    this.saveMatchAnswers()
-  },
-
-  assignLetter(e: WechatMiniprogram.TouchEvent) {
-    const letter = e.currentTarget.dataset.letter as string
-    const stmt = this.data.activeStmt
-    if (stmt === null) return
-    const ma = { ...this.data.matchAnswers }
-    if (ma[stmt] === letter) {
-      delete ma[stmt]
-    } else {
-      ma[stmt] = letter
-    }
-    this.setData({ matchAnswers: ma, activeStmt: null })
-    this.updateUsedLetters()
-    this.saveMatchAnswers()
-    wx.showToast({ title: (ma[stmt] ? '已匹配 ' : '已取消 ') + letter, icon: 'none' })
-  },
-
-  saveMatchAnswers() {
-    const id = this.data.current?.id
-    if (!id) return
-    const app = getApp<IAppOption>()
-    const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
-    existing.matchAnswers = { ...this.data.matchAnswers }
-    app.globalData.studyData.readingAnswers[id] = existing
-    wx.setStorageSync('studyData', app.globalData.studyData)
-  },
 
   onTouchStart(e: WechatMiniprogram.TouchEvent) { this.setData({ touchStartX: e.touches[0].clientX }) },
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent) {
@@ -318,12 +211,6 @@ Page<IReadingData, IReadingMethods>({
   },
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent) {
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
-    if (this.data.current?.sectionType === 'B') {
-      if (dx > 50) this.prevStmts()
-      else if (dx < -50) this.nextStmts()
-    } else {
-      if (dx > 50) this.prevQ()
-      else if (dx < -50) this.nextQ()
-    }
+    if (dx > 50) this.prevQ(); else if (dx < -50) this.nextQ()
   },
 })
