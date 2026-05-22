@@ -91,10 +91,22 @@ function parseListening(lines, year) {
   const paragraphs = splitParagraphs(lines.join('\n'))
   if (paragraphs.length < 3) return []
 
-  const sentences = paragraphs.slice(0, Math.min(paragraphs.length, 15)).map((text, i) => ({
-    text: text.slice(0, 200),
-    start: i * 3,
-    end: i * 3 + 2.5,
+  // 合并短行：选项续行合并到前一行，避免破碎
+  const merged = []
+  for (const p of paragraphs) {
+    // 过滤页脚
+    if (/\d{4}年\d+月/.test(p) && /第\d+页/.test(p)) continue
+    if (/^[A-D]\)/.test(p) && merged.length > 0 && !/^\d+\./.test(p)) {
+      merged[merged.length - 1] += '  ' + p
+    } else {
+      merged.push(p)
+    }
+  }
+
+  const sentences = merged.map((text) => ({
+    text: sanitize(text),
+    start: 0,
+    end: 0,
   }))
 
   return [{
@@ -201,7 +213,7 @@ function parseReading(lines, year) {
             if (currentStem) {
               stems.push(sanitize(currentStem))
               if (currentChoices.length === 1) {
-                currentChoices = currentChoices[0].split(/(?=[A-D]\))/).map((s: string) => sanitize(s.trim())).filter((s: string) => s)
+                currentChoices = currentChoices[0].split(/(?=[A-D]\))/).map(s => sanitize(s.trim())).filter(s => s)
               }
               choices.push(currentChoices)
             }
@@ -215,7 +227,7 @@ function parseReading(lines, year) {
           stems.push(sanitize(currentStem))
           // 若只提取到1个选项，尝试拆分合并行（PDF常见问题）
           if (currentChoices.length === 1) {
-            currentChoices = currentChoices[0].split(/(?=[A-D]\))/).map((s: string) => sanitize(s.trim())).filter((s: string) => s)
+            currentChoices = currentChoices[0].split(/(?=[A-D]\))/).map(s => sanitize(s.trim())).filter(s => s)
           }
           choices.push(currentChoices)
         }
@@ -325,9 +337,8 @@ async function main() {
       if (sections.listening.length > 5) {
         const items = parseListening(sections.listening, year)
         if (items.length) {
-          const matchAudio = audioFiles.find(a => f.replace(/[^0-9]/g, '').includes(a.filename.replace(/[^0-9]/g, '')))
-          if (matchAudio) items[0].audioUrl = `http://localhost:3001/audio/${matchAudio.filename}`
-          items[0].title += '（PDF导入，仅题目，使用TTS听正文需手动编辑）'
+          const matchAudio = audioFiles.find(a => f.replace(/[^0-9]/g, '').includes(a.filename.replace(/\.mp3$/,'').replace(/[^0-9]/g, '')))
+          if (matchAudio) items[0].audioUrl = `/audio/${matchAudio.filename}`
           const existing = fs.existsSync(path.join(DATA_DIR, 'listening.json'))
             ? JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'listening.json'), 'utf-8'))
             : []

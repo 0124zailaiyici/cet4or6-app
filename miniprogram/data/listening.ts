@@ -190,87 +190,217 @@ const listeningData = [
     "fullText": "Healthy eating habits are essential for maintaining good health. A balanced diet should include a variety of fruits, vegetables, and whole grains. It is also important to limit the intake of sugar and processed foods. Many young people tend to skip breakfast, which is harmful to their health. Experts suggest that we should eat three regular meals a day. A healthy diet, combined with regular exercise, can help us live a longer and happier life."
   },
   {
-    "id": 1779428172701,
+    "id": 1779437056934,
     "title": "CET-4 听力 2019061",
     "audioUrl": "/audio/2019年06月四级听力音频第1套.mp3",
     "sentences": [
       {
-        "text": "you hear two  or three  questions.  Both  the news  report and the questions  will be spoken",
+        "text": "you hear two or three questions. Both the news report and the questions will be spoken",
         "start": 0,
-        "end": 2.5
+        "end": 0
       },
       {
-        "text": "only once.  After you hear a question, you must choose  the best answer from  the four choices",
-        "start": 3,
-        "end": 5.5
+        "text": "only once. After you hear a question, you must choose the best answer from the four choices",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "marked A), B),  C) and D).  Then mark the corresponding letter on Answer Sheet 1 with a single",
-        "start": 6,
-        "end": 8.5
+        "text": "marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single",
+        "start": 0,
+        "end": 0
       },
       {
         "text": "line through the centre.",
-        "start": 9,
-        "end": 11.5
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "1.  A) He set a record by swimming to and from an island.",
-        "start": 12,
-        "end": 14.5
+        "text": "1. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday on a small island. C) He visited a prison located on a faraway island. D) He swam around an island near San Francisco.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "B)  He celebrated his ninth birthday on a small island.",
-        "start": 15,
-        "end": 17.5
+        "text": "2. A) He doubled the reward. C) He cheered him on all the way. B) He set him an example. D) He had the event covered on TV.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "C)  He visited a prison located on a faraway island.",
-        "start": 18,
-        "end": 20.5
+        "text": "3. A) To end the one-child policy. C) To increase working efficiency. B) To encourage late marriage. D) To give people more time to travel.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "D)  He swam around an island near San Francisco.",
-        "start": 21,
-        "end": 23.5
+        "text": "4. A) They will not be welcomed by young people. B) They will help to popularize early marriage. C) They will boost China",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "2.  A) He doubled the reward. C) He cheered him on all the way.",
-        "start": 24,
-        "end": 26.5
+        "text": "s economic growth. D) They will not come into immediate effect.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "B)  He set him an example. D) He had the event covered on TV.",
-        "start": 27,
-        "end": 29.5
+        "text": "5. A) Cleaning service in great demand all over the world. B) Two ladies giving up well-paid jobs to do cleaning. C) A new company to clean up the mess after parties. D) Cleaners gainfully employed at nights and weekends.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "3.  A) To end the one-child policy. C) To increase working efficiency.",
-        "start": 30,
-        "end": 32.5
+        "text": "6. A) It takes a lot of time to prepare. B) It leaves the house in a mess.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "B)  To encourage late marriage. D) To give people more time to travel.",
-        "start": 33,
-        "end": 35.5
+        "text": "7. A) Hire an Australian lawyer. B) Visit the U.S. and Canada. C) It makes party goers exhausted. D) It creates noise and misconduct. C) Settle a legal dispute. D) Expand their business.",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "4.  A) They will not be welcomed by young people.",
-        "start": 36,
-        "end": 38.5
+        "text": "2019年6月英语四级真题第1套 第1页 共1 0页",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "B)  They will help to popularize early marriage.",
-        "start": 39,
-        "end": 41.5
+        "text": "conversation, you will hear four questions. Both the conversation and the questions will be",
+        "start": 0,
+        "end": 0
       },
       {
-        "text": "C)  They will boost China",
-        "start": 42,
-        "end": 44.5
+        "text": "spoken only once. After you hear a question, you must choose the best answer from the four",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "a single line through the centre.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "8. A) He had a driving lesson. B) He got his driver's license. C) He took the driver's theory exam. D) He passed the driver's road test.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "9. A) He was not well prepared. B) He did not get to the exam in time. C) He was not used to the test format. D) He did not follow the test procedure.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "10. A) They are tough. B) They are costly.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "11. A) Pass his road test the first time. C) They are helpful. D) They are too short. B) Test-drive a few times on highways. C) Find an experienced driving instructor. D) Earn enough money for driving lessons.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "12. A) Where the woman studies. B) The acceptance rate at Leeds. C) Leeds' tuition for international students. D) How to apply for studies at a university.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "13. A) Apply to an American university. B) Do research on higher education. C) Perform in a famous musical. D) Pursue postgraduate studies.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "14. A) His favorable recommendations. B) His outstanding musical talent. C) His academic excellence. D) His unique experience.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "15. A) Do a master's degree. B) Settle down in England. C) Travel widely. D) Teach overseas.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "hear three or four questions. Both the passage and the questions will be spoken only once.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "the centre.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "16. A) They help farmers keep diseases in check. B) Many species remain unknown to scientists. C) Only a few species cause trouble to humans.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "2019年6月英语四级真题第1套 第2页 共10页 D) They live in incredibly well-organized colonies.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "17. A) They are larger than many other species. B) They can cause damage to people's homes. C) They can survive a long time without water. D) They like to form colonies in electrical units.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "18. A) Deny them access to any food. B) Keep doors and windows shut. C) Destroy their colonies close by. D) Refrain from eating sugary food.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "19. A) The function of the human immune system. B) The cause of various auto-immune diseases. C) The viruses that may infect the human immune system. D) The change in people's immune system as they get older.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "20. A) Report their illnesses. C) Act as research assistants. B) Offer blood samples. D) Help to interview patients.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "21. A) Strengthening people's immunity to infection. B) Better understanding patients",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "immune system. C) Helping improve old people's health conditions. D) Further reducing old patients' medical expenses.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "22. A) His students had trouble getting on with each other. B) A lot of kids stayed at school to do their homework. C) His students were struggling to follow his lessons. D) A group of kids were playing chess after school.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "23. A) Visit a chess team in Nashville. B) Join the schooPs chess team. C) Participate in a national chess competition. D) Receive training for a chess competition.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "24. A) Most of them come from low-income families. B) Many have become national chess champions. C) A couple of them have got involved in crimes. D) Many became chess coaches after graduation.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "25. A) Actions speak louder than words. B) Think twice before taking action. C) Translate their words into action. D) Take action before it gets too late.",
+        "start": 0,
+        "end": 0
+      },
+      {
+        "text": "2019年6月英语四级真题第1套 第3页 共1 0页",
+        "start": 0,
+        "end": 0
       }
     ],
-    "fullText": "you hear two or three questions. Both the news report and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre. 1. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday on a small island. C) He visited a prison located on a faraway island. D) He swam around an island near San Francisco. 2. A) He doubled the reward. C) He cheered him on all the way. B) He set him an example. D) He had the event covered on TV. 3. A) To end the one-child policy. C) To increase working efficiency. B) To encourage late marriage. D) To give people more time to travel. 4. A) They will not be welcomed by young people. B) They will help to popularize early marriage. C) They will boost China"
+    "fullText": "you hear two or three questions. Both the news report and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre. 1. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday on a small island. C) He visited a prison located on a faraway island. D) He swam around an island near San Francisco. 2. A) He doubled the reward. C) He cheered him on all the way. B) He set him an example. D) He had the event covered on TV. 3. A) To end the one-child policy. C) To increase working efficiency. B) To encourage late marriage. D) To give people more time to travel. 4. A) They will not be welcomed by young people. B) They will help to popularize early marriage. C) They will boost China s economic growth. D) They will not come into immediate effect. 5. A) Cleaning service in great demand all over the world. B) Two ladies giving up well-paid jobs to do cleaning. C) A new company to clean up the mess after parties. D) Cleaners gainfully employed at nights and weekends. 6. A) It takes a lot of time to prepare. B) It leaves the house in a mess. 7. A) Hire an Australian lawyer. B) Visit the U.S. and Canada. C) It makes party goers exhausted. D) It creates noise and misconduct. C) Settle a legal dispute. D) Expand their business. 2019年6月英语四级真题第1套 第1页 共1 0页 conversation, you will hear four questions. Both the conversation and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre. 8. A) He had a driving lesson. B) He got his driver's license. C) He took the driver's theory exam. D) He passed the driver's road test. 9. A) He was not well prepared. B) He did not get to the exam in time. C) He was not used to the test format. D) He did not follow the test procedure. 10. A) They are tough. B) They are costly. 11. A) Pass his road test the first time. C) They are helpful. D) They are too short. B) Test-drive a few times on highways. C) Find an experienced driving instructor. D) Earn enough money for driving lessons. 12. A) Where the woman studies. B) The acceptance rate at Leeds. C) Leeds' tuition for international students. D) How to apply for studies at a university. 13. A) Apply to an American university. B) Do research on higher education. C) Perform in a famous musical. D) Pursue postgraduate studies. 14. A) His favorable recommendations. B) His outstanding musical talent. C) His academic excellence. D) His unique experience. 15. A) Do a master's degree. B) Settle down in England. C) Travel widely. D) Teach overseas. hear three or four questions. Both the passage and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre. 16. A) They help farmers keep diseases in check. B) Many species remain unknown to scientists. C) Only a few species cause trouble to humans. 2019年6月英语四级真题第1套 第2页 共10页 D) They live in incredibly well-organized colonies. 17. A) They are larger than many other species. B) They can cause damage to people's homes. C) They can survive a long time without water. D) They like to form colonies in electrical units. 18. A) Deny them access to any food. B) Keep doors and windows shut. C) Destroy their colonies close by. D) Refrain from eating sugary food. 19. A) The function of the human immune system. B) The cause of various auto-immune diseases. C) The viruses that may infect the human immune system. D) The change in people's immune system as they get older. 20. A) Report their illnesses. C) Act as research assistants. B) Offer blood samples. D) Help to interview patients. 21. A) Strengthening people's immunity to infection. B) Better understanding patients immune system. C) Helping improve old people's health conditions. D) Further reducing old patients' medical expenses. 22. A) His students had trouble getting on with each other. B) A lot of kids stayed at school to do their homework. C) His students were struggling to follow his lessons. D) A group of kids were playing chess after school. 23. A) Visit a chess team in Nashville. B) Join the schooPs chess team. C) Participate in a national chess competition. D) Receive training for a chess competition. 24. A) Most of them come from low-income families. B) Many have become national chess champions. C) A couple of them have got involved in crimes. D) Many became chess coaches after graduation. 25. A) Actions speak louder than words. B) Think twice before taking action. C) Translate their words into action. D) Take action before it gets too late. 2019年6月英语四级真题第1套 第3页 共1 0页"
   }
 ]
 export default listeningData
