@@ -163,10 +163,7 @@ Page<ISentencesData, ISentencesMethods>({
     if (mastered.has(idNum)) mastered.delete(idNum)
     else mastered.add(idNum)
     const masteredArr = [...mastered]
-    this.setData({
-      masteredIds: masteredArr,
-      filteredSentences: this.data.filteredSentences,
-    })
+    this.setData({ masteredIds: masteredArr })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr
@@ -181,10 +178,7 @@ Page<ISentencesData, ISentencesMethods>({
     if (fav.has(idNum)) fav.delete(idNum)
     else fav.add(idNum)
     const favArr = [...fav]
-    this.setData({
-      favoriteIds: favArr,
-      filteredSentences: this.data.filteredSentences,
-    })
+    this.setData({ favoriteIds: favArr })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.favoriteSentenceIds = favArr

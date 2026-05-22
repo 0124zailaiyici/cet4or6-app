@@ -47,7 +47,7 @@
         </view>
       </view>
 
-      <view class="s-card" wx:for="{{filteredSentences}}" wx:key="id">
+      <view class="s-card" wx:for="{{filteredSentences}}" wx:key="*this">
         <view class="sc-main">
           <view class="sc-num">{{index + 1}}</view>
           <view class="sc-body">
