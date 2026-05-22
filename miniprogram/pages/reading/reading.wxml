@@ -90,7 +90,7 @@
           <view class="qb-bar">
             <text class="qb-bar-hint">👆 点击陈述，再选字母匹配</text>
             <view class="qb-bar-letters">
-              <text class="qb-l {{usedLetters.indexOf(l) !== -1 ? 'used' : ''}}" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter">{{l}}</text>
+              <text class="qb-l" wx:for="{{availLetters}}" wx:key="*this" wx:for-item="L" data-letter="{{L}}" catchtap="assignLetter">{{L}}</text>
             </view>
           </view>
         </block>

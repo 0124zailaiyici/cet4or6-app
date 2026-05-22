@@ -31,6 +31,7 @@ interface IReadingData {
   matchAnswers: Record<number, string>
   matchCount: number
   usedLetters: string[]
+  availLetters: string[]
   activeStmt: number | null
   bStmtPage: number
   bStmtPages: string[][] // 5条一页
@@ -80,6 +81,7 @@ Page<IReadingData, IReadingMethods>({
     matchAnswers: {},
     matchCount: 0,
     usedLetters: [],
+    availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
     activeStmt: null,
     bStmtPage: 0,
     bStmtPages: [],
@@ -139,6 +141,7 @@ Page<IReadingData, IReadingMethods>({
         matchAnswers: matchSaved,
         matchCount: Object.keys(matchSaved).length,
         usedLetters: [...new Set(Object.values(matchSaved))],
+        availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(matchSaved).includes(l)),
         bStmtPage: 0, bStmtPages: bPages,
         activeBlank: null, activeStmt: null,
       })
@@ -270,7 +273,7 @@ Page<IReadingData, IReadingMethods>({
 
   updateUsedLetters() {
     const used = [...new Set(Object.values(this.data.matchAnswers))]
-    this.setData({ usedLetters: used, matchCount: Object.keys(this.data.matchAnswers).length })
+    this.setData({ usedLetters: used, matchCount: Object.keys(this.data.matchAnswers).length, availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => used.indexOf(l) === -1) })
   },
 
   removeMatch(e: WechatMiniprogram.TouchEvent) {
