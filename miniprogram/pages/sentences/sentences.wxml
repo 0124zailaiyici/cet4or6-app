@@ -23,7 +23,7 @@
     </view>
   </scroll-view>
 
-  <scroll-view class="card-scroll" scroll-y>
+  <scroll-view class="card-scroll" scroll-y show-scrollbar="{{false}}">
     <view class="card-list">
       <view class="empty-state" wx:if="{{filteredSentences.length === 0}}">
         <text class="empty-emoji">🔍</text>

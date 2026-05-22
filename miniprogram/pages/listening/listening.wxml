@@ -8,7 +8,7 @@
       </view>
     </view>
 
-    <scroll-view class="lcard-scroll" scroll-y>
+    <scroll-view class="lcard-scroll" scroll-y show-scrollbar="{{false}}">
       <view class="lcard-list">
       <view class="lcard" wx:for="{{passages}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
         <view class="lc-icon" style="background: linear-gradient(135deg, #4fc3f7, #2196f3);">
@@ -40,7 +40,7 @@
       <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">单句</view>
     </view>
 
-    <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}">
+    <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}" show-scrollbar="{{false}}">
       <view class="sentence-list">
         <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
           <view class="se-num">{{index + 1}}</view>

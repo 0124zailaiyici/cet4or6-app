@@ -33,7 +33,7 @@
 
       <!-- 文章区 -->
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-          <scroll-view class="pz-scroll" scroll-y>
+          <scroll-view class="pz-scroll" scroll-y show-scrollbar="{{false}}">
             <!-- Section A：交互式填空 -->
             <block wx:if="{{passageSeg.length > 0 && passageSeg[passagePage]}}">
               <text class="pz-text">
@@ -64,7 +64,7 @@
         <!-- Section A：选词填空 -->
         <block wx:if="{{current.sectionType === 'A'}}">
           <view class="qz-label">📋 选词（15选10）<text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 请选词填入第{{activeBlank}}空</text></view>
-          <scroll-view class="qz-chip-scroll" scroll-y>
+            <scroll-view class="qz-chip-scroll" scroll-y show-scrollbar="{{false}}">
             <view class="qz-chips">
               <text class="qzc {{usedFlags[i] ? 'used' : ''}}" wx:for="{{current.options}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" catchtap="onOptionTap">{{optionLetters[i]}}. {{item}}</text>
             </view>
@@ -74,7 +74,7 @@
         <!-- Section B/C：题目 + 选项 -->
         <block wx:else>
           <view class="qz-label">❓ 第{{currentQ + 1}}/{{current.questions.length}}题</view>
-          <scroll-view class="qz-q-scroll" scroll-y bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+          <scroll-view class="qz-q-scroll" scroll-y show-scrollbar="{{false}}" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
             <text class="qz-question">{{current.questions[currentQ]}}</text>
 
             <!-- 有 A-D 选项 -->

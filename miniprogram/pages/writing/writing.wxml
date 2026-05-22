@@ -14,7 +14,7 @@
 
   <!-- Tab 0: Patterns -->
   <block wx:if="{{tab === 0}}">
-    <scroll-view class="w-content" scroll-y>
+    <scroll-view class="w-content" scroll-y show-scrollbar="{{false}}">
       <view class="wlist">
         <view class="wcard" wx:for="{{patterns}}" wx:key="id" data-id="{{item.id}}" catchtap="togglePattern">
           <view class="wc-pat">{{item.pattern}}</view>
@@ -40,7 +40,7 @@
 
   <!-- Tab 1: Paragraph -->
   <block wx:elif="{{tab === 1}}">
-    <scroll-view class="w-content" scroll-y>
+    <scroll-view class="w-content" scroll-y show-scrollbar="{{false}}">
       <view class="prompt-card">
         <text class="pc-label">主题句：</text>
         <text class="pc-text">Environmental protection is everyone's responsibility.</text>
@@ -59,7 +59,7 @@
   <!-- Tab 2: Full Writing -->
   <block wx:else>
     <block wx:if="{{!currentWriting}}">
-      <scroll-view class="w-content" scroll-y>
+      <scroll-view class="w-content" scroll-y show-scrollbar="{{false}}">
         <view class="wlist">
           <view class="wcard wc-writing" wx:for="{{writings}}" wx:key="id" data-id="{{item.id}}" catchtap="enterWriting">
             <text class="wc-wtitle">{{item.title}}</text>
@@ -73,7 +73,7 @@
         <view class="back-btn" catchtap="backToWritingList">返回</view>
         <text class="detail-title">全文写作</text>
       </view>
-      <scroll-view class="w-content" scroll-y>
+      <scroll-view class="w-content" scroll-y show-scrollbar="{{false}}">
         <view class="prompt-card">
           <text class="pc-title">{{currentWriting.title}}</text>
           <text class="pc-text">{{currentWriting.prompt}}</text>
