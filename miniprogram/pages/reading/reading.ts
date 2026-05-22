@@ -310,6 +310,7 @@ Page<IReadingData, IReadingMethods>({
     }
     this.setData({ cAnswers: ca })
     this.saveCAnswer()
+    wx.showToast({ title: `选了 ${choice} - ${Object.keys(ca).length}`, icon: 'none' })
   },
 
   saveCAnswer() {
