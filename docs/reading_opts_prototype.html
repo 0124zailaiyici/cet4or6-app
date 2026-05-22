@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仔细阅读 UI 设计稿</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#f0ebe6; display:flex; flex-direction:column; align-items:center; padding:40px 20px; font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif; }
+h1 { font-size:26px; color:#333; margin-bottom:6px; }
+.sub { color:#888; font-size:14px; margin-bottom:36px; }
+
+.phone {
+  width:375px; background:#f8f6f0; border-radius:36px; overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,0.12); display:flex; flex-direction:column;
+}
+.top { padding:10px 16px; display:flex; align-items:center; gap:8px; background:#f8f6f0; }
+.back { width:28px;height:28px;border-radius:8px;background:rgba(84,110,122,0.08);display:flex;align-items:center;justify-content:center;font-size:12px;color:#546e7a; }
+.ttl { flex:1; font-size:14px; font-weight:700; color:#2d2d4e; }
+.badge { font-size:9px; color:#fff; padding:3px 10px; border-radius:8px; background:linear-gradient(135deg,#81c784,#388e3c); }
+
+/* Passage */
+.pass-box { padding:6px 14px 0; }
+.pass-label { font-size:11px; color:#546e7a; font-weight:600; margin-bottom:4px; }
+.pass-card { background:#eef1f3; border-radius:14px; padding:14px 18px; min-height:100px; }
+.pass-text { font-size:13px; line-height:1.8; color:#2d3a4a; }
+.pass-nav { display:flex; justify-content:center; gap:4px; padding:6px 0 8px; }
+.pass-dot { width:8px;height:8px;border-radius:50%;background:#d0c8d0; }
+.pass-dot.on { background:#546e7a; width:16px; border-radius:4px; }
+
+.divider { height:1px; background:rgba(84,110,122,0.08); margin:0 14px; }
+
+/* Question */
+.quest-box { padding:6px 14px 16px; flex:1; display:flex; flex-direction:column; }
+.q-label { font-size:11px; color:#546e7a; font-weight:600; margin-bottom:6px; }
+.q-text { font-size:14px; line-height:1.7; color:#2d2d4e; font-weight:500; margin-bottom:10px; }
+
+/* Options layouts */
+.opt-label { font-size:10px; color:#8a7a9a; margin:8px 0 4px; padding:2px 0; border-top:1px dashed #ddd; }
+
+/* V1: Inline text */
+.opts-inline { }
+.opts-inline .oi {
+  display:inline-block; font-size:13px; color:#4a4a6a; line-height:2; padding:2px 4px;
+  margin-right:16px; border-radius:4px; cursor:pointer;
+}
+.opts-inline .oi.on { color:#1e88e5; font-weight:700; background:rgba(30,136,229,0.06); }
+
+/* V2: Chips */
+.opts-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.opts-chips .oc {
+  padding:8px 16px; border-radius:16px; font-size:13px; color:#4a4a6a;
+  background:#fff; border:1px solid #e0d8e0; cursor:pointer;
+}
+.opts-chips .oc.on { color:#1e88e5; border-color:#1e88e5; background:rgba(30,136,229,0.04); font-weight:600; }
+
+/* V3: Cards */
+.opts-cards { display:flex; flex-wrap:wrap; gap:8px; }
+.opts-cards .oca {
+  width:calc(50% - 4px); padding:12px 14px; border-radius:12px;
+  font-size:13px; color:#4a4a6a; line-height:1.5;
+  background:#fff; border:1px solid #e8e0e8; cursor:pointer;
+}
+.opts-cards .oca.on { color:#1e88e5; border-color:#1e88e5; background:rgba(30,136,229,0.04); font-weight:600; }
+
+.q-dots { display:flex; justify-content:center; gap:5px; padding:10rpx 0 0; margin-top:8px; }
+.q-dot { width:8px;height:8px;border-radius:50%;background:#d0c8d0; }
+.q-dot.on { background:#546e7a; width:16px; border-radius:4px; }
+
+.grid { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
+</style>
+</head>
+<body>
+
+<h1>📖 仔细阅读 · 选项 UI 设计稿</h1>
+<p class="sub">3 种选项排版方案 · 短选项 vs 长选项</p>
+
+<div class="grid">
+
+<!-- V1: Inline -->
+<div class="phone">
+  <div class="top"><div class="back">←</div><div class="ttl">仔细阅读</div><div class="badge">精读</div></div>
+  <div class="pass-box">
+    <div class="pass-label">📄 文章</div>
+    <div class="pass-card"><div class="pass-text">In the classic marriage vow, couples promise to stay together in sickness and in health. But a new study finds that the risk of divorce among older couples rises when the wife — not the husband — becomes seriously ill.</div></div>
+    <div class="pass-nav"><div class="pass-dot on"></div><div class="pass-dot"></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="quest-box">
+    <div class="q-label">❓ 第1/5题</div>
+    <div class="q-text">51. How might people often feel when they were misnamed?</div>
+
+    <div class="opt-label">V1 · 行内文本（短选项）</div>
+    <div class="opts-inline">
+      <span class="oi on">A) Unwanted.</span>
+      <span class="oi">B) Unhappy.</span>
+      <span class="oi">C) Confused.</span>
+      <span class="oi">D) Indifferent.</span>
+    </div>
+
+    <div class="opt-label" style="margin-top:16px">行内文本（长选项）</div>
+    <div class="opts-inline">
+      <span class="oi on">A) They may not guarantee a lasting marriage.</span><br>
+      <span class="oi">B) They are as binding as they used to be.</span><br>
+      <span class="oi">C) They are not taken seriously any more.</span><br>
+      <span class="oi">D) They may help couples tide over hard times.</span>
+    </div>
+
+    <div class="q-dots"><div class="q-dot on"></div><div class="q-dot"></div><div class="q-dot"></div><div class="q-dot"></div><div class="q-dot"></div></div>
+  </div>
+  <p style="text-align:center;font-size:10px;color:#999;padding:4px 0">V1 · 行内文本 · 简洁干净 · 短选项并排，长选项换行</p>
+</div>
+
+<!-- V2: Chips -->
+<div class="phone">
+  <div class="top"><div class="back">←</div><div class="ttl">仔细阅读</div><div class="badge">精读</div></div>
+  <div class="pass-box">
+    <div class="pass-label">📄 文章</div>
+    <div class="pass-card"><div class="pass-text">In the classic marriage vow, couples promise to stay together in sickness and in health. But a new study finds that the risk of divorce among older couples rises when the wife — not the husband — becomes seriously ill.</div></div>
+    <div class="pass-nav"><div class="pass-dot on"></div><div class="pass-dot"></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="quest-box">
+    <div class="q-label">❓ 第1/5题</div>
+    <div class="q-text">51. How might people often feel when they were misnamed?</div>
+
+    <div class="opt-label">V2 · 胶囊按钮（短选项）</div>
+    <div class="opts-chips">
+      <span class="oc on">A) Unwanted.</span>
+      <span class="oc">B) Unhappy.</span>
+      <span class="oc">C) Confused.</span>
+      <span class="oc">D) Indifferent.</span>
+    </div>
+
+    <div class="opt-label" style="margin-top:16px">胶囊按钮（长选项）</div>
+    <div class="opts-chips">
+      <span class="oc on">A) They may not guarantee a lasting marriage.</span>
+      <span class="oc">B) They are as binding as they used to be.</span>
+      <span class="oc">C) They are not taken seriously any more.</span>
+      <span class="oc">D) They may help couples tide over hard times.</span>
+    </div>
+
+    <div class="q-dots"><div class="q-dot on"></div><div class="q-dot"></div><div class="q-dot"></div><div class="q-dot"></div><div class="q-dot"></div></div>
+  </div>
+  <p style="text-align:center;font-size:10px;color:#999;padding:4px 0">V2 · 胶囊按钮 · 可点击区域大 · 选中蓝色边框</p>
+</div>
+
+<!-- V3: Cards 2x2 -->
+<div class="phone">
+  <div class="top"><div class="back">←</div><div class="ttl">仔细阅读</div><div class="badge">精读</div></div>
+  <div class="pass-box">
+    <div class="pass-label">📄 文章</div>
+    <div class="pass-card"><div class="pass-text">In the classic marriage vow, couples promise to stay together in sickness and in health. But a new study finds that the risk of divorce among older couples rises when the wife — not the husband — becomes seriously ill.</div></div>
+    <div class="pass-nav"><div class="pass-dot on"></div><div class="pass-dot"></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="quest-box">
+    <div class="q-label">❓ 第1/5题</div>
+    <div class="q-text">51. How might people often feel when they were misnamed?</div>
+
+    <div class="opt-label">V3 · 两列卡片（短选项）</div>
+    <div class="opts-cards">
+      <div class="oca on">A) Unwanted.</div>
+      <div class="oca">B) Unhappy.</div>
+      <div class="oca">C) Confused.</div>
+      <div class="oca">D) Indifferent.</div>
+    </div>
+
+    <div class="opt-label" style="margin-top:16px">两列卡片（长选项）</div>
+    <div class="opts-cards">
+      <div class="oca on">A) They may not guarantee a lasting marriage.</div>
+      <div class="oca">B) They are as binding as they used to be.</div>
+      <div class="oca">C) They are not taken seriously any more.</div>
+      <div class="oca">D) They may help couples tide over hard times.</div>
+    </div>
+
+    <div class="q-dots"><div class="q-dot on"></div><div class="q-dot"></div><div class="q-dot"></div><div class="q-dot"></div><div class="q-dot"></div></div>
+  </div>
+  <p style="text-align:center;font-size:10px;color:#999;padding:4px 0">V3 · 两列卡片 · 选中高亮明显 · 触控区域大</p>
+</div>
+
+</div>
+<p style="margin-top:30px;color:#999;font-size:13px;">👆 选一个你喜欢的方案，我改代码为对应的样式</p>
+</body>
+</html>

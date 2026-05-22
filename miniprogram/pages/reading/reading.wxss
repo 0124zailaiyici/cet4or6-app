@@ -110,14 +110,20 @@
 }
 
 /* 选项区域 - 内联自然排列，不设固定宽度 */
-.qz-opts { }
+.qz-opts { display: flex; flex-wrap: wrap; gap: 16rpx; }
 .qzo {
-  display: inline-block;
-  font-size: 26rpx; color: #4a4a6a; line-height: 2;
-  margin-right: 20rpx; padding: 2rpx 4rpx;
+  width: calc(50% - 8rpx);
+  font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
+  padding: 24rpx 28rpx; border-radius: 24rpx;
+  background: #fff; border: 2rpx solid #e8e0e8;
   transition: 0.15s;
 }
-.qzo.on { color: #1e88e5; font-weight: 700; }
+.qzo.on {
+  color: #1e88e5; font-weight: 600;
+  border-color: #1e88e5;
+  background: rgba(30,136,229,0.04);
+  box-shadow: 0 2rpx 12rpx rgba(30,136,229,0.1);
+}
 .qzo-ref { font-size: 22rpx; color: #8a7a9a; line-height: 1.6; font-style: italic; }
 
 /* dots */
