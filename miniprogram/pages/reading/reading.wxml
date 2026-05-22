@@ -88,7 +88,6 @@
           </view>
 
           <view class="qb-bar">
-            <text class="qb-bar-hint">👆 点击陈述，再选字母匹配</text>
             <view class="qb-bar-letters">
               <text class="qb-l" wx:for="{{availLetters}}" wx:key="*this" wx:for-item="L" data-letter="{{L}}" catchtap="assignLetter">{{L}}</text>
             </view>
