@@ -640,3 +640,5 @@
 .dark-theme .gen-type-switch {
   background: rgba(255,255,255,0.04);
 }
+
+.debug-red { background: #f00 !important; }
