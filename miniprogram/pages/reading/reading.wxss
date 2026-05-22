@@ -110,11 +110,11 @@
 }
 
 /* 选项区域 - 内联自然排列，不设固定宽度 */
-.qz-opts { }
+.qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .qzo {
-  display: block; width: 100%;
+  flex: 1 0 auto; min-width: 40%;
   font-size: 26rpx; color: #4a4a6a; line-height: 1.6;
-  padding: 20rpx 24rpx; margin-bottom: 10rpx;
+  padding: 20rpx 24rpx;
   border-radius: 14rpx;
   background: #fff; border: 2rpx solid #e8e0e8;
   transition: 0.2s;
