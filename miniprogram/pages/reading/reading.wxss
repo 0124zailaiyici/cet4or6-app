@@ -110,9 +110,21 @@
 }
 
 /* 选项区域 - 内联自然排列，不设固定宽度 */
-.qz-opts { display: flex; flex-wrap: wrap; gap: 16rpx; }
-.qz-opts.compact { gap: 12rpx; }
-.qz-opts.compact .qzo { width: auto; flex: 0 0 auto; padding: 16rpx 24rpx; }
+.qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.qzo {
+  width: calc(50% - 6rpx);
+  font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
+  padding: 24rpx 28rpx; border-radius: 24rpx;
+  background: #fff; border: 2rpx solid #e8e0e8;
+  transition: 0.15s;
+}
+.qzo.on {
+  color: #1e88e5; font-weight: 600;
+  border-color: #1e88e5;
+  background: rgba(30,136,229,0.04);
+  box-shadow: 0 2rpx 12rpx rgba(30,136,229,0.1);
+}
+.qz-opts.compact .qzo { width: auto; flex: 0 1 auto; padding: 16rpx 22rpx; white-space: nowrap; }
 .qzo {
   width: calc(50% - 8rpx);
   font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
