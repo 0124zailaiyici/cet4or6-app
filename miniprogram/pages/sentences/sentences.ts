@@ -104,6 +104,7 @@ Page<ISentencesData, ISentencesMethods>({
       topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1
     })
 
+    console.log('[DEBUG] onLoad: setting empty arrays')
     this.setData({
       allSentences: sentences,
       filteredSentences: sentences,
