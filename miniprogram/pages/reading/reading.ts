@@ -28,6 +28,13 @@ interface IReadingData {
   blankAnswers: Record<string, string>
   usedFlags: boolean[]
   activeBlank: string | null
+  // Section B
+  bStmtPage: number
+  bStmtPages: string[][]
+  matchAnswers: Record<number, string>
+  activeStmt: number | null
+  matchCount: number
+  availLetters: string[]
   darkMode: boolean
   optionLetters: string[]
   touchStartX: number
@@ -48,6 +55,12 @@ interface IReadingMethods {
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
+  // Section B
+  formatBPassage(text: string): string[]
+  selectStmt(e: WechatMiniprogram.TouchEvent): void
+  assignLetter(e: WechatMiniprogram.TouchEvent): void
+  removeMatch(e: WechatMiniprogram.TouchEvent): void
+  saveMatch(): void
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -65,6 +78,12 @@ Page<IReadingData, IReadingMethods>({
     darkMode: false,
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
     touchStartX: 0,
+    bStmtPage: 0,
+    bStmtPages: [],
+    matchAnswers: {},
+    activeStmt: null,
+    matchCount: 0,
+    availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
   },
 
   onLoad() {
@@ -80,18 +99,30 @@ Page<IReadingData, IReadingMethods>({
     const id = e.currentTarget.dataset.id as number
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
-      const pages = this.splitPassage(item.passage)
+      const pages = item.sectionType === 'B'
+        ? this.formatBPassage(item.passage)
+        : this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
-      const formatted = pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
-      // 从存储加载已有答案
+      const formatted = item.sectionType !== 'B'
+        ? pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
+        : []
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
+      const matchSaved = saved?.matchAnswers || {}
+      const bPages: string[][] = []
+      if (item.sectionType === 'B' && item.questions.length > 0) {
+        for (let i = 0; i < item.questions.length; i += 5) bPages.push(item.questions.slice(i, i + 5))
+      }
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
         blankAnswers: saved?.blankAnswers || {},
         usedFlags: saved?.usedFlags || [],
         activeBlank: null,
+        bStmtPage: 0, bStmtPages: bPages,
+        matchAnswers: matchSaved,
+        activeStmt: null,
+        availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(matchSaved).includes(l)),
       })
     }
   },
@@ -183,9 +214,11 @@ Page<IReadingData, IReadingMethods>({
     const id = this.data.current?.id
     if (!id) return
     const app = getApp<IAppOption>()
+    const existing = app.globalData.studyData.readingAnswers[id] || {}
     app.globalData.studyData.readingAnswers[id] = {
       blankAnswers: { ...this.data.blankAnswers },
       usedFlags: [...this.data.usedFlags],
+      matchAnswers: existing.matchAnswers || {},
     }
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
@@ -209,8 +242,59 @@ Page<IReadingData, IReadingMethods>({
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
     if (dx > 50) this.prevPassage(); else if (dx < -50) this.nextPassage()
   },
+  // ===== Section B =====
+  formatBPassage(text: string): string[] {
+    if (!text) return ['']
+    const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
+    const pages: string[] = []
+    for (let i = 0; i < parts.length; i++) pages.push(parts[i].trim())
+    return pages.length > 0 ? pages : [text]
+  },
+
+  selectStmt(e: WechatMiniprogram.TouchEvent) {
+    const idx = parseInt(e.currentTarget.dataset.idx as string)
+    this.setData({ activeStmt: this.data.activeStmt === idx ? null : idx })
+  },
+
+  assignLetter(e: WechatMiniprogram.TouchEvent) {
+    const letter = e.currentTarget.dataset.letter as string
+    const stmt = this.data.activeStmt
+    if (stmt === null) return
+    const ma = { ...this.data.matchAnswers }
+    if (ma[stmt] === letter) { delete ma[stmt] }
+    else { ma[stmt] = letter }
+    const avail = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(ma).includes(l))
+    this.setData({ matchAnswers: ma, activeStmt: null, availLetters: avail, matchCount: Object.keys(ma).length })
+    this.saveMatch()
+  },
+
+  removeMatch(e: WechatMiniprogram.TouchEvent) {
+    const idx = parseInt(e.currentTarget.dataset.idx as string)
+    const ma = { ...this.data.matchAnswers }
+    delete ma[idx]
+    const avail = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(ma).includes(l))
+    this.setData({ matchAnswers: ma, availLetters: avail, matchCount: Object.keys(ma).length })
+    this.saveMatch()
+  },
+
+  saveMatch() {
+    const id = this.data.current?.id
+    if (!id) return
+    const app = getApp<IAppOption>()
+    const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
+    existing.matchAnswers = { ...this.data.matchAnswers }
+    app.globalData.studyData.readingAnswers[id] = existing
+    wx.setStorageSync('studyData', app.globalData.studyData)
+  },
+
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent) {
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
-    if (dx > 50) this.prevQ(); else if (dx < -50) this.nextQ()
+    if (this.data.current?.sectionType === 'B') {
+      if (dx > 50 && this.data.bStmtPage > 0) this.setData({ bStmtPage: this.data.bStmtPage - 1 })
+      else if (dx < -50 && this.data.bStmtPage < this.data.bStmtPages.length - 1) this.setData({ bStmtPage: this.data.bStmtPage + 1 })
+    } else {
+      if (dx > 50) this.prevQ()
+      else if (dx < -50) this.nextQ()
+    }
   },
 })

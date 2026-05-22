@@ -71,7 +71,29 @@
           </scroll-view>
         </block>
 
-        <!-- Section B/C：题目 + 选项 -->
+        <!-- Section B：长篇匹配 -->
+        <block wx:elif="{{current.sectionType === 'B'}}">
+          <view class="qz-label">📋 匹配陈述 {{matchCount}}/{{current.questions.length}}</view>
+          <view class="qb-grid" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+            <view class="qb-item {{activeStmt === (i + bStmtPage * 5) ? 'active' : ''}}" wx:for="{{bStmtPages[bStmtPage]}}" wx:key="*this" wx:for-index="i" data-idx="{{i + bStmtPage * 5}}" catchtap="selectStmt">
+              <text class="qbi-num">{{i + bStmtPage * 5 + 1}}</text>
+              <text class="qbi-txt">{{item}}</text>
+              <view class="qbi-ans" wx:if="{{matchAnswers[i + bStmtPage * 5]}}" data-idx="{{i + bStmtPage * 5}}" catchtap="removeMatch">
+                <text>{{matchAnswers[i + bStmtPage * 5]}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="qz-dots">
+            <view class="qzd {{j === bStmtPage ? 'on' : ''}}" wx:for="{{bStmtPages}}" wx:key="*this" wx:for-index="j"></view>
+          </view>
+          <view class="qb-bar">
+            <view class="qb-bar-letters">
+              <text class="qb-l" wx:for="{{availLetters}}" wx:key="*this" wx:for-item="L" data-letter="{{L}}" catchtap="assignLetter">{{L}}</text>
+            </view>
+          </view>
+        </block>
+
+        <!-- Section C：题目 + 选项 -->
         <block wx:else>
           <view class="qz-label">❓ 第{{currentQ + 1}}/{{current.questions.length}}题</view>
           <scroll-view class="qz-q-scroll" scroll-y bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
