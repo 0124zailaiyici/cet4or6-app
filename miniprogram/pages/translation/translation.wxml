@@ -23,7 +23,7 @@
 
   <block wx:else>
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">←</view>
+      <view class="back-btn" catchtap="backToList">返回</view>
       <text class="detail-title">翻译练习</text>
     </view>
 

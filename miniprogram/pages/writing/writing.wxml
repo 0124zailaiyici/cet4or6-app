@@ -70,7 +70,7 @@
     </block>
     <block wx:else>
       <view class="detail-header">
-        <view class="back-btn" catchtap="backToWritingList">←</view>
+        <view class="back-btn" catchtap="backToWritingList">返回</view>
         <text class="detail-title">全文写作</text>
       </view>
       <scroll-view class="w-content" scroll-y>

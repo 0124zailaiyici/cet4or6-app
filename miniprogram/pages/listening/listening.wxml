@@ -28,7 +28,7 @@
 
   <block wx:else>
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">←</view>
+      <view class="back-btn" catchtap="backToList">返回</view>
       <text class="detail-title">{{currentPassage.title}}</text>
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
