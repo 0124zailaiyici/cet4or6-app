@@ -115,15 +115,24 @@ Page<ISentencesData, ISentencesMethods>({
       favoriteIds: app.globalData.studyData.favoriteSentenceIds,
     })
 
-    const validIds = new Set(sentences.map(s => s.id))
-    const cleanFav = this.data.favoriteIds.filter((id: number) => validIds.has(id))
-    const cleanMastered = this.data.masteredIds.filter((id: number) => validIds.has(id))
-    if (cleanFav.length !== this.data.favoriteIds.length || cleanMastered.length !== this.data.masteredIds.length) {
-      this.setData({ favoriteIds: cleanFav, masteredIds: cleanMastered })
-      const app2 = getApp<IAppOption>()
-      app2.globalData.studyData.favoriteSentenceIds = cleanFav
-      app2.globalData.studyData.masteredSentences = cleanMastered
-      wx.setStorageSync('studyData', app2.globalData.studyData)
+    const sentenceHash = sentences.length + '|' + sentences[0]?.english + '|' + sentences[sentences.length - 1]?.english
+    const storedHash = wx.getStorageSync('sentenceHash')
+    if (storedHash !== sentenceHash) {
+      wx.setStorageSync('sentenceHash', sentenceHash)
+      app.globalData.studyData.favoriteSentenceIds = []
+      app.globalData.studyData.masteredSentences = []
+      wx.setStorageSync('studyData', app.globalData.studyData)
+      this.setData({ favoriteIds: [], masteredIds: [] })
+    } else {
+      const validSentenceIds = new Set(sentences.map(s => s.id))
+      const cleanFav = this.data.favoriteIds.filter((id: number) => validSentenceIds.has(id))
+      const cleanMastered = this.data.masteredIds.filter((id: number) => validSentenceIds.has(id))
+      if (cleanFav.length !== this.data.favoriteIds.length || cleanMastered.length !== this.data.masteredIds.length) {
+        this.setData({ favoriteIds: cleanFav, masteredIds: cleanMastered })
+        app.globalData.studyData.favoriteSentenceIds = cleanFav
+        app.globalData.studyData.masteredSentences = cleanMastered
+        wx.setStorageSync('studyData', app.globalData.studyData)
+      }
     }
   },
 
@@ -313,6 +322,8 @@ Page<ISentencesData, ISentencesMethods>({
         generating: false,
       })
       this.doFilter()
+      const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english
+      wx.setStorageSync('sentenceHash', hash)
 
       wx.showToast({ title: `已生成 ${results.length} 个句子`, icon: 'success' })
     } catch (err: any) {
@@ -369,6 +380,8 @@ Page<ISentencesData, ISentencesMethods>({
         parsing: false,
       })
       this.doFilter()
+      const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english
+      wx.setStorageSync('sentenceHash', hash)
 
       wx.showToast({ title: `已导入 ${results.length} 个句子`, icon: 'success' })
     } catch (err: any) {
