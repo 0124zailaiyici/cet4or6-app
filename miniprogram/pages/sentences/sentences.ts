@@ -175,13 +175,16 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   toggleFavorite(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as number
-    console.log('[DEBUG] toggleFavorite id=', id, 'favoriteIds before=', this.data.favoriteIds)
-    const fav = new Set(this.data.favoriteIds)
-    if (fav.has(id)) fav.delete(id)
-    else fav.add(id)
+    const id = e.currentTarget.dataset.id
+    const idNum = Number(id)
+    const before = this.data.favoriteIds
+    console.log('[DBG] id raw:', id, '| type:', typeof id, '| num:', idNum)
+    console.log('[DBG] before:', JSON.stringify(before))
+    const fav = new Set(before)
+    if (fav.has(idNum)) fav.delete(idNum)
+    else fav.add(idNum)
     const favArr = [...fav]
-    console.log('[DEBUG] toggleFavorite after=', favArr)
+    console.log('[DBG] after:', JSON.stringify(favArr))
     this.setData({ favoriteIds: favArr })
 
     const app = getApp<IAppOption>()
