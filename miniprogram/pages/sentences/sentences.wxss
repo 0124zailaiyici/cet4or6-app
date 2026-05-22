@@ -269,14 +269,15 @@
   align-items: center;
   gap: 6rpx;
   font-size: 24rpx;
-  color: #bbb;
   padding: 4rpx 14rpx;
   border-radius: 14rpx;
 }
 
-.sc-fav.on, .sc-master.on {
-  opacity: 0.6;
-}
+.sc-fav { color: #e6a800; }
+.sc-fav.on { color: #bbb; }
+
+.sc-master { color: #388e3c; }
+.sc-master.on { color: #bbb; }
 
 .sc-action-label {
   font-size: 22rpx;
@@ -383,13 +384,13 @@
   align-items: center;
   justify-content: center;
   font-size: 40rpx;
-  color: #d0c0d8;
-  background: rgba(208,192,216,0.1);
 }
 
-.imm-btn.on {
-  opacity: 0.55;
-}
+.imm-btn.fav { color: #e6a800; background: rgba(230,168,0,0.1); }
+.imm-btn.fav.on { color: #bbb; background: rgba(0,0,0,0.04); }
+
+.imm-btn.master { color: #388e3c; background: rgba(56,142,60,0.1); }
+.imm-btn.master.on { color: #bbb; background: rgba(0,0,0,0.04); }
 
 .imm-nav {
   display: flex;
