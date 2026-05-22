@@ -97,12 +97,12 @@
   display: block; margin-bottom: 10rpx;
 }
 
-/* 选项区域 */
-.qz-opts { display: flex; flex-wrap: wrap; gap: 8rpx 0; }
+/* 选项区域 - 内联自然排列，不设固定宽度 */
+.qz-opts { }
 .qzo {
-  width: 50%;
-  font-size: 26rpx; color: #4a4a6a; line-height: 1.6;
-  padding: 6rpx 12rpx;
+  display: inline-block;
+  font-size: 26rpx; color: #4a4a6a; line-height: 1.8;
+  margin-right: 32rpx; margin-bottom: 8rpx;
 }
 .qzo-ref { font-size: 22rpx; color: #8a7a9a; line-height: 1.6; font-style: italic; }
 
