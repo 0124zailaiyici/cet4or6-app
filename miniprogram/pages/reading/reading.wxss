@@ -53,9 +53,8 @@
   padding: 0 20rpx; min-height: 0; overflow: hidden;
 }
 .pz-scroll {
-  flex: 1; overflow: hidden;
+  flex: 1;
   background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx;
-  --scroll-bar-color: transparent;
 }
 .pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; }
 .pz-nav {
@@ -100,7 +99,7 @@
 
 /* 题目滚动区 */
 .qz-q-scroll {
-  flex: 1; overflow: hidden;
+  flex: 1;
   background: #fff; border-radius: 18rpx; padding: 16rpx 24rpx 12rpx;
   box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
