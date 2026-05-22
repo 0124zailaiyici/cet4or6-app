@@ -83,7 +83,7 @@
 .qz-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10rpx; align-content: start; padding: 4rpx 0; }
 .qzc {
   font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
-  padding: 14rpx 20rpx; border-radius: 14rpx; text-align: center;
+  padding: 14rpx 20rpx; border-radius: 14rpx;
   background: rgba(84,110,122,0.04); border: 2rpx solid rgba(84,110,122,0.06);
 }
 

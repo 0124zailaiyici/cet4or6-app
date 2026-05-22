@@ -18,6 +18,7 @@ interface IReadingData {
   passagePage: number
   passagePages: string[]
   blankedPages: string[]
+  formattedPages: string[]
   darkMode: boolean
   choiceLabels: string[]
   optionLetters: string[]
@@ -32,6 +33,8 @@ interface IReadingMethods {
   prevPassage(): void
   nextPassage(): void
   splitPassage(text: string): string[]
+  formatPara(text: string): string
+  escapeHtml(s: string): string
   highlightBlanks(text: string): string
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
@@ -46,6 +49,7 @@ Page<IReadingData, IReadingMethods>({
     passagePage: 0,
     passagePages: [],
     blankedPages: [],
+    formattedPages: [],
     darkMode: false,
     choiceLabels: ['A)', 'B)', 'C)', 'D)'],
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
@@ -66,8 +70,9 @@ Page<IReadingData, IReadingMethods>({
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
       const pages = this.splitPassage(item.passage)
-      const blanked = item.sectionType === 'A' ? pages.map(p => this.highlightBlanks(p)) : []
-      this.setData({ current: item, currentQ: 0, passagePage: 0, passagePages: pages, blankedPages: blanked })
+      const formatted = pages.map(p => this.formatPara(p))
+      const blanked = item.sectionType === 'A' ? formatted.map(p => this.highlightBlanks(p)) : []
+      this.setData({ current: item, currentQ: 0, passagePage: 0, passagePages: pages, blankedPages: blanked, formattedPages: formatted })
     }
   },
 
@@ -78,16 +83,34 @@ Page<IReadingData, IReadingMethods>({
   splitPassage(text: string): string[] {
     if (!text) return ['']
     const clean = text.replace(/\s+/g, ' ').trim()
-    const parts = clean.split(/[.?!]\s*/).filter(s => s.trim().length > 5)
+
+    // 按段落切分：先分裂句子，再将句子分组为段落
+    const sentences = clean.split(/[.?!]\s*/).filter(s => s.trim().length > 5)
+    const paras: string[] = []
+    let currentPara = ''
+    let sentenceCount = 0
+    const startWords = ['however', 'but', 'while', 'in', 'the', 'although', 'according', 'as', 'despite', 'during', 'for', 'if', 'when', 'because', 'since', 'after', 'before', 'until', 'this', 'these', 'that', 'those', 'one', 'two', 'some', 'many', 'most', 'all', 'each', 'every', 'both', 'no', 'there', 'what', 'which', 'who', 'how', 'why', 'where']
+
+    for (const sent of sentences) {
+      const firstWord = sent.trim().toLowerCase().split(/\s+/)[0] || ''
+      const isNewPara = sentenceCount > 0 && (startWords.includes(firstWord) || /^["""""'']/.test(sent.trim()))
+
+      if (isNewPara || sentenceCount >= 3) {
+        if (currentPara) {
+          paras.push(currentPara.trim() + '.')
+          currentPara = ''
+          sentenceCount = 0
+        }
+      }
+      currentPara += (currentPara ? '. ' : '') + sent.trim()
+      sentenceCount++
+    }
+    if (currentPara) paras.push(currentPara.trim() + '.')
+
+    // 按页分割（每页2-3个段落）
     const pages: string[] = []
-    if (parts.length >= 2) {
-      for (let i = 0; i < parts.length; i += 4) {
-        pages.push(parts.slice(i, i + 4).join('. ') + '.')
-      }
-    } else {
-      for (let i = 0; i < clean.length; i += 300) {
-        pages.push(clean.slice(i, i + 300))
-      }
+    for (let i = 0; i < paras.length; i += 2) {
+      pages.push(paras.slice(i, i + 2).join('\n\n'))
     }
     return pages.length > 0 ? pages : [text]
   },
@@ -115,6 +138,15 @@ Page<IReadingData, IReadingMethods>({
     if (this.data.passagePage < this.data.passagePages.length - 1) {
       this.setData({ passagePage: this.data.passagePage + 1 })
     }
+  },
+
+  formatPara(text: string): string {
+    const paras = text.split('\n\n').filter(s => s.trim())
+    return paras.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.escapeHtml(p.trim())}</p>`).join('')
+  },
+
+  escapeHtml(s: string): string {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
   },
 
   highlightBlanks(text: string): string {

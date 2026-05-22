@@ -35,6 +35,7 @@
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
           <scroll-view class="pz-scroll" scroll-y>
             <rich-text wx:if="{{blankedPages.length > 0}}" nodes="{{blankedPages[passagePage]}}"></rich-text>
+            <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
             <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
           </scroll-view>
         <view class="pz-nav" wx:if="{{passagePages.length > 1}}">
