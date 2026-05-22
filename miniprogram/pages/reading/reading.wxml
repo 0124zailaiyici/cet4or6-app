@@ -73,21 +73,24 @@
 
         <!-- Section B：长篇匹配 -->
         <block wx:elif="{{current.sectionType === 'B'}}">
-          <view class="qz-label">📋 匹配陈述 {{matchCount}}/{{current.questions.length}} 已答</view>
-          <scroll-view class="qb-scroll" scroll-y>
-            <view class="qb-item {{activeStmt === i ? 'active' : ''}} {{matchAnswers[i] ? 'done' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" bindtap="selectStmt">
-              <text class="qbi-num">{{i + 1}}</text>
-              <text class="qbi-txt">{{item}}</text>
-              <view class="qbi-ans" wx:if="{{matchAnswers[i]}}">
-                <text>{{matchAnswers[i]}}</text>
+          <view class="qz-label">📋 匹配陈述 {{matchCount}}/{{current.questions.length}} {{bStmtPage + 1}}/{{bStmtPages.length}}页</view>
+          <view class="qb-grid" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+            <view class="qb-item {{activeStmt === (i + bStmtPage * 5) ? 'active' : ''}} {{matchAnswers[i + bStmtPage * 5] ? 'done' : ''}}" wx:for="{{bStmtPages[bStmtPage]}}" wx:key="*this" wx:for-index="i" wx:for-item="s" data-idx="{{i + bStmtPage * 5}}" catchtap="selectStmt">
+              <text class="qbi-num">{{i + bStmtPage * 5 + 1}}</text>
+              <text class="qbi-txt">{{s}}</text>
+              <view class="qbi-ans" wx:if="{{matchAnswers[i + bStmtPage * 5]}}">
+                <text>{{matchAnswers[i + bStmtPage * 5]}}</text>
               </view>
             </view>
-          </scroll-view>
+          </view>
+          <view class="qz-dots">
+            <view class="qzd {{j === bStmtPage ? 'on' : ''}}" wx:for="{{bStmtPages}}" wx:key="*this" wx:for-index="j"></view>
+          </view>
 
           <view class="qb-bar">
-            <text wx:if="{{activeStmt === null}}" class="qb-bar-hint">👆 点击上方陈述开始匹配</text>
+            <text wx:if="{{activeStmt === null}}" class="qb-bar-hint">👆 点击陈述开始匹配</text>
             <block wx:else>
-              <text class="qb-bar-label">第{{activeStmt + 1}}题 → 选段落：</text>
+              <text class="qb-bar-label">第{{activeStmt + 1}}题 → </text>
               <view class="qb-bar-letters">
                 <text class="qb-l" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter">{{l}}</text>
               </view>

@@ -31,6 +31,8 @@ interface IReadingData {
   matchAnswers: Record<number, string>
   matchCount: number
   activeStmt: number | null
+  bStmtPage: number
+  bStmtPages: string[][] // 5条一页
   darkMode: boolean
   optionLetters: string[]
   paraLetters: string[]
@@ -44,6 +46,8 @@ interface IReadingMethods {
   nextQ(): void
   prevPassage(): void
   nextPassage(): void
+  prevStmts(): void
+  nextStmts(): void
   splitPassage(text: string): string[]
   formatBPassage(text: string): string[]
   parseSegments(page: string): ISegment[]
@@ -73,6 +77,8 @@ Page<IReadingData, IReadingMethods>({
     matchAnswers: {},
     matchCount: 0,
     activeStmt: null,
+    bStmtPage: 0,
+    bStmtPages: [],
     darkMode: false,
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
     paraLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
@@ -90,11 +96,12 @@ Page<IReadingData, IReadingMethods>({
 
   formatBPassage(text: string): string[] {
     if (!text) return ['']
-    // 按段落标签分割 (A) B) C) 或 A）B）C）)
+    // 按段落标签 (A) B) C) 或 A）B）C）) 分组，每组作为一个独立段落
     const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
+    // 每页最多3段
     const pages: string[] = []
-    for (let i = 0; i < parts.length; i += 4) {
-      pages.push(parts.slice(i, i + 4).join('\n\n'))
+    for (let i = 0; i < parts.length; i += 3) {
+      pages.push(parts.slice(i, i + 3).map(p => p.trim()).join('\n\n'))
     }
     return pages.length > 0 ? pages : [text]
   },
@@ -112,6 +119,12 @@ Page<IReadingData, IReadingMethods>({
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
       const matchSaved = saved?.matchAnswers || {}
+      const bPages: string[][] = []
+      if (item.sectionType === 'B' && item.questions.length > 0) {
+        for (let i = 0; i < item.questions.length; i += 5) {
+          bPages.push(item.questions.slice(i, i + 5))
+        }
+      }
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
@@ -119,6 +132,7 @@ Page<IReadingData, IReadingMethods>({
         usedFlags: saved?.usedFlags || [],
         matchAnswers: matchSaved,
         matchCount: Object.keys(matchSaved).length,
+        bStmtPage: 0, bStmtPages: bPages,
         activeBlank: null, activeStmt: null,
       })
     }
@@ -233,6 +247,12 @@ Page<IReadingData, IReadingMethods>({
   nextPassage() {
     if (this.data.passagePage < this.data.passagePages.length - 1) this.setData({ passagePage: this.data.passagePage + 1 })
   },
+  prevStmts() {
+    if (this.data.bStmtPage > 0) this.setData({ bStmtPage: this.data.bStmtPage - 1 })
+  },
+  nextStmts() {
+    if (this.data.bStmtPage < this.data.bStmtPages.length - 1) this.setData({ bStmtPage: this.data.bStmtPage + 1 })
+  },
 
   selectStmt(e: WechatMiniprogram.TouchEvent) {
     const sIdx = parseInt(e.currentTarget.dataset.idx as string)
@@ -276,6 +296,12 @@ Page<IReadingData, IReadingMethods>({
   },
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent) {
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
-    if (dx > 50) this.prevQ(); else if (dx < -50) this.nextQ()
+    if (this.data.current?.sectionType === 'B') {
+      if (dx > 50) this.prevStmts()
+      else if (dx < -50) this.nextStmts()
+    } else {
+      if (dx > 50) this.prevQ()
+      else if (dx < -50) this.nextQ()
+    }
   },
 })
