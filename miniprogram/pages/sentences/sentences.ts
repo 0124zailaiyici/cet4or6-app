@@ -89,7 +89,7 @@ Page<ISentencesData, ISentencesMethods>({
 
     let scrollH = 400
     try {
-      const sys = wx.getSystemInfoSync()
+      const sys = (wx as any).getWindowInfo()
       const px = sys.windowWidth / 750
       scrollH = Math.floor(sys.windowHeight - 310 * px - 80 * px - 90 * px - (sys.statusBarHeight || 20) - 10)
       if (scrollH < 200) scrollH = 400
