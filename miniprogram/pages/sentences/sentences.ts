@@ -59,7 +59,7 @@ interface ISentencesMethods {
   doParse(): void
 }
 
-Page<ISentencesData, ISentencesMethods>({
+Page({
   data: {
     allSentences: [],
     filteredSentences: [],
