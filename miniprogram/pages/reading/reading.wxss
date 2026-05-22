@@ -30,114 +30,84 @@
 .rc-arrow { font-size: 36rpx; color: #8a7a9a; }
 
 /* ===== Detail ===== */
-.reading-detail { display: flex; flex-direction: column; height: 100vh; background: #f8f6f0; }
+.detail-root { display: flex; flex-direction: column; height: 100vh; background: #f3eeed; }
 
+/* Topbar */
 .topbar {
   display: flex; align-items: center; gap: 12rpx;
-  padding: 12rpx 28rpx 8rpx; flex-shrink: 0;
+  padding: 14rpx 24rpx 8rpx; flex-shrink: 0;
 }
 .tb-back {
-  width: 48rpx; height: 48rpx; border-radius: 12rpx; background: rgba(84,110,122,0.08);
-  display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: #546e7a;
+  width: 44rpx; height: 44rpx; border-radius: 12rpx; background: rgba(84,110,122,0.08);
+  display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: #546e7a;
 }
-.tb-title { flex: 1; font-size: 30rpx; font-weight: 700; color: #2d2d4e; }
-.tb-badge {
-  font-size: 20rpx; color: #fff; padding: 6rpx 18rpx; border-radius: 14rpx;
-}
+.tb-title { flex: 1; font-size: 28rpx; font-weight: 700; color: #2d2d4e; }
+.tb-badge { font-size: 18rpx; color: #fff; padding: 4rpx 14rpx; border-radius: 12rpx; }
 .tag-A { background: linear-gradient(135deg, #90a4ae, #607d8b); }
 .tag-B { background: linear-gradient(135deg, #64b5f6, #1e88e5); }
 .tag-C { background: linear-gradient(135deg, #81c784, #388e3c); }
 
-/* Passage */
-.passage-wrap {
-  display: flex; flex-direction: column;
-  padding: 6rpx 28rpx; min-height: 0;
-  background: #f8f6f0;
-  height: 45%;
+/* === Passage zone === */
+.pass-zone {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 0 20rpx; min-height: 0; overflow: hidden;
 }
-.pw-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 4rpx;
+.pz-scroll {
+  flex: 1; overflow: hidden;
+  background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx;
 }
-.pw-label { font-size: 22rpx; color: #546e7a; font-weight: 600; }
-.pw-page { font-size: 20rpx; color: #8a7a9a; }
+.pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; }
+.pz-nav {
+  display: flex; justify-content: center; align-items: center;
+  gap: 10rpx; padding: 6rpx 0 4rpx; flex-shrink: 0;
+}
+.pz-dots { display: flex; gap: 6rpx; }
+.pzd { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }
+.pzd.on { background: #546e7a; width: 20rpx; border-radius: 5rpx; }
+.pz-num { font-size: 18rpx; color: #8a7a9a; }
 
-.pw-card {
-  flex: 1;
-  background: #eef1f3;
-  border-radius: 24rpx;
-  overflow: hidden;
-}
-.pw-scroll {
-  height: 100%;
-  padding: 24rpx 28rpx;
-}
-.pw-text {
-  font-size: 28rpx; line-height: 1.9; color: #2d3a4a;
-}
+/* === Divider === */
+.divider { height: 2rpx; background: #dad0ca; flex-shrink: 0; }
 
-.pw-dots {
-  display: flex; justify-content: center; gap: 8rpx; padding: 8rpx 0 4rpx;
-}
-.pwd { width: 12rpx; height: 12rpx; border-radius: 50%; background: #d0c8d0; transition: 0.3s; }
-.pwd.on { background: #546e7a; width: 28rpx; border-radius: 6rpx; }
-
-/* Divider */
-.section-divider {
-  height: 1rpx; background: rgba(84,110,122,0.1); flex-shrink: 0;
+/* === Question zone === */
+.quest-zone {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 0 20rpx 24rpx; min-height: 0; overflow: hidden;
+  background: #f7f0ef;
 }
 
-/* Question */
-.question-wrap {
-  display: flex; flex-direction: column;
-  padding: 6rpx 28rpx 28rpx; min-height: 0;
-  background: #faf5f7;
-  height: 55%;
-}
-.qw-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 4rpx;
-}
-.qw-label { font-size: 22rpx; color: #546e7a; font-weight: 600; }
-.qw-count { font-size: 20rpx; color: #8a7a9a; }
+.qz-label { font-size: 20rpx; font-weight: 600; color: #546e7a; padding: 8rpx 0 4rpx; flex-shrink: 0; }
 
-.qw-card {
-  flex: 1;
-  background: #ffffff;
-  border-radius: 24rpx; padding: 20rpx 28rpx;
-  box-shadow: 0 4rpx 24rpx rgba(84,110,122,0.04);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-.qw-text {
-  font-size: 30rpx; line-height: 1.7; color: #2d2d4e; font-weight: 500;
-  margin-bottom: 12rpx;
+/* 选词填空 chips */
+.qz-chip-scroll { flex: 1; }
+.qz-chips { display: flex; flex-wrap: wrap; gap: 8rpx; padding-bottom: 12rpx; }
+.qzc {
+  font-size: 26rpx; color: #4a4a6a; padding: 10rpx 22rpx;
+  border-radius: 14rpx; background: rgba(84,110,122,0.05); border: 1rpx solid rgba(84,110,122,0.08);
 }
 
-/* Options: 2 column grid */
-.qw-options {
-  display: flex; flex-wrap: wrap; gap: 10rpx;
+/* 题目滚动区 */
+.qz-q-scroll {
+  flex: 1; overflow: hidden;
+  background: #fff; border-radius: 18rpx; padding: 16rpx 24rpx 12rpx;
+  box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
-.qwo-item {
-  width: calc(50% - 5rpx);
-  font-size: 26rpx; color: #4a4a6a;
-  padding: 14rpx 20rpx;
-  border-radius: 14rpx;
-  background: rgba(84,110,122,0.04);
-  border: 2rpx solid rgba(84,110,122,0.06);
-  line-height: 1.5;
+.qz-question {
+  font-size: 28rpx; line-height: 1.7; color: #2d2d4e; font-weight: 500;
+  display: block; margin-bottom: 10rpx;
 }
 
-/* Options chips (Section A) */
-.qw-chips {
-  display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 8rpx;
+/* 选项容器 */
+.qz-opts { display: flex; flex-wrap: wrap; gap: 8rpx; }
+.qzo {
+  width: calc(50% - 4rpx);
+  font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
+  padding: 12rpx 18rpx; border-radius: 12rpx;
+  background: rgba(84,110,122,0.04); border: 1rpx solid rgba(84,110,122,0.06);
 }
-.qwc-item {
-  font-size: 26rpx; color: #4a4a6a; padding: 12rpx 24rpx;
-  border-radius: 14rpx; background: rgba(84,110,122,0.05);
-  border: 2rpx solid rgba(84,110,122,0.08);
-}
+.qzo-ref { font-size: 22rpx; color: #8a7a9a; line-height: 1.6; font-style: italic; }
 
-.qw-dots {
-  display: flex; justify-content: center; gap: 8rpx; padding: 10rpx 0 0;
-}
-.qwd { width: 12rpx; height: 12rpx; border-radius: 50%; background: #d0c8d0; transition: 0.3s; }
-.qwd.on { background: #546e7a; width: 28rpx; border-radius: 6rpx; }
+/* dots */
+.qz-dots { display: flex; justify-content: center; gap: 6rpx; padding: 8rpx 0 0; flex-shrink: 0; }
+.qzd { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }
+.qzd.on { background: #546e7a; width: 20rpx; border-radius: 5rpx; }

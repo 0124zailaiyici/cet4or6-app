@@ -13,75 +13,72 @@
         <view class="rc-badge rc-{{item.sectionType}}">{{item.sectionType === 'A' ? '选词' : item.sectionType === 'B' ? '匹配' : '精读'}}</view>
         <view class="rc-body">
           <text class="rc-title">{{item.title}}</text>
-          <text class="rc-meta">{{item.questions.length}} 题 · {{item.options ? item.options.length : 0}} 选项</text>
+          <text class="rc-meta">{{item.questions.length}}题 · {{item.options.length}}选项</text>
         </view>
         <text class="rc-arrow">›</text>
       </view>
     </view>
   </block>
 
-  <!-- 详情页 -->
+  <!-- ===== 详情页 ===== -->
   <block wx:else>
-    <view class="reading-detail">
+    <view class="detail-root">
 
       <!-- 顶栏 -->
       <view class="topbar">
         <view class="tb-back" catchtap="back">←</view>
-        <text class="tb-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读' : '仔细阅读'}}</text>
-        <view class="tb-badge {{'tag-' + current.sectionType}}">
-          {{current.sectionType === 'A' ? '选词' : current.sectionType === 'B' ? '匹配' : '精读'}}
+        <text class="tb-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读匹配' : '仔细阅读'}}</text>
+        <view class="tb-badge {{'tag-' + current.sectionType}}">{{current.sectionType === 'A' ? '选词' : current.sectionType === 'B' ? '匹配' : '精读'}}</view>
+      </view>
+
+      <!-- 文章区：每4句一页，左右滑动翻页 -->
+      <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
+        <scroll-view class="pz-scroll" scroll-y>
+          <text class="pz-text">{{passagePages[passagePage]}}</text>
+        </scroll-view>
+        <view class="pz-nav" wx:if="{{passagePages.length > 1}}">
+          <view class="pz-dots">
+            <view class="pzd {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></view>
+          </view>
+          <text class="pz-num">{{passagePage + 1}}/{{passagePages.length}}</text>
         </view>
       </view>
 
-      <!-- 文章区 -->
-      <view class="passage-wrap">
-        <view class="pw-header">
-          <text class="pw-label">📄 文章</text>
-          <text class="pw-page">{{passagePage + 1}}/{{passagePages.length}}</text>
-        </view>
-        <view class="pw-card">
-          <scroll-view class="pw-scroll" scroll-y bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-            <text class="pw-text">{{passagePages[passagePage]}}</text>
-          </scroll-view>
-        </view>
-        <view class="pw-dots">
-          <view class="pwd {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></view>
-        </view>
-      </view>
+      <!-- 分割线 -->
+      <view class="divider"></view>
 
-      <!-- 分割 -->
-      <view class="section-divider"></view>
+      <!-- 题目区 -->
+      <view class="quest-zone" wx:if="{{current.sectionType === 'A' || (current.questions && current.questions.length > 0)}}">
 
-      <!-- 题目区（选词填空始终显示，其他需有题目才显示）-->
-      <view class="question-wrap" wx:if="{{current.sectionType === 'A' || (current.questions && current.questions.length > 0)}}">
-
-        <!-- 题型 A：选词填空 → 显示15选项 -->
+        <!-- Section A：选词填空 -->
         <block wx:if="{{current.sectionType === 'A'}}">
-          <view class="qw-header">
-            <text class="qw-label">📋 选词（15选10）</text>
-            <text class="qw-count">{{current.options ? current.options.length : 0}} 词</text>
-          </view>
-          <view class="qw-card">
-            <view class="qw-chips">
-              <text class="qwc-item" wx:for="{{current.options}}" wx:key="*this" wx:for-index="idx">{{idx + 1}}.{{item}}</text>
+          <view class="qz-label">📋 选词（15选10）</view>
+          <scroll-view class="qz-chip-scroll" scroll-y>
+            <view class="qz-chips">
+              <text class="qzc" wx:for="{{current.options}}" wx:key="*this" wx:for-index="i">{{i + 1}}.{{item}}</text>
             </view>
-          </view>
+          </scroll-view>
         </block>
 
-        <!-- 题型 B/C：显示题目 + 选项 -->
+        <!-- Section B/C：题目 + 选项 -->
         <block wx:else>
-          <view class="qw-header">
-            <text class="qw-label">❓ 题目</text>
-            <text class="qw-count">{{currentQ + 1}}/{{current.questions.length}}</text>
-          </view>
-          <view class="qw-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
-            <text class="qw-text">{{current.questions[currentQ]}}</text>
-            <view class="qw-options" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
-              <text class="qwo-item" wx:for="{{current.choices[currentQ]}}" wx:key="*this">{{item}}</text>
+          <view class="qz-label">❓ 第{{currentQ + 1}}/{{current.questions.length}}题</view>
+          <scroll-view class="qz-q-scroll" scroll-y bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+            <text class="qz-question">{{current.questions[currentQ]}}</text>
+
+            <!-- 有 A-D 选项 -->
+            <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
+              <text class="qzo" wx:for="{{current.choices[currentQ]}}" wx:key="*this">{{item}}</text>
             </view>
-          </view>
-          <view class="qw-dots">
-            <view class="qwd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i"></view>
+
+            <!-- Section B 没有选项时显示提示 -->
+            <view class="qz-opts" wx:elif="{{current.sectionType === 'B'}}">
+              <view class="qzo-ref">请将每题匹配到上方文章对应段落（A-N）</view>
+            </view>
+          </scroll-view>
+
+          <view class="qz-dots">
+            <view class="qzd {{i === currentQ ? 'on' : ''}}" wx:for="{{current.questions}}" wx:key="*this" wx:for-index="i"></view>
           </view>
         </block>
 
