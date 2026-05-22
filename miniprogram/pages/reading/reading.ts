@@ -298,8 +298,7 @@ Page<IReadingData, IReadingMethods>({
 
   // ===== Section C =====
   onChoiceTap(e: WechatMiniprogram.TouchEvent) {
-    const full = e.currentTarget.dataset.choice as string
-    const choice = full.trim().charAt(0)
+    const choice = e.currentTarget.dataset.letter as string
     if (!choice) return
     const idx = this.data.currentQ
     const ca = { ...this.data.cAnswers }
@@ -310,7 +309,6 @@ Page<IReadingData, IReadingMethods>({
     }
     this.setData({ cAnswers: ca })
     this.saveCAnswer()
-    wx.showToast({ title: `选了 ${choice} - ${Object.keys(ca).length}`, icon: 'none' })
   },
 
   saveCAnswer() {
