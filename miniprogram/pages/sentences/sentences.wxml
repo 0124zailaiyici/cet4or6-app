@@ -58,8 +58,8 @@
             <view class="sc-bottom">
               <view class="sc-tag">{{item.topic}}</view>
               <view class="sc-actions">
-                <view class="act-btn" data-id="{{item.id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(item.id) !== -1 ? '已收藏' : '收藏'}}</view>
-                <view class="act-btn" data-id="{{item.id}}" catchtap="toggleMaster">{{masteredIds.indexOf(item.id) !== -1 ? '已掌握' : '掌握'}}</view>
+                <view class="act-btn" data-id="{{item.id}}" catchtap="toggleFavorite">收藏</view>
+                <view class="act-btn" data-id="{{item.id}}" catchtap="toggleMaster">掌握</view>
               </view>
             </view>
           </view>
