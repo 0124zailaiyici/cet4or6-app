@@ -37,7 +37,7 @@ interface IReadingData {
   availLetters: string[]
   // Section C
   cAnswers: Record<number, string>
-  cSelectedLetter: string
+  cSelIdx: number
   darkMode: boolean
   optionLetters: string[]
   touchStartX: number
@@ -91,7 +91,7 @@ Page<IReadingData, IReadingMethods>({
     matchCount: 0,
     availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
     cAnswers: {},
-    cSelectedLetter: '',
+    cSelIdx: -1,
   },
 
   onLoad() {
@@ -133,7 +133,10 @@ Page<IReadingData, IReadingMethods>({
         activeStmt: null,
         availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(matchSaved).includes(l)),
         cAnswers: cAnswerSaved,
-        cSelectedLetter: String(cAnswerSaved[0] || ''),
+        cSelIdx: (() => {
+          const sl = String(cAnswerSaved[0] || '')
+          return 'ABCD'.indexOf(sl)
+        })(),
       })
     }
   },
@@ -304,13 +307,15 @@ Page<IReadingData, IReadingMethods>({
     const choice = e.currentTarget.dataset.letter as string
     if (!choice) return
     const idx = this.data.currentQ
+    const ci = 'ABCD'.indexOf(choice)
+    if (ci === -1) return
     const ca = { ...this.data.cAnswers }
     if (ca[idx] === choice) {
       delete ca[idx]
-      this.setData({ cAnswers: ca, cSelectedLetter: '' })
+      this.setData({ cAnswers: ca, cSelIdx: -1 })
     } else {
       ca[idx] = choice
-      this.setData({ cAnswers: ca, cSelectedLetter: choice })
+      this.setData({ cAnswers: ca, cSelIdx: ci })
     }
     this.saveCAnswer()
   },
