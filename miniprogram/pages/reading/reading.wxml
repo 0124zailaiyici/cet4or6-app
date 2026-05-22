@@ -100,7 +100,7 @@
             <text class="qz-question">{{current.questions[currentQ]}}</text>
 
             <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
-              <text class="qzo {{cAnswers[currentQ] && item.indexOf(cAnswers[currentQ]) === 0 ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" data-choice="{{item}}" catchtap="onChoiceTap">{{item}}</text>
+              <text class="qzo {{cAnswers[currentQ] && item.indexOf(cAnswers[currentQ]) === 0 ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" data-choice="{{item}}" bindtap="onChoiceTap">{{item}}</text>
             </view>
 
             <!-- Section B 没有选项时显示提示 -->
