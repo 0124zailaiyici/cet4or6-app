@@ -115,7 +115,7 @@ Page<IStatData, IStatMethods>({
       writingCount: sd.writingRecords.length,
       maxScores,
       monthChecked,
-      monthTotal: daysInMonth,
+      monthTotal: today,
       listenedRatio: Math.min(1, sd.completedListens.length / (today * goal.listen || 1)),
       masteredRatio: Math.min(1, sd.masteredSentences.length / (today * goal.sentence || 1)),
       translationRatio: Math.min(1, sd.translationRecords.length / (today * goal.translation || 1)),
