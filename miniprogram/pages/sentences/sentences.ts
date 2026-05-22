@@ -31,6 +31,7 @@ interface ISentencesData {
   showPasteModal: boolean
   pasteText: string
   parsing: boolean
+  testNum: number
 }
 
 interface ISentencesMethods {
@@ -163,7 +164,8 @@ Page<ISentencesData, ISentencesMethods>({
     if (mastered.has(idNum)) mastered.delete(idNum)
     else mastered.add(idNum)
     const masteredArr = [...mastered]
-    this.setData({ masteredIds: masteredArr, filteredSentences: this.data.filteredSentences.slice() })
+    const testNum = (this.data.testNum || 0) + 1
+    this.setData({ masteredIds: masteredArr, testNum, filteredSentences: this.data.filteredSentences.slice() })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr
@@ -178,7 +180,8 @@ Page<ISentencesData, ISentencesMethods>({
     if (fav.has(idNum)) fav.delete(idNum)
     else fav.add(idNum)
     const favArr = [...fav]
-    this.setData({ favoriteIds: favArr, filteredSentences: this.data.filteredSentences.slice() })
+    const testNum = (this.data.testNum || 0) + 1
+    this.setData({ favoriteIds: favArr, testNum, filteredSentences: this.data.filteredSentences.slice() })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.favoriteSentenceIds = favArr
@@ -347,7 +350,8 @@ Page<ISentencesData, ISentencesMethods>({
         topics,
         topicCounts: topicCounts2,
         showPasteModal: false,
-        parsing: false,
+    parsing: false,
+    testNum: 0,
       })
       this.doFilter()
       const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english

@@ -56,7 +56,7 @@
             </view>
             <view class="sc-chinese">{{item.chinese}}</view>
             <view class="sc-bottom">
-              <view class="sc-tag">{{item.topic}}</view>
+              <view class="sc-tag">{{item.topic}} <text style="color:red">{{testNum}}</text></view>
               <view class="sc-actions">
                 <view class="act-btn {{favoriteIds.indexOf(item.id) >= 0 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(item.id) >= 0 ? '已收藏' : '收藏'}}</view>
                 <view class="act-btn {{masteredIds.indexOf(item.id) >= 0 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">{{masteredIds.indexOf(item.id) >= 0 ? '已掌握' : '掌握'}}</view>
