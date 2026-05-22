@@ -112,7 +112,7 @@
 /* 选项区域 - 内联自然排列，不设固定宽度 */
 .qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .qzo {
-  flex: 1 0 auto; min-width: 40%;
+  flex: 1 0 45%;
   font-size: 26rpx; color: #4a4a6a; line-height: 1.6;
   padding: 20rpx 24rpx;
   border-radius: 14rpx;
