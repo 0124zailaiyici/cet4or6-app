@@ -106,6 +106,9 @@ Page<ISentencesData, ISentencesMethods>({
     sentences.forEach(s => {
       topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1
     })
+    topics.push('已掌握', '未掌握')
+    topicCounts['已掌握'] = 0
+    topicCounts['未掌握'] = sentences.length
 
     this.setData({
       allSentences: sentences,
@@ -127,9 +130,14 @@ Page<ISentencesData, ISentencesMethods>({
 
   doFilter() {
     const q = this.data.searchQuery.toLowerCase().trim()
+    const masteredSet = new Set(this.data.masteredIds)
     let filtered = this.data.allSentences
 
-    if (this.data.currentTopic !== '全部') {
+    if (this.data.currentTopic === '已掌握') {
+      filtered = filtered.filter(s => masteredSet.has(s.id))
+    } else if (this.data.currentTopic === '未掌握') {
+      filtered = filtered.filter(s => !masteredSet.has(s.id))
+    } else if (this.data.currentTopic !== '全部') {
       filtered = filtered.filter(s => s.topic === this.data.currentTopic)
     }
 
@@ -169,7 +177,13 @@ Page<ISentencesData, ISentencesMethods>({
     else mastered.add(idNum)
     const masteredArr = [...mastered]
     const masterTexts = this.data.allSentences.map(s => masteredArr.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
-    this.setData({ masteredIds: masteredArr, masterTexts, filteredSentences: this.data.filteredSentences.slice() })
+    this.setData({
+      masteredIds: masteredArr,
+      masterTexts,
+      topicCounts: { ...this.data.topicCounts, '已掌握': masteredArr.length, '未掌握': this.data.allSentences.length - masteredArr.length },
+      filteredSentences: this.data.filteredSentences.slice(),
+    })
+    this.doFilter()
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr

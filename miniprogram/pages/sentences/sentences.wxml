@@ -24,7 +24,7 @@
       <view class="topic-bar">
         <view class="topic-pill {{currentTopic === item ? 'active' : ''}}" wx:for="{{topics}}" wx:key="*this" data-topic="{{item}}" catchtap="filterByTopic">
           {{item}}<text class="topic-count" wx:if="{{item === '全部'}}">{{allSentences.length}}</text>
-          <text class="topic-count" wx:elif="{{topicCounts[item]}}">{{topicCounts[item]}}</text>
+          <text class="topic-count" wx:elif="{{topicCounts[item] !== undefined}}">{{topicCounts[item]}}</text>
         </view>
       </view>
     </scroll-view>
