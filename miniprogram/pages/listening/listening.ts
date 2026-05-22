@@ -38,6 +38,7 @@ interface IListeningData {
   audioDuration: number
   audioTimeStr: string
   audioDurationStr: string
+  refText: string
 }
 
 interface IListeningMethods {
@@ -133,6 +134,7 @@ Page<IListeningData, IListeningMethods>({
     audioDuration: 0,
     audioTimeStr: '0:00',
     audioDurationStr: '0:00',
+    refText: '',
   },
 
   onLoad() {
@@ -177,18 +179,17 @@ Page<IListeningData, IListeningMethods>({
           ? passage.audioUrl!
           : `${API_BASE}${encodeURI(passage.audioUrl!)}`
         ctx.src = src
-      }
-      if (isAudio) {
+        const ref = passage.sentences.map((s: ISentence) => s.text).join(' ').replace(/\s+/g, ' ')
         this.setData({ mode: 'detail',
           currentPassage: passage, currentIndex: 0, isPlaying: true,
           hardSentences: localHard,
-          audioMode: true, audioTime: 0, audioDuration: 0,
+          audioMode: true, audioTime: 0, audioDuration: 0, refText: ref,
         })
       } else {
         this.setData({ mode: 'detail',
           currentPassage: passage, currentIndex: 0, isPlaying: false,
           hardSentences: localHard,
-          audioMode: false, audioTime: 0, audioDuration: 0,
+          audioMode: false, audioTime: 0, audioDuration: 0, refText: '',
         })
       }
     }

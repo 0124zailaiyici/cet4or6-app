@@ -111,13 +111,6 @@
 }
 .ap-time { display: flex; justify-content: space-between; font-size: 20rpx; color: #8a7a9a; }
 
-.sentence-item.sref {
-  border-color: transparent;
-}
-.sentence-item.sref .se-num {
-  background: rgba(84,110,122,0.06); color: #8a7a9a;
-}
-
 .player-bar.audio-bar {
   justify-content: space-between; gap: 12rpx;
 }
@@ -129,3 +122,11 @@
 .player-bar.audio-bar .pb-play {
   width: 96rpx; height: 96rpx;
 }
+
+/* ===== 整段模式参考文本 ===== */
+.ref-scroll { flex: 1; padding: 0 36rpx 16rpx; }
+.ref-text {
+  background: #fff; border-radius: 18rpx; padding: 24rpx 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(33,150,243,0.04);
+}
+.ref-text text { font-size: 28rpx; line-height: 1.9; color: #2d2d4e; white-space: pre-wrap; word-break: break-all; }

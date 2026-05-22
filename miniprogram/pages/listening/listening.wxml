@@ -51,14 +51,9 @@
         <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">循环</view>
       </view>
 
-      <scroll-view class="sentence-scroll" scroll-y>
-        <view class="sentence-list">
-          <view class="sentence-item sref" wx:for="{{currentPassage.sentences}}" wx:key="start">
-            <view class="se-num">{{index + 1}}</view>
-            <view class="se-text">
-              <text class="se-en">{{item.text}}</text>
-            </view>
-          </view>
+      <scroll-view class="ref-scroll" scroll-y>
+        <view class="ref-text">
+          <text>{{refText}}</text>
         </view>
       </scroll-view>
 

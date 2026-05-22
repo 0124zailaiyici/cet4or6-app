@@ -37,6 +37,7 @@ interface ISentencesMethods {
   clearSearch(): void
   doFilter(): void
   goDict(): void
+  noop(): void
   highlightText(text: string, keywords: string[]): string
   openGenModal(): void
   closeGenModal(): void
@@ -162,6 +163,8 @@ Page<ISentencesData, ISentencesMethods>({
   goDict() {
     wx.navigateTo({ url: '/pages/dictionary/dictionary' })
   },
+
+  noop() {},
 
   highlightText(text: string, keywords: string[]): string {
     let result = text

@@ -54,7 +54,7 @@
   </scroll-view>
 
   <view class="gen-overlay" wx:if="{{showGenModal}}" catchtap="closeGenModal">
-    <view class="gen-modal" catchtap="stopPropagation">
+    <view class="gen-modal" catchtap="noop">
       <view class="gen-header">
         <text class="gen-title">AI 生成语境句子</text>
         <view class="gen-close" catchtap="closeGenModal">✕</view>
