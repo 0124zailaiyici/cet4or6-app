@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>翻译练习 · 可爱风</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+    background: #fdf2f8; display: flex; justify-content: center;
+    padding: 30px 16px; min-height: 100vh;
+  }
+  .phone {
+    width: 375px; border-radius: 36px; overflow: hidden;
+    background: #fff8fc; box-shadow: 0 20px 60px rgba(244,114,182,0.1);
+    position: relative;
+  }
+  .notch {
+    height: 40px; background: #fff8fc; display: flex; align-items: center;
+    justify-content: center; font-size: 9px; color: #f9a8d4;
+    letter-spacing: 4px; font-weight: 600;
+  }
+
+  .page { padding: 0 0 16px; }
+
+  /* ── 萌系配色 ── */
+  .bg-pink  { background: #fce4ec; }
+  .bg-lav   { background: #f3e8ff; }
+  .bg-mint  { background: #e0f2e9; }
+  .bg-peach { background: #fff3e0; }
+  .c-pink   { color: #ec407a; }
+  .c-lav    { color: #ab47bc; }
+  .c-mint   { color: #26a69a; }
+  .c-peach  { color: #ff8a65; }
+  .c-star   { color: #ffca28; }
+
+  /* ── 导航 ── */
+  .nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 20px 10px;
+  }
+  .nav-l { display: flex; align-items: center; gap: 10px; }
+  .nav-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #f9a8d4, #f472b6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; box-shadow: 0 3px 10px rgba(244,114,182,0.2);
+  }
+  .nav-greeting { font-size: 12px; color: #f9a8d4; font-weight: 500; }
+  .nav-title { font-size: 18px; font-weight: 700; color: #4a1a2e; }
+  .nav-r { display: flex; gap: 8px; }
+  .nav-icon {
+    width: 34px; height: 34px; border-radius: 12px;
+    background: rgba(244,114,182,0.06); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .nav-icon:active { transform: scale(0.9); }
+  .nav-icon.on { background: rgba(244,114,182,0.12); }
+
+  /* ── 进度卡片 ── */
+  .progress-card {
+    margin: 0 16px 12px; padding: 16px 18px; border-radius: 20px;
+    background: linear-gradient(135deg, #fce4ec, #fff3e0);
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 4px 16px rgba(244,114,182,0.06);
+  }
+  .pc-ring {
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(#f472b6 0deg 162deg, rgba(244,114,182,0.12) 162deg 360deg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pc-ring-in {
+    width: 42px; height: 42px; border-radius: 50%; background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .pc-num { font-size: 14px; font-weight: 800; color: #ec407a; line-height: 1; }
+  .pc-unit { font-size: 7px; color: #f9a8d4; }
+  .pc-body { flex: 1; }
+  .pc-tip { font-size: 13px; font-weight: 600; color: #4a1a2e; }
+  .pc-sub { font-size: 11px; color: #f9a8d4; margin-top: 2px; }
+  .pc-badge {
+    padding: 4px 12px; border-radius: 14px;
+    background: rgba(244,114,182,0.08); font-size: 11px;
+    color: #ec407a; font-weight: 600; white-space: nowrap;
+
+  }
+
+  /* ── 标签栏 ── */
+  .tabs { display: flex; gap: 4px; padding: 4px 16px; margin-bottom: 6px; }
+  .tab {
+    flex: 1; text-align: center; padding: 8px 0; font-size: 12px; font-weight: 600;
+    border-radius: 14px; color: #f9a8d4; cursor: pointer;
+    transition: all 0.2s; background: transparent;
+  }
+  .tab.active { background: #fff; color: #ec407a; box-shadow: 0 2px 10px rgba(244,114,182,0.06); }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ═══════════ 列表页 ═══════════ */
+
+  .list { padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+
+  .lc {
+    background: #fff; border-radius: 18px; padding: 14px 16px;
+    box-shadow: 0 2px 12px rgba(244,114,182,0.04); cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s;
+    animation: bounceIn 0.4s ease both;
+  }
+  .lc:nth-child(1) { animation-delay: 0ms; }
+  .lc:nth-child(2) { animation-delay: 60ms; }
+  .lc:nth-child(3) { animation-delay: 120ms; }
+  .lc:nth-child(4) { animation-delay: 180ms; }
+  .lc:nth-child(5) { animation-delay: 240ms; }
+  .lc:nth-child(6) { animation-delay: 300ms; }
+  .lc:active { transform: scale(0.97); }
+
+  @keyframes bounceIn {
+    0% { opacity: 0; transform: translateY(12px) scale(0.96); }
+    60% { transform: translateY(-2px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .lc-emoji {
+    width: 36px; height: 36px; border-radius: 14px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .lc-emoji.exam { background: #fce4ec; }
+  .lc-emoji.sim  { background: #f3e8ff; }
+  .lc-emoji.para { background: #e0f2e9; }
+  .lc-emoji.done { background: #fff3e0; }
+
+  .lc-body { flex: 1; min-width: 0; }
+  .lc-text { font-size: 14px; font-weight: 500; color: #4a1a2e; line-height: 1.5; }
+  .lc-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+  .lc-tag {
+    font-size: 9px; font-weight: 600; padding: 1px 8px; border-radius: 6px;
+  }
+  .lc-tag.exam { background: #fce4ec; color: #d81b60; }
+  .lc-tag.sim  { background: #f3e8ff; color: #8e24aa; }
+  .lc-tag.para { background: #e0f2e9; color: #00897b; }
+
+  .lc-right { text-align: right; flex-shrink: 0; }
+  .lc-check {
+    font-size: 18px; line-height: 1;
+  }
+  .lc-check.done { color: #66bb6a; }
+  .lc-check.pending { color: #f9a8d4; }
+  .lc-score { font-size: 11px; font-weight: 700; margin-top: 4px; display: block; }
+  .lc-score.good { color: #66bb6a; }
+  .lc-score.mid  { color: #ffa726; }
+
+  /* ═══════════ 答题页 ═══════════ */
+
+  .d-nav {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px 12px;
+  }
+  .d-back {
+    width: 36px; height: 36px; border-radius: 14px;
+    background: rgba(244,114,182,0.06); display: flex;
+    align-items: center; justify-content: center; cursor: pointer;
+    font-size: 16px; color: #f472b6; transition: transform 0.15s;
+  }
+  .d-back:active { transform: scale(0.9); }
+  .d-title { flex: 1; font-size: 16px; font-weight: 700; color: #4a1a2e; }
+
+  .ai-toggle {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    padding: 4px 12px; border-radius: 16px;
+    background: rgba(244,114,182,0.06); font-size: 11px; color: #f472b6; font-weight: 500;
+  }
+  .ai-toggle .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #66bb6a; transition: background 0.2s;
+  }
+  .ai-toggle.off .dot { background: #e0e0e0; }
+
+  .d-scroll { padding: 0 16px 16px; }
+
+  /* ── 题目气泡 ── */
+  .q-bubble {
+    background: #fff; border-radius: 22px; padding: 20px;
+    box-shadow: 0 4px 16px rgba(244,114,182,0.04);
+    margin-bottom: 12px; position: relative; overflow: hidden;
+  }
+  .q-bubble::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #f9a8d4, #f472b6, #f9a8d4);
+  }
+  .q-hint {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 10px; background: #fce4ec;
+    font-size: 10px; font-weight: 600; color: #d81b60; margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 17px; font-weight: 600; line-height: 1.8; color: #4a1a2e;
+  }
+  .q-keywords {
+    display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px;
+  }
+  .q-kw {
+    font-size: 10px; padding: 2px 10px; border-radius: 8px;
+    background: rgba(38,166,154,0.06); color: #26a69a; font-weight: 500;
+  }
+
+  /* ── 输入 ── */
+  .input-area {
+    width: 100%; min-height: 130px; border-radius: 18px; padding: 16px;
+    border: 2px solid #fce4ec; background: #fff;
+    color: #4a1a2e; font-size: 14px; line-height: 1.7;
+    outline: none; resize: none; transition: border-color 0.2s;
+  }
+  .input-area:focus { border-color: #f9a8d4; box-shadow: 0 0 0 4px rgba(249,168,212,0.08); }
+  .input-area::placeholder { color: #f9a8d4; }
+  .input-foot { display: flex; justify-content: flex-end; padding: 4px 6px 0; }
+  .wc { font-size: 11px; color: #f9a8d4; }
+
+  /* ── 提交 ── */
+  .btn-go {
+    width: 100%; height: 50px; border-radius: 25px; border: none;
+    background: linear-gradient(135deg, #f9a8d4, #f472b6);
+    color: #fff; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer; box-shadow: 0 6px 20px rgba(244,114,182,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-bottom: 16px;
+  }
+  .btn-go:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(244,114,182,0.15); }
+
+  /* ── 结果 ── */
+  .result-card {
+    background: #fff; border-radius: 22px; padding: 24px 20px;
+    box-shadow: 0 4px 20px rgba(244,114,182,0.04);
+    margin-bottom: 12px;
+    animation: pop 0.45s ease;
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+    70% { transform: scale(1.01) translateY(-2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .rc-top { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+
+  .rc-stars {
+    width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(#f472b6 0deg 306deg, #fce4ec 306deg 360deg);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .rc-stars-in {
+    width: 62px; height: 62px; border-radius: 50%; background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .rc-star-num { font-size: 26px; font-weight: 800; color: #ec407a; line-height: 1; }
+  .rc-star-lb { font-size: 9px; color: #f9a8d4; margin-top: 1px; }
+
+  .rc-starlets { display: flex; gap: 2px; margin-top: 2px; }
+  .rc-starlets .s { font-size: 12px; }
+
+  .rc-quickie { flex: 1; }
+  .rc-q-item { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+  .rc-ql { color: #f9a8d4; }
+  .rc-qr { font-weight: 700; }
+  .rc-qr.good { color: #66bb6a; }
+  .rc-qr.mid  { color: #ffa726; }
+  .rc-qr.low  { color: #ef5350; }
+
+  .rc-dims { margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .rc-dim {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 4px;
+  }
+  .rc-dl { width: 36px; font-size: 11px; color: #f9a8d4; text-align: right; flex-shrink: 0; }
+  .rc-dbar { flex: 1; height: 10px; border-radius: 5px; background: #fce4ec; overflow: hidden; }
+  .rc-dfill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+  .rc-dfill.good { background: linear-gradient(90deg, #81c784, #66bb6a); }
+  .rc-dfill.mid  { background: linear-gradient(90deg, #ffcc80, #ffa726); }
+  .rc-dfill.low  { background: linear-gradient(90deg, #ef9a9a, #ef5350); }
+  .rc-dn { width: 24px; font-size: 11px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+  .rc-block { margin-bottom: 12px; }
+  .rc-block-title { font-size: 10px; font-weight: 600; color: #f9a8d4; margin-bottom: 6px; letter-spacing: 0.5px; }
+
+  .rc-suggest {
+    background: #fce4ec; border-radius: 14px; padding: 12px 14px;
+    font-size: 13px; line-height: 1.7; color: #6d3352;
+  }
+  .rc-suggest b { color: #d81b60; }
+
+  .rc-ref {
+    background: #f3e8ff; border-radius: 14px; padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .rc-ref-t { flex: 1; font-size: 13px; line-height: 1.7; color: #6b3d7a; }
+  .rc-ref-play {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(171,71,188,0.06); display: flex; align-items: center;
+    justify-content: center; cursor: pointer; font-size: 13px; color: #ab47bc;
+    transition: background 0.15s;
+  }
+  .rc-ref-play:active { background: rgba(171,71,188,0.12); }
+
+  /* ── 重做 ── */
+  .btn-retry {
+    width: 100%; height: 44px; border-radius: 22px;
+    border: 2px solid #fce4ec; color: #f472b6;
+    font-size: 13px; font-weight: 600; display: flex;
+    align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer; background: transparent;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 16px;
+  }
+  .btn-retry:active { background: #fce4ec; border-color: #f9a8d4; }
+
+  /* ── 历史 ── */
+  .h-title { font-size: 12px; font-weight: 600; color: #4a1a2e; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+  .h-title .hstar { color: #ffca28; }
+
+  .h-chart { display: flex; align-items: flex-end; gap: 6px; height: 32px; margin-bottom: 12px; }
+  .h-bar {
+    flex: 1; border-radius: 4px 4px 0 0; position: relative;
+    transition: height 0.3s; cursor: pointer;
+  }
+  .h-bar .hb-l { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 700; color: #f9a8d4; white-space: nowrap; }
+
+  .h-items { display: flex; flex-direction: column; }
+  .h-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid rgba(244,114,182,0.04);
+  }
+  .h-item:last-child { border-bottom: none; }
+  .h-idx { font-size: 11px; color: #f9a8d4; width: 30px; flex-shrink: 0; font-weight: 600; }
+  .h-body { flex: 1; min-width: 0; }
+  .h-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+  .h-date { font-size: 10px; color: #f9a8d4; }
+  .h-ans { font-size: 12px; color: #b07a96; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .h-sc {
+    font-size: 13px; font-weight: 700; padding: 1px 8px; border-radius: 6px;
+  }
+  .h-sc.good { color: #66bb6a; background: rgba(102,187,106,0.06); }
+  .h-sc.mid  { color: #ffa726; background: rgba(255,167,38,0.06); }
+  .h-sc.low  { color: #ef5350; background: rgba(239,83,80,0.06); }
+
+  /* ── 装饰 ── */
+  .deco-dots {
+    display: flex; gap: 4px; padding: 8px 20px 4px; justify-content: center;
+  }
+  .deco-dots span {
+    width: 5px; height: 5px; border-radius: 50%; background: rgba(249,168,212,0.15);
+  }
+  .deco-dots span:nth-child(2) { background: rgba(249,168,212,0.25); }
+  .deco-dots span:nth-child(3) { background: rgba(249,168,212,0.15); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch">✧ TRANSLATION CUTE</div>
+  <div class="page">
+
+    <!-- ═══ 导航 ═══ -->
+    <div class="nav">
+      <div class="nav-l">
+        <div class="nav-avatar">🌟</div>
+        <div>
+          <div class="nav-greeting">✨ 下午好</div>
+          <div class="nav-title">翻译练习</div>
+        </div>
+      </div>
+      <div class="nav-r">
+        <div class="nav-icon">🔔</div>
+        <div class="nav-icon on">❤️</div>
+      </div>
+    </div>
+
+    <!-- ═══ 进度 ═══ -->
+    <div class="progress-card">
+      <div class="pc-ring"><div class="pc-ring-in"><span class="pc-num">5</span><span class="pc-unit">/11</span></div></div>
+      <div class="pc-body">
+        <div class="pc-tip">小可爱今天完成了 5 题 ✨</div>
+        <div class="pc-sub">继续加油，离目标还有 6 题</div>
+      </div>
+      <span class="pc-badge">45%</span>
+    </div>
+
+    <!-- ═══ 标签 ═══ -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('tab-list')">📚 题目</div>
+      <div class="tab" onclick="switchTab('tab-detail')">✏️ 答题</div>
+    </div>
+
+    <!-- ════════════════ 列表 ════════════════ -->
+    <div id="tab-list" class="section active">
+      <div class="list">
+        <div class="lc">
+          <div class="lc-emoji exam">🇨🇳</div>
+          <div class="lc-body">
+            <div class="lc-text">中国是一个历史悠久、文化丰富的国家。</div>
+            <div class="lc-tags"><span class="lc-tag exam">真题</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="lc-check done">✅</div>
+            <span class="lc-score good">92</span>
+          </div>
+        </div>
+        <div class="lc">
+          <div class="lc-emoji sim">🌿</div>
+          <div class="lc-body">
+            <div class="lc-text">越来越多的人意识到环境保护的重要性。</div>
+            <div class="lc-tags"><span class="lc-tag sim">模拟</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="lc-check done">✅</div>
+            <span class="lc-score good">88</span>
+          </div>
+        </div>
+        <div class="lc">
+          <div class="lc-emoji exam">🧧</div>
+          <div class="lc-body">
+            <div class="lc-text">春节是中国最重要的传统节日，家人会聚在一起吃年夜饭。</div>
+            <div class="lc-tags"><span class="lc-tag exam">真题</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="lc-check pending">⏳</div>
+          </div>
+        </div>
+        <div class="lc">
+          <div class="lc-emoji exam">📱</div>
+          <div class="lc-body">
+            <div class="lc-text">随着互联网的发展，移动支付在中国变得越来越普遍。</div>
+            <div class="lc-tags"><span class="lc-tag exam">真题</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="lc-check done">✅</div>
+            <span class="lc-score good">85</span>
+          </div>
+        </div>
+        <div class="lc">
+          <div class="lc-emoji sim">🎓</div>
+          <div class="lc-body">
+            <div class="lc-text">据报道，今年参加高考的学生人数创下了历史新高。</div>
+            <div class="lc-tags"><span class="lc-tag sim">模拟</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="lc-check pending">⏳</div>
+          </div>
+        </div>
+        <div class="lc">
+          <div class="lc-emoji para">🦁</div>
+          <div class="lc-body">
+            <div class="lc-text">舞狮作为中国传统民间表演已有2000多年历史…</div>
+            <div class="lc-tags"><span class="lc-tag para">段落</span><span class="lc-tag exam">真题</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="lc-check pending">⏳</div>
+          </div>
+        </div>
+      </div>
+      <div class="deco-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- ════════════════ 答题 ════════════════ -->
+    <div id="tab-detail" class="section">
+      <div class="d-nav">
+        <div class="d-back" onclick="switchTab('tab-list')">←</div>
+        <div class="d-title">翻译 · 真题</div>
+        <div class="ai-toggle" onclick="this.classList.toggle('off')">
+          <span class="dot"></span> AI
+        </div>
+      </div>
+
+      <div class="d-scroll">
+
+        <!-- 题目气泡 -->
+        <div class="q-bubble">
+          <div class="q-hint">📝 把它翻成英文吧</div>
+          <div class="q-text">中国是一个历史悠久、文化丰富的国家。</div>
+          <div class="q-keywords">
+            <span class="q-kw">long history</span>
+            <span class="q-kw">rich culture</span>
+          </div>
+        </div>
+
+        <!-- 输入 -->
+        <textarea class="input-area" placeholder="写下你的翻译…" style="margin-bottom:12px" oninput="document.getElementById('wc').textContent=this.value.length"></textarea>
+        <div class="input-foot" style="margin-top:-8px;margin-bottom:12px"><span class="wc"><span id="wc">0</span> / 500</span></div>
+
+        <!-- 提交 -->
+        <button class="btn-go" onclick="showResult()">✨ 提交评分</button>
+
+        <!-- 结果 -->
+        <div id="result" style="display:none">
+          <div class="result-card">
+            <div class="rc-top">
+              <div class="rc-stars">
+                <div class="rc-stars-in">
+                  <span class="rc-star-num">85</span>
+                  <span class="rc-star-lb">分</span>
+                  <div class="rc-starlets"><span class="s c-star">★</span><span class="s c-star">★</span><span class="s c-star">★</span><span class="s" style="color:#fce4ec">★</span><span class="s" style="color:#fce4ec">★</span></div>
+                </div>
+              </div>
+              <div class="rc-quickie">
+                <div class="rc-q-item"><span class="rc-ql">最高</span><span class="rc-qr good">92</span></div>
+                <div class="rc-q-item"><span class="rc-ql">最低</span><span class="rc-qr low">62</span></div>
+                <div class="rc-q-item"><span class="rc-ql">进步</span><span class="rc-qr good">↗ +23</span></div>
+              </div>
+            </div>
+
+            <div class="rc-dims">
+              <div class="rc-dim">
+                <span class="rc-dl">词汇</span>
+                <div class="rc-dbar"><div class="rc-dfill mid" style="width:70%"></div></div>
+                <span class="rc-dn" style="color:#ffa726">70</span>
+              </div>
+              <div class="rc-dim">
+                <span class="rc-dl">语法</span>
+                <div class="rc-dbar"><div class="rc-dfill good" style="width:85%"></div></div>
+                <span class="rc-dn" style="color:#66bb6a">85</span>
+              </div>
+              <div class="rc-dim">
+                <span class="rc-dl">语义</span>
+                <div class="rc-dbar"><div class="rc-dfill good" style="width:92%"></div></div>
+                <span class="rc-dn" style="color:#66bb6a">92</span>
+              </div>
+              <div class="rc-dim">
+                <span class="rc-dl">表达</span>
+                <div class="rc-dbar"><div class="rc-dfill mid" style="width:78%"></div></div>
+                <span class="rc-dn" style="color:#ffa726">78</span>
+              </div>
+            </div>
+
+            <div class="rc-block">
+              <div class="rc-block-title">💡 修改建议</div>
+              <div class="rc-suggest">
+                关键词 <b>long history</b> 和 <b>rich culture</b> 都用到啦～ 建议把 <b>is a country with</b> 换成 <b>boasts</b>，表达会更地道哦 ✨
+              </div>
+            </div>
+
+            <div class="rc-block">
+              <div class="rc-block-title">📖 参考译文</div>
+              <div class="rc-ref">
+                <span class="rc-ref-t">China is a country with a long history and rich culture.</span>
+                <span class="rc-ref-play">▶</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-retry">🔄 重新翻译</div>
+
+          <div class="h-title"><span class="hstar">⭐</span> 历史记录 · 4 次</div>
+
+          <div class="h-chart">
+            <div class="h-bar" style="height:14px;background:#ef9a9a"><span class="hb-l">62</span></div>
+            <div class="h-bar" style="height:20px;background:#ffcc80"><span class="hb-l">70</span></div>
+            <div class="h-bar" style="height:22px;background:#ffcc80"><span class="hb-l">73</span></div>
+            <div class="h-bar" style="height:28px;background:#a5d6a7"><span class="hb-l">85</span></div>
+          </div>
+
+          <div class="h-items">
+            <div class="h-item">
+              <span class="h-idx">#4</span>
+              <div class="h-body">
+                <div class="h-head"><span class="h-date">05·22</span><span class="h-sc good">85</span></div>
+                <div class="h-ans">China is a country with a long history and rich culture.</div>
+              </div>
+            </div>
+            <div class="h-item">
+              <span class="h-idx">#3</span>
+              <div class="h-body">
+                <div class="h-head"><span class="h-date">05·20</span><span class="h-sc mid">73</span></div>
+                <div class="h-ans">China is a nation which has a long history and rich culture.</div>
+              </div>
+            </div>
+            <div class="h-item">
+              <span class="h-idx">#2</span>
+              <div class="h-body">
+                <div class="h-head"><span class="h-date">05·18</span><span class="h-sc mid">70</span></div>
+                <div class="h-ans">China is a country with long history and rich cultural.</div>
+              </div>
+            </div>
+            <div class="h-item">
+              <span class="h-idx">#1</span>
+              <div class="h-body">
+                <div class="h-head"><span class="h-date">05·15</span><span class="h-sc low">62</span></div>
+                <div class="h-ans">China have long history and rich culture.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+function showResult() {
+  const r = document.getElementById('result');
+  if (r.style.display === 'none' || !r.style.display) { r.style.display = 'block'; r.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+</script>
+</body>
+</html>

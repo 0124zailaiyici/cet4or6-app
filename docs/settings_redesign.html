@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>设置页原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e; font-family: -apple-system, sans-serif;
+  display: flex; justify-content: center; align-items: center; min-height: 100vh;
+  gap: 24px; padding: 20px; flex-wrap: wrap;
+}
+
+.phone {
+  width: 375px; height: 780px; border-radius: 40px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  display: flex; flex-direction: column;
+}
+
+/* Light mode */
+.phone.light {
+  background: #fff5f7;
+}
+.phone.light .header { background: linear-gradient(135deg, #ffb3c6, #ff8fab); }
+.phone.light .header h1 { color: #fff; }
+.phone.light .header p { color: rgba(255,255,255,0.8); }
+.phone.light .card { background: #fff; box-shadow: 0 4rpx 20rpx rgba(255,158,181,0.1); }
+.phone.light .item { border-bottom-color: #fff0f3; }
+.phone.light .label { color: #2d2d4e; }
+.phone.light .num { color: #2d2d4e; }
+.phone.light .btn {
+  background: #fff0f3; color: #ff6b8a;
+}
+.phone.light .btn:active { background: #ffe0e6; }
+.phone.light .toggle-track { background: #fff0f3; }
+.phone.light .toggle-track.on { background: #ff6b8a; }
+.phone.light .tip { background: #fff; box-shadow: 0 2px 12px rgba(255,158,181,0.08); }
+.phone.light .tip-text { color: #8a7a9a; }
+.phone.light .badge { background: #fff0f3; color: #8a7a9a; }
+
+/* Dark mode */
+.phone.dark {
+  background: #12121f;
+}
+.phone.dark .header { background: linear-gradient(135deg, #2a2a4a, #1a1a38); }
+.phone.dark .header h1 { color: #e0d0e8; }
+.phone.dark .header p { color: #a090b0; }
+.phone.dark .card { background: #1e1e38; box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.3); }
+.phone.dark .item { border-bottom-color: #2a2a4a; }
+.phone.dark .label { color: #e0d0e8; }
+.phone.dark .num { color: #e0d0e8; }
+.phone.dark .btn { background: #2a2a4a; color: #ff8fab; }
+.phone.dark .btn:active { background: #3a3a5a; }
+.phone.dark .toggle-track { background: #2a2a4a; }
+.phone.dark .toggle-track.on { background: #ff6b8a; }
+.phone.dark .tip { background: #1e1e38; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.phone.dark .tip-text { color: #a090b0; }
+.phone.dark .badge { background: #2a2a4a; color: #a090b0; }
+
+/* Shared styles */
+.phone { position: relative; }
+.header {
+  padding: 48px 24px 24px; flex-shrink: 0;
+}
+.header h1 { font-size: 28px; font-weight: 800; }
+.header p { font-size: 14px; margin-top: 4px; }
+
+.content {
+  flex: 1; padding: 16px 16px 8px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.card {
+  border-radius: 16px; padding: 4px 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid;
+  transition: border-color 0.3s;
+}
+.item:last-child { border-bottom: none; }
+
+.item-left { display: flex; align-items: center; gap: 12px; }
+.icon { font-size: 20px; }
+.label { font-size: 16px; font-weight: 600; transition: color 0.3s; }
+
+.controls { display: flex; align-items: center; gap: 10px; }
+.btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; cursor: pointer;
+  transition: background 0.2s, color 0.3s;
+  user-select: none;
+}
+.num {
+  font-size: 22px; font-weight: 700; min-width: 36px;
+  text-align: center; transition: color 0.3s;
+}
+
+/* Toggle */
+.toggle-row { justify-content: space-between; }
+.toggle-track {
+  width: 52px; height: 28px; border-radius: 14px;
+  position: relative; cursor: pointer;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+.toggle-knob {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #fff; position: absolute;
+  top: 2px; left: 2px;
+  transition: left 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.toggle-track.on .toggle-knob { left: 26px; }
+.toggle-track .moon { display: none; }
+.toggle-track.on .sun { display: none; }
+.toggle-track.on .moon { display: block; }
+.toggle-track .toggle-icon {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 12px; z-index: 1; pointer-events: none;
+}
+.toggle-track .toggle-icon.sunny { left: 6px; display: block; }
+.toggle-track .toggle-icon.moon { right: 6px; display: none; }
+.toggle-track.on .toggle-icon.sunny { display: none; }
+.toggle-track.on .toggle-icon.moon { display: block; }
+
+/* Badge */
+.badge {
+  font-size: 11px; padding: 3px 10px; border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Tip */
+.tip {
+  border-radius: 14px; padding: 14px 18px;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.tip-text { font-size: 13px; line-height: 1.5; transition: color 0.3s; }
+
+/* Section title */
+.section-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #8a7a9a; padding: 4px 20px 0;
+}
+
+/* Preview bar */
+.preview-bar {
+  display: flex; gap: 8px; padding: 8px 16px 12px; flex-shrink: 0;
+}
+.preview-btn {
+  flex: 1; padding: 10px; border-radius: 10px;
+  text-align: center; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: 0.2s;
+}
+.preview-btn.light-btn {
+  background: #fff0f3; color: #ff6b8a;
+  border: 2px solid #ffd9e0;
+}
+.preview-btn.dark-btn {
+  background: #2a2a4a; color: #a090b0;
+  border: 2px solid #3a3a5a;
+}
+.preview-btn.active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+<!-- Light mode phone -->
+<div class="phone light" id="lightPhone">
+  <div class="header">
+    <h1>学习目标</h1>
+    <p>设定每日学习任务量</p>
+  </div>
+  <div class="content">
+    <div class="section-title">每日任务</div>
+    <div class="card">
+      <div class="item">
+        <div class="item-left"><span class="icon">🎵</span><span class="label">听力精听</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">1</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-left"><span class="icon">💬</span><span class="label">语境句子</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">5</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-left"><span class="icon">🌟</span><span class="label">翻译练习</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">1</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-left"><span class="icon">✨</span><span class="label">写作练习</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">1</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">偏好</div>
+    <div class="card">
+      <div class="item toggle-row">
+        <div class="item-left"><span class="icon">🌙</span><span class="label">暗黑模式</span></div>
+        <div class="toggle-track" id="lightToggle">
+          <span class="toggle-icon sunny">☀️</span>
+          <span class="toggle-icon moon">🌙</span>
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-text">💡 建议每天完成：1 篇听力 + 5 个句子 + 1 篇翻译 + 1 篇写作</div>
+    </div>
+  </div>
+</div>
+
+<!-- Dark mode phone -->
+<div class="phone dark" id="darkPhone">
+  <div class="header">
+    <h1>学习目标</h1>
+    <p>设定每日学习任务量</p>
+  </div>
+  <div class="content">
+    <div class="section-title">每日任务</div>
+    <div class="card">
+      <div class="item">
+        <div class="item-left"><span class="icon">🎵</span><span class="label">听力精听</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">1</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-left"><span class="icon">💬</span><span class="label">语境句子</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">5</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-left"><span class="icon">🌟</span><span class="label">翻译练习</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">1</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-left"><span class="icon">✨</span><span class="label">写作练习</span></div>
+        <div class="controls">
+          <div class="btn">−</div>
+          <span class="num">1</span>
+          <div class="btn">+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">偏好</div>
+    <div class="card">
+      <div class="item toggle-row">
+        <div class="item-left"><span class="icon">🌙</span><span class="label">暗黑模式</span></div>
+        <div class="toggle-track on" id="darkToggle">
+          <span class="toggle-icon sunny">☀️</span>
+          <span class="toggle-icon moon">🌙</span>
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-text">💡 建议每天完成：1 篇听力 + 5 个句子 + 1 篇翻译 + 1 篇写作</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Toggle interaction
+document.querySelectorAll('.toggle-track').forEach(t => {
+  t.addEventListener('click', () => t.classList.toggle('on'))
+})
+</script>
+</body>
+</html>

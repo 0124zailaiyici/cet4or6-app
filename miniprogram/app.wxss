@@ -17,7 +17,7 @@ page, .page {
   --text-secondary: #a090b0;
   --card-bg: #1e1e38;
   --tag-bg: #2a2a4a;
-  --pink: #ff6b8a;
+  --pink: #ff8fab;
 }
 
 page {
@@ -34,28 +34,200 @@ page {
 
 view, text, scroll-view { box-sizing: border-box; }
 
-/* ==================== Dark overrides ==================== */
+/* ==================== Dark mode ==================== */
 .dark-theme.page, .page.dark-theme {
   background-color: #12121f !important;
   color: #e0d0e8 !important;
 }
-.dark-theme .card, .dark-theme .module-card, .dark-theme .stats-section,
-.dark-theme .checkin-card, .dark-theme .s-card, .dark-theme .tcard,
-.dark-theme .lcard, .dark-theme .wcard, .dark-theme .stat-box,
-.dark-theme .goal-card, .dark-theme .search-box, .dark-theme .player,
-.dark-theme .d-sbox, .dark-theme .set-card, .dark-theme .calendar {
+
+/* ---- Global cards ---- */
+.dark-theme .card, .dark-theme .lcard, .dark-theme .rcard,
+.dark-theme .fcard, .dark-theme .hcard, .dark-theme .search-box,
+.dark-theme .goal-card, .dark-theme .tip-block, .dark-theme .prompt-card,
+.dark-theme .practice-area, .dark-theme .result-box, .dark-theme .detail-root,
+.dark-theme .rh-header, .dark-theme .pass-zone, .dark-theme .quest-zone,
+.dark-theme .qz-c-card, .dark-theme .audio-player, .dark-theme .page-view,
+.dark-theme .ref-scroll, .dark-theme .ref-text, .dark-theme .sentence-item,
+.dark-theme .stat-card, .dark-theme .st-card, .dark-theme .st-card-item,
+.dark-theme .page-header, .dark-theme .hero-actions, .dark-theme .stats-banner,
+.dark-theme .module-card, .dark-theme .stat-box, .dark-theme .set-card,
+.dark-theme .player, .dark-theme .d-sbox, .dark-theme .calendar,
+.dark-theme .s-card, .dark-theme .imm-card, .dark-theme .gen-modal,
+.dark-theme .topic-section, .dark-theme .mode-bar, .dark-theme .result-card,
+.dark-theme .q-bubble, .dark-theme .input-area, .dark-theme .progress-card,
+.dark-theme .detail-header, .dark-theme .s-header, .dark-theme .st-header,
+.dark-theme .f-header, .dark-theme .w-header, .dark-theme .l-header,
+.dark-theme .calendar-card, .dark-theme .section-card {
   background-color: #1e1e38 !important;
   box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.3) !important;
 }
-.dark-theme .page-title, .dark-theme .mc-name, .dark-theme .s-card .sc-english,
-.dark-theme .scard-text, .dark-theme .tcard-cn, .dark-theme .lcard-name,
-.dark-theme .wcard-pat, .dark-theme .cc-label, .dark-theme .stat-num,
-.dark-theme .set-label, .dark-theme .set-num, .dark-theme .cal-month {
+
+/* ---- Page headers / gradients ---- */
+.dark-theme .hero-bg, .dark-theme .lh-bg, .dark-theme .sth-bg,
+.dark-theme .wh-bg, .dark-theme .fh-bg, .dark-theme .sh-bg,
+.dark-theme .rh-bg {
+  background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important;
+}
+
+/* ---- Text: primary ---- */
+.dark-theme .page-title, .dark-theme .page-subtitle,
+.dark-theme .hero-title, .dark-theme .hero-greeting, .dark-theme .hero-text,
+.dark-theme .detail-title, .dark-theme .section-title, .dark-theme .section-subtitle,
+.dark-theme .mc-name, .dark-theme .lcard-name, .dark-theme .rc-title,
+.dark-theme .lc-title, .dark-theme .lh-title, .dark-theme .sh-title,
+.dark-theme .sth-title, .dark-theme .fh-title, .dark-theme .wh-title,
+.dark-theme .rh-title, .dark-theme .tb-title, .dark-theme .sc-english,
+.dark-theme .imm-english, .dark-theme .empty-title, .dark-theme .gen-title,
+.dark-theme .scard-text, .dark-theme .tcard-cn, .dark-theme .wcard-pat,
+.dark-theme .cc-label, .dark-theme .cal-month, .dark-theme .set-label,
+.dark-theme .set-num, .dark-theme .stat-num, .dark-theme .st-num,
+.dark-theme .goal-label, .dark-theme .goal-num, .dark-theme .p-stem,
+.dark-theme .qz-question, .dark-theme .qz-label, .dark-theme .se-en,
+.dark-theme .pz-text, .dark-theme .pc-tip, .dark-theme .pc-num,
+.dark-theme .d-title, .dark-theme .q-text, .dark-theme .input-field,
+.dark-theme .h-title, .dark-theme .sc-title, .dark-theme .cal-title,
+.dark-theme .word, .dark-theme .def-text, .dark-theme .d-nav,
+.dark-theme .nav-title, .dark-theme .wc-pat, .dark-theme .pat-text,
+.dark-theme .phonetic, .dark-theme .gen-input, .dark-theme .paste-area,
+.dark-theme .p-dir-text, .dark-theme .wcard-pat {
   color: #e0d0e8 !important;
 }
+
+/* ---- Text: secondary ---- */
 .dark-theme .mc-desc, .dark-theme .lcard-meta, .dark-theme .tcard-src,
-.dark-theme .scard-tag, .dark-theme .stat-lbl, .dark-theme .cal-h,
-.dark-theme .s-pill:not(.active), .dark-theme .set-btn {
+.dark-theme .scard-tag, .dark-theme .stat-lbl, .dark-theme .st-lbl,
+.dark-theme .cal-h, .dark-theme .s-pill:not(.active), .dark-theme .set-btn,
+.dark-theme .goal-icon, .dark-theme .tip-text, .dark-theme .hero-greeting,
+.dark-theme .lh-sub, .dark-theme .sh-sub, .dark-theme .sth-sub,
+.dark-theme .fh-sub, .dark-theme .wh-sub, .dark-theme .rh-sub,
+.dark-theme .rc-meta, .dark-theme .pz-num, .dark-theme .ap-time,
+.dark-theme .p-section, .dark-theme .se-num, .dark-theme .sc-chinese,
+.dark-theme .imm-chinese, .dark-theme .empty-desc, .dark-theme .gen-hint,
+.dark-theme .lc-text, .dark-theme .h-date, .dark-theme .h-ans,
+.dark-theme .hb-l, .dark-theme .h-idx, .dark-theme .rc-ql,
+.dark-theme .rc-bt, .dark-theme .rc-star-lb, .dark-theme .rc-dl,
+.dark-theme .pc-sub, .dark-theme .pc-badge, .dark-theme .search-input,
+.dark-theme .phonetic, .dark-theme .def-example, .dark-theme .history-item,
+.dark-theme .empty-text, .dark-theme .empty-hint, .dark-theme .hc-source,
+.dark-theme .fc-tag, .dark-theme .wc-cn, .dark-theme .wc-example,
+.dark-theme .pa-label, .dark-theme .pc-label, .dark-theme .q-hint,
+.dark-theme .h-bar, .dark-theme .hc-index, .dark-theme .sb-input,
+.dark-theme .topic-count, .dark-theme .sc-tag, .dark-theme .sc-action-label,
+.dark-theme .gen-count-label, .dark-theme .qbi-txt, .dark-theme .tb-back,
+.dark-theme .qb-l, .dark-theme .nav-l, .dark-theme .nav-greeting,
+.dark-theme .q-kw, .dark-theme .lc-tag, .dark-theme .sh-counter,
+.dark-theme .rz-label, .dark-theme .error-text, .dark-theme .empty-tip,
+.dark-theme .cb-label {
   color: #a090b0 !important;
-  background-color: #2a2a4a !important;
 }
+
+/* ---- Dividers / borders ---- */
+.dark-theme .divider, .dark-theme .goal-item, .dark-theme .st-item,
+.dark-theme .sentence-item, .dark-theme .qb-item, .dark-theme .fav-item,
+.dark-theme .dict-def, .dark-theme .history-item, .dark-theme .h-item,
+.dark-theme .st-item-row, .dark-theme .sc-bottom, .dark-theme .def-item,
+.dark-theme .tab, .dark-theme .gen-type-btn,
+.dark-theme .p-stem, .dark-theme .controls-bar, .dark-theme .player-bar,
+.dark-theme .topbar, .dark-theme .detail-header, .dark-theme .w-tabs,
+.dark-theme .f-tabs, .dark-theme .tabs, .dark-theme .mode-bar,
+.dark-theme .search-bar, .dark-theme .search-box, .dark-theme .input-area,
+.dark-theme .topic-pill, .dark-theme .gen-type-btn,
+.dark-theme .s-card, .dark-theme .imm-card, .dark-theme .st-card,
+.dark-theme .st-card-item, .dark-theme .progress-card, .dark-theme .result-card {
+  border-color: #2a2a4a !important;
+}
+
+/* ---- Tags / badges / buttons ---- */
+.dark-theme .goal-btn, .dark-theme .speed-btn, .dark-theme .ctrl-btn,
+.dark-theme .spd, .dark-theme .ctl, .dark-theme .pb-prev, .dark-theme .pb-next,
+.dark-theme .se-play, .dark-theme .se-hard, .dark-theme .p-nav,
+.dark-theme .back-btn, .dark-theme .tb-back, .dark-theme .sh-btn,
+.dark-theme .mode-btn, .dark-theme .topic-pill, .dark-theme .gen-count-btn,
+.dark-theme .gen-close, .dark-theme .gen-type-btn, .dark-theme .empty-btn,
+.dark-theme .nav-btn, .dark-theme .hb-l, .dark-theme .search-btn,
+.dark-theme .d-back, .dark-theme .btn-retry, .dark-theme .clear-btn,
+.dark-theme .qo, .dark-theme .qzo, .dark-theme .qzc, .dark-theme .qb-l,
+.dark-theme .stat-card, .dark-theme .st-card, .dark-theme .st-card-item,
+.dark-theme .pa-btn, .dark-theme .sc-fav, .dark-theme .sc-master,
+.dark-theme .sc-action-label, .dark-theme .go-back, .dark-theme .back-top,
+.dark-theme .hero-btn, .dark-theme .hero-checkin, .dark-theme .btn-go,
+.dark-theme .gen-submit, .dark-theme .detail-complete, .dark-theme .nav-icon,
+.dark-theme .ft-item, .dark-theme .wt-item, .dark-theme .tab {
+  background-color: #2a2a4a !important;
+  color: #a090b0 !important;
+}
+.dark-theme .spd.on, .dark-theme .ctl.on, .dark-theme .speed-btn.active,
+.dark-theme .ctrl-btn.active, .dark-theme .tab.active, .dark-theme .mode-btn.active,
+.dark-theme .s-pill.active, .dark-theme .topic-pill.active,
+.dark-theme .gen-type-btn.on, .dark-theme .ft-item.active,
+.dark-theme .wt-item.active, .dark-theme .sh-btn-primary,
+.dark-theme .qo.on, .dark-theme .qzo.on, .dark-theme .se-play.playing,
+.dark-theme .se-hard.active, .dark-theme .qb-l:active,
+.dark-theme .sc-fav.fav-on, .dark-theme .sc-master.master-on {
+  color: #ff8fab !important;
+  border-color: rgba(255,143,171,0.2) !important;
+  background-color: rgba(255,143,171,0.08) !important;
+}
+
+/* ---- Pause button / primary accent ---- */
+.dark-theme .pb-play, .dark-theme .p-play, .dark-theme .detail-complete,
+.dark-theme .btn-go, .dark-theme .gen-submit, .dark-theme .hero-btn,
+.dark-theme .hero-checkin.done, .dark-theme .lc-check.done {
+  background: linear-gradient(135deg, #4a4a7a, #3a3a6a) !important;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.3) !important;
+}
+
+/* ---- Toggle switch ---- */
+.dark-theme .toggle-btn { background-color: #2a2a4a !important; }
+.dark-theme .toggle-btn.on { background-color: #ff8fab !important; }
+.dark-theme .toggle-knob { background-color: #ffffff !important; }
+
+/* ---- Scrollbar ---- */
+.dark-theme ::-webkit-scrollbar-thumb { background: #3a3a5a !important; }
+
+/* ---- Inputs / textarea ---- */
+.dark-theme .input-field, .dark-theme .search-input, .dark-theme .pa-input,
+.dark-theme .sb-input, .dark-theme .gen-input, .dark-theme .paste-area {
+  background-color: #2a2a4a !important;
+  color: #e0d0e8 !important;
+  border-color: #3a3a5a !important;
+}
+
+/* ---- Charts / progress ---- */
+.dark-theme .pb-fill, .dark-theme .ap-fill, .dark-theme .home-progress .fill,
+.dark-theme .cb-fill, .dark-theme .rc-dfill, .dark-theme .chart-bar .fill {
+  background: linear-gradient(90deg, #4a4a7a, #3a3a6a) !important;
+}
+.dark-theme .ap-thumb { background: #4a4a7a !important; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.4) !important; }
+
+/* ---- calendar dots ---- */
+.dark-theme .cal-d { background: #2a2a4a !important; }
+.dark-theme .cal-d.checked { background: #ff8fab !important; }
+.dark-theme .cal-d.today { border-color: #e0d0e8 !important; }
+
+/* ---- status dots ---- */
+.dark-theme .pzd, .dark-theme .qzd, .dark-theme .pd, .dark-theme .b-dot,
+.dark-theme .st-bar .d { background: #2a2a4a !important; }
+.dark-theme .pzd.on, .dark-theme .qzd.on, .dark-theme .pd.on, .dark-theme .b-dot.on,
+.dark-theme .st-bar .d.on { background: #a090b0 !important; }
+
+/* ---- ap bar ---- */
+.dark-theme .ap-bar, .dark-theme .pb-progress { background: #2a2a4a !important; }
+
+/* ---- Reading options ---- */
+.dark-theme .pass-zone { background: transparent !important; }
+.dark-theme .pz-scroll { background: #1e1e38 !important; }
+.dark-theme .qz-q-scroll { background: #1e1e38 !important; }
+
+/* ---- Blank tags ---- */
+.dark-theme .bk-tag { color: #ff8fab !important; border-color: #ff8fab !important; }
+.dark-theme .bk-tag.filled { color: #e0d0e8 !important; border-color: #4a4a7a !important; background: rgba(74,74,122,0.1) !important; }
+.dark-theme .bk-tag.active { color: #fff !important; background: #ff8fab !important; border-color: #ff8fab !important; }
+
+/* ---- badges ---- */
+.dark-theme .rc-badge, .dark-theme .tb-badge {
+  background: #2a2a4a !important;
+}
+
+/* ---- Stars ---- */
+.dark-theme .sc-fav.fav-on, .dark-theme .fc-remove { color: #ff8fab !important; }

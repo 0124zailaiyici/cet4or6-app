@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>语境句子 v2 · UI 方案</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#f4f6f8;color:#2d2d3a;max-width:420px;margin:0 auto;min-height:100vh
+}
+
+/* Header */
+.header{
+  background:linear-gradient(135deg,#66bb6a,#388e3c);
+  padding:40px 20px 16px;color:#fff;border-radius:0 0 32px 32px;
+  box-shadow:0 4px 24px rgba(56,142,60,0.12);
+}
+.header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.title{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.counter{font-size:13px;background:rgba(255,255,255,.18);padding:6px 16px;border-radius:20px;font-weight:600}
+.search-wrap{position:relative;margin-bottom:10px}
+.search-wrap input{
+  width:100%;height:44px;border-radius:14px;border:none;
+  background:rgba(255,255,255,.88);padding:0 14px 0 36px;
+  font-size:15px;color:#2d2d3a;outline:none;
+}
+.search-wrap input::placeholder{color:#aaa}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:#999}
+.action-row{display:flex;gap:10px}
+.action-btn{
+  flex:1;text-align:center;padding:9px 0;border-radius:18px;
+  font-size:13px;font-weight:600;background:rgba(255,255,255,.16);cursor:pointer
+}
+.action-btn:active{background:rgba(255,255,255,.3)}
+.action-btn.primary{background:rgba(255,255,255,.3);font-weight:700}
+
+/* Topics */
+.topics{
+  padding:16px 20px 10px;background:#fff;border-bottom:1px solid rgba(0,0,0,.04);
+  box-shadow:0 2px 12px rgba(0,0,0,.02);display:flex;gap:10px;overflow-x:auto
+}
+.topics::-webkit-scrollbar{display:none}
+.pill{
+  flex-shrink:0;padding:8px 20px;border-radius:22px;font-size:13px;
+  font-weight:500;color:#388e3c;background:rgba(56,142,60,.06);
+  border:1px solid rgba(56,142,60,.1);cursor:pointer;white-space:nowrap
+}
+.pill.active{color:#fff;background:linear-gradient(135deg,#66bb6a,#388e3c);border-color:transparent}
+.pill .cnt{margin-left:4px;font-size:11px;opacity:.65}
+
+/* Mode Bar */
+.mode-bar{
+  display:flex;padding:14px 20px;gap:12px;background:#fff
+}
+.mode{
+  flex:1;text-align:center;padding:10px 0;border-radius:18px;
+  font-size:14px;font-weight:600;color:#888;background:rgba(0,0,0,.03);cursor:pointer
+}
+.mode.active{color:#fff;background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 3px 12px rgba(56,142,60,.15)}
+
+/* Card list */
+.list{padding:14px 20px;display:flex;flex-direction:column;gap:14px}
+
+.card{
+  background:#fff;border-radius:18px;padding:20px 18px;
+  box-shadow:0 2px 16px rgba(0,0,0,.04);display:flex;gap:14px
+}
+.card-left{flex-shrink:0}
+.num{
+  width:34px;height:34px;border-radius:50%;background:rgba(56,142,60,.07);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#388e3c
+}
+.card-body{flex:1;min-width:0}
+.english{font-size:15px;line-height:1.65;color:#2d2d3a;margin-bottom:10px}
+.english .kw{color:#e65100;font-weight:600;background:rgba(230,81,0,.08);padding:1px 5px;border-radius:4px}
+.trans{display:none;font-size:14px;color:#888;line-height:1.5;padding:10px 14px;background:rgba(56,142,60,.03);border-radius:12px}
+.card.expanded .trans{display:block}
+.hint{font-size:12px;color:#ccc;text-align:center;margin-top:6px}
+.card.expanded .hint{display:none}
+.bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.topic-tag{
+  font-size:12px;color:#388e3c;padding:4px 14px;border-radius:12px;
+  background:rgba(56,142,60,.06);font-weight:500
+}
+.actions{display:flex;gap:12px}
+
+/* ===== Button Design v2 ===== */
+.btn{
+  padding:6px 18px;border-radius:14px;font-size:13px;font-weight:500;
+  cursor:pointer;border:none;transition:all .2s
+}
+.btn-fav{
+  color:#b8860b;border:1.5px solid rgba(184,134,11,.35);
+  background:rgba(184,134,11,.07)
+}
+.btn-fav.on{
+  color:#aaa;border-color:rgba(0,0,0,.08);
+  background:rgba(0,0,0,.03)
+}
+.btn-master{
+  color:#2e7d32;border:1.5px solid rgba(46,125,50,.35);
+  background:rgba(46,125,50,.07)
+}
+.btn-master.on{
+  color:#aaa;border-color:rgba(0,0,0,.08);
+  background:rgba(0,0,0,.03)
+}
+
+/* Immersion */
+.immersion{display:none;flex-direction:column;align-items:center;padding:32px 20px;min-height:60vh}
+.imm-card{background:#fff;border-radius:24px;padding:36px 28px;width:100%;text-align:center;box-shadow:0 4px 28px rgba(0,0,0,.05)}
+.imm-num{font-size:14px;color:#bbb;margin-bottom:24px}
+.imm-eng{font-size:21px;line-height:1.7;color:#2d2d3a;font-weight:500;margin-bottom:20px}
+.imm-eng .kw{color:#e65100;font-weight:700;background:rgba(230,81,0,.08);padding:2px 8px;border-radius:6px}
+.imm-trans{font-size:15px;color:#888;padding:16px;background:rgba(56,142,60,.03);border-radius:16px;margin-bottom:24px}
+.imm-actions{display:flex;gap:16px;justify-content:center}
+.imm-nav{display:flex;align-items:center;justify-content:center;gap:40px;margin-top:36px}
+.nav-btn{
+  width:56px;height:56px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#66bb6a,#388e3c);color:#fff;
+  font-size:26px;cursor:pointer;box-shadow:0 4px 18px rgba(56,142,60,.2);
+  display:flex;align-items:center;justify-content:center
+}
+.nav-btn:active{opacity:.8}
+.nav-btn.dis{opacity:.3;box-shadow:none}
+.imm-prog{font-size:14px;color:#888}
+
+/* Toggle Demo */
+.demo-controls{margin:16px 20px;display:flex;gap:12px}
+.demo-controls button{
+  flex:1;padding:10px;border-radius:14px;border:none;
+  font-size:14px;font-weight:600;cursor:pointer
+}
+.demo-controls button:nth-child(1){background:#e8f5e9;color:#2e7d32}
+.demo-controls button:nth-child(2){background:rgba(184,134,11,.1);color:#b8860b}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <span class="title">语境句子</span>
+    <span class="counter">12/80</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input placeholder="搜索句子或关键词…">
+  </div>
+  <div class="action-row">
+    <div class="action-btn">📖 查词</div>
+    <div class="action-btn">📋 导入</div>
+    <div class="action-btn primary">✨ AI生成</div>
+  </div>
+</div>
+
+<div class="topics">
+  <div class="pill active">全部<span class="cnt">80</span></div>
+  <div class="pill">科技<span class="cnt">12</span></div>
+  <div class="pill">环保<span class="cnt">8</span></div>
+  <div class="pill">教育<span class="cnt">10</span></div>
+  <div class="pill">社会<span class="cnt">9</span></div>
+  <div class="pill">生活<span class="cnt">11</span></div>
+  <div class="pill">学习<span class="cnt">7</span></div>
+  <div class="pill">励志<span class="cnt">6</span></div>
+  <div class="pill">校园<span class="cnt">7</span></div>
+  <div class="pill">就业<span class="cnt">5</span></div>
+  <div class="pill">文化<span class="cnt">5</span></div>
+</div>
+
+<div class="mode-bar">
+  <div class="mode active" onclick="switchMode('list')">📋 列表浏览</div>
+  <div class="mode" onclick="switchMode('imm')">🎯 沉浸学习</div>
+</div>
+
+<div class="list" id="listView">
+  <!-- Card 1: mastered -->
+  <div class="card expanded">
+    <div class="card-left"><div class="num">1</div></div>
+    <div class="card-body">
+      <div class="english">
+        The rapid development of <span class="kw">artificial intelligence</span>
+        has brought both <span class="kw">opportunities</span> and challenges.
+      </div>
+      <div class="trans">人工智能的快速发展带来了机遇与挑战。</div>
+      <div class="hint">▾ 点击查看翻译</div>
+      <div class="bottom">
+        <span class="topic-tag">科技</span>
+        <div class="actions">
+          <button class="btn btn-fav" onclick="toggle(this)">收藏</button>
+          <button class="btn btn-master on" onclick="toggle(this)">掌握</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: favorited -->
+  <div class="card">
+    <div class="card-left"><div class="num">2</div></div>
+    <div class="card-body">
+      <div class="english">
+        It is <span class="kw">high time</span> that we took
+        <span class="kw">effective measures</span> to reduce carbon emissions.
+      </div>
+      <div class="trans">我们早就该采取有效措施减少碳排放了。</div>
+      <div class="hint">▾ 点击查看翻译</div>
+      <div class="bottom">
+        <span class="topic-tag">环保</span>
+        <div class="actions">
+          <button class="btn btn-fav on" onclick="toggle(this)">收藏</button>
+          <button class="btn btn-master" onclick="toggle(this)">掌握</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: none -->
+  <div class="card">
+    <div class="card-left"><div class="num">3</div></div>
+    <div class="card-body">
+      <div class="english">
+        Only by <span class="kw">working together</span> can we solve
+        the problem of <span class="kw">global warming</span>.
+      </div>
+      <div class="trans">只有共同努力，我们才能解决全球变暖的问题。</div>
+      <div class="hint">▾ 点击查看翻译</div>
+      <div class="bottom">
+        <span class="topic-tag">环保</span>
+        <div class="actions">
+          <button class="btn btn-fav" onclick="toggle(this)">收藏</button>
+          <button class="btn btn-master" onclick="toggle(this)">掌握</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4: favorited -->
+  <div class="card">
+    <div class="card-left"><div class="num">4</div></div>
+    <div class="card-body">
+      <div class="english">
+        There is <span class="kw">no doubt</span> that education plays
+        a <span class="kw">vital role</span> in personal development.
+      </div>
+      <div class="trans">毫无疑问，教育在个人发展中起着至关重要的作用。</div>
+      <div class="hint">▾ 点击查看翻译</div>
+      <div class="bottom">
+        <span class="topic-tag">教育</span>
+        <div class="actions">
+          <button class="btn btn-fav on" onclick="toggle(this)">收藏</button>
+          <button class="btn btn-master" onclick="toggle(this)">掌握</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Immersion -->
+<div class="immersion" id="immView">
+  <div class="imm-card">
+    <div class="imm-num">1 / 80</div>
+    <div class="imm-eng">
+      The rapid development of <span class="kw">artificial intelligence</span>
+      has brought both <span class="kw">opportunities</span> and challenges.
+    </div>
+    <div class="imm-trans">人工智能的快速发展带来了机遇与挑战。</div>
+    <div class="imm-actions">
+      <button class="btn btn-fav on" onclick="toggle(this)">收藏</button>
+      <button class="btn btn-master" onclick="toggle(this)">掌握</button>
+    </div>
+  </div>
+  <div class="imm-nav">
+    <button class="nav-btn dis">‹</button>
+    <span class="imm-prog">1 / 80</span>
+    <button class="nav-btn">›</button>
+  </div>
+</div>
+
+<div class="demo-controls">
+  <button onclick="resetDemo()">🔄 重置全部状态</button>
+  <button onclick="toggleAll()">🎲 随机切换状态</button>
+</div>
+
+<script>
+function toggle(el) {
+  el.classList.toggle('on')
+}
+
+function switchMode(mode) {
+  document.querySelectorAll('.mode').forEach(m => m.classList.remove('active'))
+  document.querySelector(mode === 'list' ? '#listView' : '#immView').style.display = mode === 'list' ? 'flex' : 'flex'
+  document.querySelector(mode === 'list' ? '.mode:first-child' : '.mode:last-child').classList.add('active')
+  document.querySelector(mode === 'list' ? '#immView' : '#listView').style.display = mode === 'list' ? 'none' : 'flex'
+}
+
+function resetDemo() {
+  document.querySelectorAll('.btn').forEach(b => b.classList.remove('on'))
+}
+
+function toggleAll() {
+  document.querySelectorAll('.btn').forEach(b => {
+    if (Math.random() > 0.5) b.classList.add('on')
+    else b.classList.remove('on')
+  })
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>暗黑模式全页设计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, sans-serif;
+  background: #1a1a2e; min-height: 100vh; padding: 20px;
+}
+.toggle-bar {
+  text-align: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 100;
+}
+.toggle-all {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #2a2a4a; padding: 8px 20px; border-radius: 20px; cursor: pointer;
+  color: #e0d0e8; font-size: 14px; font-weight: 600;
+  border: 1px solid #3a3a5a; user-select: none;
+}
+.toggle-all .indicator {
+  width: 40px; height: 20px; border-radius: 10px;
+  background: #3a3a5a; position: relative; transition: 0.3s;
+}
+.toggle-all .indicator .knob {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; position: absolute; top: 2px; left: 2px;
+  transition: 0.3s;
+}
+.toggle-all.dark .indicator { background: #ff6b8a; }
+.toggle-all.dark .indicator .knob { left: 22px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; max-width: 1440px; margin: 0 auto; }
+
+/* Phone shell */
+.phone {
+  width: 340px; height: 700px; border-radius: 32px;
+  overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; font-size: 14px;
+  transition: background 0.3s, color 0.3s;
+  margin: 0 auto;
+}
+.phone-header {
+  padding: 16px 18px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.phone-title { font-size: 16px; font-weight: 700; flex: 1; }
+.phone-page { font-size: 10px; opacity: 0.6; padding: 2px 8px; border-radius: 4px; }
+.phone-body { flex: 1; overflow-y: auto; padding: 0 14px 10px; }
+
+/* ==================== LIGHT ==================== */
+.light {
+  --bg: #fff5f7;
+  --card: #ffffff;
+  --primary: #2d2d4e;
+  --secondary: #8a7a9a;
+  --border: #fff0f3;
+  --accent: #ff6b8a;
+  --accentSoft: rgba(255,107,138,0.08);
+  --tag: #fff0f3;
+  --shadow: 0 2px 12px rgba(255,158,181,0.08);
+  --headerGrad1: #ffb3c6;
+  --headerGrad2: #ff8fab;
+  --headerText: #fff;
+  --pageBg: #fff5f7;
+}
+.light .phone-header { background: linear-gradient(135deg, var(--headerGrad1), var(--headerGrad2)); color: var(--headerText); }
+.light .phone-title { color: var(--headerText); }
+.light .phone-page { background: rgba(255,255,255,0.2); color: var(--headerText); }
+.light .phone-body { background: var(--pageBg); }
+
+/* ==================== DARK ==================== */
+.dark {
+  --bg: #12121f;
+  --card: #1e1e38;
+  --primary: #e0d0e8;
+  --secondary: #a090b0;
+  --border: #2a2a4a;
+  --accent: #ff8fab;
+  --accentSoft: rgba(255,143,171,0.08);
+  --tag: #2a2a4a;
+  --shadow: 0 2px 12px rgba(0,0,0,0.25);
+  --headerGrad1: #2a2a4a;
+  --headerGrad2: #1a1a38;
+  --headerText: #e0d0e8;
+  --pageBg: #12121f;
+}
+.dark .phone-header { background: linear-gradient(135deg, var(--headerGrad1), var(--headerGrad2)); color: var(--headerText); }
+.dark .phone-title { color: var(--headerText); }
+.dark .phone-page { background: rgba(255,255,255,0.06); color: var(--secondary); }
+.dark .phone-body { background: var(--pageBg); }
+
+/* Shared */
+.phone { background: var(--pageBg); color: var(--primary); transition: all 0.3s; }
+
+/* ==================== COMPONENTS ==================== */
+.card { background: var(--card); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); transition: all 0.3s; margin-bottom: 10px; }
+
+/* ---- Home page ---- */
+.home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.home-module { background: var(--card); border-radius: 14px; padding: 16px 12px; box-shadow: var(--shadow); text-align: center; transition: all 0.3s; }
+.home-module .icon { font-size: 24px; margin-bottom: 4px; }
+.home-module .name { font-size: 12px; font-weight: 600; color: var(--primary); }
+.home-module .desc { font-size: 10px; color: var(--secondary); margin-top: 2px; }
+.home-streak { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+.home-streak .s-num { font-size: 24px; font-weight: 800; color: var(--accent); }
+.home-streak .s-text { font-size: 12px; color: var(--secondary); }
+.home-progress { height: 6px; border-radius: 3px; background: var(--border); margin: 8px 0; }
+.home-progress .fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), #ff4d6d); width: 60%; }
+
+/* ---- Listening page ---- */
+.ls-player { padding: 6px 0; }
+.ls-bar { height: 6px; border-radius: 3px; background: var(--border); margin-bottom: 4px; position: relative; }
+.ls-bar .fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #4fc3f7, #2196f3); width: 35%; }
+.ls-time { display: flex; justify-content: space-between; font-size: 11px; color: var(--secondary); }
+.ls-ctrl { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.ls-ctrl .sp { padding: 3px 12px; border-radius: 8px; font-size: 12px; background: var(--tag); color: var(--secondary); }
+.ls-ctrl .sp.on { color: #2196f3; background: rgba(33,150,243,0.08); border: 1px solid rgba(33,150,243,0.2); }
+.ls-item { display: flex; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.ls-item:last-child { border-bottom: none; }
+.ls-num { width: 28px; height: 28px; border-radius: 6px; background: rgba(33,150,243,0.06); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #2196f3; flex-shrink: 0; }
+.ls-text { flex: 1; font-size: 13px; line-height: 1.5; color: var(--primary); }
+.ls-opt { padding: 10px 12px; border-radius: 10px; font-size: 12px; background: var(--tag); color: var(--primary); border: 1px solid var(--border); margin: 3px 0; }
+.ls-opt.on { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.04); }
+
+/* ---- Reading page ---- */
+.rd-q { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--primary); }
+.rd-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.rd-opt {
+  width: calc(50% - 4px); padding: 10px 12px; border-radius: 10px;
+  font-size: 12px; background: var(--tag); border: 1px solid var(--border);
+  color: var(--primary); transition: 0.15s;
+}
+.rd-opt.on { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.04); }
+
+/* ---- Sentences page ---- */
+.st-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.st-en { font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+.st-cn { font-size: 13px; color: var(--secondary); }
+.st-tag { font-size: 10px; color: #2196f3; background: rgba(33,150,243,0.06); padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+
+/* ---- Translation page ---- */
+.tr-card { }
+.tr-q { font-size: 14px; line-height: 1.6; color: var(--primary); margin-bottom: 8px; }
+.tr-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--primary); font-size: 13px; outline: none; }
+.tr-score { display: flex; gap: 10px; margin-top: 8px; }
+.tr-score .s { flex: 1; text-align: center; padding: 6px; border-radius: 8px; background: var(--tag); }
+.tr-score .s .v { font-size: 16px; font-weight: 700; color: var(--accent); }
+.tr-score .s .l { font-size: 10px; color: var(--secondary); }
+
+/* ---- Writing page ---- */
+.wr-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.wr-tab { padding: 6px 14px; border-radius: 8px; font-size: 12px; background: var(--tag); color: var(--secondary); }
+.wr-tab.on { color: var(--accent); background: var(--accentSoft); border: 1px solid rgba(255,107,138,0.2); }
+
+/* ---- Statistics page ---- */
+.st-bar { display: flex; justify-content: center; gap: 4px; padding: 10px 0; }
+.st-bar .d { width: 16px; height: 16px; border-radius: 4px; background: var(--border); }
+.st-bar .d.on { background: var(--accent); }
+.st-bar .d.today { border: 2px solid var(--primary); }
+
+/* ---- Favorites page ---- */
+.fav-item { display: flex; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.fav-star { color: #ffc107; flex-shrink: 0; }
+.fav-text { flex: 1; font-size: 13px; color: var(--primary); }
+
+/* ---- Dictionary page ---- */
+.dict-word { font-size: 20px; font-weight: 700; color: var(--primary); }
+.dict-phonetic { font-size: 13px; color: var(--secondary); margin-bottom: 8px; }
+.dict-def { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--primary); }
+.dict-example { font-size: 12px; color: var(--secondary); font-style: italic; margin: 4px 0; }
+.dict-history { font-size: 12px; color: var(--secondary); padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+/* ---- Settings page ---- */
+.st-item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.st-item-row:last-child { border-bottom: none; }
+.st-left { display: flex; align-items: center; gap: 10px; }
+.st-icon { font-size: 18px; }
+.st-label { font-size: 14px; font-weight: 600; color: var(--primary); }
+.st-ctrl { display: flex; align-items: center; gap: 8px; }
+.st-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--tag); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; cursor: pointer; }
+.st-num { font-size: 18px; font-weight: 700; min-width: 30px; text-align: center; color: var(--primary); }
+.st-toggle { width: 48px; height: 26px; border-radius: 13px; background: var(--border); position: relative; cursor: pointer; transition: 0.3s; }
+.st-toggle.on { background: var(--accent); }
+.st-toggle .knob { width: 22px; height: 22px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: 0.3s; }
+.st-toggle.on .knob { left: 24px; }
+</style>
+</head>
+<body>
+<div class="toggle-bar">
+  <div class="toggle-all" id="toggleAll">
+    <span>切换暗黑</span>
+    <div class="indicator"><div class="knob"></div></div>
+  </div>
+</div>
+<div class="grid" id="phoneGrid"></div>
+
+<script>
+const pages = [
+  { name: '首页', id: 'home', html: `
+    <div class="card home-streak">
+      <div class="s-num">3</div>
+      <div class="s-text">天连续学习<br><span style="font-size:11px">继续加油！</span></div>
+    </div>
+    <div class="home-grid">
+      ${['🎵听力','💬句子','🌟翻译','✨写作','📖阅读','❤️收藏','📊统计','📖词典'].map((m,i)=>`
+        <div class="home-module">
+          <div class="icon">${m.split('').slice(0,2).join('')}</div>
+          <div class="name">${m.slice(2)}</div>
+          <div class="desc">${['精听','语境','练习','练习','理解','管理','进度','查询'][i]}</div>
+        </div>`).join('')}
+    </div>
+    <div class="card" style="margin-top:4px">
+      <div style="font-size:12px;color:var(--secondary);margin-bottom:4px">今日进度 3/8</div>
+      <div class="home-progress"><div class="fill"></div></div>
+    </div>
+  `},
+  { name: '听力', id: 'listening', html: `
+    <div class="ls-player">
+      <div class="ls-bar"><div class="fill"></div></div>
+      <div class="ls-time"><span>2:15</span><span>28:30</span></div>
+    </div>
+    <div class="ls-ctrl">
+      <span class="sp">1x</span><span class="sp on">1.25x</span><span class="sp">1.5x</span>
+    </div>
+    <div style="font-size:11px;color:var(--accent);font-weight:600;margin:4px 0">Section A  News Reports</div>
+    <div style="font-size:14px;font-weight:600;margin:6px 0">Q1. What did the boy do?</div>
+    <div class="ls-opt">A) He set a record by swimming</div>
+    <div class="ls-opt on">B) He celebrated his birthday</div>
+    <div class="ls-opt">C) He visited a prison</div>
+    <div class="ls-opt">D) He swam around an island</div>
+    <div style="display:flex;gap:8px;margin-top:8px;justify-content:center;font-size:18px">
+      <span style="color:var(--secondary)">⬅</span>
+      <span style="color:var(--accent)">▶</span>
+      <span style="color:var(--secondary)">➔</span>
+    </div>
+  `},
+  { name: '阅读', id: 'reading', html: `
+    <div style="font-size:11px;color:var(--accent);font-weight:600">仔细阅读</div>
+    <div style="font-size:11px;color:var(--secondary);margin:4px 0">❓ 第1/5题</div>
+    <div class="rd-q">51. How might people often feel when they were misnamed?</div>
+    <div class="rd-opts">
+      <div class="rd-opt">A) Unwanted.</div>
+      <div class="rd-opt on">B) Unhappy.</div>
+      <div class="rd-opt">C) Confused.</div>
+      <div class="rd-opt">D) Indifferent.</div>
+    </div>
+    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px">
+      ${'○●○○○'.split('').map((d,i)=>`<span style="width:${d==='●'?16:6}px;height:6px;border-radius:${d==='●'?3:3}px;background:${d==='●'?'var(--primary)':'var(--border)'};display:inline-block"></span>`).join('')}
+    </div>
+  `},
+  { name: '句子', id: 'sentences', html: `
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <span class="wr-tab on">全部</span>
+      <span class="wr-tab">校园</span>
+      <span class="wr-tab">生活</span>
+      <span class="wr-tab">工作</span>
+    </div>
+    <div class="st-item"><div class="st-en">Reading enriches the mind.</div><div class="st-cn">阅读丰富心灵。</div><div class="st-tag">#学习</div></div>
+    <div class="st-item"><div class="st-en">Knowledge is power.</div><div class="st-cn">知识就是力量。</div><div class="st-tag">#哲理</div></div>
+    <div class="st-item"><div class="st-en">Practice makes perfect.</div><div class="st-cn">熟能生巧。</div><div class="st-tag">#学习</div></div>
+  `},
+  { name: '翻译', id: 'translation', html: `
+    <div class="tr-card">
+      <div class="tr-q">舞狮作为中国传统民间表演已有2000多年历史。在狮子舞中，两位表演者同披一件狮子服...</div>
+      <textarea class="tr-input" rows="3" placeholder="输入你的翻译..." style="resize:none">Lion dance is a traditional</textarea>
+      <div style="text-align:right;margin:4px 0">
+        <span style="font-size:12px;color:var(--accent);font-weight:600">AI评分</span>
+      </div>
+      <div class="tr-score">
+        <div class="s"><div class="v">85</div><div class="l">词汇</div></div>
+        <div class="s"><div class="v">72</div><div class="l">语法</div></div>
+        <div class="s"><div class="v">90</div><div class="l">语义</div></div>
+        <div class="s"><div class="v">78</div><div class="l">表达</div></div>
+      </div>
+    </div>
+  `},
+  { name: '写作', id: 'writing', html: `
+    <div class="wr-tabs">
+      <span class="wr-tab">句型库</span>
+      <span class="wr-tab on">段落写作</span>
+      <span class="wr-tab">全文模拟</span>
+    </div>
+    <div class="card" style="padding:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:4px">Directions:</div>
+      <div style="font-size:13px;color:var(--secondary);line-height:1.6">For this part, you are allowed 30 minutes to write a short essay...</div>
+    </div>
+    <textarea class="tr-input" rows="4" placeholder="在此写作..." style="margin-top:8px;resize:none"></textarea>
+    <div style="text-align:right;margin-top:4px">
+      <span style="font-size:12px;color:var(--accent);font-weight:600;background:var(--accentSoft);padding:4px 12px;border-radius:6px">AI批改</span>
+    </div>
+  `},
+  { name: '统计', id: 'statistics', html: `
+    <div class="card">
+      <div style="font-size:12px;color:var(--secondary);margin-bottom:6px">三月</div>
+      <div class="st-bar">
+        ${[0,1,1,0,1,0,1,1,1,0,0,1,1,0,1,0,1,1,1,0,1,1,0,1,0,1,1,1,0,0,1].map((d,i)=>`
+          <div class="d ${d?'on':''} ${i===20?'today':''}"></div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--secondary);margin-bottom:8px">学习趋势</div>
+      <div style="height:120px;display:flex;align-items:flex-end;gap:4px">
+        ${[40,55,30,70,45,60,80,50,65,35,75,55].map(h=>`
+          <div style="flex:1;background:linear-gradient(180deg,var(--accent),#ff4d6d);border-radius:3px 3px 0 0;height:${h}%"></div>
+        `).join('')}
+      </div>
+    </div>
+  `},
+  { name: '收藏', id: 'favorites', html: `
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <span class="wr-tab on">收藏句子</span>
+      <span class="wr-tab">难句</span>
+    </div>
+    <div class="fav-item"><span class="fav-star">★</span><span class="fav-text">Reading enriches the mind.</span></div>
+    <div class="fav-item"><span class="fav-star">★</span><span class="fav-text">Knowledge is power.</span></div>
+    <div class="fav-item"><span class="fav-star">★</span><span class="fav-text">Practice makes perfect.</span></div>
+    <div class="fav-item"><span class="fav-star">★</span><span class="fav-text">Actions speak louder than words.</span></div>
+  `},
+  { name: '词典', id: 'dictionary', html: `
+    <div style="display:flex;gap:6px;background:var(--card);border-radius:10px;padding:8px 12px;box-shadow:var(--shadow);margin-bottom:8px">
+      <span style="color:var(--secondary)">🔍</span>
+      <input style="flex:1;border:none;outline:none;background:transparent;font-size:13px;color:var(--primary)" placeholder="搜索单词...">
+    </div>
+    <div class="dict-word">abandon</div>
+    <div class="dict-phonetic">/əˈbændən/</div>
+    <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:6px">verb</div>
+    <div class="dict-def"><span style="color:var(--accent)">1.</span> 抛弃，放弃</div>
+    <div class="dict-example">"They had to abandon the project."</div>
+    <div class="dict-def"><span style="color:var(--accent)">2.</span> 停止，中止</div>
+    <div class="dict-example">"The game was abandoned due to rain."</div>
+    <div style="font-size:11px;color:var(--secondary);margin:6px 0">搜索历史</div>
+    <div class="dict-history">abandon · ability · able · about · above · abroad</div>
+  `},
+  { name: '设置', id: 'settings', html: `
+    <div style="font-size:11px;color:var(--secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:4px 14px 2px">每日任务</div>
+    <div class="card">
+      ${[['🎵','听力精听',1],['💬','语境句子',5],['🌟','翻译练习',1],['✨','写作练习',1]].map(([icon,label,val])=>`
+        <div class="st-item-row">
+          <div class="st-left"><span class="st-icon">${icon}</span><span class="st-label">${label}</span></div>
+          <div class="st-ctrl"><div class="st-btn">−</div><span class="st-num">${val}</span><div class="st-btn">+</div></div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:8px 14px 2px">偏好</div>
+    <div class="card">
+      <div class="st-item-row">
+        <div class="st-left"><span class="st-icon">🌙</span><span class="st-label">暗黑模式</span></div>
+        <div class="st-toggle" id="demoToggle"><div class="knob"></div></div>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 14px;margin-top:4px">
+      <div style="font-size:12px;color:var(--secondary)">💡 建议每天完成：1 篇听力 + 5 个句子 + 1 篇翻译 + 1 篇写作</div>
+    </div>
+  `},
+]
+
+let isDark = false
+
+function render() {
+  const grid = document.getElementById('phoneGrid')
+  grid.innerHTML = pages.map(p => `
+    <div class="phone ${isDark ? 'dark' : 'light'}">
+      <div class="phone-header">
+        <span class="phone-title">${p.name}</span>
+        <span class="phone-page">${p.id}</span>
+      </div>
+      <div class="phone-body">
+        ${p.html}
+      </div>
+    </div>
+  `).join('')
+  
+  // Bind toggle on settings page
+  setTimeout(() => {
+    const dt = document.getElementById('demoToggle')
+    if (dt) dt.onclick = () => dt.classList.toggle('on')
+  }, 50)
+}
+
+document.getElementById('toggleAll').addEventListener('click', () => {
+  isDark = !isDark
+  document.getElementById('toggleAll').classList.toggle('dark', isDark)
+  document.getElementById('toggleAll').querySelector('span').textContent = isDark ? '切换亮色' : '切换暗黑'
+  render()
+})
+
+render()
+</script>
+</body>
+</html>
