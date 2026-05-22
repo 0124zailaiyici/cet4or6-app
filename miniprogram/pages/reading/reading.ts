@@ -104,10 +104,10 @@ Page<IReadingData, IReadingMethods>({
     if (!text) return ['']
     // 按 A）B）C) 拆分，每个标签作为独立段落开头
     const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
-    // 每页3段，段间用双换行
+    // 每页1段（长篇文字多，避免溢出）
     const pages: string[] = []
-    for (let i = 0; i < parts.length; i += 3) {
-      pages.push(parts.slice(i, i + 3).map(p => p.trim()).join('\n'))
+    for (let i = 0; i < parts.length; i++) {
+      pages.push(parts[i].trim())
     }
     return pages.length > 0 ? pages : [text]
   },
