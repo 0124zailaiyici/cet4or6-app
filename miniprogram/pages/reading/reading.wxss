@@ -119,8 +119,14 @@
 .qzo-ref { font-size: 22rpx; color: #8a7a9a; line-height: 1.6; font-style: italic; }
 
 /* Section B: 长篇匹配 */
-.qb-scroll {
-  flex: 1; background: #fff; border-radius: 18rpx; padding: 8rpx 0;
+.qb-grid {
+  flex: 1; overflow: hidden;
+  background: #fff; border-radius: 18rpx; padding: 4rpx 0;
+  box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
+}
+.qb-grid {
+  flex: 1; overflow: hidden;
+  background: #fff; border-radius: 18rpx; padding: 4rpx 0;
   box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
 }
 .qb-item {
