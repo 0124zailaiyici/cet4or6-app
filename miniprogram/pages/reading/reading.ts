@@ -19,6 +19,7 @@ interface IReadingData {
   passagePages: string[]
   darkMode: boolean
   choiceLabels: string[]
+  optionLetters: string[]
   touchStartX: number
 }
 
@@ -44,6 +45,7 @@ Page<IReadingData, IReadingMethods>({
     passagePages: [],
     darkMode: false,
     choiceLabels: ['A)', 'B)', 'C)', 'D)'],
+    optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
     touchStartX: 0,
   },
 
