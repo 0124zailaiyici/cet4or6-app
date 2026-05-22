@@ -236,6 +236,10 @@
   font-weight: 600;
 }
 
+.sh-btn-paste {
+  background: rgba(255,255,255,0.2);
+}
+
 /* Empty state */
 .empty-state {
   display: flex;
@@ -317,6 +321,20 @@
   background: rgba(76,175,80,0.04);
   font-size: 28rpx;
   color: #2d2d4e;
+  box-sizing: border-box;
+  margin-bottom: 28rpx;
+}
+
+.paste-area {
+  width: 100%;
+  min-height: 260rpx;
+  max-height: 500rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 20rpx;
+  background: rgba(76,175,80,0.04);
+  font-size: 28rpx;
+  color: #2d2d4e;
+  line-height: 1.6;
   box-sizing: border-box;
   margin-bottom: 28rpx;
 }

@@ -78,3 +78,7 @@ export interface GeneratedSentence {
 export function generateSentence(params: { word?: string; topic?: string; count?: number }) {
   return request<GeneratedSentence[]>('/generate_sentence', params)
 }
+
+export function parseSentences(text: string) {
+  return request<GeneratedSentence[]>('/parse_sentences', { text })
+}

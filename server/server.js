@@ -167,6 +167,32 @@ app.post('/generate_sentence', async (req, res) => {
   }
 });
 
+app.post('/parse_sentences', async (req, res) => {
+  const { text } = req.body;
+  if (!text || text.trim().length < 10) {
+    return res.status(400).json({ error: '文本太短，至少10个字符' });
+  }
+
+  try {
+    const prompt = `请将以下英文段落拆分为单个句子，为每句生成中文翻译、提取2-4个核心关键词（词组/搭配）、标注一个话题分类。适合四级难度。
+
+英文原文：
+${text.trim()}
+
+返回纯 JSON 数组：[{"english":"句子1", "chinese":"中文翻译", "keywords":["kw1","kw2"], "topic":"科技/环保/教育/社会/生活/学习/励志/校园/就业/文化/品德"}]`;
+
+    const result = await callDeepSeek([
+      { role: 'system', content: '你是英语教学专家。将英文段落拆成句子，保持原句不变，只加翻译、关键词、话题。只返回纯 JSON 数组，不要 markdown。' },
+      { role: 'user', content: prompt },
+    ], 0.3);
+
+    const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    res.json(JSON.parse(cleaned));
+  } catch (err) {
+    res.status(500).json({ error: '解析失败', detail: err.message });
+  }
+});
+
 app.get('/health', (_, res) => {
   res.json({ status: 'ok', apiKey: !!API_KEY });
 });

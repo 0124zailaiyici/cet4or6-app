@@ -9,6 +9,7 @@ interface IStudyData {
   favoriteSentenceIds: number[]
   hardSentences: { passageId: number; sentenceIndex: number; text: string; passageTitle: string }[]
   readingAnswers: Record<number, { blankAnswers: Record<string, string>; usedFlags: boolean[]; matchAnswers?: Record<number, string>; cAnswers?: Record<number, string> }>
+  listeningAnswers: Record<number, Record<number, number>>
   dailyGoal: {
     listen: number
     sentence: number

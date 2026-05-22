@@ -33,7 +33,7 @@
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 
-    <!-- === 整段MP3模式 === -->
+    <!-- === 整段MP3翻页模式 === -->
     <block wx:if="{{audioMode}}">
       <view class="audio-player">
         <view class="ap-bar" catchtap="seekAudio">
@@ -46,21 +46,43 @@
         </view>
       </view>
 
-      <view class="controls-bar">
-        <view class="speed-btn {{speed === s ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-        <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">循环</view>
+      <view class="controls">
+        <view class="spd {{speed === s ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+        <view class="ctl {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
       </view>
 
-      <scroll-view class="ref-scroll" scroll-y>
-        <view class="ref-text">
-          <text>{{refText}}</text>
+      <view class="page-area">
+        <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
+          <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
+            <view class="page-card" wx:for="{{pages}}" wx:key="*this" wx:for-index="pi">
+              <!-- Directions page -->
+              <view wx:if="{{item.type === 'dir'}}" class="p-dir">
+                <view class="p-section">{{item.section}}</view>
+                <view class="p-dir-text">{{item.stem}}</view>
+              </view>
+              <!-- Question page -->
+              <view wx:else class="p-q">
+                <view class="p-section">{{item.section}}</view>
+                <view class="p-stem">{{item.stem}}</view>
+                <view class="p-opts">
+                  <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
+                    <view class="po-l">{{optionLetters[oi]}}</view>
+                    <view class="po-t">{{item}}</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
         </view>
-      </scroll-view>
+      </view>
 
-      <view class="player-bar audio-bar">
-        <view class="pb-prev" catchtap="prevSentence">⏪ 15s</view>
-        <view class="pb-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-        <view class="pb-next" catchtap="nextSentence">15s ⏩</view>
+      <view class="p-bar">
+        <view class="p-nav" catchtap="prevPage">⬅ 上一题</view>
+        <view class="p-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+        <view class="p-dots">
+          <view class="pd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
+        </view>
+        <view class="p-nav" catchtap="nextPage">下一题 ➔</view>
       </view>
     </block>
 

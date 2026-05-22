@@ -1,7 +1,7 @@
 import sentencesData from '../../data/sentences'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
-import { generateSentence } from '../../utils/api'
+import { generateSentence, parseSentences } from '../../utils/api'
 
 interface ISentence {
   id: number
@@ -26,6 +26,9 @@ interface ISentencesData {
   genType: 'word' | 'topic'
   genCount: number
   generating: boolean
+  showPasteModal: boolean
+  pasteText: string
+  parsing: boolean
 }
 
 interface ISentencesMethods {
@@ -45,6 +48,10 @@ interface ISentencesMethods {
   setGenType(e: WechatMiniprogram.TouchEvent): void
   adjustGenCount(e: WechatMiniprogram.TouchEvent): void
   doGenerate(): void
+  openPasteModal(): void
+  closePasteModal(): void
+  onPasteInput(e: WechatMiniprogram.Input): void
+  doParse(): void
 }
 
 Page<ISentencesData, ISentencesMethods>({
@@ -63,6 +70,9 @@ Page<ISentencesData, ISentencesMethods>({
     genType: 'word',
     genCount: 3,
     generating: false,
+    showPasteModal: false,
+    pasteText: '',
+    parsing: false,
   },
 
   onLoad() {
@@ -249,6 +259,57 @@ Page<ISentencesData, ISentencesMethods>({
     } catch (err: any) {
       wx.showToast({ title: err.message || '生成失败', icon: 'none' })
       this.setData({ generating: false })
+    }
+  },
+
+  openPasteModal() {
+    this.setData({ showPasteModal: true, pasteText: '' })
+  },
+
+  closePasteModal() {
+    this.setData({ showPasteModal: false })
+  },
+
+  onPasteInput(e: WechatMiniprogram.Input) {
+    this.setData({ pasteText: e.detail.value })
+  },
+
+  async doParse() {
+    const text = this.data.pasteText.trim()
+    if (text.length < 10) {
+      wx.showToast({ title: '文本太短，至少10个字符', icon: 'none' })
+      return
+    }
+
+    this.setData({ parsing: true })
+    try {
+      const results = await parseSentences(text)
+
+      const maxId = Math.max(0, ...this.data.allSentences.map(s => s.id))
+      const newSentences: ISentence[] = results.map((item, i) => ({
+        id: maxId + i + 1,
+        english: item.english,
+        chinese: item.chinese,
+        keywords: item.keywords,
+        topic: item.topic,
+      }))
+
+      const allSentences = [...this.data.allSentences, ...newSentences]
+      const topics = [...new Set(allSentences.map(s => s.topic))]
+      topics.unshift('全部')
+
+      this.setData({
+        allSentences,
+        topics,
+        showPasteModal: false,
+        parsing: false,
+      })
+      this.doFilter()
+
+      wx.showToast({ title: `已导入 ${results.length} 个句子`, icon: 'success' })
+    } catch (err: any) {
+      wx.showToast({ title: err.message || '解析失败', icon: 'none' })
+      this.setData({ parsing: false })
     }
   },
 })

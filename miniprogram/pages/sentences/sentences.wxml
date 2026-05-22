@@ -6,6 +6,7 @@
         <text class="sh-title">语境句子</text>
         <view class="sh-actions">
           <view class="sh-btn" catchtap="goDict">📖 查词</view>
+          <view class="sh-btn sh-btn-paste" catchtap="openPasteModal">📋 导入</view>
           <view class="sh-btn sh-btn-ai" catchtap="openGenModal">✨ AI生成</view>
           <text class="sh-counter">{{masteredIds.length}}/{{allSentences.length}}</text>
         </view>
@@ -81,6 +82,23 @@
       </view>
 
       <view class="gen-hint">基于四级大纲难度，生成含关键词的语境句子</view>
+    </view>
+  </view>
+
+  <view class="gen-overlay" wx:if="{{showPasteModal}}" catchtap="closePasteModal">
+    <view class="gen-modal" catchtap="noop">
+      <view class="gen-header">
+        <text class="gen-title">粘贴文本导入句子</text>
+        <view class="gen-close" catchtap="closePasteModal">✕</view>
+      </view>
+
+      <textarea class="paste-area" placeholder="粘贴一篇英文文章或段落（如四级真题阅读、新闻等），AI 将自动拆分为语境句子并标注翻译、关键词、话题" value="{{pasteText}}" bindinput="onPasteInput" auto-height maxlength="3000" />
+
+      <view class="gen-submit {{parsing ? 'loading' : ''}}" catchtap="doParse">
+        {{parsing ? '解析中…' : '开始解析导入'}}
+      </view>
+
+      <view class="gen-hint">支持英文段落、文章，AI 自动拆句并适配四级难度</view>
     </view>
   </view>
 </view>
