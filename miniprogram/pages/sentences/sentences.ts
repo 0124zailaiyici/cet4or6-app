@@ -31,7 +31,8 @@ interface ISentencesData {
   showPasteModal: boolean
   pasteText: string
   parsing: boolean
-  testNum: number
+  favTexts: string[]
+  masterTexts: string[]
 }
 
 interface ISentencesMethods {
@@ -81,6 +82,8 @@ Page<ISentencesData, ISentencesMethods>({
     showPasteModal: false,
     pasteText: '',
     parsing: false,
+    favTexts: [],
+    masterTexts: [],
   },
 
   onLoad() {
@@ -104,14 +107,15 @@ Page<ISentencesData, ISentencesMethods>({
       topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1
     })
 
-    console.log('[DEBUG] onLoad: setting empty arrays')
     this.setData({
       allSentences: sentences,
       filteredSentences: sentences,
       topics,
       topicCounts,
-      masteredIds: [],
-      favoriteIds: [],
+      masteredIds: app.globalData.studyData.masteredSentences || [],
+      favoriteIds: app.globalData.studyData.favoriteSentenceIds || [],
+      favTexts: sentences.map(s => (app.globalData.studyData.favoriteSentenceIds || []).indexOf(s.id) >= 0 ? '已收藏' : '收藏'),
+      masterTexts: sentences.map(s => (app.globalData.studyData.masteredSentences || []).indexOf(s.id) >= 0 ? '已掌握' : '掌握'),
     })
   },
 
@@ -164,8 +168,8 @@ Page<ISentencesData, ISentencesMethods>({
     if (mastered.has(idNum)) mastered.delete(idNum)
     else mastered.add(idNum)
     const masteredArr = [...mastered]
-    const testNum = (this.data.testNum || 0) + 1
-    this.setData({ masteredIds: masteredArr, testNum, filteredSentences: this.data.filteredSentences.slice() })
+    const masterTexts = this.data.allSentences.map(s => masteredArr.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
+    this.setData({ masteredIds: masteredArr, masterTexts, filteredSentences: this.data.filteredSentences.slice() })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr
@@ -180,8 +184,8 @@ Page<ISentencesData, ISentencesMethods>({
     if (fav.has(idNum)) fav.delete(idNum)
     else fav.add(idNum)
     const favArr = [...fav]
-    const testNum = (this.data.testNum || 0) + 1
-    this.setData({ favoriteIds: favArr, testNum, filteredSentences: this.data.filteredSentences.slice() })
+    const favTexts = this.data.allSentences.map(s => favArr.indexOf(s.id) >= 0 ? '已收藏' : '收藏')
+    this.setData({ favoriteIds: favArr, favTexts, filteredSentences: this.data.filteredSentences.slice() })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.favoriteSentenceIds = favArr
@@ -351,7 +355,8 @@ Page<ISentencesData, ISentencesMethods>({
         topicCounts: topicCounts2,
         showPasteModal: false,
     parsing: false,
-    testNum: 0,
+    favTexts: [],
+    masterTexts: [],
       })
       this.doFilter()
       const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english
