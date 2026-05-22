@@ -1,13 +1,16 @@
-import { correctTranslation } from '../../utils/api'
+import { correctTranslation, checkHealth } from '../../utils/api'
 import translationsData from '../../data/translations'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
+import { scoreTranslation, ScorerResult } from '../../utils/scorer'
 
 interface ITranslation {
   id: number
   chinese: string
   reference: string
   source: string
+  keywords?: string[]
+  acceptableAnswers?: string[]
 }
 
 interface IDimensions {
@@ -21,9 +24,9 @@ interface ITranslationRecord {
   id: number
   userAnswer: string
   score: number
-  dimensions?: IDimensions
+  dimensions: IDimensions
   suggestions?: string
-  reference?: string
+  reference: string
   date: string
 }
 
@@ -34,7 +37,7 @@ interface ITranslationData {
   userAnswer: string
   result: {
     score: number
-    dimensions?: IDimensions
+    dimensions: IDimensions
     suggestions: string
     reference: string
     show: boolean
@@ -43,7 +46,21 @@ interface ITranslationData {
   questionHistory: ITranslationRecord[]
   completedIds: number[]
   submitting: boolean
+  aiAvailable: boolean
+  aiEnabled: boolean
   darkMode: boolean
+}
+
+function genSuggestions(s: ScorerResult): string {
+  if (s.total >= 90) return '翻译很准确，继续保持！'
+  if (s.total >= 80) return '翻译整体不错，可以尝试更丰富的表达方式！'
+  const parts: string[] = []
+  if (s.dimensions.vocabulary < 60) parts.push('关键词使用不足，注意覆盖题目核心词汇')
+  if (s.dimensions.grammar < 60) parts.push('句子结构与参考译文差异较大，建议调整句式')
+  if (s.dimensions.semantics < 60) parts.push('语义表达不够准确，注意传达原文意思')
+  if (s.dimensions.expression < 60) parts.push('表达不够地道，建议参考英语习惯用法')
+  if (parts.length === 0) return '翻译基本正确，在个别方面还可以提升'
+  return parts.join('；')
 }
 
 Page({
@@ -57,6 +74,8 @@ Page({
     questionHistory: [],
     completedIds: [],
     submitting: false,
+    aiAvailable: false,
+    aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
     darkMode: false,
   },
 
@@ -67,6 +86,10 @@ Page({
     const history = (app.globalData.studyData.translationRecords || []) as ITranslationRecord[]
     const completedIds = [...new Set(history.map(r => r.id))]
     this.setData({ translations: items, history, completedIds })
+
+    checkHealth().then(r => {
+      if (r.apiKey) this.setData({ aiAvailable: true })
+    }).catch(() => {})
   },
 
   onShow() {
@@ -112,24 +135,28 @@ Page({
     this.setData({ submitting: true })
 
     const answer = userAnswer.trim()
-    let score = 0
-    let suggestions = ''
-    let reference = currentItem.reference
-    let dimensions: IDimensions | undefined
+    const local = scoreTranslation(answer, currentItem)
 
-    try {
-      const ai = await correctTranslation(currentItem.chinese, answer)
-      score = ai.score
-      suggestions = ai.suggestions
-      if (ai.reference) reference = ai.reference
-      dimensions = ai.dimensions
-    } catch {
-      score = this.calcScore(answer, reference)
-      suggestions = score >= 90
-        ? '翻译很准确，继续保持！'
-        : score >= 70
-          ? `翻译基本正确。建议参考：${reference}`
-          : `需要改进。参考译文：${reference}`
+    let score = local.total
+    let dimensions = local.dimensions
+    let suggestions = genSuggestions(local)
+    let reference = currentItem.reference
+
+    if (this.data.aiAvailable && this.data.aiEnabled) {
+      try {
+        const ai = await Promise.race([
+          correctTranslation(currentItem.chinese, answer),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
+        ])
+        if (ai.dimensions) dimensions = ai.dimensions
+        if (ai.suggestions) suggestions = ai.suggestions
+        if (ai.reference) reference = ai.reference
+        if (ai.score && Math.abs(ai.score - score) > 15) {
+          score = Math.round((score + ai.score) / 2)
+        }
+      } catch {
+        /* local scoring is the fallback, keep current values */
+      }
     }
 
     const record: ITranslationRecord = {
@@ -174,39 +201,9 @@ Page({
     wx.pageScrollTo({ scrollTop: 0, duration: 200 })
   },
 
-  calcScore(answer: string, ref: string): number {
-    const norm = (s: string) =>
-      s.toLowerCase().replace(/[.,!?;:'"()\-]/g, '').split(/\s+/).filter(Boolean)
-    const aWords = norm(answer)
-    const rWords = norm(ref)
-    if (rWords.length === 0) return 0
-
-    const rSet = new Set(rWords)
-    const aSet = new Set(aWords)
-
-    let unigramHits = 0
-    for (const w of aWords) {
-      if (rSet.has(w)) unigramHits++
-    }
-    const unigramScore = unigramHits / Math.max(rWords.length, aWords.length)
-
-    const toBigrams = (words: string[]) => {
-      const s = new Set<string>()
-      for (let i = 0; i < words.length - 1; i++) {
-        s.add(`${words[i]} ${words[i + 1]}`)
-      }
-      return s
-    }
-    const aBigrams = toBigrams(aWords)
-    const rBigrams = toBigrams(rWords)
-    let bigramHits = 0
-    for (const b of aBigrams) {
-      if (rBigrams.has(b)) bigramHits++
-    }
-    const bigramScore = rBigrams.size > 0
-      ? bigramHits / Math.max(rBigrams.size, aBigrams.size)
-      : 0
-
-    return Math.round((unigramScore * 0.6 + bigramScore * 0.4) * 100)
+  toggleAi() {
+    const val = !this.data.aiEnabled
+    this.setData({ aiEnabled: val })
+    wx.setStorageSync('translationAiEnabled', val)
   },
 })

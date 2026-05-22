@@ -88,3 +88,18 @@ export function generateSentence(params: { word?: string; topic?: string; count?
 export function parseSentences(text: string) {
   return request<GeneratedSentence[]>('/parse_sentences', { text })
 }
+
+export function checkHealth(): Promise<{ status: string; apiKey: boolean }> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}/health`,
+      method: 'GET',
+      timeout: 2000,
+      success: (res) => {
+        if (res.statusCode === 200) resolve(res.data as { status: string; apiKey: boolean })
+        else reject(new Error(`health check failed: ${res.statusCode}`))
+      },
+      fail: (err) => reject(err),
+    })
+  })
+}

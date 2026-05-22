@@ -25,6 +25,10 @@
     <view class="detail-header">
       <view class="back-btn" catchtap="backToList">←</view>
       <text class="detail-title">翻译练习</text>
+      <view class="ai-toggle {{aiAvailable ? '' : 'hidden'}}" catchtap="toggleAi">
+        <text class="ai-label">AI</text>
+        <view class="ai-track {{aiEnabled ? 'on' : ''}}"><view class="ai-thumb"></view></view>
+      </view>
     </view>
 
     <scroll-view class="detail-scroll" scroll-y>
@@ -48,7 +52,7 @@
         </view>
         <view class="rc-bar"><view class="rc-fill" style="width: {{result.score}}%"></view></view>
 
-        <view class="rc-dims" wx:if="{{result.dimensions}}">
+        <view class="rc-dims">
           <view class="rc-dim" wx:for="{{[result.dimensions.vocabulary, result.dimensions.grammar, result.dimensions.semantics, result.dimensions.expression]}}" wx:for-index="i" wx:key="i">
             <text class="rc-dl">{{['词汇', '语法', '语义', '表达'][i]}}</text>
             <view class="rc-dbar"><view class="rc-dfill" style="width: {{item}}%"></view></view>

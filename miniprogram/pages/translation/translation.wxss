@@ -36,6 +36,22 @@
 }
 .detail-title { font-size: 32rpx; font-weight: 700; color: #2d2d4e; flex: 1; }
 
+/* AI Toggle */
+.ai-toggle { display: flex; align-items: center; gap: 8rpx; padding: 4rpx 0; }
+.ai-toggle.hidden { display: none; }
+.ai-label { font-size: 22rpx; font-weight: 600; color: #6a6a8a; }
+.ai-track {
+  width: 72rpx; height: 36rpx; border-radius: 18rpx; background: #ddd;
+  position: relative; transition: background 0.25s;
+}
+.ai-track.on { background: #ff9800; }
+.ai-thumb {
+  width: 28rpx; height: 28rpx; border-radius: 14rpx; background: #fff;
+  position: absolute; top: 4rpx; left: 4rpx; transition: left 0.25s;
+  box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.15);
+}
+.ai-track.on .ai-thumb { left: 40rpx; }
+
 .detail-scroll { padding: 0 36rpx; }
 
 /* Question Card */

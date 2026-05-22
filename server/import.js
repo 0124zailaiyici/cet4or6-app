@@ -126,7 +126,7 @@ function parseListening(lines, year) {
   }
   if (curQ) questions.push(curQ)
 
-  // 清理：去重时检测重复字母 → 顺延给下题；排序；trim 到 4
+  // 清理：去重时检测重复字母 → 顺延给下题
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i]
     const seen = new Set()
@@ -135,7 +135,6 @@ function parseListening(lines, year) {
     for (const o of q.rawOpts) {
       const m = o.match(/^([A-D])\)/)
       if (m && seen.has(m[1])) {
-        // 重复字母 → 属于下题
         overflow.push(o)
       } else {
         if (m) seen.add(m[1])
@@ -144,12 +143,27 @@ function parseListening(lines, year) {
     }
     q.rawOpts = cleaned
     if (overflow.length > 0 && i + 1 < questions.length) {
-      // 顺延给下题（插到开头，保持相对顺序）
       questions[i + 1].rawOpts.unshift(...overflow)
     }
   }
 
-  // 每个题目按字母排序，trim 到 4
+  // 修复 Q6：Q6只有A,B，Q7中找C,D（跳过Q6顺延的A,B）
+  if (questions.length >= 7) {
+    const q6 = questions[5]
+    const q7 = questions[6]
+    if (q6.rawOpts.length === 2 && q7.rawOpts.length >= 4) {
+      const ci = q7.rawOpts.findIndex(o => o.startsWith('C)'))
+      const di = q7.rawOpts.findIndex(o => o.startsWith('D)'))
+      if (ci >= 0 && di >= 0 && ci < di) {
+        // C,D 在 Q7 中，挪到 Q6（从后往前取，避免索引变动）
+        const d = q7.rawOpts.splice(di, 1)[0]
+        const c = q7.rawOpts.splice(ci, 1)[0]
+        q6.rawOpts.push(c, d)
+      }
+    }
+  }
+
+  // 排序，trim 到 4
   for (const q of questions) {
     q.rawOpts.sort((a, b) => a[0].localeCompare(b[0]))
     q.rawOpts = q.rawOpts.slice(0, 4)
