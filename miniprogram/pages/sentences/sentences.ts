@@ -1,5 +1,4 @@
 import sentencesData from '../../data/sentences'
-import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 import { generateSentence, parseSentences } from '../../utils/api'
 
@@ -157,17 +156,17 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   toggleMaster(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as number
-    console.log('[DEBUG] toggleMaster id=', id, 'masteredIds before=', this.data.masteredIds)
-    const mastered = new Set(this.data.masteredIds)
-    if (mastered.has(id)) {
-      mastered.delete(id)
-    } else {
-      mastered.add(id)
-      doCheckIn()
-    }
+    const id = e.currentTarget.dataset.id
+    const idNum = Number(id)
+    const before = this.data.masteredIds
+    const mastered = new Set(before)
+    if (mastered.has(idNum)) mastered.delete(idNum)
+    else mastered.add(idNum)
     const masteredArr = [...mastered]
-    this.setData({ masteredIds: masteredArr })
+    this.setData({
+      masteredIds: masteredArr,
+      filteredSentences: this.data.filteredSentences,
+    })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr
@@ -178,14 +177,14 @@ Page<ISentencesData, ISentencesMethods>({
     const id = e.currentTarget.dataset.id
     const idNum = Number(id)
     const before = this.data.favoriteIds
-    console.log('[DBG] id raw:', id, '| type:', typeof id, '| num:', idNum)
-    console.log('[DBG] before:', JSON.stringify(before))
     const fav = new Set(before)
     if (fav.has(idNum)) fav.delete(idNum)
     else fav.add(idNum)
     const favArr = [...fav]
-    console.log('[DBG] after:', JSON.stringify(favArr))
-    this.setData({ favoriteIds: favArr })
+    this.setData({
+      favoriteIds: favArr,
+      filteredSentences: this.data.filteredSentences,
+    })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.favoriteSentenceIds = favArr

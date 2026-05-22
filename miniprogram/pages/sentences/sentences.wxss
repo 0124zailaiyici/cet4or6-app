@@ -257,12 +257,16 @@
   gap: 28rpx;
 }
 
-.fav-btn, .master-btn, .act-btn {
+.act-btn {
   display: flex;
   align-items: center;
   font-size: 24rpx;
   padding: 6rpx 20rpx;
   border-radius: 16rpx;
+}
+
+.act-btn {
+  border: 2rpx solid rgba(0,0,0,0.1);
 }
 
 .act-btn.on {
