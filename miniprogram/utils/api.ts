@@ -84,6 +84,20 @@ export function aiTranslateWord(word: string): Promise<{ chinese: string }> {
   })
 }
 
+export function aiFullDict(word: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}/dictionary/ai?word=${encodeURIComponent(word)}&full=true`,
+      method: 'GET',
+      success: (res) => {
+        if (res.statusCode === 200) resolve(res.data)
+        else reject(new Error(`AI词典失败 ${res.statusCode}`))
+      },
+      fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
+    })
+  })
+}
+
 export function correctParagraph(prompt: string, userAnswer: string) {
   return request<{ score: number; dimensions: { coherence: number; content: number; language: number }; suggestions: string }>('/correct_paragraph', { prompt, userAnswer })
 }

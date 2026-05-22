@@ -40,6 +40,10 @@
           <text class="word-phonetic" wx:if="{{result.phonetic}}">{{result.phonetic}}</text>
           <text class="word-audio" wx:if="{{result.audio}}" catchtap="playAudio">🔊</text>
         </view>
+        <view class="word-meta">
+          <text class="meta-count">{{result.meanings.length}} 项释义</text>
+          <text class="meta-examples" wx:if="{{exampleCount > 0}}">{{exampleCount}} 条例句</text>
+        </view>
         <view class="word-chinese" wx:if="{{result.chinese}}">
           <text class="chinese-label">{{aiEnabled && aiAvailable ? '🤖' : '🌐'}}</text>
           <text class="chinese-value">{{result.chinese}}</text>
@@ -49,7 +53,7 @@
       <view class="card-body">
         <view class="meaning-group" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
           <view class="pos-row">
-            <text class="pos-badge {{item.partOfSpeech}}">{{item.partOfSpeech}}</text>
+            <text class="pos-badge {{item._posClass}}">{{item.partOfSpeech}}</text>
             <view class="pos-words" wx:if="{{item.synonyms.length > 0}}">
               <text class="pos-label">同义</text>
               <text class="pos-word" wx:for="{{item.synonyms}}" wx:for-index="si" wx:key="si">{{item}}</text>
@@ -60,7 +64,9 @@
               <text class="def-num">{{index + 1}}.</text>
               <view class="def-body">
                 <text class="def-text">{{item.definition}}</text>
+                <text class="def-cn" wx:if="{{item.definitionCn}}">{{item.definitionCn}}</text>
                 <text class="def-example" wx:if="{{item.example}}">{{item.example}}</text>
+                <text class="def-example-cn" wx:if="{{item.exampleCn}}">{{item.exampleCn}}</text>
               </view>
             </view>
           </view>

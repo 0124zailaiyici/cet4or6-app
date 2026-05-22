@@ -155,15 +155,48 @@ app.get('/dictionary', async (req, res) => {
     }
 
     const data = dictRes.value.data;
+    const entry = Array.isArray(data) ? data[0] : data;
     let chinese = '';
     if (transRes.status === 'fulfilled' && transRes.value.data?.responseData?.translatedText) {
       chinese = transRes.value.data.responseData.translatedText;
     }
+    entry.chinese = chinese;
 
-    if (Array.isArray(data) && data[0]) {
-      data[0].chinese = chinese;
-    } else if (data && typeof data === 'object') {
-      data.chinese = chinese;
+    const texts = []
+    if (entry.meanings) {
+      for (const m of entry.meanings) {
+        if (m.definitions) {
+          for (const d of m.definitions) {
+            if (d.definition) texts.push({ key: 'def', text: d.definition })
+            if (d.example) texts.push({ key: 'exp', text: d.example })
+          }
+        }
+      }
+    }
+
+    if (texts.length > 0) {
+      const trs = await Promise.allSettled(texts.map(t =>
+        axios.get(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t.text)}&langpair=en|zh-CN`, { timeout: 5000 })
+      ))
+      let idx = 0
+      for (const m of entry.meanings || []) {
+        if (m.definitions) {
+          for (const d of m.definitions) {
+            if (d.definition) {
+              const r = trs[idx++]
+              if (r.status === 'fulfilled' && r.value.data?.responseData?.translatedText) {
+                d.definitionCn = r.value.data.responseData.translatedText
+              }
+            }
+            if (d.example) {
+              const r = trs[idx++]
+              if (r.status === 'fulfilled' && r.value.data?.responseData?.translatedText) {
+                d.exampleCn = r.value.data.responseData.translatedText
+              }
+            }
+          }
+        }
+      }
     }
 
     dictCache.set(word.toLowerCase(), { data, ts: Date.now() })
@@ -178,16 +211,39 @@ app.get('/dictionary', async (req, res) => {
 });
 
 app.get('/dictionary/ai', async (req, res) => {
-  const { word } = req.query;
+  const { word, full } = req.query;
   if (!word) return res.status(400).json({ error: '缺少 word' });
   if (!API_KEY) return res.status(400).json({ error: 'API Key 未配置' });
 
   try {
-    const chinese = await callDeepSeek([
-      { role: 'system', content: '你是一个英汉词典助手。将用户输入的英文单词翻译成中文，给出2-3个最常见的中文释义，用逗号分隔。只返回中文翻译，不要多余内容。' },
-      { role: 'user', content: word },
-    ], 0.3);
-    res.json({ chinese });
+    if (full === 'true') {
+      const result = await callDeepSeek([
+        { role: 'system', content: `你是一个英汉词典。查询英文单词"${word}"，返回如下格式的JSON（只返回JSON，不要markdown）：
+{
+  "word": "${word}",
+  "phonetic": "音标",
+  "audio": "",
+  "meanings": [
+    {
+      "partOfSpeech": "词性（中文）",
+      "definitions": [
+        { "definition": "英文释义", "definitionCn": "中文释义", "example": "英文例句", "exampleCn": "例句中文翻译" }
+      ]
+    }
+  ]
+}
+每个词性最多3个义项，释义和例句都必须有英文原文和中文翻译。` },
+        { role: 'user', content: word },
+      ], 0.3);
+      const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      res.json(JSON.parse(cleaned));
+    } else {
+      const chinese = await callDeepSeek([
+        { role: 'system', content: '你是一个英汉词典助手。将用户输入的英文单词翻译成中文，给出2-3个最常见的中文释义，用逗号分隔。只返回中文翻译，不要多余内容。' },
+        { role: 'user', content: word },
+      ], 0.3);
+      res.json({ chinese });
+    }
   } catch (err) {
     res.status(500).json({ error: 'AI 翻译失败', detail: err.message });
   }

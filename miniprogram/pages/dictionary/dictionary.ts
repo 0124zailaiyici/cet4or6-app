@@ -1,11 +1,12 @@
-import { lookupWord, checkHealth, aiTranslateWord } from '../../utils/api'
+import { lookupWord, checkHealth, aiTranslateWord, aiFullDict } from '../../utils/api'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IMeaning {
   partOfSpeech: string
+  _posClass: string
   synonyms: string[]
   antonyms: string[]
-  definitions: { definition: string; example?: string }[]
+  definitions: { definition: string; example?: string; definitionCn?: string; exampleCn?: string }[]
 }
 
 interface IWordResult {
@@ -26,6 +27,18 @@ interface IDictData {
   darkMode: boolean
   aiAvailable: boolean
   aiEnabled: boolean
+  exampleCount: number
+}
+
+const POS_MAP: Record<string, string> = {
+  '名词': 'noun', 'noun': 'noun',
+  '动词': 'verb', 'verb': 'verb',
+  '形容词': 'adjective', 'adjective': 'adjective',
+  '副词': 'adverb', 'adverb': 'adverb',
+  '介词': 'preposition', 'preposition': 'preposition',
+  '连词': 'conjunction', 'conjunction': 'conjunction',
+  '代词': 'pronoun', 'pronoun': 'pronoun',
+  '感叹词': 'interjection', 'interjection': 'interjection',
 }
 
 Page<IDictData>({
@@ -38,6 +51,7 @@ Page<IDictData>({
     darkMode: false,
     aiAvailable: false,
     aiEnabled: true,
+    exampleCount: 0,
   },
 
   onLoad() {
@@ -72,37 +86,44 @@ Page<IDictData>({
     if (word) this.setData({ query: word })
 
     try {
-      const data = await lookupWord(q)
-      const entry = Array.isArray(data) ? data[0] : data
-      const phonetics = entry.phonetics || []
-      const phonetic = entry.phonetic || phonetics.find((p: any) => p.text)?.text || ''
-      const audio = phonetics.find((p: any) => p.audio)?.audio || ''
+      let result: IWordResult
 
-      let chinese = entry.chinese || ''
       if (this.data.aiAvailable && this.data.aiEnabled) {
-        try {
-          const ai = await aiTranslateWord(q)
-          if (ai.chinese) chinese = ai.chinese
-        } catch {}
-      }
+        const ai = await aiFullDict(q)
+        result = ai as IWordResult
+        if (result.meanings) {
+          result.meanings.forEach(m => { m._posClass = POS_MAP[m.partOfSpeech] || m.partOfSpeech })
+        }
+      } else {
+        const data = await lookupWord(q)
+        const entry = Array.isArray(data) ? data[0] : data
+        const phonetics = entry.phonetics || []
+        const phonetic = entry.phonetic || phonetics.find((p: any) => p.text)?.text || ''
+        const audio = phonetics.find((p: any) => p.audio)?.audio || ''
+        const chinese = entry.chinese || ''
 
-      const result: IWordResult = {
-        word: entry.word,
-        phonetic,
-        audio,
-        chinese,
-        meanings: entry.meanings?.map((m: any) => ({
-          partOfSpeech: m.partOfSpeech,
-          synonyms: m.synonyms?.slice(0, 5) || [],
-          antonyms: m.antonyms?.slice(0, 5) || [],
-          definitions: m.definitions?.slice(0, 3).map((d: any) => ({
-            definition: d.definition,
-            example: d.example || '',
+        result = {
+          word: entry.word,
+          phonetic,
+          audio,
+          chinese,
+          meanings: entry.meanings?.map((m: any) => ({
+            partOfSpeech: m.partOfSpeech,
+            _posClass: POS_MAP[m.partOfSpeech] || m.partOfSpeech,
+            synonyms: m.synonyms?.slice(0, 5) || [],
+            antonyms: m.antonyms?.slice(0, 5) || [],
+            definitions: m.definitions?.slice(0, 3).map((d: any) => ({
+              definition: d.definition,
+              definitionCn: d.definitionCn || '',
+              example: d.example || '',
+              exampleCn: d.exampleCn || '',
+            })) || [],
           })) || [],
-        })) || [],
-        sourceUrls: entry.sourceUrls || [],
+          sourceUrls: entry.sourceUrls || [],
+        }
       }
-      this.setData({ result, loading: false, error: '' })
+      const exampleCount = result.meanings.reduce((s, m) => s + m.definitions.filter(d => d.example).length, 0)
+      this.setData({ result, exampleCount, loading: false, error: '' })
 
       const history = this.data.history
       if (!history.includes(q.toLowerCase())) {
