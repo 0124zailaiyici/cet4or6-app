@@ -144,7 +144,7 @@ function parseReading(lines, year) {
       }
       const questions = cleanLines.filter(l => /^\d+\./.test(l)).map(s => sanitize(s))
       if (passage.length > 30 || options.length > 0) {
-        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 4000), questions, options })
+        passages.push({ id: Date.now() + passages.length, title: `选词填空 ${year}`, sectionType: 'A', passage: passage.slice(0, 8000), questions, options })
       }
       continue
     }
@@ -161,7 +161,7 @@ function parseReading(lines, year) {
         const text = l.replace(/^[A-Z][\)）]\s*/, '').trim()
         return text.length > 20  // 短的是干扰项（如选项），长的是段落
       })
-      const article = sanitize(articleLines.join('\n')).slice(0, 3000)
+      const article = sanitize(articleLines.join('\n')).slice(0, 6000)
       if (statements.length > 0 || article.length > 50) {
         passages.push({ id: Date.now() + passages.length, title: `长篇阅读匹配 ${year}`, sectionType: 'B', passage: article || '（含10条陈述，请匹配段落）', questions: statements, options: [], choices: [] })
       }
@@ -216,7 +216,7 @@ function parseReading(lines, year) {
         if (passageText.length > 30) {
           const pNum = sub.match(/Passage\s+(One|Two|Three)/i)?.[1] || ''
           const pLabel = { One: '一', Two: '二', Three: '三' }[pNum] || ''
-          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 4000), questions: stems, options: [], choices })
+          passages.push({ id: Date.now() + passages.length, title: `仔细阅读 ${year} 第${pLabel}篇`, sectionType: 'C', passage: passageText.slice(0, 8000), questions: stems, options: [], choices })
         }
       }
     }
