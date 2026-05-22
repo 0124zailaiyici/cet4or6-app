@@ -146,18 +146,11 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     pages.push({ type: 'q', ...currentQ, opts: currentQ.opts.map(o => o.t) })
   }
 
-  // 每题去重（保留首次出现的字母）
+  // 每题直接使用导入的原始选项（导入已做了去重）
   for (const p of pages) {
     if (p.type !== 'q' || !p.opts) continue
-    const seen = new Set<string>()
-    const clean: string[] = []
-    for (const o of p.opts) {
-      const key = o.match(/^[A-D]/)?.[0] || ''
-      if (!key || seen.has(key)) continue
-      seen.add(key)
-      clean.push(o)
-    }
-    p.opts = clean
+    // 只保留非空选项
+    p.opts = p.opts.filter(o => o.length > 0)
   }
 
   if (pages.every(p => p.type === 'dir')) return []

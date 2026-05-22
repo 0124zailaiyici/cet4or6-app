@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>翻译练习 - UI 改版原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f5;
+    display: flex; justify-content: center; padding: 24px 12px;
+  }
+  .phone {
+    width: 375px; min-height: 700px; background: #f8f9fc;
+    border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    overflow: hidden; position: relative;
+  }
+  .notch {
+    height: 44px; background: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #999; letter-spacing: 2px;
+  }
+  .page { padding-bottom: 24px; min-height: 656px; }
+
+  /* ── Header ── */
+  .header {
+    position: relative; overflow: hidden; padding: 36px 28px 28px; color: #fff;
+    background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+    border-radius: 0 0 36px 36px;
+  }
+  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .header .sub { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+
+  /* ── Progress ── */
+  .progress-wrap { margin-top: 14px; }
+  .progress-row { display: flex; align-items: center; gap: 10px; }
+  .progress-label { font-size: 12px; opacity: 0.75; white-space: nowrap; }
+  .progress-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.25); overflow: hidden; }
+  .progress-fill { height: 100%; width: 45%; border-radius: 3px; background: #fff; transition: width 0.6s; }
+  .progress-pct { font-size: 13px; font-weight: 700; opacity: 0.9; min-width: 32px; text-align: right; }
+
+  /* ── List ── */
+  .list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 2px 12px rgba(255,152,0,0.05);
+    display: flex; align-items: stretch; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .card:nth-child(1) { animation-delay: 0ms; }
+  .card:nth-child(2) { animation-delay: 80ms; }
+  .card:nth-child(3) { animation-delay: 160ms; }
+  .card:nth-child(4) { animation-delay: 240ms; }
+  .card:active { transform: scale(0.97); box-shadow: 0 1px 6px rgba(255,152,0,0.08); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-accent {
+    width: 4px; flex-shrink: 0;
+    background: linear-gradient(180deg, #ffb74d, #ff9800);
+  }
+  .card-accent.done { background: linear-gradient(180deg, #81c784, #66bb6a); }
+  .card-accent.paragraph { background: linear-gradient(180deg, #ce93d8, #ab47bc); }
+
+  .card-body { flex: 1; padding: 14px 14px 14px 12px; min-width: 0; }
+  .card-title { font-size: 14px; line-height: 1.6; color: #2d2d4e; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+
+  .tag {
+    display: inline-block; font-size: 10px; padding: 1px 8px; border-radius: 8px;
+    font-weight: 600; letter-spacing: 0.3px;
+  }
+  .tag-exam { background: rgba(255,152,0,0.1); color: #e65100; }
+  .tag-sim  { background: rgba(33,150,243,0.1); color: #1565c0; }
+  .tag-para { background: rgba(171,71,188,0.1); color: #8e24aa; }
+
+  .card-status {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; flex-shrink: 0; font-size: 18px;
+  }
+  .card-status .done { color: #81c784; }
+  .card-status .wait { color: #ccc; }
+
+  /* ── Detail Header ── */
+  .detail-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; background: #fff; border-bottom: 1px solid #f0f0f0;
+  }
+  .back { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #ff9800; background: rgba(255,152,0,0.06); cursor: pointer; }
+  .dh-title { flex: 1; font-size: 16px; font-weight: 700; color: #2d2d4e; }
+
+  .ai-switch { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .ai-label { font-size: 11px; font-weight: 600; color: #999; }
+  .ai-track { width: 40px; height: 20px; border-radius: 10px; background: #ddd; position: relative; transition: background 0.25s; }
+  .ai-track.on { background: #ff9800; }
+  .ai-thumb { width: 16px; height: 16px; border-radius: 8px; background: #fff; position: absolute; top: 2px; left: 2px; transition: left 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .ai-track.on .ai-thumb { left: 22px; }
+
+  /* ── Detail Scroll ── */
+  .detail-scroll { padding: 16px 20px; }
+
+  /* ── Question Card ── */
+  .q-card {
+    background: #fff; border-radius: 16px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(255,152,0,0.05); margin-bottom: 14px;
+  }
+  .q-label { font-size: 12px; color: #999; margin-bottom: 8px; }
+  .q-label .ico { margin-right: 4px; }
+  .q-text { font-size: 16px; line-height: 1.8; color: #2d2d4e; font-weight: 500; }
+
+  /* ── Answer Area ── */
+  .answer-wrap { margin-bottom: 14px; }
+  .answer-input {
+    width: 100%; min-height: 120px; padding: 16px; border-radius: 14px;
+    border: 2px solid #ffe0e0; background: #fff; font-size: 14px; line-height: 1.7;
+    color: #2d2d4e; outline: none; resize: none; transition: border-color 0.2s;
+  }
+  .answer-input:focus { border-color: #ffb74d; }
+  .answer-foot { display: flex; justify-content: flex-end; padding: 4px 4px 0; }
+  .word-count { font-size: 11px; color: #bbb; }
+
+  /* ── Submit ── */
+  .submit-btn {
+    width: 100%; height: 48px; border-radius: 24px;
+    background: linear-gradient(135deg, #ffb74d, #ff9800); color: #fff;
+    font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; box-shadow: 0 4px 16px rgba(255,152,0,0.25);
+    cursor: pointer; transition: opacity 0.3s;
+  }
+  .submit-btn:active { opacity: 0.8; }
+
+  /* ── Result Card ── */
+  .result-card {
+    background: #fff; border-radius: 16px; padding: 24px 20px;
+    box-shadow: 0 2px 16px rgba(255,152,0,0.06); margin-bottom: 14px;
+    animation: slideUp 0.45s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .rc-ring-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
+  .rc-ring {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: conic-gradient(#ff9800 0deg 306deg, #f0f0f0 306deg 360deg);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .rc-ring-inner {
+    width: 76px; height: 76px; border-radius: 50%; background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .rc-ring-num { font-size: 32px; font-weight: 800; color: #ff9800; line-height: 1; }
+  .rc-ring-label { font-size: 11px; color: #999; }
+
+  .rc-dims { margin-bottom: 16px; }
+  .rc-dim { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .rc-dl { width: 36px; font-size: 11px; color: #888; text-align: right; flex-shrink: 0; }
+  .rc-dbar { flex: 1; height: 8px; border-radius: 4px; background: #f0f0f0; overflow: hidden; }
+  .rc-dfill { height: 100%; border-radius: 4px; transition: width 0.6s; }
+  .rc-dfill.good { background: linear-gradient(90deg, #81c784, #66bb6a); }
+  .rc-dfill.mid  { background: linear-gradient(90deg, #ffb74d, #ff9800); }
+  .rc-dfill.low  { background: linear-gradient(90deg, #ef9a9a, #e57373); }
+  .rc-dn { width: 30px; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
+
+  .rc-section { margin-bottom: 14px; }
+  .rc-section-title { font-size: 11px; color: #bbb; margin-bottom: 6px; letter-spacing: 0.5px; }
+  .rc-suggest {
+    background: #fff8e6; border-radius: 10px; padding: 12px 14px;
+    font-size: 13px; line-height: 1.7; color: #5d4037;
+  }
+  .rc-ref {
+    background: #f8f9ff; border-radius: 10px; padding: 12px 14px; display: flex;
+    align-items: flex-start; gap: 8px; cursor: pointer; transition: background 0.2s;
+  }
+  .rc-ref:active { background: #eef0ff; }
+  .rc-ref-text { flex: 1; font-size: 13px; line-height: 1.7; color: #555; }
+  .rc-ref-tts { width: 28px; height: 28px; border-radius: 14px; background: rgba(255,152,0,0.08); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #ff9800; flex-shrink: 0; }
+
+  /* ── Action ── */
+  .action-bar { margin-bottom: 16px; }
+  .retry-btn {
+    width: 100%; height: 44px; border-radius: 22px;
+    border: 2px solid #ff9800; color: #ff9800;
+    font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .retry-btn:active { background: rgba(255,152,0,0.05); }
+
+  /* ── History ── */
+  .history-area { margin-bottom: 8px; }
+  .h-title { font-size: 13px; font-weight: 600; color: #2d2d4e; margin-bottom: 10px; }
+
+  .h-chart { margin-bottom: 12px; display: flex; align-items: flex-end; gap: 6px; height: 40px; }
+  .h-bar {
+    flex: 1; border-radius: 4px 4px 0 0; min-height: 4px;
+    transition: height 0.4s; position: relative; cursor: pointer;
+  }
+  .h-bar .h-bar-label {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; font-weight: 600; color: #999; white-space: nowrap;
+  }
+
+  .h-item {
+    background: #fff; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px;
+  }
+  .h-num { font-size: 11px; color: #bbb; width: 36px; flex-shrink: 0; }
+  .h-body { flex: 1; min-width: 0; }
+  .h-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+  .h-date { font-size: 11px; color: #bbb; }
+  .h-score { font-size: 13px; font-weight: 700; padding: 0 8px; border-radius: 6px; }
+  .h-score.good { color: #66bb6a; background: rgba(102,187,106,0.06); }
+  .h-score.mid  { color: #ff9800; background: rgba(255,152,0,0.06); }
+  .h-score.low  { color: #e57373; background: rgba(229,115,115,0.06); }
+  .h-answer { font-size: 12px; color: #999; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .h-trend { margin-left: auto; font-size: 14px; }
+
+  /* ── Tabs ── */
+  .tab-bar { display: flex; margin-bottom: 4px; }
+  .tab { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; font-weight: 600; color: #bbb; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+  .tab.active { color: #ff9800; border-bottom-color: #ff9800; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  hr { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch">TRANSLATION REDESIGN v2</div>
+  <div class="page">
+
+    <!-- ════════ TAB 1: 列表 ════════ -->
+    <div id="tab-list" class="section active">
+      <div class="header">
+        <h1>翻译练习</h1>
+        <div class="sub">已完成 5 / 11</div>
+        <div class="progress-wrap">
+          <div class="progress-row">
+            <span class="progress-label">学习进度</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+            <span class="progress-pct">45%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="list">
+        <div class="card">
+          <div class="card-accent done"></div>
+          <div class="card-body">
+            <div class="card-title">中国是一个历史悠久、文化丰富的国家。</div>
+            <div class="card-meta">
+              <span class="tag tag-exam">真题</span>
+            </div>
+          </div>
+          <div class="card-status"><span class="done" style="color:#81c784">✓</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent done"></div>
+          <div class="card-body">
+            <div class="card-title">越来越多的人意识到环境保护的重要性。</div>
+            <div class="card-meta">
+              <span class="tag tag-sim">模拟</span>
+            </div>
+          </div>
+          <div class="card-status"><span class="done" style="color:#81c784">✓</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent"></div>
+          <div class="card-body">
+            <div class="card-title">春节是中国最重要的传统节日，家人会聚在一起吃年夜饭。</div>
+            <div class="card-meta">
+              <span class="tag tag-exam">真题</span>
+            </div>
+          </div>
+          <div class="card-status"><span style="color:#ccc">⏳</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent done"></div>
+          <div class="card-body">
+            <div class="card-title">随着互联网的发展，移动支付在中国变得越来越普遍。</div>
+            <div class="card-meta">
+              <span class="tag tag-exam">真题</span>
+            </div>
+          </div>
+          <div class="card-status"><span class="done" style="color:#81c784">✓</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent"></div>
+          <div class="card-body">
+            <div class="card-title">据报道，今年参加高考的学生人数创下了历史新高。</div>
+            <div class="card-meta">
+              <span class="tag tag-sim">模拟</span>
+            </div>
+          </div>
+          <div class="card-status"><span style="color:#ccc">⏳</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent paragraph"></div>
+          <div class="card-body">
+            <div class="card-title">舞狮作为中国传统民间表演已有2000多年历史…</div>
+            <div class="card-meta">
+              <span class="tag tag-para">段落</span>
+              <span class="tag tag-exam">真题</span>
+            </div>
+          </div>
+          <div class="card-status"><span style="color:#ccc">⏳</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ TAB 2: 答题 ════════ -->
+    <div id="tab-detail" class="section">
+
+      <div class="detail-header">
+        <div class="back" onclick="switchTab('tab-list')">←</div>
+        <div class="dh-title">翻译练习</div>
+        <div class="ai-switch" onclick="this.querySelector('.ai-track').classList.toggle('on')">
+          <span class="ai-label">AI</span>
+          <div class="ai-track on"><div class="ai-thumb"></div></div>
+        </div>
+      </div>
+
+      <div class="detail-scroll">
+
+        <!-- 题目 -->
+        <div class="q-card">
+          <div class="q-label"><span class="ico">📝</span> 请翻译成英文：</div>
+          <div class="q-text">中国是一个历史悠久、文化丰富的国家。</div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="answer-wrap">
+          <textarea class="answer-input" placeholder="在此输入你的翻译…" maxlength="500" oninput="document.getElementById('wc').textContent=this.value.length"></textarea>
+          <div class="answer-foot"><span class="word-count"><span id="wc">0</span> / 500</span></div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <div class="submit-btn" onclick="document.getElementById('result-section').classList.remove('hidden'); document.getElementById('result-section').classList.add('result-card'); this.textContent='评分中…'; setTimeout(()=>{this.textContent='提交评分'},800)">提交评分</div>
+
+        <!-- 结果卡片 (初始隐藏) -->
+        <div id="result-section" style="display:none">
+          <div class="result-card">
+            <!-- 环形分数 -->
+            <div class="rc-ring-wrap">
+              <div class="rc-ring">
+                <div class="rc-ring-inner">
+                  <span class="rc-ring-num">85</span>
+                  <span class="rc-ring-label">分</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 维度 -->
+            <div class="rc-dims">
+              <div class="rc-dim">
+                <span class="rc-dl">词汇</span>
+                <div class="rc-dbar"><div class="rc-dfill mid" style="width:70%"></div></div>
+                <span class="rc-dn" style="color:#ff9800">70</span>
+              </div>
+              <div class="rc-dim">
+                <span class="rc-dl">语法</span>
+                <div class="rc-dbar"><div class="rc-dfill good" style="width:85%"></div></div>
+                <span class="rc-dn" style="color:#66bb6a">85</span>
+              </div>
+              <div class="rc-dim">
+                <span class="rc-dl">语义</span>
+                <div class="rc-dbar"><div class="rc-dfill good" style="width:92%"></div></div>
+                <span class="rc-dn" style="color:#66bb6a">92</span>
+              </div>
+              <div class="rc-dim">
+                <span class="rc-dl">表达</span>
+                <div class="rc-dbar"><div class="rc-dfill mid" style="width:78%"></div></div>
+                <span class="rc-dn" style="color:#ff9800">78</span>
+              </div>
+            </div>
+
+            <!-- 修改建议 -->
+            <div class="rc-section">
+              <div class="rc-section-title">修改建议</div>
+              <div class="rc-suggest">
+                关键词 "历史悠久" 和 "文化丰富" 已准确使用。建议将 "is a country with" 改为 "is a nation that boasts" 使表达更丰富。
+              </div>
+            </div>
+
+            <!-- 参考译文 + 朗读 -->
+            <div class="rc-section">
+              <div class="rc-section-title">参考译文</div>
+              <div class="rc-ref">
+                <span class="rc-ref-text">China is a country with a long history and rich culture.</span>
+                <span class="rc-ref-tts">🔊</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 重做 -->
+          <div class="action-bar">
+            <div class="retry-btn">重新翻译</div>
+          </div>
+
+          <!-- 历史记录 -->
+          <div class="history-area">
+            <div class="h-title">历史记录</div>
+
+            <!-- 趋势小折线 (CSS bars 模拟) -->
+            <div class="h-chart">
+              <div class="h-bar" style="height:20px;background:#e57373"><span class="h-bar-label">62</span></div>
+              <div class="h-bar" style="height:28px;background:#ffb74d"><span class="h-bar-label">70</span></div>
+              <div class="h-bar" style="height:30px;background:#ffb74d"><span class="h-bar-label">73</span></div>
+              <div class="h-bar" style="height:34px;background:#81c784"><span class="h-bar-label">85</span></div>
+            </div>
+
+            <div class="h-item">
+              <span class="h-num">#4</span>
+              <div class="h-body">
+                <div class="h-head">
+                  <span class="h-date">2026·05·22</span>
+                  <span class="h-score good">85</span>
+                </div>
+                <div class="h-answer">China is a country with a long history and rich culture.</div>
+              </div>
+              <span class="h-trend">↑</span>
+            </div>
+
+            <div class="h-item">
+              <span class="h-num">#3</span>
+              <div class="h-body">
+                <div class="h-head">
+                  <span class="h-date">2026·05·20</span>
+                  <span class="h-score mid">73</span>
+                </div>
+                <div class="h-answer">China is a nation which has a long history and rich culture.</div>
+              </div>
+              <span class="h-trend">↑</span>
+            </div>
+
+            <div class="h-item">
+              <span class="h-num">#2</span>
+              <div class="h-body">
+                <div class="h-head">
+                  <span class="h-date">2026·05·18</span>
+                  <span class="h-score mid">70</span>
+                </div>
+                <div class="h-answer">China is a country with long history and rich cultural.</div>
+              </div>
+              <span class="h-trend">↑</span>
+            </div>
+
+            <div class="h-item">
+              <span class="h-num">#1</span>
+              <div class="h-body">
+                <div class="h-head">
+                  <span class="h-date">2026·05·15</span>
+                  <span class="h-score low">62</span>
+                </div>
+                <div class="h-answer">China have long history and rich culture.</div>
+              </div>
+              <span class="h-trend">—</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /detail-scroll -->
+    </div>
+
+    <!-- ════════ Tab Bar ════════ -->
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('tab-list')">📋 题目列表</div>
+      <div class="tab" onclick="switchTab('tab-detail')">✏️ 答题模式</div>
+    </div>
+
+  </div><!-- /page -->
+</div><!-- /phone -->
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
