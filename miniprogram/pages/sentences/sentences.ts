@@ -87,14 +87,16 @@ Page<ISentencesData, ISentencesMethods>({
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
 
-    const sysInfo = wx.getSystemInfoSync()
-    const pxPerRpx = sysInfo.windowWidth / 750
-    const headerH = Math.ceil(310 * pxPerRpx)
-    const topicH = Math.ceil(80 * pxPerRpx)
-    const modeH = Math.ceil(90 * pxPerRpx)
-    const sbH = sysInfo.statusBarHeight || 20
-    const scrollH = Math.floor(sysInfo.windowHeight - headerH - topicH - modeH - sbH - 10)
-    this.setData({ scrollHeight: scrollH > 200 ? scrollH : 400 })
+    let scrollH = 400
+    try {
+      const win = wx.getWindowInfo()
+      const dev = wx.getDeviceInfo()
+      const px = win.windowWidth / 750
+      scrollH = Math.floor(win.windowHeight - 310 * px - 80 * px - 90 * px - (dev.statusBarHeight || 20) - 10)
+      if (scrollH < 200) scrollH = 400
+    } catch (_) {}
+
+    this.setData({ scrollHeight: scrollH })
     const sentences = sentencesData as ISentence[]
     const topics = [...new Set(sentences.map(s => s.topic))]
     topics.unshift('全部')
