@@ -35,6 +35,8 @@ interface IReadingData {
   activeStmt: number | null
   matchCount: number
   availLetters: string[]
+  // Section C
+  cAnswers: Record<number, string>
   darkMode: boolean
   optionLetters: string[]
   touchStartX: number
@@ -55,6 +57,9 @@ interface IReadingMethods {
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
+  // Section C
+  onChoiceTap(e: WechatMiniprogram.TouchEvent): void
+  saveCAnswer(): void
   // Section B
   formatBPassage(text: string): string[]
   selectStmt(e: WechatMiniprogram.TouchEvent): void
@@ -84,6 +89,7 @@ Page<IReadingData, IReadingMethods>({
     activeStmt: null,
     matchCount: 0,
     availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
+    cAnswers: {},
   },
 
   onLoad() {
@@ -109,6 +115,7 @@ Page<IReadingData, IReadingMethods>({
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
       const matchSaved = saved?.matchAnswers || {}
+      const cAnswerSaved = saved?.cAnswers || {}
       const bPages: string[][] = []
       if (item.sectionType === 'B' && item.questions.length > 0) {
         for (let i = 0; i < item.questions.length; i += 5) bPages.push(item.questions.slice(i, i + 5))
@@ -123,6 +130,7 @@ Page<IReadingData, IReadingMethods>({
         matchAnswers: matchSaved,
         activeStmt: null,
         availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(matchSaved).includes(l)),
+        cAnswers: cAnswerSaved,
       })
     }
   },
@@ -219,6 +227,7 @@ Page<IReadingData, IReadingMethods>({
       blankAnswers: { ...this.data.blankAnswers },
       usedFlags: [...this.data.usedFlags],
       matchAnswers: existing.matchAnswers || {},
+      cAnswers: existing.cAnswers || {},
     }
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
@@ -283,6 +292,30 @@ Page<IReadingData, IReadingMethods>({
     const app = getApp<IAppOption>()
     const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
     existing.matchAnswers = { ...this.data.matchAnswers }
+    app.globalData.studyData.readingAnswers[id] = existing
+    wx.setStorageSync('studyData', app.globalData.studyData)
+  },
+
+  // ===== Section C =====
+  onChoiceTap(e: WechatMiniprogram.TouchEvent) {
+    const choice = e.currentTarget.dataset.choice as string
+    const idx = this.data.currentQ
+    const ca = { ...this.data.cAnswers }
+    if (ca[idx] === choice) {
+      delete ca[idx]
+    } else {
+      ca[idx] = choice
+    }
+    this.setData({ cAnswers: ca })
+    this.saveCAnswer()
+  },
+
+  saveCAnswer() {
+    const id = this.data.current?.id
+    if (!id) return
+    const app = getApp<IAppOption>()
+    const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
+    existing.cAnswers = { ...this.data.cAnswers }
     app.globalData.studyData.readingAnswers[id] = existing
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
