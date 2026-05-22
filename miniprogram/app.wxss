@@ -2,12 +2,22 @@ page, .page {
   --shadow: rgba(255, 158, 181, 0.1);
   --border: #ffd9e0;
   --white: #ffffff;
+  --text-primary: #2d2d4e;
+  --text-secondary: #8a7a9a;
+  --card-bg: #ffffff;
+  --tag-bg: #fff0f3;
+  --pink: #ff6b8a;
 }
 
 .dark-theme {
   --shadow: rgba(0, 0, 0, 0.3);
   --border: #3a3a5a;
   --white: #1e1e38;
+  --text-primary: #e0d0e8;
+  --text-secondary: #a090b0;
+  --card-bg: #1e1e38;
+  --tag-bg: #2a2a4a;
+  --pink: #ff6b8a;
 }
 
 page {
