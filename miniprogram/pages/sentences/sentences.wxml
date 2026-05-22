@@ -4,46 +4,62 @@
     <view class="sh-content">
       <view class="sh-top">
         <text class="sh-title">语境句子</text>
-        <view class="sh-actions">
-          <view class="sh-btn" catchtap="goDict">📖 查词</view>
-          <text class="sh-counter">{{masteredIds.length}}/{{allSentences.length}}</text>
-        </view>
+        <text class="sh-counter">{{masteredIds.length}}/{{allSentences.length}}</text>
       </view>
       <view class="search-box">
         <text class="sb-icon">🔍</text>
         <input class="sb-input" placeholder="搜索句子或关键词…" value="{{searchQuery}}" bindinput="onSearchInput" confirm-type="search" />
         <view class="sb-clear" wx:if="{{searchQuery}}" catchtap="clearSearch">✕</view>
       </view>
+      <view class="sh-actions">
+        <view class="sh-btn" catchtap="goDict">📖 查词</view>
+        <view class="sh-btn" catchtap="openPasteModal">📋 导入</view>
+        <view class="sh-btn sh-btn-primary" catchtap="openGenModal">✨ AI生成</view>
+      </view>
     </view>
   </view>
 
-  <scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}">
-    <view class="topic-bar">
-      <view class="topic-pill {{currentTopic === item ? 'active' : ''}}" wx:for="{{topics}}" wx:key="*this" data-topic="{{item}}" catchtap="filterByTopic">{{item}}</view>
-    </view>
-  </scroll-view>
+  <view class="topic-section">
+    <scroll-view class="topic-scroll" scroll-x>
+      <view class="topic-bar">
+        <view class="topic-pill {{currentTopic === item ? 'active' : ''}}" wx:for="{{topics}}" wx:key="*this" data-topic="{{item}}" catchtap="filterByTopic">
+          {{item}}<text class="topic-count" wx:if="{{item === '全部'}}">{{allSentences.length}}</text>
+          <text class="topic-count" wx:elif="{{topicCounts[item]}}">{{topicCounts[item]}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
 
-  <scroll-view class="card-scroll" scroll-y>
+  <view class="mode-bar">
+    <view class="mode-btn {{viewMode === 'list' ? 'active' : ''}}" data-mode="list" catchtap="switchMode">📋 列表浏览</view>
+    <view class="mode-btn {{viewMode === 'immersion' ? 'active' : ''}}" data-mode="immersion" catchtap="switchMode">🎯 沉浸学习</view>
+  </view>
+
+  <scroll-view class="card-scroll" scroll-y wx:if="{{viewMode === 'list'}}" style="height: {{scrollHeight}}px;">
     <view class="card-list">
       <view class="empty-state" wx:if="{{filteredSentences.length === 0}}">
-        <text class="empty-emoji">🔍</text>
-        <text class="empty-text">没有匹配的句子</text>
-        <text class="empty-hint">试试其他关键词</text>
+        <text class="empty-icon">📭</text>
+        <text class="empty-title">还没有匹配的句子</text>
+        <text class="empty-desc">试试其他关键词，或通过 AI 生成</text>
+        <view class="empty-actions">
+          <view class="empty-btn gen" catchtap="openGenModal">✨ AI 生成</view>
+          <view class="empty-btn paste" catchtap="openPasteModal">📋 导入文本</view>
+        </view>
       </view>
 
-      <view class="s-card {{masteredIds.indexOf(item.id) !== -1 ? 'done' : ''}} {{favoriteIds.indexOf(item.id) !== -1 ? 'fav' : ''}}" wx:for="{{filteredSentences}}" wx:key="id" data-id="{{item.id}}" catchtap="toggleExpand">
+      <view class="s-card" wx:for="{{filteredSentences}}" wx:key="id">
         <view class="sc-main">
           <view class="sc-num">{{index + 1}}</view>
           <view class="sc-body">
             <view class="sc-english">
               <rich-text nodes="{{highlightText(item.english, item.keywords)}}"></rich-text>
             </view>
-            <view class="sc-chinese" wx:if="{{expandedIds.indexOf(item.id) !== -1}}">{{item.chinese}}</view>
+            <view class="sc-chinese">{{item.chinese}}</view>
             <view class="sc-bottom">
               <view class="sc-tag">{{item.topic}}</view>
               <view class="sc-actions">
-                <view class="sc-fav {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(item.id) !== -1 ? '★' : '☆'}}</view>
-                <view class="sc-master {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">{{masteredIds.indexOf(item.id) !== -1 ? '✓' : '○'}}</view>
+                <view class="fav-btn {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleFavorite">收藏</view>
+                <view class="master-btn {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleMaster">掌握</view>
               </view>
             </view>
           </view>
@@ -51,4 +67,71 @@
       </view>
     </view>
   </scroll-view>
+
+  <view class="immersion-area" wx:if="{{viewMode === 'immersion' && filteredSentences.length > 0}}">
+    <view class="imm-card">
+      <view class="imm-num">{{immersionIndex + 1}} / {{filteredSentences.length}}</view>
+      <view class="imm-english">
+        <rich-text nodes="{{highlightText(filteredSentences[immersionIndex].english, filteredSentences[immersionIndex].keywords)}}"></rich-text>
+      </view>
+      <view class="imm-chinese">{{filteredSentences[immersionIndex].chinese}}</view>
+      <view class="imm-actions">
+        <view class="imm-btn fav {{favoriteIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? 'on' : ''}}" data-id="{{filteredSentences[immersionIndex].id}}" bindtap="toggleFavorite">收藏</view>
+        <view class="imm-btn master {{masteredIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? 'on' : ''}}" data-id="{{filteredSentences[immersionIndex].id}}" bindtap="toggleMaster">掌握</view>
+      </view>
+    </view>
+    <view class="imm-nav">
+      <view class="nav-btn {{immersionIndex === 0 ? 'disabled' : ''}}" catchtap="prevSentence">‹</view>
+      <text class="imm-progress">{{immersionIndex + 1}} / {{filteredSentences.length}}</text>
+      <view class="nav-btn {{immersionIndex === filteredSentences.length - 1 ? 'disabled' : ''}}" catchtap="nextSentence">›</view>
+    </view>
+  </view>
+
+  <view class="immersion-area" wx:if="{{viewMode === 'immersion' && filteredSentences.length === 0}}">
+    <view class="empty-state">
+      <text class="empty-icon">📭</text>
+      <text class="empty-title">没有句子可学习</text>
+      <text class="empty-desc">换个话题筛选，或导入新句子</text>
+    </view>
+  </view>
+
+  <view class="gen-overlay" wx:if="{{showGenModal}}" catchtap="closeGenModal">
+    <view class="gen-modal" catchtap="noop">
+      <view class="gen-header">
+        <text class="gen-title">AI 生成语境句子</text>
+        <view class="gen-close" catchtap="closeGenModal">✕</view>
+      </view>
+      <view class="gen-type-switch">
+        <view class="gen-type-btn {{genType === 'word' ? 'active' : ''}}" data-type="word" catchtap="setGenType">按单词</view>
+        <view class="gen-type-btn {{genType === 'topic' ? 'active' : ''}}" data-type="topic" catchtap="setGenType">按话题</view>
+      </view>
+      <input class="gen-input" placeholder="{{genType === 'word' ? '输入四级单词，如：sustainable' : '输入话题，如：环保'}}" value="{{genInput}}" bindinput="onGenInput" confirm-type="done" />
+      <view class="gen-count-row">
+        <text class="gen-count-label">生成数量</text>
+        <view class="gen-count-ctrl">
+          <view class="gen-count-btn" data-delta="-1" catchtap="adjustGenCount">−</view>
+          <text class="gen-count-num">{{genCount}}</text>
+          <view class="gen-count-btn" data-delta="1" catchtap="adjustGenCount">+</view>
+        </view>
+      </view>
+      <view class="gen-submit {{generating ? 'loading' : ''}}" catchtap="doGenerate">
+        {{generating ? '生成中…' : '生成句子'}}
+      </view>
+      <view class="gen-hint">基于四级大纲难度，生成含关键词的语境句子</view>
+    </view>
+  </view>
+
+  <view class="gen-overlay" wx:if="{{showPasteModal}}" catchtap="closePasteModal">
+    <view class="gen-modal" catchtap="noop">
+      <view class="gen-header">
+        <text class="gen-title">粘贴文本导入句子</text>
+        <view class="gen-close" catchtap="closePasteModal">✕</view>
+      </view>
+      <textarea class="paste-area" placeholder="粘贴英文文章或段落（如四级真题阅读、英语新闻等），AI 自动拆句并标注翻译、关键词、话题" value="{{pasteText}}" bindinput="onPasteInput" auto-height maxlength="3000" />
+      <view class="gen-submit {{parsing ? 'loading' : ''}}" catchtap="doParse">
+        {{parsing ? '解析中…' : '开始解析导入'}}
+      </view>
+      <view class="gen-hint">支持英文段落、文章，AI 自动拆句并适配四级难度</view>
+    </view>
+  </view>
 </view>
