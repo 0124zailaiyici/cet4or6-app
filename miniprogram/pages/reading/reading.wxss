@@ -110,14 +110,14 @@
 }
 
 /* 选项区域 - 内联自然排列，不设固定宽度 */
-.qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.qz-opts { display: flex; flex-wrap: wrap; gap: 8rpx; }
 .qzo {
-  flex: 1 0 45%;
-  font-size: 26rpx; color: #4a4a6a; line-height: 1.6;
-  padding: 20rpx 24rpx;
-  border-radius: 14rpx;
+  flex: 0 1 auto;
+  font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
   background: #fff; border: 2rpx solid #e8e0e8;
-  transition: 0.2s;
+  transition: 0.15s;
 }
 .qzo.on {
   color: #1e88e5; font-weight: 700;
