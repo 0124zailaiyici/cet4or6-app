@@ -298,7 +298,9 @@ Page<IReadingData, IReadingMethods>({
 
   // ===== Section C =====
   onChoiceTap(e: WechatMiniprogram.TouchEvent) {
-    const choice = e.currentTarget.dataset.choice as string
+    const full = e.currentTarget.dataset.choice as string
+    const choice = full.trim().charAt(0)
+    if (!choice) return
     const idx = this.data.currentQ
     const ca = { ...this.data.cAnswers }
     if (ca[idx] === choice) {
