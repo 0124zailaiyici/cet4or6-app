@@ -39,8 +39,10 @@
           <text class="pw-label">📄 文章</text>
           <text class="pw-page">{{passagePage + 1}}/{{passagePages.length}}</text>
         </view>
-        <view class="pw-card" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-          <text class="pw-text">{{passagePages[passagePage]}}</text>
+        <view class="pw-card">
+          <scroll-view class="pw-scroll" scroll-y bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
+            <text class="pw-text">{{passagePages[passagePage]}}</text>
+          </scroll-view>
         </view>
         <view class="pw-dots">
           <view class="pwd {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></view>
