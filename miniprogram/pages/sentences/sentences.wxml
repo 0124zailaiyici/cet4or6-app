@@ -58,7 +58,7 @@
             <view class="sc-bottom">
               <view class="sc-tag">{{item.topic}}</view>
               <view class="sc-actions">
-                <view class="sc-fav debug-red {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleFavorite">收藏</view>
+                <view class="sc-fav {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleFavorite">收藏</view>
                 <view class="sc-master {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleMaster">掌握</view>
               </view>
             </view>

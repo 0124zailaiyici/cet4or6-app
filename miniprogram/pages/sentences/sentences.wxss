@@ -266,21 +266,21 @@
 }
 
 .sc-fav {
-  color: #fff;
-  background: #e6a800;
+  color: #fff !important;
+  background: #e6a800 !important;
 }
 .sc-fav.on {
-  color: #fff;
-  background: #bbb;
+  color: #fff !important;
+  background: #bbb !important;
 }
 
 .sc-master {
-  color: #fff;
-  background: #388e3c;
+  color: #fff !important;
+  background: #388e3c !important;
 }
 .sc-master.on {
-  color: #fff;
-  background: #bbb;
+  color: #fff !important;
+  background: #bbb !important;
 }
 
 .sc-action-label {
@@ -390,11 +390,11 @@
   font-weight: 500;
 }
 
-.imm-btn.fav { color: #fff; background: #e6a800; }
-.imm-btn.fav.on { color: #fff; background: #bbb; }
+.imm-btn.fav { color: #fff !important; background: #e6a800 !important; }
+.imm-btn.fav.on { color: #fff !important; background: #bbb !important; }
 
-.imm-btn.master { color: #fff; background: #388e3c; }
-.imm-btn.master.on { color: #fff; background: #bbb; }
+.imm-btn.master { color: #fff !important; background: #388e3c !important; }
+.imm-btn.master.on { color: #fff !important; background: #bbb !important; }
 
 .imm-nav {
   display: flex;
@@ -640,5 +640,3 @@
 .dark-theme .gen-type-switch {
   background: rgba(255,255,255,0.04);
 }
-
-.debug-red { background: #f00 !important; }
