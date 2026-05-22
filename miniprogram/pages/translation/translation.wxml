@@ -11,7 +11,7 @@
     <view class="tlist">
       <view class="tcard" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
         <view class="tc-main">
-          <text class="tc-cn">{{item.chinese.length > 40 ? item.chinese.slice(0, 40) + '…' : item.chinese}}</text>
+          <text class="tc-cn">{{item.chinese ? (item.chinese.length > 40 ? item.chinese.slice(0, 40) + '…' : item.chinese) : ''}}</text>
           <text class="tc-src">{{item.source}}</text>
         </view>
         <view class="tc-status {{completedIds.indexOf(item.id) !== -1 ? 'done' : ''}}">
