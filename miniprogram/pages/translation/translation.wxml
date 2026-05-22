@@ -1,88 +1,159 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <block wx:if="{{mode === 'list'}}">
-    <view class="t-header">
-      <view class="th-bg"></view>
-      <view class="th-content">
-        <text class="th-title">翻译练习</text>
-        <text class="th-sub">已完成 {{completedIds.length}} / {{translations.length}}</text>
+
+  <!-- ═══ 导航 ═══ -->
+  <view class="nav">
+    <view class="nav-l">
+      <view class="nav-avatar">🌟</view>
+      <view>
+        <view class="nav-greeting">✨ 翻译练习</view>
+        <view class="nav-title">每日一练</view>
       </view>
     </view>
+    <view class="nav-r">
+      <view class="nav-icon">🔔</view>
+      <view class="nav-icon {{aiEnabled ? 'on' : ''}}" catchtap="toggleAi">🤖</view>
+    </view>
+  </view>
 
-    <view class="tlist">
-      <view class="tcard" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
-        <view class="tc-main">
-          <text class="tc-cn">{{item._display}}</text>
-          <text class="tc-src">{{item.source}}</text>
+  <!-- ═══ 进度卡片 ═══ -->
+  <view class="progress-card">
+    <view class="pc-ring"><view class="pc-ring-in"><text class="pc-num">{{completedIds.length}}</text><text class="pc-unit">/{{translations.length}}</text></view></view>
+    <view class="pc-body">
+      <text class="pc-tip">已完成 {{completedIds.length}} 题 ✨</text>
+      <text class="pc-sub">{{translations.length - completedIds.length > 0 ? '还剩 ' + (translations.length - completedIds.length) + ' 题，加油哦' : '全部完成啦，太棒了 🎉'}}</text>
+    </view>
+    <text class="pc-badge">{{completedIds.length > 0 ? Math.round(completedIds.length / translations.length * 100) + '%' : '0%'}}</text>
+  </view>
+
+  <!-- ═══ 标签 ═══ -->
+  <view class="tabs">
+    <view class="tab {{mode === 'list' ? 'active' : ''}}" catchtap="backToList">📚 题目</view>
+    <view class="tab {{mode === 'detail' ? 'active' : ''}}" catchtap="{{mode === 'list' ? 'noop' : ''}}">✏️ 答题</view>
+  </view>
+
+  <!-- ════════════════ 列表模式 ════════════════ -->
+  <block wx:if="{{mode === 'list'}}">
+    <view class="list">
+      <view class="lc" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail" style="animation-delay:{{index * 60}}ms">
+        <view class="lc-emoji {{item._tag.type}}">{{item._emoji}}</view>
+        <view class="lc-body">
+          <text class="lc-text">{{item._display}}</text>
+          <view class="lc-tags">
+            <text class="lc-tag {{item._tag.type}}">{{item._tag.label}}</text>
+          </view>
         </view>
-        <view class="tc-status {{completedIds.indexOf(item.id) !== -1 ? 'done' : ''}}">
-          {{completedIds.indexOf(item.id) !== -1 ? '✓' : '待练'}}
+        <view class="lc-right">
+          <text class="lc-check {{completedIds.indexOf(item.id) !== -1 ? 'done' : 'pending'}}">{{completedIds.indexOf(item.id) !== -1 ? '✅' : '⏳'}}</text>
+          <text class="lc-score {{item._scoreClass || ''}}" wx:if="{{item._score}}">{{item._score}}</text>
         </view>
       </view>
     </view>
   </block>
 
+  <!-- ════════════════ 答题模式 ════════════════ -->
   <block wx:else>
-    <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">←</view>
-      <text class="detail-title">翻译练习</text>
-      <view class="ai-toggle {{aiAvailable ? '' : 'hidden'}}" catchtap="toggleAi">
-        <text class="ai-label">AI</text>
-        <view class="ai-track {{aiEnabled ? 'on' : ''}}"><view class="ai-thumb"></view></view>
+    <view class="d-nav">
+      <view class="d-back" catchtap="backToList">←</view>
+      <text class="d-title">翻译 · {{currentItem._tag ? currentItem._tag.label : '练习'}}</text>
+      <view class="ai-badge {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">
+        <text class="ai-dot"></text>
+        <text>AI</text>
       </view>
     </view>
 
-    <scroll-view class="detail-scroll" scroll-y>
-      <view class="question-card">
-        <text class="q-label">请翻译成英文：</text>
+    <scroll-view class="d-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+
+      <!-- 题目气泡 -->
+      <view class="q-bubble">
+        <view class="q-hint">📝 把它翻成英文吧</view>
         <text class="q-text">{{currentItem.chinese}}</text>
-      </view>
-
-      <view class="answer-area">
-        <textarea class="answer-input" placeholder="在此输入你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height disabled="{{submitting}}"></textarea>
-      </view>
-
-      <view class="submit-btn {{submitting ? 'disabled' : ''}}" catchtap="submit">
-        {{submitting ? '评分中…' : '提交评分'}}
-      </view>
-
-      <view class="result-card" wx:if="{{result.show}}">
-        <view class="rc-score">
-          <text class="rc-num">{{result.score}}</text>
-          <text class="rc-label">分</text>
+        <view class="q-kws" wx:if="{{currentItem.keywords && currentItem.keywords.length > 0}}">
+          <text class="q-kw" wx:for="{{currentItem.keywords}}" wx:key="*this">{{item}}</text>
         </view>
-        <view class="rc-bar"><view class="rc-fill" style="width: {{result.score}}%"></view></view>
+      </view>
+
+      <!-- 输入区 -->
+      <view class="input-area">
+        <textarea class="input-field" placeholder="写下你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height disabled="{{submitting}}"></textarea>
+        <view class="input-foot">
+          <text class="wc {{wordCount > 0 ? 'has' : ''}}">{{wordCount}} / 500</text>
+        </view>
+      </view>
+
+      <!-- 提交按钮 -->
+      <view class="btn-go {{submitting ? 'disabled' : ''}}" catchtap="submit">
+        <text wx:if="{{!submitting}}">✨ 提交评分</text>
+        <text wx:else>评分中～</text>
+      </view>
+
+      <!-- 结果卡片 -->
+      <view class="result-card" wx:if="{{result.show}}">
+        <view class="rc-top">
+          <view class="rc-stars">
+            <view class="rc-stars-in">
+              <text class="rc-star-num">{{result.score}}</text>
+              <text class="rc-star-lb">分</text>
+              <view class="rc-starlets">
+                <text wx:for="{{5}}" wx:for-index="i" wx:key="i" class="{{i < (result.score >= 95 ? 5 : result.score >= 80 ? 4 : result.score >= 60 ? 3 : result.score >= 40 ? 2 : result.score >= 20 ? 1 : 0) ? 'on' : ''}}">★</text>
+              </view>
+            </view>
+          </view>
+          <view class="rc-quickie">
+            <view class="rc-q"><text class="rc-ql">最高</text><text class="rc-qr good">{{hMax}}</text></view>
+            <view class="rc-q"><text class="rc-ql">最低</text><text class="rc-qr low">{{hMin}}</text></view>
+            <view class="rc-q"><text class="rc-ql">趋势</text><text class="rc-qr {{hTrend === 'up' ? 'good' : 'mid'}}">{{questionHistory.length >= 1 ? (hTrend === 'up' ? '↗ 上升' : '↘ 下降') : '—'}}</text></view>
+          </view>
+        </view>
 
         <view class="rc-dims">
           <view class="rc-dim" wx:for="{{[result.dimensions.vocabulary, result.dimensions.grammar, result.dimensions.semantics, result.dimensions.expression]}}" wx:for-index="i" wx:key="i">
             <text class="rc-dl">{{['词汇', '语法', '语义', '表达'][i]}}</text>
-            <view class="rc-dbar"><view class="rc-dfill" style="width: {{item}}%"></view></view>
-            <text class="rc-dn">{{item}}</text>
+            <view class="rc-dbar"><view class="rc-dfill {{item >= 80 ? 'good' : item >= 60 ? 'mid' : 'low'}}" style="width: {{item}}%"></view></view>
+            <text class="rc-dn {{item >= 80 ? 'c-good' : item >= 60 ? 'c-mid' : 'c-low'}}">{{item}}</text>
           </view>
         </view>
 
-        <text class="rc-suggest-title">修改建议</text>
-        <text class="rc-suggest">{{result.suggestions}}</text>
-
-        <view class="rc-ref">
-          <text class="rc-rl">参考译文</text>
-          <text class="rc-rt">{{result.reference}}</text>
+        <view class="rc-block">
+          <view class="rc-bt">💡 修改建议</view>
+          <view class="rc-suggest">{{result.suggestions}}</view>
         </view>
-      </view>
 
-      <view class="action-bar" wx:if="{{result.show}}">
-        <view class="retry-btn" catchtap="retry">重新翻译</view>
-      </view>
-
-      <view class="history-area" wx:if="{{questionHistory.length > 0}}">
-        <text class="h-title">历史记录</text>
-        <view class="h-item" wx:for="{{questionHistory}}" wx:for-index="i" wx:key="index">
-          <view class="h-head">
-            <text class="h-date">第 {{questionHistory.length - i}} 次 · {{item.date}}</text>
-            <text class="h-score {{item.score >= 80 ? 'h-good' : item.score >= 60 ? 'h-mid' : 'h-low'}}">{{item.score}} 分</text>
+        <view class="rc-block">
+          <view class="rc-bt">📖 参考译文</view>
+          <view class="rc-ref">
+            <text class="rc-ref-t">{{result.reference}}</text>
+            <text class="rc-ref-play">▶</text>
           </view>
-          <text class="h-answer">{{item.userAnswer}}</text>
         </view>
       </view>
+
+      <!-- 重做按钮 -->
+      <view class="btn-retry" wx:if="{{result.show}}" catchtap="retry">🔄 重新翻译</view>
+
+      <!-- 历史记录 -->
+      <view class="h-area" wx:if="{{questionHistory.length > 0}}">
+        <view class="h-title"><text class="h-star">⭐</text> 历史记录 · {{questionHistory.length}} 次</view>
+
+        <view class="h-chart">
+          <view class="h-bar" wx:for="{{questionHistory}}" wx:key="index" style="height: {{item.score / 3}}rpx; background: {{item.score >= 80 ? '#a5d6a7' : item.score >= 60 ? '#ffcc80' : '#ef9a9a'}}">
+            <text class="hb-l">{{item.score}}</text>
+          </view>
+        </view>
+
+        <view class="h-items">
+          <view class="h-item" wx:for="{{questionHistory}}" wx:for-index="i" wx:key="index">
+            <text class="h-idx">#{{questionHistory.length - i}}</text>
+            <view class="h-body">
+              <view class="h-head">
+                <text class="h-date">{{item.date.slice(5)}}</text>
+                <text class="h-sc {{item.score >= 80 ? 'good' : item.score >= 60 ? 'mid' : 'low'}}">{{item.score}}</text>
+              </view>
+              <text class="h-ans">{{item.userAnswer}}</text>
+            </view>
+        </view>
+      </view>
+
     </scroll-view>
   </block>
+
 </view>
