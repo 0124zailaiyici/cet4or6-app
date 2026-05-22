@@ -28,8 +28,12 @@ interface IReadingData {
   blankAnswers: Record<string, string>
   usedFlags: boolean[]
   activeBlank: string | null
+  matchAnswers: Record<number, string>
+  matchCount: number
+  activeStmt: number | null
   darkMode: boolean
   optionLetters: string[]
+  paraLetters: string[]
   touchStartX: number
 }
 
@@ -45,6 +49,9 @@ interface IReadingMethods {
   saveAnswers(): void
   onBlankTap(e: WechatMiniprogram.TouchEvent): void
   onOptionTap(e: WechatMiniprogram.TouchEvent): void
+  selectStmt(e: WechatMiniprogram.TouchEvent): void
+  assignLetter(e: WechatMiniprogram.TouchEvent): void
+  saveMatchAnswers(): void
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
@@ -62,8 +69,12 @@ Page<IReadingData, IReadingMethods>({
     blankAnswers: {},
     usedFlags: [],
     activeBlank: null,
+    matchAnswers: {},
+    matchCount: 0,
+    activeStmt: null,
     darkMode: false,
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
+    paraLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
     touchStartX: 0,
   },
 
@@ -86,12 +97,15 @@ Page<IReadingData, IReadingMethods>({
       // 从存储加载已有答案
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
+      const matchSaved = saved?.matchAnswers || {}
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
         blankAnswers: saved?.blankAnswers || {},
         usedFlags: saved?.usedFlags || [],
-        activeBlank: null,
+        matchAnswers: matchSaved,
+        matchCount: Object.keys(matchSaved).length,
+        activeBlank: null, activeStmt: null,
       })
     }
   },
@@ -183,9 +197,11 @@ Page<IReadingData, IReadingMethods>({
     const id = this.data.current?.id
     if (!id) return
     const app = getApp<IAppOption>()
+    const existing = app.globalData.studyData.readingAnswers[id] || { matchAnswers: {} }
     app.globalData.studyData.readingAnswers[id] = {
       blankAnswers: { ...this.data.blankAnswers },
       usedFlags: [...this.data.usedFlags],
+      matchAnswers: existing.matchAnswers || {},
     }
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
@@ -202,6 +218,38 @@ Page<IReadingData, IReadingMethods>({
   },
   nextPassage() {
     if (this.data.passagePage < this.data.passagePages.length - 1) this.setData({ passagePage: this.data.passagePage + 1 })
+  },
+
+  selectStmt(e: WechatMiniprogram.TouchEvent) {
+    const idx = e.currentTarget.dataset.idx as number
+    this.setData({ activeStmt: this.data.activeStmt === idx ? null : idx })
+  },
+
+  assignLetter(e: WechatMiniprogram.TouchEvent) {
+    const letter = e.currentTarget.dataset.letter as string
+    const stmt = this.data.activeStmt
+    if (stmt === null) {
+      wx.showToast({ title: '请先点击要匹配的陈述', icon: 'none' })
+      return
+    }
+    const ma = { ...this.data.matchAnswers }
+    if (ma[stmt] === letter) {
+      delete ma[stmt]
+    } else {
+      ma[stmt] = letter
+    }
+    this.setData({ matchAnswers: ma, activeStmt: null, matchCount: Object.keys(ma).length })
+    this.saveMatchAnswers()
+  },
+
+  saveMatchAnswers() {
+    const id = this.data.current?.id
+    if (!id) return
+    const app = getApp<IAppOption>()
+    const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
+    existing.matchAnswers = { ...this.data.matchAnswers }
+    app.globalData.studyData.readingAnswers[id] = existing
+    wx.setStorageSync('studyData', app.globalData.studyData)
   },
 
   onTouchStart(e: WechatMiniprogram.TouchEvent) { this.setData({ touchStartX: e.touches[0].clientX }) },
