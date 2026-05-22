@@ -42,6 +42,7 @@ interface IReadingMethods {
   nextPassage(): void
   splitPassage(text: string): string[]
   parseSegments(page: string): ISegment[]
+  saveAnswers(): void
   onBlankTap(e: WechatMiniprogram.TouchEvent): void
   onOptionTap(e: WechatMiniprogram.TouchEvent): void
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
@@ -82,10 +83,15 @@ Page<IReadingData, IReadingMethods>({
       const pages = this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
       const formatted = pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
+      // 从存储加载已有答案
+      const app = getApp<IAppOption>()
+      const saved = app.globalData.studyData.readingAnswers[item.id]
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
-        blankAnswers: {}, usedFlags: [], activeBlank: null,
+        blankAnswers: saved?.blankAnswers || {},
+        usedFlags: saved?.usedFlags || [],
+        activeBlank: null,
       })
     }
   },
@@ -135,13 +141,13 @@ Page<IReadingData, IReadingMethods>({
     const num = e.currentTarget.dataset.num as string
     const ba = { ...this.data.blankAnswers }
     if (ba[num]) {
-      // 清除答案
       const word = ba[num]
       delete ba[num]
       const used = [...this.data.usedFlags]
       const idx = this.data.current!.options.indexOf(word)
       if (idx > -1) used[idx] = false
       this.setData({ blankAnswers: ba, usedFlags: used, activeBlank: null })
+      this.saveAnswers()
     } else {
       this.setData({ activeBlank: this.data.activeBlank === num ? null : num })
     }
@@ -158,11 +164,9 @@ Page<IReadingData, IReadingMethods>({
     }
     const ba = { ...this.data.blankAnswers }
     const used = [...this.data.usedFlags]
-    // 如果这个词已在别处，先移除
     for (const k of Object.keys(ba)) {
       if (ba[k] === word) { delete ba[k]; break }
     }
-    // 如果这个空已有词，释放它
     if (ba[active]) {
       const old = ba[active]
       const oi = this.data.current!.options.indexOf(old)
@@ -171,7 +175,19 @@ Page<IReadingData, IReadingMethods>({
     ba[active] = word
     used[idx] = true
     this.setData({ blankAnswers: ba, usedFlags: used, activeBlank: null })
+    this.saveAnswers()
     wx.showToast({ title: `已填入 ${word}`, icon: 'none' })
+  },
+
+  saveAnswers() {
+    const id = this.data.current?.id
+    if (!id) return
+    const app = getApp<IAppOption>()
+    app.globalData.studyData.readingAnswers[id] = {
+      blankAnswers: { ...this.data.blankAnswers },
+      usedFlags: [...this.data.usedFlags],
+    }
+    wx.setStorageSync('studyData', app.globalData.studyData)
   },
 
   prevQ() {

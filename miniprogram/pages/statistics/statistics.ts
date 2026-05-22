@@ -98,7 +98,7 @@ Page<IStatData, IStatMethods>({
       content: '将清除所有学习记录，此操作不可撤销。',
       success: (res) => {
         if (res.confirm) {
-          const empty = {
+          const empty: IStudyData = {
             completedListens: [],
             masteredSentences: [],
             translationRecords: [],
@@ -106,6 +106,7 @@ Page<IStatData, IStatMethods>({
             checkInDates: [],
             favoriteSentenceIds: [],
             hardSentences: [],
+            readingAnswers: {},
             dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
           }
           const app = getApp<IAppOption>()

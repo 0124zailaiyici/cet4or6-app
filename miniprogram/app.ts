@@ -8,6 +8,7 @@ const defaults = {
   checkInDates: [] as string[],
   favoriteSentenceIds: [] as number[],
   hardSentences: [] as { passageId: number; sentenceIndex: number; text: string; passageTitle: string }[],
+  readingAnswers: {} as Record<number, { blankAnswers: Record<string, string>; usedFlags: boolean[] }>,
   dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 }
 }
 
@@ -17,7 +18,7 @@ App<IAppOption>({
     darkMode: wx.getStorageSync('darkMode') || false,
     studyData: (() => {
       const stored = wx.getStorageSync('studyData')
-      return stored ? { ...defaults, ...stored, hardSentences: stored.hardSentences || [] } : { ...defaults }
+      return stored ? { ...defaults, ...stored, hardSentences: stored.hardSentences || [], readingAnswers: stored.readingAnswers || {} } : { ...defaults }
     })()
   },
   onLaunch() {
