@@ -75,7 +75,7 @@
         <block wx:elif="{{current.sectionType === 'B'}}">
           <view class="qz-label">📋 匹配陈述 {{matchCount}}/{{current.questions.length}} {{bStmtPage + 1}}/{{bStmtPages.length}}页</view>
           <view class="qb-grid" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
-            <view class="qb-item {{activeStmt === (i + bStmtPage * 5) ? 'active' : ''}} {{matchAnswers[i + bStmtPage * 5] ? 'done' : ''}}" wx:for="{{bStmtPages[bStmtPage]}}" wx:key="*this" wx:for-index="i" wx:for-item="s" data-idx="{{i + bStmtPage * 5}}" catchtap="selectStmt">
+            <view class="qb-item {{activeStmt === (i + bStmtPage * 5) ? 'active' : ''}}" wx:for="{{bStmtPages[bStmtPage]}}" wx:key="*this" wx:for-index="i" wx:for-item="s" data-idx="{{i + bStmtPage * 5}}" bindtap="selectStmt">
               <text class="qbi-num">{{i + bStmtPage * 5 + 1}}</text>
               <text class="qbi-txt">{{s}}</text>
               <view class="qbi-ans" wx:if="{{matchAnswers[i + bStmtPage * 5]}}" data-idx="{{i + bStmtPage * 5}}" catchtap="removeMatch">
@@ -88,13 +88,10 @@
           </view>
 
           <view class="qb-bar">
-            <text wx:if="{{activeStmt === null}}" class="qb-bar-hint">👆 点击陈述开始匹配</text>
-            <block wx:else>
-              <text class="qb-bar-label">第{{activeStmt + 1}}题 → </text>
-              <view class="qb-bar-letters">
-                <text class="qb-l {{usedLetters.indexOf(l) !== -1 ? 'used' : ''}}" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter" wx:if="{{usedLetters.indexOf(l) === -1}}">{{l}}</text>
-              </view>
-            </block>
+            <text class="qb-bar-hint">{{activeStmt === null ? '👆 点击陈述，再选字母' : '第' + (activeStmt + 1) + '题 →'}}</text>
+            <view class="qb-bar-letters">
+              <text class="qb-l {{usedLetters.indexOf(l) !== -1 ? 'used' : ''}}" wx:for="{{paraLetters}}" wx:key="*this" wx:for-item="l" data-letter="{{l}}" catchtap="assignLetter">{{l}}</text>
+            </view>
           </view>
         </block>
 
