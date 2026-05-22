@@ -1,114 +1,157 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="w-header">
-    <view class="wh-bg"></view>
-    <view class="wh-content">
-      <text class="wh-title">写作教学</text>
+
+  <!-- ══ Normal Header ══ -->
+  <view class="header" wx:if="{{!detailMode}}">
+    <view class="header-row">
+      <view class="header-l">
+        <view class="header-icon">✍️</view>
+        <view>
+          <view class="header-t1">CET-4 写作训练</view>
+          <view class="header-t2">写作教学</view>
+        </view>
+      </view>
+      <view class="header-ai {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">🤖</view>
     </view>
   </view>
 
-  <view class="w-tabs">
-    <view class="wt-item {{tab === 0 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{0}}">句型库</view>
-    <view class="wt-item {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">段落写作</view>
-    <view class="wt-item {{tab === 2 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{2}}">全文模拟</view>
+  <!-- ══ Detail Header ══ -->
+  <view class="detail-header" wx:if="{{detailMode}}">
+    <view class="dh-top">
+      <view class="dh-back" catchtap="backToWritingList">返回</view>
+      <view class="dh-title">{{currentWriting.title}}</view>
+      <view class="header-ai {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">🤖</view>
+    </view>
   </view>
 
-  <!-- Tab 0: Patterns -->
-  <block wx:if="{{tab === 0}}">
-    <scroll-view class="w-content" scroll-y>
-      <view class="wlist">
-        <view class="wcard" wx:for="{{patterns}}" wx:key="id" data-id="{{item.id}}" catchtap="togglePattern">
-          <view class="wcard-row">
-            <view class="wc-pat">{{item.pattern}}</view>
-            <view class="wc-badge {{expandedPattern === item.id ? 'active' : ''}}">{{expandedPattern === item.id ? '收起' : '展开'}}</view>
-          </view>
-          <text class="wc-cn">{{item.chinese}}</text>
-          <view class="wc-example" wx:if="{{expandedPattern === item.id}}">
-            <text class="wc-el">例句：</text>
-            <text class="wc-et">{{item.example}}</text>
-          </view>
+  <!-- ══ Tabs ══ -->
+  <view class="tabs">
+    <view class="tab {{tab === 0 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{0}}">📖 句型库</view>
+    <view class="tab {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">📝 段落写作</view>
+    <view class="tab {{tab === 2 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{2}}">📄 全文模拟</view>
+  </view>
+
+  <!-- ═══════════ TAB 0: 句型库 ═══════════ -->
+  <scroll-view class="content" scroll-y wx:if="{{tab === 0}}">
+    <view class="hint">📚 点击卡片展开例句，选一个句型练手</view>
+
+    <view class="pcard" wx:for="{{patterns}}" wx:key="id" data-id="{{item.id}}" catchtap="togglePattern">
+      <view class="pcard-row">
+        <view class="pcard-pat">{{item.pattern}}</view>
+        <view class="pcard-arrow {{expandedPattern === item.id ? 'open' : ''}}">{{expandedPattern === item.id ? '▼' : '▶'}}</view>
+      </view>
+      <view class="pcard-cn">{{item.chinese}}</view>
+      <view class="pcard-ex" wx:if="{{expandedPattern === item.id}}">
+        {{item.example}}
+      </view>
+    </view>
+
+    <view class="practice">
+      <view class="practice-h">
+        <view class="practice-label">用上方句型造句</view>
+        <text wx:if="{{selectedPattern}}" class="practice-hint">当前：{{selectedPattern.pattern}}</text>
+        <text wx:else class="practice-hint dim">请先点开一个句型</text>
+      </view>
+      <view class="pi-wrap">
+        <textarea class="pi" placeholder="在此输入你的句子…" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
+        <text class="pi-wc {{sentenceWordCount > 0 ? 'on' : ''}}">{{sentenceWordCount}} 词</text>
+      </view>
+      <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitSentence">{{submitting ? '提交中…' : '提交练习'}}</view>
+    </view>
+
+    <view class="result" wx:if="{{showResult}}">
+      <view class="r-h">🔍 评审结果</view>
+      <view class="r-line"><text class="r-tag">句型：</text>{{selectedPattern.pattern}}</view>
+      <view class="r-line"><text class="r-tag">你的句子：</text>{{userSentence}}</view>
+      <view class="r-div"></view>
+      <text class="r-text">{{result}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- ═══════════ TAB 1: 段落写作 ═══════════ -->
+  <scroll-view class="content" scroll-y wx:elif="{{tab === 1}}">
+    <view class="hint">🎯 选主题 → 读主题句 → 续写</view>
+
+    <view class="pills">
+      <view class="pill {{currentTopic.label === item.label ? 'on' : ''}}" wx:for="{{paragraphTopics}}" wx:key="label" data-index="{{index}}" catchtap="selectTopic">{{item.label}}</view>
+    </view>
+
+    <view class="bubble">
+      <view class="bubble-icon">💬</view>
+      <view class="bubble-text">{{currentTopic.text}}</view>
+    </view>
+
+    <view class="practice" style="margin-top:0">
+      <view class="practice-h">
+        <view class="practice-label">续写段落</view>
+        <view class="practice-hint">建议 60–120 词</view>
+      </view>
+      <view class="pi-wrap">
+        <textarea class="pi" placeholder="从此主题句开始续写……" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
+        <text class="pi-wc {{paragraphWordCount > 0 ? 'on' : ''}}">{{paragraphWordCount}} 词</text>
+      </view>
+      <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitParagraph">{{submitting ? '提交中…' : '提交评审'}}</view>
+    </view>
+
+    <view class="result" wx:if="{{showResult}}">
+      <view class="r-h">📊 评审结果</view>
+      <text class="r-text">{{result}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- ═══════════ TAB 2: 全文模拟 ═══════════ -->
+
+  <!-- List -->
+  <scroll-view class="content" scroll-y wx:elif="{{tab === 2 && !currentWriting}}">
+    <view class="hint">📝 选一道题，模拟考场写作</view>
+
+    <view class="wl">
+      <view class="wi" wx:for="{{writings}}" wx:key="id" data-id="{{item.id}}" catchtap="enterWriting">
+        <view class="wi-icon">📄</view>
+        <view class="wi-body">
+          <view class="wi-title">{{item.title}}</view>
+          <view class="wi-meta">120–180 词 · 四级{{item.prompt.indexOf('真题') > -1 ? '真题' : '模拟'}}</view>
         </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Detail -->
+  <scroll-view class="content" scroll-y wx:elif="{{tab === 2 && currentWriting}}">
+
+    <view class="bubble">
+      <view class="bubble-icon">📋</view>
+      <view class="bubble-h">题目</view>
+      <view class="bubble-text">{{currentWriting.prompt}}</view>
+    </view>
+
+    <view class="practice" style="margin-top:0">
+      <view class="practice-h">
+        <view class="practice-label">你的作文</view>
+        <view class="practice-hint">120–180 词</view>
       </view>
 
-      <view class="practice-area">
-        <text class="pa-label">
-          用上方句型写一个句子
-          <text wx:if="{{selectedPattern}}" class="pa-hint">（当前句型：{{selectedPattern.pattern}}）</text>
-          <text wx:else class="pa-hint dim">（请先点开一个句型）</text>
-        </text>
-        <view class="pa-input-wrap">
-          <textarea class="pa-input" placeholder="在此输入你的句子…" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
-          <text class="wc-count {{sentenceWordCount > 0 ? 'show' : ''}}">{{sentenceWordCount}}词</text>
+      <view class="wc-bar">
+        <view class="wc-bar-h">
+          <text>词数</text>
+          <text><text class="wc-bar-n">{{writingWordCount}}</text> / 120–180</text>
         </view>
-        <view class="pa-btn {{submitting ? 'disabled' : ''}}" catchtap="submitSentence">{{submitting ? '提交中…' : '提交练习'}}</view>
+        <view class="wc-bar-t">
+          <view class="wc-bar-f {{writingWordCount > 0 && writingWordCount < 120 ? 'under' : ''}} {{writingWordCount > 180 ? 'over' : ''}}" style="width: {{writingWordCount > 180 ? 100 : (writingWordCount / 180 * 100)}}%"></view>
+        </view>
+        <view class="wc-bar-m"><text>0</text><text>120</text><text>180</text></view>
       </view>
 
-      <view class="result-box" wx:if="{{showResult}}">
-        <text class="rb-text">{{result}}</text>
+      <view class="pi-wrap">
+        <textarea class="pi" placeholder="在此输入你的作文……" value="{{writingAnswer}}" bindinput="onWritingInput" maxlength="2000" auto-height disabled="{{submitting}}"></textarea>
+        <text class="pi-wc {{writingWordCount > 0 ? 'on' : ''}}">{{writingWordCount}} 词</text>
       </view>
-    </scroll-view>
-  </block>
+      <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitWriting">{{submitting ? '提交中…' : '提交批改'}}</view>
+    </view>
 
-  <!-- Tab 1: Paragraph -->
-  <block wx:elif="{{tab === 1}}">
-    <scroll-view class="w-content" scroll-y>
-      <view class="topic-pills">
-        <view class="tp-label">选择主题：</view>
-        <view class="tp-list">
-          <view class="tp-item {{currentTopic.label === item.label ? 'active' : ''}}" wx:for="{{paragraphTopics}}" wx:key="label" data-index="{{index}}" catchtap="selectTopic">{{item.label}}</view>
-        </view>
-      </view>
-      <view class="prompt-card">
-        <text class="pc-label">主题句：</text>
-        <text class="pc-text">{{currentTopic.text}}</text>
-      </view>
-      <view class="practice-area">
-        <text class="pa-label">续写段落（建议 60-120 词）：</text>
-        <view class="pa-input-wrap">
-          <textarea class="pa-input" placeholder="从此主题句开始续写…" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
-          <text class="wc-count {{paragraphWordCount > 0 ? 'show' : ''}}">{{paragraphWordCount}}词</text>
-        </view>
-        <view class="pa-btn {{submitting ? 'disabled' : ''}}" catchtap="submitParagraph">{{submitting ? '提交中…' : '提交评审'}}</view>
-      </view>
-      <view class="result-box" wx:if="{{showResult}}">
-        <text class="rb-text">{{result}}</text>
-      </view>
-    </scroll-view>
-  </block>
+    <view class="result" wx:if="{{showResult}}">
+      <view class="r-h">📊 批改结果</view>
+      <text class="r-text">{{result}}</text>
+    </view>
+  </scroll-view>
 
-  <!-- Tab 2: Full Writing -->
-  <block wx:else>
-    <block wx:if="{{!currentWriting}}">
-      <scroll-view class="w-content" scroll-y>
-        <view class="wlist">
-          <view class="wcard wc-writing" wx:for="{{writings}}" wx:key="id" data-id="{{item.id}}" catchtap="enterWriting">
-            <text class="wc-wtitle">{{item.title}}</text>
-            <text class="wc-wpreview">{{item.prompt.slice(0, 60)}}…</text>
-          </view>
-        </view>
-      </scroll-view>
-    </block>
-    <block wx:else>
-      <view class="detail-header">
-        <view class="back-btn" catchtap="backToWritingList">返回</view>
-        <text class="detail-title">全文写作</text>
-      </view>
-      <scroll-view class="w-content" scroll-y>
-        <view class="prompt-card">
-          <text class="pc-title">{{currentWriting.title}}</text>
-          <text class="pc-text">{{currentWriting.prompt}}</text>
-        </view>
-        <view class="practice-area">
-          <text class="pa-label">你的作文（建议 120-180 词）：</text>
-          <view class="pa-input-wrap">
-            <textarea class="pa-input" placeholder="在此输入你的作文…" value="{{writingAnswer}}" bindinput="onWritingInput" maxlength="2000" auto-height disabled="{{submitting}}"></textarea>
-            <text class="wc-count {{writingWordCount > 0 ? 'show' : ''}}">{{writingWordCount}}词</text>
-          </view>
-          <view class="pa-btn {{submitting ? 'disabled' : ''}}" catchtap="submitWriting">{{submitting ? '提交中…' : '提交批改'}}</view>
-        </view>
-        <view class="result-box" wx:if="{{showResult}}">
-          <text class="rb-text">{{result}}</text>
-        </view>
-      </scroll-view>
-    </block>
-  </block>
 </view>
