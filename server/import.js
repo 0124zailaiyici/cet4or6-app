@@ -200,6 +200,9 @@ function parseReading(lines, year) {
           if (/^\d+\./.test(line)) {
             if (currentStem) {
               stems.push(sanitize(currentStem))
+              if (currentChoices.length === 1) {
+                currentChoices = currentChoices[0].split(/(?=[A-D]\))/).map((s: string) => sanitize(s.trim())).filter((s: string) => s)
+              }
               choices.push(currentChoices)
             }
             currentStem = line
@@ -210,6 +213,10 @@ function parseReading(lines, year) {
         }
         if (currentStem) {
           stems.push(sanitize(currentStem))
+          // 若只提取到1个选项，尝试拆分合并行（PDF常见问题）
+          if (currentChoices.length === 1) {
+            currentChoices = currentChoices[0].split(/(?=[A-D]\))/).map((s: string) => sanitize(s.trim())).filter((s: string) => s)
+          }
           choices.push(currentChoices)
         }
 

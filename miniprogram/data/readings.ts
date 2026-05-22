@@ -104,7 +104,10 @@ const readingsData = [
     "options": [],
     "choices": [
       [
-        "A) Unwanted. B) Unhappy. C) Confused. D) Indifferent."
+        "A) Unwanted.",
+        "B) Unhappy.",
+        "C) Confused.",
+        "D) Indifferent."
       ],
       [
         "A) It is related to the way our memories work.",
