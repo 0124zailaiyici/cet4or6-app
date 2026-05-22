@@ -265,6 +265,10 @@
   border-radius: 16rpx;
 }
 
+.act-btn.on {
+  opacity: 0.5;
+}
+
 .sc-action-label {
   font-size: 22rpx;
 }
@@ -370,6 +374,10 @@
   justify-content: center;
   font-size: 28rpx;
   font-weight: 500;
+}
+
+.imm-btn.on {
+  opacity: 0.5;
 }
 
 .imm-nav {

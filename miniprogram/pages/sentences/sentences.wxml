@@ -58,8 +58,8 @@
             <view class="sc-bottom">
               <view class="sc-tag">{{item.topic}}</view>
               <view class="sc-actions">
-                <view class="act-btn" data-id="{{item.id}}" catchtap="toggleFavorite">收藏</view>
-                <view class="act-btn" data-id="{{item.id}}" catchtap="toggleMaster">掌握</view>
+                <view class="act-btn {{favoriteIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(item.id) !== -1 ? '已收藏' : '收藏'}}</view>
+                <view class="act-btn {{masteredIds.indexOf(item.id) !== -1 ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">{{masteredIds.indexOf(item.id) !== -1 ? '已掌握' : '掌握'}}</view>
               </view>
             </view>
           </view>
@@ -76,8 +76,8 @@
       </view>
       <view class="imm-chinese">{{filteredSentences[immersionIndex].chinese}}</view>
       <view class="imm-actions">
-        <view class="imm-btn" data-id="{{filteredSentences[immersionIndex].id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? '已收藏' : '收藏'}}</view>
-        <view class="imm-btn" data-id="{{filteredSentences[immersionIndex].id}}" catchtap="toggleMaster">{{masteredIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? '已掌握' : '掌握'}}</view>
+        <view class="imm-btn {{favoriteIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? 'on' : ''}}" data-id="{{filteredSentences[immersionIndex].id}}" catchtap="toggleFavorite">{{favoriteIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? '已收藏' : '收藏'}}</view>
+        <view class="imm-btn {{masteredIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? 'on' : ''}}" data-id="{{filteredSentences[immersionIndex].id}}" catchtap="toggleMaster">{{masteredIds.indexOf(filteredSentences[immersionIndex].id) !== -1 ? '已掌握' : '掌握'}}</view>
       </view>
     </view>
     <view class="imm-nav">
