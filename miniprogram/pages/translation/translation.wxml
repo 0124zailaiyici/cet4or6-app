@@ -28,7 +28,7 @@
   <!-- ═══ 标签 ═══ -->
   <view class="tabs">
     <view class="tab {{mode === 'list' ? 'active' : ''}}" catchtap="backToList">📚 题目</view>
-    <view class="tab {{mode === 'detail' ? 'active' : ''}}" catchtap="{{mode === 'list' ? 'noop' : ''}}">✏️ 答题</view>
+    <view class="tab {{mode === 'detail' ? 'active' : ''}}">✏️ 答题</view>
   </view>
 
   <!-- ════════════════ 列表模式 ════════════════ -->
@@ -68,7 +68,7 @@
         <view class="q-hint">📝 把它翻成英文吧</view>
         <text class="q-text">{{currentItem.chinese}}</text>
         <view class="q-kws" wx:if="{{currentItem.keywords && currentItem.keywords.length > 0}}">
-          <text class="q-kw" wx:for="{{currentItem.keywords}}" wx:key="*this">{{item}}</text>
+          <text class="q-kw" wx:for="{{currentItem.keywords}}" wx:for-index="idx" wx:key="idx">{{item}}</text>
         </view>
       </view>
 
@@ -94,7 +94,11 @@
               <text class="rc-star-num">{{result.score}}</text>
               <text class="rc-star-lb">分</text>
               <view class="rc-starlets">
-                <text wx:for="{{5}}" wx:for-index="i" wx:key="i" class="{{i < (result.score >= 95 ? 5 : result.score >= 80 ? 4 : result.score >= 60 ? 3 : result.score >= 40 ? 2 : result.score >= 20 ? 1 : 0) ? 'on' : ''}}">★</text>
+                <text class="{{result.score >= 20 ? 'on' : ''}}">★</text>
+                <text class="{{result.score >= 40 ? 'on' : ''}}">★</text>
+                <text class="{{result.score >= 60 ? 'on' : ''}}">★</text>
+                <text class="{{result.score >= 80 ? 'on' : ''}}">★</text>
+                <text class="{{result.score >= 95 ? 'on' : ''}}">★</text>
               </view>
             </view>
           </view>
@@ -151,6 +155,7 @@
               <text class="h-ans">{{item.userAnswer}}</text>
             </view>
         </view>
+      </view>
       </view>
 
     </scroll-view>
