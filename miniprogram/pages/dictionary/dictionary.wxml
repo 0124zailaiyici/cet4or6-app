@@ -20,6 +20,7 @@
     <view class="result-header">
       <text class="word">{{result.word}}</text>
       <text class="phonetic" wx:if="{{result.phonetic}}">{{result.phonetic}}</text>
+      <text class="audio-btn" wx:if="{{result.audio}}" catchtap="playAudio">🔊</text>
     </view>
 
     <view class="meaning-block" wx:for="{{result.meanings}}" wx:key="partOfSpeech">
@@ -37,7 +38,7 @@
     <view class="history-section">
       <text class="section-title">最近查询</text>
       <view class="history-list">
-        <text class="history-item" wx:for="{{history}}" wx:key="*this" catchtap="search">{{item}}</text>
+        <text class="history-item" wx:for="{{history}}" wx:key="*this" catchtap="search" data-word="{{item}}">{{item}}</text>
       </view>
     </view>
   </block>

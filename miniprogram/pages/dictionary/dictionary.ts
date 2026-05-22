@@ -9,6 +9,7 @@ interface IMeaning {
 interface IWordResult {
   word: string
   phonetic: string
+  audio: string
   meanings: IMeaning[]
   sourceUrls: string[]
 }
@@ -22,13 +23,7 @@ interface IDictData {
   darkMode: boolean
 }
 
-interface IDictMethods {
-  onInput(e: WechatMiniprogram.Input): void
-  search(): void
-  clear(): void
-}
-
-Page<IDictData, IDictMethods>({
+Page<IDictData>({
   data: {
     query: '',
     result: null,
@@ -39,14 +34,16 @@ Page<IDictData, IDictMethods>({
   },
 
   onLoad() {
-    const app = getApp<IAppOption>()
-    this.setData({ darkMode: app.globalData.darkMode })
-    this.setData({ history: app.globalData.studyData.favoriteSentenceIds.length > 0 ? [] : [] })
+    this._applyDarkMode()
     const raw = wx.getStorageSync('dictHistory')
     if (raw) this.setData({ history: raw })
   },
 
   onShow() {
+    this._applyDarkMode()
+  },
+
+  _applyDarkMode() {
     applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
@@ -56,17 +53,23 @@ Page<IDictData, IDictMethods>({
     this.setData({ query: e.detail.value, error: '', result: null })
   },
 
-  async search() {
-    const q = this.data.query.trim()
+  async search(e?: WechatMiniprogram.TouchEvent) {
+    const word = e?.currentTarget?.dataset?.word as string | undefined
+    const q = (word || this.data.query).trim()
     if (!q) return
     this.setData({ loading: true, error: '', result: null })
+    if (word) this.setData({ query: word })
 
     try {
       const data = await lookupWord(q)
       const entry = Array.isArray(data) ? data[0] : data
+      const phonetics = entry.phonetics || []
+      const phonetic = entry.phonetic || phonetics.find((p: any) => p.text)?.text || ''
+      const audio = phonetics.find((p: any) => p.audio)?.audio || ''
       const result: IWordResult = {
         word: entry.word,
-        phonetic: entry.phonetic || entry.phonetics?.find((p: any) => p.text)?.text || '',
+        phonetic,
+        audio,
         meanings: entry.meanings?.map((m: any) => ({
           partOfSpeech: m.partOfSpeech,
           definitions: m.definitions?.slice(0, 3).map((d: any) => ({
@@ -79,7 +82,7 @@ Page<IDictData, IDictMethods>({
       this.setData({ result, loading: false, error: '' })
 
       const history = this.data.history
-      if (history.indexOf(q.toLowerCase()) === -1) {
+      if (!history.includes(q.toLowerCase())) {
         history.unshift(q.toLowerCase())
         if (history.length > 20) history.pop()
         wx.setStorageSync('dictHistory', history)
@@ -92,5 +95,13 @@ Page<IDictData, IDictMethods>({
 
   clear() {
     this.setData({ query: '', result: null, error: '' })
+  },
+
+  playAudio() {
+    const audioSrc = this.data.result?.audio
+    if (!audioSrc) return
+    const ctx = wx.createInnerAudioContext()
+    ctx.src = audioSrc
+    ctx.play()
   },
 })

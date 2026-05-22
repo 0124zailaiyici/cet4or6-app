@@ -83,6 +83,11 @@
   font-style: italic;
 }
 
+.audio-btn {
+  font-size: 36rpx;
+  padding: 4rpx 8rpx;
+}
+
 .meaning-block {
   background: var(--card-bg);
   border-radius: 24rpx;
