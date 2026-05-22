@@ -96,11 +96,13 @@
         <!-- Section C：题目 + 选项 -->
         <block wx:else>
           <view class="qz-label">❓ 第{{currentQ + 1}}/{{current.questions.length}}题</view>
-          <scroll-view class="qz-q-scroll" scroll-y>
-            <text class="qz-question">{{current.questions[currentQ]}}</text>
-          </scroll-view>
-          <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
-            <view class="qzo {{cAnswers[currentQ] === optionLetters[i] ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" wx:for-index="i" data-letter="{{optionLetters[i]}}" data-choice="{{item}}" catchtap="onChoiceTap">{{item}}</view>
+          <view class="qz-c-wrap" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
+            <scroll-view class="qz-q-scroll" scroll-y>
+              <text class="qz-question">{{current.questions[currentQ]}}</text>
+            </scroll-view>
+            <view class="qz-opts" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
+              <view class="qzo {{cAnswers[currentQ] === optionLetters[i] ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" wx:for-index="i" data-letter="{{optionLetters[i]}}" data-choice="{{item}}" catchtap="onChoiceTap">{{item}}</view>
+            </view>
           </view>
 
           <view class="qz-dots">
