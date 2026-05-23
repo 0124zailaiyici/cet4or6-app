@@ -102,7 +102,6 @@ interface IExamMethods {
 
 const EXAM_DURATION = 7500
 const TWO_HOURS_FIVE = '125:00'
-const OPTS = ['A', 'B', 'C', 'D']
 let timerInterval: any = null
 let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
 
