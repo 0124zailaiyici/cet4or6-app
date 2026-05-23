@@ -94,7 +94,7 @@
           <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
-              <view class="se-en">{{getBlankText(item.text)}}</view>
+              <view class="se-en">{{getBlankText(item)}}</view>
             </view>
             <view class="se-actions">
               <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>

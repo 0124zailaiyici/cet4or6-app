@@ -59,7 +59,7 @@ interface IListeningData {
   summaryTotal: number
   summaryAnswered: number
   summaryMarked: number
-  focusSentences: ISentence[]
+  focusSentences: string[]
   focusSentenceMap: number[]
 }
 
@@ -566,12 +566,12 @@ Page<IListeningData, IListeningMethods>({
     if (on) {
       audio.pause()
       const passage = this.data.currentPassage
-      const filtered: ISentence[] = []
+      const filtered: string[] = []
       const map: number[] = []
       if (passage) {
         passage.sentences.forEach((s, i) => {
           if (!isDirectionSentence(s)) {
-            filtered.push(s)
+            filtered.push(s.text)
             map.push(i)
           }
         })
