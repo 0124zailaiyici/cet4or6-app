@@ -46,7 +46,7 @@
           <view class="f-b" catchtap="rewindAudio">⏪</view>
           <view class="f-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
           <view class="f-b" catchtap="forwardAudio">⏩</view>
-          <view class="f-sp {{speed === s ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+          <view class="f-sp {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
         </view>
       </view>
       <view class="f-pos"><text>📍 {{currentSectionLabel}}</text></view>
@@ -139,7 +139,7 @@
     <!-- === 逐句精听模式（原） === -->
     <block wx:else>
     <view class="controls-bar">
-      <view class="speed-btn {{speed === s ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+      <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
       <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
       <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
       <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">单句</view>

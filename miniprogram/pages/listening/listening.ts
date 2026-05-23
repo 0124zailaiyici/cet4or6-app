@@ -309,19 +309,19 @@ Page<IListeningData, IListeningMethods>({
           if (n < 4) warns.push(`${p.stem}缺${4-n}个选项`)
         }
         // 精听模式默认开循环、慢速0.75
+        const fm = this.data.focusMode
         this.setData({
           mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: true,
           hardSentences: localHard, audioMode: true, audioTime: 0, audioDuration: 0,
           pages, currentPage: 0, selectedAnswers: saved,
           dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
-          focusMode: true,
           currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
           markedPages: [],
           markedFlags: new Array(pages.length).fill(false),
-          loopSentence: true,
-          speed: 0.75,
+          loopSentence: fm,
+          speed: fm ? 0.75 : 1,
         })
-        if (audioCtx) audioCtx.playbackRate = 0.75
+        if (audioCtx) audioCtx.playbackRate = fm ? 0.75 : 1
       } else {
         this.setData({
           mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: false,
