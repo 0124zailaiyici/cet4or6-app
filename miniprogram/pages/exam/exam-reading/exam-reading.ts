@@ -14,6 +14,7 @@ Page({
     letters: 'ABCDEFGHIJKLMN'.split(''),
     activeStmt: -1,
     activeBlank: '',
+    touchStartX: 0,
   },
 
   onLoad() {
@@ -58,6 +59,7 @@ Page({
     }
     if (p.sectionType === 'C') {
       r._cAns = ans.cAnswers || {}
+      r._cqChoices = (p.questions || []).map((_, qi) => (p.choices && p.choices[qi]) ? p.choices[qi] : ['A','B','C','D'])
     }
     return r
   },
@@ -160,5 +162,13 @@ Page({
 
   prev() { if (this.data.idx > 0) this.setData({ idx: this.data.idx - 1, activeStmt: -1, activeBlank: '' }) },
   next() { if (this.data.idx < this.data.passages.length - 1) this.setData({ idx: this.data.idx + 1, activeStmt: -1, activeBlank: '' }) },
+
+  onTouchStart(e: any) { this.data.touchStartX = e.touches[0].clientX },
+  onTouchEnd(e: any) {
+    const dx = e.changedTouches[0].clientX - this.data.touchStartX
+    if (dx > 50) this.prev()
+    else if (dx < -50) this.next()
+  },
+
   goBack() { wx.navigateBack() },
 })
