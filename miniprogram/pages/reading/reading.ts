@@ -9,12 +9,20 @@ interface IReadingItem {
   questions: string[]
   options: string[]
   choices: string[][]
+  correctAnswers: Record<string, string>
 }
 
 interface ISegment {
   type: 'text' | 'blank'
   text: string
   num?: string
+}
+
+interface IResultItem {
+  label: string
+  userAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
 }
 
 interface IReadingData {
@@ -28,20 +36,24 @@ interface IReadingData {
   blankAnswers: Record<string, string>
   usedFlags: boolean[]
   activeBlank: string | null
-  // Section B
   bStmtPage: number
   bStmtPages: string[][]
   matchAnswers: Record<number, string>
   activeStmt: number | null
   matchCount: number
   availLetters: string[]
-  // Section C
   cAnswers: Record<number, string>
   cSelIdx: number
   compactOpts: boolean
   darkMode: boolean
   optionLetters: string[]
   touchStartX: number
+  submitted: boolean
+  score: number
+  totalScore: number
+  showResult: boolean
+  resultItems: IResultItem[]
+  completionMap: Record<number, { submitted: boolean; score: number; totalScore: number }>
 }
 
 interface IReadingMethods {
@@ -59,16 +71,18 @@ interface IReadingMethods {
   onTouchStart(e: WechatMiniprogram.TouchEvent): void
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent): void
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent): void
-  // Section C
   onChoiceTap(e: WechatMiniprogram.TouchEvent): void
   saveCAnswer(): void
   updateCompact(): void
-  // Section B
   formatBPassage(text: string): string[]
   selectStmt(e: WechatMiniprogram.TouchEvent): void
   assignLetter(e: WechatMiniprogram.TouchEvent): void
   removeMatch(e: WechatMiniprogram.TouchEvent): void
   saveMatch(): void
+  submit(): void
+  hideResult(): void
+  checkAllAnswered(): boolean
+  buildResult(): IResultItem[]
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -95,10 +109,29 @@ Page<IReadingData, IReadingMethods>({
     cAnswers: {},
     cSelIdx: -1,
     compactOpts: false,
+    submitted: false,
+    score: 0,
+    totalScore: 0,
+    showResult: false,
+    resultItems: [],
+    completionMap: {}
   },
 
   onLoad() {
-    this.setData({ readings: readingsData as IReadingItem[] })
+    const readings = readingsData as IReadingItem[]
+    const app = getApp<IAppOption>()
+    const saved = app.globalData.studyData.readingAnswers
+    const map: Record<number, { submitted: boolean; score: number; totalScore: number }> = {}
+    for (const r of readings) {
+      const a = saved[r.id]
+      const submitted = !!(a && a.submitted)
+      map[r.id] = {
+        submitted,
+        score: (a && a.score) || 0,
+        totalScore: (a && a.totalScore) || 0
+      }
+    }
+    this.setData({ readings, completionMap: map })
   },
 
   onShow() {
@@ -125,6 +158,9 @@ Page<IReadingData, IReadingMethods>({
       if (item.sectionType === 'B' && item.questions.length > 0) {
         for (let i = 0; i < item.questions.length; i += 5) bPages.push(item.questions.slice(i, i + 5))
       }
+      const isSubmitted = !!(saved && (saved as any).submitted)
+      const st = item.sectionType
+      const maxScore = st === 'A' ? 10 : st === 'B' ? 10 : 5
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
@@ -140,14 +176,128 @@ Page<IReadingData, IReadingMethods>({
           const sl = String(cAnswerSaved[0] || '')
           return 'ABCD'.indexOf(sl)
         })(),
+        submitted: isSubmitted,
+        score: (saved && (saved as any).score) || 0,
+        totalScore: maxScore,
+        showResult: false,
+        resultItems: []
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [] })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [] })
   },
+
+  // ===== Submission & Scoring =====
+
+  checkAllAnswered(): boolean {
+    const st = this.data.current?.sectionType
+    if (st === 'A') {
+      const ba = this.data.blankAnswers
+      const total = Object.keys(this.data.current?.correctAnswers || {}).length
+      return Object.keys(ba).length >= total
+    }
+    if (st === 'B') {
+      const total = this.data.current?.questions?.length || 0
+      const ma = this.data.matchAnswers
+      return Object.keys(ma).length >= total
+    }
+    if (st === 'C') {
+      const total = this.data.current?.questions?.length || 0
+      const ca = this.data.cAnswers
+      return Object.keys(ca).length >= total
+    }
+    return false
+  },
+
+  buildResult(): IResultItem[] {
+    const item = this.data.current
+    if (!item) return []
+    const ca = item.correctAnswers || {}
+    const results: IResultItem[] = []
+
+    if (item.sectionType === 'A') {
+      const ba = this.data.blankAnswers
+      const sorted = Object.keys(ca).sort((a, b) => parseInt(a) - parseInt(b))
+      for (const k of sorted) {
+        const user = ba[k] || '(未填)'
+        results.push({
+          label: '第' + k + '空',
+          userAnswer: user,
+          correctAnswer: ca[k],
+          isCorrect: user.toLowerCase().trim() === (ca[k] || '').toLowerCase().trim()
+        })
+      }
+    } else if (item.sectionType === 'B') {
+      const ma = this.data.matchAnswers
+      for (let i = 0; i < item.questions.length; i++) {
+        const user = ma[i] || '(未匹配)'
+        results.push({
+          label: '#' + (i + 36),
+          userAnswer: user,
+          correctAnswer: ca[String(i)] || '',
+          isCorrect: user === ca[String(i)]
+        })
+      }
+    } else if (item.sectionType === 'C') {
+      const cAns = this.data.cAnswers
+      const startNum = parseInt((item.questions[0]?.match(/^\d+/) || ['0'])[0])
+      for (let i = 0; i < item.questions.length; i++) {
+        const user = cAns[i] || '(未作答)'
+        results.push({
+          label: 'Q' + (startNum + i),
+          userAnswer: user,
+          correctAnswer: ca[String(i)] || '',
+          isCorrect: user === ca[String(i)]
+        })
+      }
+    }
+    return results
+  },
+
+  submit() {
+    if (this.data.submitted) {
+      wx.showToast({ title: '已提交过', icon: 'none' })
+      return
+    }
+    if (!this.checkAllAnswered()) {
+      wx.showToast({ title: '请完成所有题目后再提交', icon: 'none' })
+      return
+    }
+    const results = this.buildResult()
+    const correctCount = results.filter(r => r.isCorrect).length
+    const totalCount = results.length
+    this.setData({
+      submitted: true,
+      score: correctCount,
+      totalScore: totalCount,
+      showResult: true,
+      resultItems: results
+    })
+
+    const id = this.data.current?.id
+    if (id) {
+      const app = getApp<IAppOption>()
+      const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
+      ;(existing as any).submitted = true
+      ;(existing as any).score = correctCount
+      ;(existing as any).totalScore = totalCount
+      app.globalData.studyData.readingAnswers[id] = existing
+      wx.setStorageSync('studyData', app.globalData.studyData)
+
+      const map = { ...this.data.completionMap }
+      map[id] = { submitted: true, score: correctCount, totalScore: totalCount }
+      this.setData({ completionMap: map })
+    }
+  },
+
+  hideResult() {
+    this.setData({ showResult: false })
+  },
+
+  // ===== Section A =====
 
   splitPassage(text: string): string[] {
     if (!text) return ['']
@@ -171,7 +321,6 @@ Page<IReadingData, IReadingMethods>({
     return pages.length > 0 ? pages : [text]
   },
 
-  // 将文章拆分为文本段和空白段
   parseSegments(page: string): ISegment[] {
     const segs: ISegment[] = []
     const re = /\b(\d{2})\b/g
@@ -185,8 +334,8 @@ Page<IReadingData, IReadingMethods>({
     return segs
   },
 
-  // 点击空白：若有答案则清除，否则设为 active
   onBlankTap(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.submitted) return
     const num = e.currentTarget.dataset.num as string
     const ba = { ...this.data.blankAnswers }
     if (ba[num]) {
@@ -202,8 +351,8 @@ Page<IReadingData, IReadingMethods>({
     }
   },
 
-  // 点击选项词：填入当前 active 的空白
   onOptionTap(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.submitted) return
     const idx = e.currentTarget.dataset.idx as number
     const word = this.data.current!.options[idx]
     const active = this.data.activeBlank
@@ -225,7 +374,7 @@ Page<IReadingData, IReadingMethods>({
     used[idx] = true
     this.setData({ blankAnswers: ba, usedFlags: used, activeBlank: null })
     this.saveAnswers()
-    wx.showToast({ title: `已填入 ${word}`, icon: 'none' })
+    wx.showToast({ title: '已填入 ' + word, icon: 'none' })
   },
 
   saveAnswers() {
@@ -238,9 +387,12 @@ Page<IReadingData, IReadingMethods>({
       usedFlags: [...this.data.usedFlags],
       matchAnswers: existing.matchAnswers || {},
       cAnswers: existing.cAnswers || {},
+      ...(existing as any).submitted !== undefined ? { submitted: (existing as any).submitted, score: (existing as any).score, totalScore: (existing as any).totalScore } as any : {}
     }
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
+
+  // ===== Section C navigation =====
 
   prevQ() {
     if (this.data.currentQ > 0) {
@@ -271,7 +423,9 @@ Page<IReadingData, IReadingMethods>({
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
     if (dx > 50) this.prevPassage(); else if (dx < -50) this.nextPassage()
   },
+
   // ===== Section B =====
+
   formatBPassage(text: string): string[] {
     if (!text) return ['']
     const parts = text.split(/(?=[A-Z][\)）])/g).filter(s => s.trim())
@@ -281,11 +435,13 @@ Page<IReadingData, IReadingMethods>({
   },
 
   selectStmt(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.submitted) return
     const idx = parseInt(e.currentTarget.dataset.idx as string)
     this.setData({ activeStmt: this.data.activeStmt === idx ? null : idx })
   },
 
   assignLetter(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.submitted) return
     const letter = e.currentTarget.dataset.letter as string
     const stmt = this.data.activeStmt
     if (stmt === null) return
@@ -298,6 +454,7 @@ Page<IReadingData, IReadingMethods>({
   },
 
   removeMatch(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.submitted) return
     const idx = parseInt(e.currentTarget.dataset.idx as string)
     const ma = { ...this.data.matchAnswers }
     delete ma[idx]
@@ -317,7 +474,9 @@ Page<IReadingData, IReadingMethods>({
   },
 
   // ===== Section C =====
+
   onChoiceTap(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.submitted) return
     const choice = e.currentTarget.dataset.letter as string
     if (!choice) return
     const idx = this.data.currentQ

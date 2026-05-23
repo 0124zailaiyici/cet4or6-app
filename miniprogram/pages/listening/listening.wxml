@@ -42,7 +42,7 @@
         </view>
         <view class="f-time"><text>{{audioTimeStr}}</text><text>{{audioDurationStr}}</text></view>
         <view class="f-row">
-          <view class="f-b {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">🔁</view>
+          <view class="f-b {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 循环中' : '🔁'}}</view>
           <view class="f-b" catchtap="rewindAudio">⏪</view>
           <view class="f-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
           <view class="f-b" catchtap="forwardAudio">⏩</view>

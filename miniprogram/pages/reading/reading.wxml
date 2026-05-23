@@ -13,7 +13,11 @@
         <view class="rc-badge rc-{{item.sectionType}}">{{item.sectionType === 'A' ? '选词' : item.sectionType === 'B' ? '匹配' : '精读'}}</view>
         <view class="rc-body">
           <text class="rc-title">{{item.title}}</text>
-          <text class="rc-meta">{{item.questions.length}}题 · {{item.options.length}}选项</text>
+          <text class="rc-meta">{{item.sectionType === 'A' ? '10空 · 15选项' : item.sectionType === 'B' ? '10题匹配' : (item.questions.length + '题' + (item.choices[0] ? ' · ' + item.choices[0].length + '选项' : ''))}}</text>
+        </view>
+        <view class="rc-status">
+          <view class="rcs-dot {{completionMap[item.id] && completionMap[item.id].submitted ? 'done' : ''}}"></view>
+          <text class="rcs-score" wx:if="{{completionMap[item.id] && completionMap[item.id].submitted}}">{{completionMap[item.id].score}}/{{completionMap[item.id].totalScore}}</text>
         </view>
         <text class="rc-arrow">›</text>
       </view>
@@ -29,24 +33,26 @@
         <view class="tb-back" catchtap="back">返回</view>
         <text class="tb-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读匹配' : '仔细阅读'}}</text>
         <view class="tb-badge {{'tag-' + current.sectionType}}">{{current.sectionType === 'A' ? '选词' : current.sectionType === 'B' ? '匹配' : '精读'}}</view>
+        <view class="tb-submit {{submitted ? 'done' : ''}}" wx:if="{{!submitted}}" catchtap="submit">提交</view>
+        <text class="tb-score" wx:if="{{submitted}}">{{score}}/{{totalScore}}</text>
       </view>
 
       <!-- 文章区 -->
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-          <scroll-view class="pz-scroll" scroll-y enhanced="{{true}}">
-            <!-- Section A：交互式填空 -->
-            <block wx:if="{{passageSeg.length > 0 && passageSeg[passagePage]}}">
-              <text class="pz-text">
-                <block wx:for="{{passageSeg[passagePage]}}" wx:key="num" wx:for-item="seg">
-                  <text wx:if="{{seg.type === 'text'}}">{{seg.text}}</text>
-                  <text wx:else class="bk-tag {{blankAnswers[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}}" data-num="{{seg.num}}" catchtap="onBlankTap">{{blankAnswers[seg.num] || seg.num}}</text>
-                </block>
-              </text>
-            </block>
-            <!-- 其他类型：富文本段落 -->
-            <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
-            <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
-          </scroll-view>
+        <scroll-view class="pz-scroll" scroll-y enhanced="{{true}}">
+          <!-- Section A：交互式填空 -->
+          <block wx:if="{{passageSeg.length > 0 && passageSeg[passagePage]}}">
+            <text class="pz-text">
+              <block wx:for="{{passageSeg[passagePage]}}" wx:key="num" wx:for-item="seg">
+                <text wx:if="{{seg.type === 'text'}}">{{seg.text}}</text>
+                <text wx:else class="bk-tag {{blankAnswers[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}}" data-num="{{seg.num}}" catchtap="onBlankTap">{{blankAnswers[seg.num] || seg.num}}</text>
+              </block>
+            </text>
+          </block>
+          <!-- 其他类型：富文本段落 -->
+          <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
+          <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
+        </scroll-view>
         <view class="pz-nav" wx:if="{{passagePages.length > 1}}">
           <view class="pz-dots">
             <view class="pzd {{i === passagePage ? 'on' : ''}}" wx:for="{{passagePages}}" wx:key="*this" wx:for-index="i"></view>
@@ -66,7 +72,7 @@
           <view class="qz-label">📋 选词（15选10）<text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 请选词填入第{{activeBlank}}空</text></view>
           <scroll-view class="qz-chip-scroll" scroll-y>
             <view class="qz-chips">
-              <text class="qzc {{usedFlags[i] ? 'used' : ''}}" wx:for="{{current.options}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" catchtap="onOptionTap">{{optionLetters[i]}}. {{item}}</text>
+              <text class="qzc {{usedFlags[i] ? 'used' : ''}} {{submitted ? 'locked' : ''}}" wx:for="{{current.options}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" catchtap="onOptionTap">{{optionLetters[i]}}. {{item}}</text>
             </view>
           </scroll-view>
         </block>
@@ -86,7 +92,7 @@
           <view class="qz-dots">
             <view class="qzd {{j === bStmtPage ? 'on' : ''}}" wx:for="{{bStmtPages}}" wx:key="*this" wx:for-index="j"></view>
           </view>
-          <view class="qb-bar">
+          <view class="qb-bar" wx:if="{{!submitted}}">
             <view class="qb-bar-letters">
               <text class="qb-l" wx:for="{{availLetters}}" wx:key="*this" wx:for-item="L" data-letter="{{L}}" catchtap="assignLetter">{{L}}</text>
             </view>
@@ -99,7 +105,7 @@
           <view class="qz-c-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
             <view class="qz-c-question">{{current.questions[currentQ]}}</view>
             <view class="qz-opts {{compactOpts ? 'compact' : ''}}" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
-              <view class="qzo {{cSelIdx === i ? 'on' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" wx:for-index="i" data-letter="{{optionLetters[i]}}" catchtap="onChoiceTap">{{item}}</view>
+              <view class="qzo {{cSelIdx === i ? 'on' : ''}} {{submitted ? 'locked' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" wx:for-index="i" data-letter="{{optionLetters[i]}}" catchtap="onChoiceTap">{{item}}</view>
             </view>
           </view>
           <view class="qz-dots">
@@ -107,6 +113,33 @@
           </view>
         </block>
 
+      </view>
+
+      <!-- ===== 结果弹窗 ===== -->
+      <view class="result-overlay" wx:if="{{showResult}}" catchtap="hideResult">
+        <view class="result-card" catchtap="">
+          <view class="res-header">
+            <text class="res-title">答题结果</text>
+            <view class="res-score-wrap">
+              <text class="res-score {{score === totalScore ? 'perfect' : score >= totalScore * 0.6 ? 'good' : 'low'}}">{{score}}/{{totalScore}}</text>
+            </view>
+          </view>
+          <scroll-view class="res-list" scroll-y>
+            <view class="res-item {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{resultItems}}" wx:key="label">
+              <view class="resi-hd">
+                <text class="resi-label">{{item.label}}</text>
+                <text class="resi-icon">{{item.isCorrect ? '✓' : '✗'}}</text>
+              </view>
+              <view class="resi-bd">
+                <text class="resi-your">你的: {{item.userAnswer}}</text>
+                <text class="resi-ans" wx:if="{{!item.isCorrect}}">正确: {{item.correctAnswer}}</text>
+              </view>
+            </view>
+          </scroll-view>
+          <view class="res-foot" catchtap="hideResult">
+            <text>关闭</text>
+          </view>
+        </view>
       </view>
 
     </view>
