@@ -41,7 +41,7 @@
           <text class="word-audio" wx:if="{{result.audio}}" catchtap="playAudio">🔊</text>
         </view>
         <view class="word-meta">
-          <text class="meta-count">{{result.meanings.length}} 项释义</text>
+          <text class="meta-count" wx:if="{{result.meanings.length > 0}}">{{result.meanings.length}} 项释义</text>
           <text class="meta-examples" wx:if="{{exampleCount > 0}}">{{exampleCount}} 条例句</text>
         </view>
         <view class="word-chinese" wx:if="{{result.chinese}}">

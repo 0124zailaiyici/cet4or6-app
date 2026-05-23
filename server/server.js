@@ -179,6 +179,8 @@ app.get('/dictionary', async (req, res) => {
     ]);
 
     if (dictRes.status === 'rejected') {
+      const baseChinese = dictBase[word.toLowerCase()]
+      if (baseChinese) return res.json([{ word: word.toLowerCase(), chinese: baseChinese, meanings: [], phonetics: [] }])
       return res.status(404).json({ error: '未找到该单词', word });
     }
 
