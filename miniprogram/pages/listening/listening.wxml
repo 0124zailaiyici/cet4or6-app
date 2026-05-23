@@ -85,8 +85,7 @@
       <view class="controls-bar">
         <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
         <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 循环中' : '循环'}}</view>
-        <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
-        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">听写</view>
+        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">{{dictationMode ? '✏️ 听写中' : '听写'}}</view>
       </view>
 
       <scroll-view class="sentence-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
@@ -94,7 +93,7 @@
           <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
-              <text class="se-en">{{item}}</text>
+              <text class="se-en">{{dictationMode ? getBlankText(item) : item}}</text>
             </view>
             <view class="se-actions">
               <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>

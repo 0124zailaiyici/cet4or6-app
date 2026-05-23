@@ -216,9 +216,13 @@ class AudioManager {
           const d = this.pageRef.data
           if (d.audioMode) {
             if (d.loopSentence && this.ctx) {
-              this.ctx.seek(0)
-              this.ctx.play()
-              this.pageRef.setData({ isPlaying: true })
+              if (d.focusMode) {
+                this.pageRef.playCurrent()
+              } else {
+                this.ctx.seek(0)
+                this.ctx.play()
+                this.pageRef.setData({ isPlaying: true })
+              }
             } else {
               this.pageRef.setData({ isPlaying: false })
             }
@@ -647,6 +651,11 @@ Page<IListeningData, IListeningMethods>({
 
   // ===== Audio controls =====
   playCurrent() {
+    if (this.data.focusMode) {
+      const text = this.data.focusSentences[this.data.currentIndex]
+      if (text) this.playText(text)
+      return
+    }
     const passage = this.data.currentPassage
     if (!passage) return
     const sentence = passage.sentences[this.data.currentIndex]
@@ -706,15 +715,26 @@ Page<IListeningData, IListeningMethods>({
       ? (this.data.focusSentenceMap[rawIndex] ?? rawIndex)
       : rawIndex
     this.setData({ currentIndex: rawIndex })
-    const passage = this.data.currentPassage
-    if (passage) {
-      if (passage.audioUrl) this.playText('', passage.audioUrl)
-      else this.playText(passage.sentences[origIndex].text)
+    if (this.data.focusMode) {
+      const text = this.data.focusSentences[rawIndex]
+      if (text) this.playText(text)
+    } else {
+      const passage = this.data.currentPassage
+      if (passage) {
+        if (passage.audioUrl) this.playText('', passage.audioUrl)
+        else this.playText(passage.sentences[origIndex].text)
+      }
     }
   },
 
   prevSentence() {
-    if (this.data.audioMode) {
+    if (this.data.focusMode) {
+      if (this.data.currentIndex > 0) {
+        this.setData({ currentIndex: this.data.currentIndex - 1 })
+        const text = this.data.focusSentences[this.data.currentIndex]
+        if (text) this.playText(text)
+      }
+    } else if (this.data.audioMode) {
       audio.seek(Math.max(0, audio.getCurrentTime() - 15))
     } else if (this.data.currentIndex > 0) {
       this.setData({ currentIndex: this.data.currentIndex - 1 })
@@ -723,7 +743,13 @@ Page<IListeningData, IListeningMethods>({
   },
 
   nextSentence() {
-    if (this.data.audioMode) {
+    if (this.data.focusMode) {
+      if (this.data.currentIndex < this.data.focusSentences.length - 1) {
+        this.setData({ currentIndex: this.data.currentIndex + 1 })
+        const text = this.data.focusSentences[this.data.currentIndex]
+        if (text) this.playText(text)
+      }
+    } else if (this.data.audioMode) {
       audio.seek(Math.min(audio.getDuration(), audio.getCurrentTime() + 15))
     } else {
       const passage = this.data.currentPassage
