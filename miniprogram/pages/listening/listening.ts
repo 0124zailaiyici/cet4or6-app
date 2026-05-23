@@ -389,6 +389,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   enterDetail(e: WechatMiniprogram.TouchEvent) {
+    audio.attach(this)
     const id = Number(e.currentTarget.dataset.id)
     const passage = this.data.passages.find(p => p.id === id)
     if (!passage) return
@@ -454,7 +455,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   backToList() {
-    audio.destroy()
+    audio.stop()
     this.setData({
       mode: 'list',
       currentPassage: null,

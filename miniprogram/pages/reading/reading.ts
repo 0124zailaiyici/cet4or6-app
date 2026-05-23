@@ -82,7 +82,9 @@ interface IReadingMethods {
   submit(): void
   hideResult(): void
   checkAllAnswered(): boolean
+  getMissingCount(): { total: number; answered: number }
   buildResult(): IResultItem[]
+  refreshCompletionMap(): void
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -119,24 +121,29 @@ Page<IReadingData, IReadingMethods>({
 
   onLoad() {
     const readings = readingsData as unknown as IReadingItem[]
-    const app = getApp<IAppOption>()
-    const saved = app.globalData.studyData.readingAnswers
-    const map: Record<number, { submitted: boolean; score: number; totalScore: number }> = {}
-    for (const r of readings) {
-      const a = saved[r.id] as any
-      const submitted = !!(a && a.submitted)
-      map[r.id] = {
-        submitted,
-        score: (a && a.score) || 0,
-        totalScore: (a && a.totalScore) || 0
-      }
-    }
-    this.setData({ readings, completionMap: map })
+    this.setData({ readings })
+    this.refreshCompletionMap()
   },
 
   onShow() {
     applyTheme(getDarkMode())
     this.setData({ darkMode: getDarkMode() })
+    this.refreshCompletionMap()
+  },
+
+  refreshCompletionMap() {
+    const app = getApp<IAppOption>()
+    const saved = app.globalData.studyData.readingAnswers
+    const map: Record<number, { submitted: boolean; score: number; totalScore: number }> = {}
+    for (const r of this.data.readings) {
+      const a = saved[r.id] as any
+      map[r.id] = {
+        submitted: !!(a && a.submitted),
+        score: (a && a.score) || 0,
+        totalScore: (a && a.totalScore) || 0
+      }
+    }
+    this.setData({ completionMap: map })
   },
 
   select(e: WechatMiniprogram.TouchEvent) {
@@ -173,8 +180,8 @@ Page<IReadingData, IReadingMethods>({
         availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'].filter(l => !Object.values(matchSaved).includes(l)),
         cAnswers: cAnswerSaved,
         cSelIdx: (() => {
-          const sl = String(cAnswerSaved[0] || '')
-          return 'ABCD'.indexOf(sl)
+          const sl = cAnswerSaved[0]
+          return sl ? 'ABCD'.indexOf(sl) : -1
         })(),
         submitted: isSubmitted,
         score: (saved && (saved as any).score) || 0,
@@ -193,23 +200,26 @@ Page<IReadingData, IReadingMethods>({
   // ===== Submission & Scoring =====
 
   checkAllAnswered(): boolean {
+    const m = this.getMissingCount()
+    return m.answered >= m.total
+  },
+
+  getMissingCount(): { total: number; answered: number } {
     const st = this.data.current?.sectionType
     if (st === 'A') {
       const ba = this.data.blankAnswers
       const total = Object.keys(this.data.current?.correctAnswers || {}).length
-      return Object.keys(ba).length >= total
+      return { total, answered: Object.keys(ba).length }
     }
     if (st === 'B') {
       const total = this.data.current?.questions?.length || 0
-      const ma = this.data.matchAnswers
-      return Object.keys(ma).length >= total
+      return { total, answered: Object.keys(this.data.matchAnswers).length }
     }
     if (st === 'C') {
       const total = this.data.current?.questions?.length || 0
-      const ca = this.data.cAnswers
-      return Object.keys(ca).length >= total
+      return { total, answered: Object.keys(this.data.cAnswers).length }
     }
-    return false
+    return { total: 0, answered: 0 }
   },
 
   buildResult(): IResultItem[] {
@@ -262,8 +272,18 @@ Page<IReadingData, IReadingMethods>({
       wx.showToast({ title: '已提交过', icon: 'none' })
       return
     }
-    if (!this.checkAllAnswered()) {
-      wx.showToast({ title: '请完成所有题目后再提交', icon: 'none' })
+    const missing = this.getMissingCount()
+    if (missing.total === 0) {
+      wx.showToast({ title: '暂无题目可答', icon: 'none' })
+      return
+    }
+    if (missing.answered < missing.total) {
+      wx.showModal({
+        title: '题目未答完',
+        content: `已完成 ${missing.answered}/${missing.total}，还有 ${missing.total - missing.answered} 题未作答`,
+        showCancel: false,
+        confirmText: '知道了'
+      })
       return
     }
     const results = this.buildResult()
@@ -397,8 +417,8 @@ Page<IReadingData, IReadingMethods>({
   prevQ() {
     if (this.data.currentQ > 0) {
       const q = this.data.currentQ - 1
-      const sl = String(this.data.cAnswers[q] || '')
-      this.setData({ currentQ: q, cSelIdx: 'ABCD'.indexOf(sl) })
+      const sl = this.data.cAnswers[q]
+      this.setData({ currentQ: q, cSelIdx: sl ? 'ABCD'.indexOf(sl) : -1 })
       this.updateCompact()
     }
   },
@@ -406,8 +426,8 @@ Page<IReadingData, IReadingMethods>({
     const t = this.data.current?.questions?.length || 0
     if (this.data.currentQ < t - 1) {
       const q = this.data.currentQ + 1
-      const sl = String(this.data.cAnswers[q] || '')
-      this.setData({ currentQ: q, cSelIdx: 'ABCD'.indexOf(sl) })
+      const sl = this.data.cAnswers[q]
+      this.setData({ currentQ: q, cSelIdx: sl ? 'ABCD'.indexOf(sl) : -1 })
       this.updateCompact()
     }
   },
@@ -444,7 +464,10 @@ Page<IReadingData, IReadingMethods>({
     if (this.data.submitted) return
     const letter = e.currentTarget.dataset.letter as string
     const stmt = this.data.activeStmt
-    if (stmt === null) return
+    if (stmt === null) {
+      wx.showToast({ title: '请先点击一条陈述', icon: 'none' })
+      return
+    }
     const ma = { ...this.data.matchAnswers }
     if (ma[stmt] === letter) { delete ma[stmt] }
     else { ma[stmt] = letter }
