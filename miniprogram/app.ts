@@ -18,6 +18,8 @@ App<IAppOption>({
   globalData: {
     userInfo: undefined,
     darkMode: wx.getStorageSync('darkMode') || false,
+    examDeadline: 0,
+    examSet: '',
     studyData: (() => {
       const stored = wx.getStorageSync('studyData')
       return stored ? { ...defaults, ...stored, hardSentences: stored.hardSentences || [], readingAnswers: stored.readingAnswers || {} } : { ...defaults }

@@ -26,12 +26,13 @@ interface IVocabData {
   gameIndex: number
   gameCorrect: number
   lookingUp: boolean
+  gameLoading: boolean
 }
 
 interface IVocabMethods {
   switchTab(e: WechatMiniprogram.TouchEvent): void
   startGame(e: WechatMiniprogram.TouchEvent): void
-  showGameForIdx(idx: number): void
+  showGameForIdx(idx: number): Promise<void>
   pickOption(e: WechatMiniprogram.TouchEvent): void
   nextGame(): void
   closeGame(): void
@@ -613,6 +614,12 @@ function extractWords(): IVocabWord[] {
   return result
 }
 
+function trimDef(d: string): string {
+  if (/[\u4e00-\u9fff]/.test(d)) return d.length > 50 ? d.slice(0, 50) + '…' : d
+  const s = d.split('. ')[0].trim()
+  return s.length > 50 ? s.slice(0, 50) + '…' : s
+}
+
 function shuffleInPlace<T>(arr: T[]): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -637,6 +644,7 @@ Page<IVocabData, IVocabMethods>({
     gameIndex: -1,
     gameCorrect: -1,
     lookingUp: false,
+    gameLoading: false,
   },
 
   onShow() {
@@ -691,23 +699,39 @@ Page<IVocabData, IVocabMethods>({
     this.showGameForIdx(idx)
   },
 
-  showGameForIdx(idx: number) {
+  async showGameForIdx(idx: number) {
     const word = this.data.filteredWords[idx]
     if (!word?.definition) return this.closeGame()
-    const others = this.data.words.filter(w => w.word !== word.word && w.definition)
-    const pick = shuffleInPlace(others).slice(0, 3)
-    const options = shuffleInPlace([word, ...pick])
     this.setData({
       gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
       gameOptions: [], gameIndex: -1, gameCorrect: -1,
     })
-    this.setData({ gameOptions: options.map(w => w.definition) })
+    if (!/[\u4e00-\u9fff]/.test(word.definition)) {
+      this.setData({ gameLoading: true })
+      try {
+        const result = await lookupWord(word.word)
+        const entry = Array.isArray(result) ? result[0] : result
+        const chinese = entry.chinese || ''
+        if (chinese) {
+          word.definition = chinese
+          const app = getApp<IAppOption>()
+          const stored = app.globalData.studyData.vocabWords as IVocabWord[]
+          const sw = stored.find(v => v.word === word.word)
+          if (sw) { sw.definition = chinese; wx.setStorageSync('studyData', app.globalData.studyData) }
+        }
+      } catch {}
+      this.setData({ gameLoading: false })
+    }
+    const others = this.data.words.filter(w => w.word !== word.word && w.definition)
+    const pick = shuffleInPlace(others).slice(0, 3)
+    const options = shuffleInPlace([word, ...pick])
+    this.setData({ gameOptions: options.map(w => trimDef(w.definition)) })
   },
 
   pickOption(e: WechatMiniprogram.TouchEvent) {
     if (this.data.gameIndex >= 0) return
     const oi = Number(e.currentTarget.dataset.oi)
-    const correctDef = this.data.gameWord?.definition || ''
+    const correctDef = trimDef(this.data.gameWord?.definition || '')
     const isCorrect = this.data.gameOptions[oi] === correctDef
     this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctDef) })
 

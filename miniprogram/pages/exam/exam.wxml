@@ -13,104 +13,60 @@
     </block>
   </block>
 
-  <!-- ===== 考试中 ===== -->
+  <!-- ===== 考试看板 ===== -->
   <block wx:if="{{phase === 'exam'}}">
-    <view class="timer-bar">
-      <text class="t-num {{timer < 300 ? 'warn' : ''}}">{{timerStr}}</text>
-      <text class="t-phase">{{sectionNames[currentSection]}} · 作答中</text>
-    </view>
-    <view class="sects">
-      <view class="se {{currentSection === 0 ? 'on' : ''}}" data-section="0" catchtap="switchSection">✏️ 写作</view>
-      <view class="se {{currentSection === 1 ? 'on' : ''}}" data-section="1" catchtap="switchSection">🎧 听力</view>
-      <view class="se {{currentSection === 2 ? 'on' : ''}}" data-section="2" catchtap="switchSection">📖 阅读</view>
-      <view class="se {{currentSection === 3 ? 'on' : ''}}" data-section="3" catchtap="switchSection">🌟 翻译</view>
+    <view class="topbar">
+      <view style="display:flex;align-items:center;gap:10px">
+        <text style="font-size:20px" catchtap="goBack">←</text>
+        <h1 style="flex:1">{{currentSet.label}}</h1>
+      </view>
     </view>
 
-    <scroll-view class="body" scroll-y>
-      <!-- Writing -->
-      <view wx:if="{{currentSection === 0}}" class="card">
-        <text class="qlbl">✏️ Part I Writing (30 min)</text>
-        <text class="qt">For this part, you are allowed 30 minutes to write a news report...</text>
-        <textarea class="input" placeholder="在此写作..." value="{{writingText}}" bindinput="onWritingInput" maxlength="2000"></textarea>
-      </view>
+    <!-- Timer -->
+    <view class="timer-big">
+      <text class="t-n {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+      <text class="t-desc">剩余时间 · {{currentSet.label}}</text>
+    </view>
 
-      <!-- Listening -->
-      <view wx:if="{{currentSection === 1}}">
-        <view class="card" wx:if="{{listeningQuestions.length === 0}}">
-          <text class="qt">暂无听力题目，请先在听力页面作答。</text>
-        </view>
-        <view class="card" wx:for="{{listeningQuestions}}" wx:key="key" wx:for-item="q" wx:for-index="qi">
-          <text class="qlbl">{{q.source}} · {{q.question}}</text>
-          <view class="opts">
-            <view class="o {{q.userAnswer === 'A' ? 'on' : ''}}" wx:if="{{q.options[0]}}" data-idx="{{qi}}" data-oi="0" catchtap="selectListening">{{q.options[0]}}</view>
-            <view class="o {{q.userAnswer === 'B' ? 'on' : ''}}" wx:if="{{q.options[1]}}" data-idx="{{qi}}" data-oi="1" catchtap="selectListening">{{q.options[1]}}</view>
-            <view class="o {{q.userAnswer === 'C' ? 'on' : ''}}" wx:if="{{q.options[2]}}" data-idx="{{qi}}" data-oi="2" catchtap="selectListening">{{q.options[2]}}</view>
-            <view class="o {{q.userAnswer === 'D' ? 'on' : ''}}" wx:if="{{q.options[3]}}" data-idx="{{qi}}" data-oi="3" catchtap="selectListening">{{q.options[3]}}</view>
-          </view>
-        </view>
+    <!-- Section cards -->
+    <view class="scard" catchtap="goWriting">
+      <text class="si">✏️</text>
+      <view class="sb">
+        <text class="sn">写作 · 30分钟</text>
+        <text class="sd">前往写作页面作答</text>
       </view>
+      <text class="sa">→</text>
+    </view>
 
-      <!-- Reading -->
-      <view wx:if="{{currentSection === 2}}">
-        <view class="card" wx:if="{{readingQuestions.length === 0}}">
-          <text class="qt">暂无阅读题目。</text>
-        </view>
-        <view class="card" wx:for="{{readingQuestions}}" wx:key="key" wx:for-item="q" wx:for-index="qi">
-          <text class="qlbl">{{q.source}} · Q{{qi + 1}}</text>
-          <text class="qt">{{q.question}}</text>
-          <view class="opts">
-            <view class="o {{q.userAnswer === 'A' ? 'on' : ''}}" data-idx="{{qi}}" data-oi="0" catchtap="selectReading">{{q.options[0]}}</view>
-            <view class="o {{q.userAnswer === 'B' ? 'on' : ''}}" data-idx="{{qi}}" data-oi="1" catchtap="selectReading">{{q.options[1]}}</view>
-            <view class="o {{q.userAnswer === 'C' ? 'on' : ''}}" data-idx="{{qi}}" data-oi="2" catchtap="selectReading">{{q.options[2]}}</view>
-            <view class="o {{q.userAnswer === 'D' ? 'on' : ''}}" data-idx="{{qi}}" data-oi="3" catchtap="selectReading">{{q.options[3]}}</view>
-          </view>
-        </view>
+    <view class="scard" catchtap="goListening">
+      <text class="si">🎧</text>
+      <view class="sb">
+        <text class="sn">听力 · 25分钟</text>
+        <text class="sd" wx:if="{{listeningTotal > 0}}">已答 {{listeningDone}}/{{listeningTotal}} 题</text>
+        <text class="sd" wx:else>前往听力页面作答</text>
       </view>
+      <view wx:if="{{listeningDone > 0}}" class="sp" style="background:#4fc3f7;width:{{listeningTotal > 0 ? listeningDone / listeningTotal * 100 : 0}}%"></view>
+    </view>
 
-      <!-- Translation -->
-      <view wx:if="{{currentSection === 3}}" class="card">
-        <text class="qlbl">🌟 Part IV Translation (30 min)</text>
-        <text class="qt">舞狮作为中国传统民间表演已有2000多年历史...</text>
-        <textarea class="input" placeholder="在此翻译..." value="{{translationText}}" bindinput="onTranslationInput" maxlength="2000"></textarea>
+    <view class="scard" catchtap="goReading">
+      <text class="si">📖</text>
+      <view class="sb">
+        <text class="sn">阅读 · 40分钟</text>
+        <text class="sd" wx:if="{{readingTotal > 0}}">已答 {{readingDone}}/{{readingTotal}} 题</text>
+        <text class="sd" wx:else>前往阅读页面作答</text>
       </view>
-    </scroll-view>
+      <view wx:if="{{readingDone > 0}}" class="sp" style="background:#81c784;width:{{readingTotal > 0 ? readingDone / readingTotal * 100 : 0}}%"></view>
+    </view>
 
-    <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷并评分</view></view>
+    <view class="scard" catchtap="goTranslation">
+      <text class="si">🌟</text>
+      <view class="sb">
+        <text class="sn">翻译 · 30分钟</text>
+        <text class="sd">前往翻译页面作答</text>
+      </view>
+      <text class="sa">→</text>
+    </view>
+
+    <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷并退出</view></view>
   </block>
-
-  <!-- ===== 结果 ===== -->
-  <block wx:if="{{phase === 'result'}}">
-    <view class="topbar"><h1>考试结果</h1><text class="sub">{{currentSet.label}}</text></view>
-
-    <view class="card" style="text-align:center">
-      <text class="score">{{readingCorrect + listeningCorrect}}</text>
-      <text class="subl">答对题数 · 阅读{{readingCorrect}}/{{readingTotal}} 听力{{listeningCorrect}}/{{listeningTotal}}</text>
-    </view>
-
-    <view class="card">
-      <text class="qt">📊 各题型得分</text>
-      <view class="bar-row">
-        <text class="bl">🎧 听力</text>
-        <view class="bb"><view class="bf" style="width:{{listeningTotal > 0 ? listeningCorrect / listeningTotal * 100 : 0}}%;background:#4fc3f7"></view></view>
-        <text class="bn">{{listeningCorrect}}/{{listeningTotal}}</text>
-      </view>
-      <view class="bar-row">
-        <text class="bl">📖 阅读</text>
-        <view class="bb"><view class="bf" style="width:{{readingTotal > 0 ? readingCorrect / readingTotal * 100 : 0}}%;background:#81c784"></view></view>
-        <text class="bn">{{readingCorrect}}/{{readingTotal}}</text>
-      </view>
-    </view>
-
-    <view class="card">
-      <text class="qt">📋 详细结果</text>
-      <view wx:for="{{readingQuestions}}" wx:key="key" wx:for-item="q" class="rrow">
-        <text class="rq">{{q.question}}</text>
-        <text class="ra {{q.userAnswer === q.correct ? 'g' : 'r'}}">{{q.userAnswer || '未答'}} {{q.userAnswer && q.userAnswer !== q.correct ? '→ ' + q.correct : ''}}</text>
-      </view>
-      <text wx:if="{{readingQuestions.length === 0}}" class="note">暂无阅读记录</text>
-    </view>
-
-    <view class="submit-row"><view class="sbtn2" catchtap="backToList">返回列表</view></view>
-  </block>
-
 </view>

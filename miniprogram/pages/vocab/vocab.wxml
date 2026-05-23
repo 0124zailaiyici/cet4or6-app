@@ -49,6 +49,7 @@
       <view class="gq">请选出以下单词的正确释义</view>
       <view class="gw">{{gameWord.word}}</view>
       <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
+      <view class="gloading" wx:if="{{gameLoading}}">正在获取中文释义…</view>
       <view class="gresult {{gameIndex >= 0 ? (gameIndex === gameCorrect ? 'ok' : 'fail') : ''}}" wx:if="{{gameIndex >= 0}}">
         {{gameIndex === gameCorrect ? '✓ 回答正确' : '✗ 回答错误'}}
       </view>

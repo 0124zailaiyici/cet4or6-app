@@ -22,9 +22,11 @@ interface IStudyData {
 
 interface IAppOption {
   globalData: {
-    userInfo?: WechatMiniprogram.UserInfo,
-    studyData: IStudyData,
+    userInfo?: any
     darkMode: boolean
+    studyData: IStudyData
+    examDeadline: number
+    examSet: string
   }
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback,
 }
