@@ -9,21 +9,34 @@
 
 .stats { display: flex; gap: 12rpx; margin: 16rpx 20rpx 12rpx; }
 .stats .s { flex: 1; background: #fff; border-radius: 16rpx; padding: 16rpx; text-align: center; box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04); }
-.stats .s .n { display: block; font-size: 36rpx; font-weight: 800; color: #ff6b8a; }
+.stats .s .n { display: block; font-size: 36rpx; font-weight: 800; color: #8a7a9a; }
+.stats .s .n.g { color: #388e3c; }
+.stats .s .n.r { color: #d32f2f; }
 .stats .s .l { display: block; font-size: 20rpx; color: #8a7a9a; margin-top: 4rpx; }
 
 .tabs { display: flex; gap: 8rpx; margin: 0 20rpx 12rpx; }
 .tab { flex: 1; text-align: center; padding: 14rpx 0; font-size: 24rpx; color: #8a7a9a; background: #fff; border-radius: 14rpx; }
 .tab.on { color: #ff6b8a; font-weight: 600; background: rgba(255,107,138,0.06); border: 2rpx solid rgba(255,107,138,0.12); }
 
-.list { flex: 1; padding: 0 20rpx 20rpx; display: flex; flex-direction: column; gap: 12rpx; }
-.card { background: #fff; border-radius: 18rpx; padding: 20rpx; box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04); border: 2rpx solid rgba(255,107,138,0.06); margin-bottom: 12rpx; }
+.list { flex: 1; padding: 0 20rpx 20rpx; }
+.card {
+  background: #fff; border-radius: 18rpx; padding: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04);
+  border: 3rpx solid transparent; margin-bottom: 12rpx;
+}
+.card.right { border-color: rgba(56,142,60,0.12); }
+.card.wrong { border-color: rgba(211,47,47,0.1); }
 .card .h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6rpx; }
 .card .h .src { font-size: 20rpx; color: #ff6b8a; font-weight: 600; }
 .card .h .qn { font-size: 20rpx; color: #8a7a9a; }
 .card .q { display: block; font-size: 26rpx; color: #2d2d4e; line-height: 1.6; margin-bottom: 12rpx; }
-.card .ans-wrap { margin-top: 8rpx; }
-.card .ans { font-size: 22rpx; color: #1e88e5; font-weight: 600; background: rgba(30,136,229,0.04); padding: 8rpx 16rpx; border-radius: 10rpx; display: inline-block; }
+.ansr { display: flex; flex-wrap: wrap; gap: 8rpx; align-items: center; }
+.ar { font-size: 22rpx; padding: 6rpx 14rpx; border-radius: 8rpx; }
+.ar.user { background: rgba(30,136,229,0.06); color: #1e88e5; }
+.ar.correct { background: rgba(56,142,60,0.06); color: #388e3c; }
+.ar.verdict { font-weight: 700; }
+.ar.verdict.right { color: #388e3c; }
+.ar.verdict.wrong { color: #d32f2f; }
 
 .empty { display: flex; flex-direction: column; align-items: center; padding: 120rpx 0; font-size: 28rpx; color: #8a7a9a; }
 .empty .hint { font-size: 24rpx; margin-top: 8rpx; }
@@ -32,13 +45,20 @@
 .dark-theme.page { background: #12121f !important; }
 .dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
 .dark-theme .stats .s { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.25) !important; }
-.dark-theme .stats .s .n { color: #ff8fab !important; }
 .dark-theme .stats .s .l { color: #a090b0 !important; }
+.dark-theme .stats .s .n { color: #a090b0 !important; }
+.dark-theme .stats .s .n.g { color: #66bb6a !important; }
+.dark-theme .stats .s .n.r { color: #ef5350 !important; }
 .dark-theme .tab { background: #1e1e38 !important; color: #a090b0 !important; }
 .dark-theme .tab.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
-.dark-theme .card { background: #1e1e38 !important; border-color: rgba(255,143,171,0.08) !important; }
+.dark-theme .card { background: #1e1e38 !important; }
+.dark-theme .card.right { border-color: rgba(102,187,106,0.15) !important; }
+.dark-theme .card.wrong { border-color: rgba(239,83,80,0.12) !important; }
 .dark-theme .card .h .src { color: #ff8fab !important; }
 .dark-theme .card .h .qn { color: #a090b0 !important; }
 .dark-theme .card .q { color: #e0d0e8 !important; }
-.dark-theme .card .ans { color: #4fc3f7 !important; background: rgba(79,195,247,0.06) !important; }
+.dark-theme .ar.user { background: rgba(79,195,247,0.06) !important; color: #4fc3f7 !important; }
+.dark-theme .ar.correct { background: rgba(102,187,106,0.06) !important; color: #66bb6a !important; }
+.dark-theme .ar.verdict.right { color: #66bb6a !important; }
+.dark-theme .ar.verdict.wrong { color: #ef5350 !important; }
 .dark-theme .empty { color: #a090b0 !important; }

@@ -6,15 +6,38 @@ function today(): string {
   return `${y}-${m}-${day}`
 }
 
-export function doCheckIn(): number {
+export function doCheckIn(activity?: string): number {
   const app = getApp<IAppOption>()
   const sd = app.globalData.studyData
   const t = today()
+
+  // Check-in
   if (sd.checkInDates.indexOf(t) === -1) {
     sd.checkInDates.push(t)
-    wx.setStorageSync('studyData', sd)
   }
+
+  // Today activity tracking
+  if (!sd.todayActivity || sd.todayActivity.date !== t) {
+    sd.todayActivity = { date: t, listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 }
+  }
+  if (activity === 'listen') sd.todayActivity.listen++
+  else if (activity === 'sentence') sd.todayActivity.sentence++
+  else if (activity === 'translation') sd.todayActivity.translation++
+  else if (activity === 'writing') sd.todayActivity.writing++
+  if (activity) sd.todayActivity.total++
+  wx.setStorageSync('studyData', sd)
+
   return calcStreak(sd.checkInDates)
+}
+
+export function getTodayActivity(): { listen: number; sentence: number; translation: number; writing: number; total: number } {
+  const app = getApp<IAppOption>()
+  const sd = app.globalData.studyData
+  const t = today()
+  if (sd.todayActivity && sd.todayActivity.date === t) {
+    return sd.todayActivity
+  }
+  return { listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 }
 }
 
 export function calcStreak(dates: string[]): number {

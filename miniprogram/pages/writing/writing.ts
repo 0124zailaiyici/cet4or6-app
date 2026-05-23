@@ -487,7 +487,7 @@ Page<IWritingData>({
     const records = app.globalData.studyData.writingRecords
     records.push({ id: Date.now(), score, date: new Date().toISOString().slice(0, 10) })
     wx.setStorageSync('studyData', app.globalData.studyData)
-    doCheckIn()
+    doCheckIn('writing')
     wx.hideLoading(); this.setData({ submitting: false })
     if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
     this.setData({ timerRunning: false })

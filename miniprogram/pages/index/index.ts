@@ -1,4 +1,4 @@
-import { doCheckIn, calcStreak, isCheckedInToday } from '../../utils/checkin'
+import { doCheckIn, calcStreak, isCheckedInToday, getTodayActivity } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 import readingsData from '../../data/readings'
 type IReadingItem = { id: number; title: string; passage: string; questions: string[] }
@@ -61,29 +61,23 @@ Page<IHomeData, IHomeMethods>({
     const app = getApp<IAppOption>()
     const sd = app.globalData.studyData
     const goal = sd.dailyGoal
+    const today = getTodayActivity()
 
-    const listened = sd.completedListens.length
-    const sentences = sd.masteredSentences.length
-    const translations = sd.translationRecords.length
-    const writings = sd.writingRecords.length
-
-    const calcPct = (done: number, target: number) => target > 0 ? Math.min(100, Math.round(done / target * 100)) : 0
-    const totalTarget = goal.listen + goal.sentence + goal.translation + goal.writing
-    const totalDone = listened + sentences + translations + writings
-
+    // Show today's activity counts
     this.setData({
       greeting,
       checkedIn: isCheckedInToday(),
       streak: calcStreak(sd.checkInDates),
       favoriteCount: sd.favoriteSentenceIds.length,
       readingCount: (readingsData as IReadingItem[]).length,
-      todayStats: { listened, sentences, translations, writings },
+      todayStats: { listened: today.listen, sentences: today.sentence, translations: today.translation, writings: today.writing },
       goalStats: {
-        listenPct: calcPct(listened, goal.listen),
-        sentencePct: calcPct(sentences, goal.sentence),
-        translationPct: calcPct(translations, goal.translation),
-        writingPct: calcPct(writings, goal.writing),
-        overallPct: calcPct(totalDone, totalTarget),
+        listenPct: goal.listen > 0 ? Math.min(100, Math.round(today.listen / goal.listen * 100)) : 0,
+        sentencePct: goal.sentence > 0 ? Math.min(100, Math.round(today.sentence / goal.sentence * 100)) : 0,
+        translationPct: goal.translation > 0 ? Math.min(100, Math.round(today.translation / goal.translation * 100)) : 0,
+        writingPct: goal.writing > 0 ? Math.min(100, Math.round(today.writing / goal.writing * 100)) : 0,
+        overallPct: goal.listen + goal.sentence + goal.translation + goal.writing > 0
+          ? Math.min(100, Math.round(today.total / (goal.listen + goal.sentence + goal.translation + goal.writing) * 100)) : 0,
       },
       darkMode: getDarkMode(),
     })
@@ -95,7 +89,7 @@ Page<IHomeData, IHomeMethods>({
   },
 
   handleCheckIn() {
-    const streak = doCheckIn()
+    const streak = doCheckIn('daily')
     this.setData({ checkedIn: true, streak })
     wx.showToast({ title: `打卡成功！连续 ${streak} 天`, icon: 'success' })
   },

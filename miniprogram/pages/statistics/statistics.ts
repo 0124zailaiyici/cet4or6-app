@@ -139,6 +139,7 @@ Page<IStatData, IStatMethods>({
             hardSentences: [],
             readingAnswers: {},
             listeningAnswers: {},
+            todayActivity: { date: '', listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 },
             dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
           }
           const app = getApp<IAppOption>()

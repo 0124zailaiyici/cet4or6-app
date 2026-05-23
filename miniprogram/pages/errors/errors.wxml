@@ -7,21 +7,21 @@
   <view class="stats">
     <view class="s">
       <text class="n">{{totalAttempted}}</text>
-      <text class="l">已答题</text>
+      <text class="l">已答</text>
     </view>
     <view class="s">
-      <text class="n">{{readingErrors.length}}</text>
-      <text class="l">阅读</text>
+      <text class="n g">{{rightCount}}</text>
+      <text class="l">✓ 正确</text>
     </view>
     <view class="s">
-      <text class="n">{{listeningErrors.length}}</text>
-      <text class="l">听力</text>
+      <text class="n r">{{wrongCount}}</text>
+      <text class="l">✗ 错误</text>
     </view>
   </view>
 
   <view class="tabs">
-    <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="{{0}}" catchtap="switchTab">📖 阅读错题</view>
-    <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="{{1}}" catchtap="switchTab">🎵 听力错题</view>
+    <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="0" catchtap="switchTab">📖 阅读</view>
+    <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="1" catchtap="switchTab">🎵 听力</view>
   </view>
 
   <scroll-view class="list" scroll-y>
@@ -30,14 +30,16 @@
         <text>📖 还没有阅读记录</text>
         <text class="hint">做几道阅读题试试</text>
       </view>
-      <view class="card" wx:for="{{readingErrors}}" wx:key="id" wx:for-item="item">
+      <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{readingErrors}}" wx:key="id" wx:for-item="item">
         <view class="h">
           <text class="src">{{item.source}}</text>
           <text class="qn">{{item.qLabel}}</text>
         </view>
         <text class="q">{{item.question}}</text>
-        <view class="ans-wrap">
-          <text class="ans">你选了：{{item.userAnswer}}</text>
+        <view class="ansr">
+          <view class="ar user">你选的 {{item.userAnswer}}</view>
+          <view class="ar correct" wx:if="{{!item.isCorrect}}">答案 {{item.correctAnswer}}</view>
+          <view class="ar verdict {{item.isCorrect ? 'right' : 'wrong'}}">{{item.isCorrect ? '✓ 正确' : '✗ 错误'}}</view>
         </view>
       </view>
     </block>
@@ -46,14 +48,16 @@
         <text>🎵 还没有听力记录</text>
         <text class="hint">做几道听力题试试</text>
       </view>
-      <view class="card" wx:for="{{listeningErrors}}" wx:key="id" wx:for-item="item">
+      <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{listeningErrors}}" wx:key="id" wx:for-item="item">
         <view class="h">
           <text class="src">{{item.source}}</text>
           <text class="qn">{{item.qLabel}}</text>
         </view>
         <text class="q">{{item.question}}</text>
-        <view class="ans-wrap">
-          <text class="ans">你选了：{{item.userAnswer}}</text>
+        <view class="ansr">
+          <view class="ar user">你选的 {{item.userAnswer}}</view>
+          <view class="ar correct" wx:if="{{!item.isCorrect}}">答案 {{item.correctAnswer}}</view>
+          <view class="ar verdict {{item.isCorrect ? 'right' : 'wrong'}}">{{item.isCorrect ? '✓ 正确' : '✗ 错误'}}</view>
         </view>
       </view>
     </block>

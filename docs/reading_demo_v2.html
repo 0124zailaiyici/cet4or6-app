@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阅读理解优化原型 - 定位联动 + 难词释义</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1d23; color: #d4d6db; height: 100vh; overflow: hidden; }
+
+/* ===== Top bar ===== */
+.topbar {
+  display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+  background: #23262d; border-bottom: 1px solid #2e3239;
+}
+.topbar .back { padding: 6px 16px; border-radius: 8px; background: #2e3239; color: #8b95a5; font-size: 14px; cursor: pointer; border: none; }
+.topbar .title { font-size: 16px; font-weight: 700; color: #e0e4ea; flex: 1; }
+.topbar .badge { font-size: 12px; padding: 4px 12px; border-radius: 8px; color: #fff; background: #388e3c; }
+.topbar .hint { font-size: 12px; color: #8b95a5; padding: 4px 12px; border-radius: 8px; background: #2e3239; }
+
+/* ===== Main layout ===== */
+.main { display: flex; height: calc(100vh - 53px); gap: 0; }
+.main > * { flex: 1; min-width: 0; }
+
+/* ===== Passage panel ===== */
+.passage-panel {
+  display: flex; flex-direction: column; overflow: hidden;
+  border-right: 1px solid #2e3239;
+}
+.passage-header { font-size: 12px; color: #8b95a5; padding: 10px 20px; border-bottom: 1px solid #2e3239; letter-spacing: 1px; }
+.passage-scroll { flex: 1; overflow-y: auto; padding: 20px 24px; line-height: 1.85; }
+.passage-scroll::-webkit-scrollbar { width: 4px; }
+.passage-scroll::-webkit-scrollbar-thumb { background: #3a3f4a; border-radius: 2px; }
+
+/* Paragraph */
+.para { margin-bottom: 16px; padding: 12px 16px; border-radius: 10px; border: 1px solid transparent; transition: 0.25s; position: relative; }
+.para-label {
+  position: absolute; left: -2px; top: 6px;
+  width: 22px; height: 22px; border-radius: 6px;
+  background: #2e3239; color: #8b95a5; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.para.highlight { background: rgba(56,142,60,0.12); border-color: rgba(56,142,60,0.4); }
+.para.highlight .para-label { background: #388e3c; color: #fff; }
+.para.highlight-multi { background: rgba(30,136,229,0.12); border-color: rgba(30,136,229,0.4); }
+.para .para-text { font-size: 15px; color: #c8cdd4; margin-left: 28px; }
+
+/* Word annotation */
+.word-annotated {
+  color: #e2b93b; border-bottom: 1px dashed rgba(226,185,59,0.5); cursor: pointer;
+  position: relative; transition: 0.15s;
+}
+.word-annotated:hover { color: #f0cc4a; border-bottom-color: #f0cc4a; }
+.word-tip {
+  display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: #2a2d35; color: #d4d6db; font-size: 12px; font-weight: 400;
+  padding: 8px 14px; border-radius: 8px; white-space: nowrap; z-index: 10;
+  border: 1px solid #3a3f4a; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.word-annotated:hover .word-tip { display: block; }
+
+/* Question keyword match */
+.kw-match { background: rgba(30,136,229,0.18); border-radius: 3px; padding: 0 2px; }
+
+/* ===== Question panel ===== */
+.question-panel {
+  display: flex; flex-direction: column; overflow: hidden; background: #1e2027;
+}
+.question-header { font-size: 12px; color: #8b95a5; padding: 10px 20px; border-bottom: 1px solid #2e3239; letter-spacing: 1px; display: flex; justify-content: space-between; }
+.question-list { flex: 1; overflow-y: auto; padding: 12px 20px; }
+.question-list::-webkit-scrollbar { width: 4px; }
+.question-list::-webkit-scrollbar-thumb { background: #3a3f4a; border-radius: 2px; }
+
+.q-card {
+  background: #23262d; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px;
+  border: 1px solid #2e3239; cursor: pointer; transition: 0.2s;
+}
+.q-card:hover { border-color: #3a3f4a; }
+.q-card.active { border-color: #388e3c; background: #252e29; box-shadow: 0 0 0 1px rgba(56,142,60,0.2); }
+.q-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.q-num {
+  width: 28px; height: 28px; border-radius: 7px; background: #2e3239;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #8b95a5; flex-shrink: 0;
+}
+.q-card.active .q-num { background: #388e3c; color: #fff; }
+.q-locate { font-size: 11px; color: #7d8a63; padding: 2px 8px; border-radius: 4px; background: rgba(56,142,60,0.1); }
+.q-stem { font-size: 14px; line-height: 1.6; color: #c8cdd4; margin-bottom: 10px; }
+.q-keywords { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.q-kw { font-size: 11px; padding: 3px 10px; border-radius: 10px; background: rgba(30,136,229,0.12); color: #64b5f6; border: 1px solid rgba(30,136,229,0.2); }
+.q-diff {
+  font-size: 12px; color: #8b95a5; line-height: 1.5;
+  padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.03);
+  display: none;
+}
+.q-card.active .q-diff { display: block; }
+.q-diff b { color: #e2b93b; }
+.q-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.q-opt {
+  padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #a0a7b2;
+  background: #1a1d23; border: 1px solid #2e3239; transition: 0.15s;
+}
+.q-opt:hover { border-color: #4a5568; color: #c8cdd4; }
+.q-opt.correct-answer { border-color: #388e3c; background: rgba(56,142,60,0.08); color: #81c784; }
+.q-opt.wrong-answer { border-color: #e57373; background: rgba(229,115,115,0.08); color: #e57373; text-decoration: line-through; }
+.q-card .show-answer-btn {
+  font-size: 11px; padding: 4px 10px; border-radius: 6px; background: #2e3239; color: #8b95a5;
+  border: none; cursor: pointer; margin-top: 8px; transition: 0.15s;
+}
+.q-card .show-answer-btn:hover { background: #3a3f4a; color: #c8cdd4; }
+
+/* ===== Legend ===== */
+.legend {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 16px; padding: 8px 20px; border-radius: 20px;
+  background: #23262d; border: 1px solid #2e3239; font-size: 11px; color: #8b95a5; z-index: 5;
+}
+.legend span { display: flex; align-items: center; gap: 6px; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+.leg-dot.loc { background: #388e3c; }
+.leg-dot.kw { background: #64b5f6; }
+.leg-dot.word { background: #e2b93b; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" onclick="location.reload()">← 返回</button>
+  <span class="title">📖 仔细阅读 · Divorce and Health</span>
+  <span class="badge">精读</span>
+  <span class="hint">💡 点击右侧题目 → 左栏高亮定位段落</span>
+</div>
+
+<div class="main">
+  <!-- 文章区 -->
+  <div class="passage-panel">
+    <div class="passage-header">📄 文 章 · 段落标注 · 难词释义</div>
+    <div class="passage-scroll" id="passage"></div>
+  </div>
+
+  <!-- 题目区 -->
+  <div class="question-panel">
+    <div class="question-header">
+      <span>❓ 题 目 · 5题</span>
+      <span style="color:#64b5f6">🔍 点击题目查看定位</span>
+    </div>
+    <div class="question-list" id="questions"></div>
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="leg-dot loc"></span>定位段落</span>
+  <span><span class="leg-dot kw"></span>题干关键词</span>
+  <span><span class="leg-dot word"></span>难词·点击看释义</span>
+</div>
+
+<script>
+// ===== 词汇表 =====
+const vocab = {
+  vow: { zh: 'n. 誓言，誓约', word: 'vow' },
+  spouse: { zh: 'n. 配偶', word: 'spouse' },
+  diagnosed: { zh: 'v. 诊断', word: 'diagnosed' },
+  struggling: { zh: 'v. 挣扎，艰难应对', word: 'struggling' },
+  onset: { zh: 'n. 发生，开始', word: 'onset' },
+  chronic: { zh: 'adj. 慢性的', word: 'chronic' },
+  vulnerable: { zh: 'adj. 脆弱的，易受伤的', word: 'vulnerable' },
+  marital: { zh: 'adj. 婚姻的', word: 'marital' },
+  widowed: { zh: 'adj. 丧偶的', word: 'widowed' },
+  norms: { zh: 'n. 准则，规范', word: 'norms' },
+  caregiving: { zh: 'n. 看护，照料', word: 'caregiving' },
+  prospective: { zh: 'adj. 潜在的，未来的', word: 'prospective' },
+  policymakers: { zh: 'n. 政策制定者', word: 'policymakers' },
+  divorce: { zh: 'n./v. 离婚', word: 'divorce' },
+};
+
+// ===== 段落数据（含定位关键词标记） =====
+const passages = [
+  {
+    label: 'P1',
+    loc: [46],
+    raw: 'In the classic marriage <vow>vow</vow>, couples promise to stay together in sickness and in health. But a new study finds that the risk of <divorce>divorce</divorce> among older couples rises when the wife—not the husband—becomes seriously ill.',
+    keywords: ['marriage vow', 'risk of divorce', 'wife becomes ill']
+  },
+  {
+    label: 'P2',
+    loc: [],
+    raw: '"Married women <diagnosed>diagnosed</diagnosed> with a serious health condition may find themselves <struggling>struggling</struggling> with the impact of their disease while also experiencing the stress of divorce," said researcher Amelia Karraker.',
+    keywords: []
+  },
+  {
+    label: 'P3',
+    loc: [],
+    raw: 'Karraker and co-author Kenzie Latham analyzed 20 years of data on 2,717 marriages from a study conducted by Indiana University since 1992. At the time of the first interview, at least one of the partners was over the age of 50.',
+    keywords: []
+  },
+  {
+    label: 'P4',
+    loc: [47],
+    raw: 'The researchers examined how the <onset>onset</onset> of four serious physical illnesses affected marriages. They found that, overall, 31% of marriages ended in divorce over the period studied. The incidence of new <chronic>chronic</chronic> illness onset increased over time as well, with <b class="kw-match">more husbands than wives developing serious health problems</b>.',
+    keywords: ['elderly husbands', 'serious illnesses']
+  },
+  {
+    label: 'P5',
+    loc: [48],
+    raw: '"We found that women are doubly <vulnerable>vulnerable</vulnerable> to <marital>marital</marital> break-up in the face of illness," Karraker said. "They\'re more likely to be <widowed>widowed</widowed>, and if they\'re the ones who become ill, they\'re <b class="kw-match">more likely to get divorced</b>."',
+    keywords: ['women who fall ill', 'get divorced']
+  },
+  {
+    label: 'P6',
+    loc: [49],
+    raw: 'While the study didn\'t assess why divorce is more likely when wives but not husbands become seriously ill, Karraker offers a few possible reasons. "Gender <norms>norms</norms> and social expectations about <caregiving>caregiving</caregiving> <b class="kw-match">may make it more difficult for men to provide care</b> to sick spouses," Karraker said. And because of the imbalance in marriage markets, especially in older ages, divorced men have more choices among <prospective>prospective</prospective> partners than divorced women.',
+    keywords: ['more difficult for men', 'provide care']
+  },
+  {
+    label: 'P7',
+    loc: [],
+    raw: 'Given the increasing concern about health care costs for the aging population, Karraker believes <policymakers>policymakers</policymakers> should be aware of the relationship between disease and risk of divorce.',
+    keywords: []
+  },
+  {
+    label: 'P8',
+    loc: [50],
+    raw: '"Offering support services to spouses caring for their other halves may reduce marital stress and prevent divorce at older ages," she said. "But <b class="kw-match">it\'s also important to recognize</b> that the pressure to divorce may be health-related and that <b class="kw-match">sick ex-wives may need additional care and services</b> to prevent worsening health and increased health costs."',
+    keywords: ['also important', 'additional care']
+  },
+];
+
+// ===== 题目数据 =====
+const questions = [
+  {
+    num: 46,
+    locate: '定位 P1',
+    stem: 'What can we learn about <b style="color:#e2b93b">marriage vows</b> from the passage?',
+    keywords: ['marriage vows', 'lasting marriage'],
+    diff: '四个选项的核心差异在于：A 说"不能保证"（对应文中 "risk of divorce rises"），B 说"跟以前一样有约束力"，C 说"不再被重视"，D 说"能帮助渡过难关"。<br><br>📍 定位到 <b>P1</b>：文首说誓约承诺同甘共苦，但第二句立刻转折 "But..." 指出离婚风险上升 → 说明誓约<b>不能保证婚姻持久</b>。',
+    answer: 0,
+    options: [
+      'A) They may not guarantee a lasting marriage.',
+      'B) They are as binding as they used to be.',
+      'C) They are not taken seriously any more.',
+      'D) They may help couples tide over hard times.'
+    ]
+  },
+  {
+    num: 47,
+    locate: '定位 P4',
+    stem: 'What did Karraker and co-author Kenzie Latham find about <b style="color:#e2b93b">elderly husbands</b>?',
+    keywords: ['elderly husbands', 'serious illnesses'],
+    diff: '选项辨析关键：A 说照顾不好自己，B 说越来越容易生病，C 说跟妻子一样得各种病，D 说<b>比妻子更容易得重病</b>。<br><br>📍 定位到 <b>P4</b> 最后一句："more husbands than wives developing serious health problems" → 丈夫比妻子更容易患上严重健康问题。',
+    answer: 3,
+    options: [
+      'A) They are generally not good at taking care of themselves.',
+      'B) They can become increasingly vulnerable to serious illnesses.',
+      'C) They can develop different kinds of illnesses just like their wives.',
+      'D) They are more likely to contract serious illnesses than their wives.'
+    ]
+  },
+  {
+    num: 48,
+    locate: '定位 P5',
+    stem: 'What does Karraker say about <b style="color:#e2b93b">women who fall ill</b>?',
+    keywords: ['women who fall ill', 'get divorced'],
+    diff: '核心区别：A 说更容易丧偶，B 说<b>更容易被离婚</b>（注意"离婚"和"丧偶"是两回事），C 说不太能得到好的照顾，D 说不太去麻烦配偶。<br><br>📍 定位到 <b>P5</b>："more likely to get divorced" → 女性生病后更容易被离婚。',
+    answer: 1,
+    options: [
+      'A) They are more likely to be widowed.',
+      'B) They are more likely to get divorced.',
+      'C) They are less likely to receive good care.',
+      'D) They are less likely to bother their spouses.'
+    ]
+  },
+  {
+    num: 49,
+    locate: '定位 P6',
+    stem: 'Why is it more difficult for <b style="color:#e2b93b">men to take care</b> of their sick spouses according to Karraker?',
+    keywords: ['more difficult for men', 'provide care', 'gender norms'],
+    diff: '关键辨析：A 说"更习惯于接受照顾"（性别规范导致），B/C/D 都与文中提到的 "gender norms and social expectations" 无关。<br><br>📍 定位到 <b>P6</b>："Gender norms and social expectations about caregiving may make it more difficult for men to provide care" → 性别准则让男性更习惯于接受照顾而非提供照顾。',
+    answer: 0,
+    options: [
+      'A) They are more accustomed to receiving care.',
+      'B) They find it more important to make money for the family.',
+      'C) They think it more urgent to fulfill their social obligations.',
+      'D) They expect society to do more of the job.'
+    ]
+  },
+  {
+    num: 50,
+    locate: '定位 P8',
+    stem: 'What does Karraker think is <b style="color:#e2b93b">also important</b>?',
+    keywords: ['also important', 'additional care', 'divorced women'],
+    diff: '四个选项易混淆：A 说减轻妻子婚姻压力，B 说稳定老年夫妻关系，C 说<b>给离婚女性提供额外照顾</b>，D 说让男性支付医疗费用。<br><br>📍 定位到 <b>P8</b> 最后："sick ex-wives may need additional care and services" → 生病的前妻需要额外的照顾和服务，即 C 选项。',
+    answer: 2,
+    options: [
+      'A) Reducing marital stress on wives.',
+      'B) Stabilizing old couples\' relations.',
+      'C) Providing extra care for divorced women.',
+      'D) Making men pay for their wives\' health costs.'
+    ]
+  },
+];
+
+// ===== 渲染文章 =====
+function renderPassage() {
+  const container = document.getElementById('passage');
+  container.innerHTML = passages.map((p, i) => {
+    let text = p.raw;
+    // 处理难词标注
+    text = text.replace(/<(\w+)>(.*?)<\/\1>/g, (_, key, word) => {
+      const v = vocab[key];
+      if (!v) return word;
+      return `<span class="word-annotated">${word}<span class="word-tip">${v.zh}</span></span>`;
+    });
+    return `<div class="para" id="p-${i}">
+      <div class="para-label">${p.label}</div>
+      <div class="para-text">${text}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== 渲染题目 =====
+function renderQuestions() {
+  const container = document.getElementById('questions');
+  container.innerHTML = questions.map((q, i) => `
+    <div class="q-card" id="q-${i}" onclick="selectQuestion(${i})">
+      <div class="q-card-header">
+        <div class="q-num">Q${q.num}</div>
+        <div class="q-locate">${q.locate}</div>
+      </div>
+      <div class="q-stem">${q.stem}</div>
+      <div class="q-keywords">${q.keywords.map(k => `<span class="q-kw">${k}</span>`).join('')}</div>
+      <div class="q-diff">💡 <b>解题思路</b><br><br>${q.diff}</div>
+      <div class="q-options" id="opts-${i}">
+        ${q.options.map((o, j) => `<div class="q-opt" id="opt-${i}-${j}">${o}</div>`).join('')}
+      </div>
+      <button class="show-answer-btn" onclick="event.stopPropagation(); revealAnswer(${i})">👁 显示正确答案</button>
+    </div>
+  `).join('');
+}
+
+// ===== 选择题号 =====
+function selectQuestion(i) {
+  // 清除之前的高亮
+  document.querySelectorAll('.q-card.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.para.highlight').forEach(el => el.classList.remove('highlight'));
+  document.querySelectorAll('.para.highlight-multi').forEach(el => el.classList.remove('highlight-multi'));
+  
+  // 高亮当前题目
+  const qCard = document.getElementById('q-' + i);
+  qCard.classList.add('active');
+  
+  // 高亮对应段落
+  const q = questions[i];
+  const locParas = passages.filter(p => p.loc.includes(q.num));
+  locParas.forEach(p => {
+    const idx = passages.indexOf(p);
+    const para = document.getElementById('p-' + idx);
+    if (para) para.classList.add('highlight');
+  });
+  
+  // 高亮相关段落(同主题)
+  const related = passages.filter(p => 
+    !p.loc.includes(q.num) && p.keywords.some(k => q.keywords.some(qk => k.includes(qk) || qk.includes(k)))
+  );
+  related.forEach(p => {
+    const idx = passages.indexOf(p);
+    const para = document.getElementById('p-' + idx);
+    if (para && !para.classList.contains('highlight')) para.classList.add('highlight-multi');
+  });
+  
+  // 滚动到题目
+  qCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  
+  // 滚动文章到定位段落
+  if (locParas.length > 0) {
+    const firstLoc = passages.indexOf(locParas[0]);
+    document.getElementById('p-' + firstLoc).scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// ===== 显示答案 =====
+function revealAnswer(i) {
+  const q = questions[i];
+  const opts = document.getElementById('opts-' + i);
+  opts.querySelectorAll('.q-opt').forEach((el, j) => {
+    el.classList.remove('correct-answer', 'wrong-answer');
+    if (j === q.answer) el.classList.add('correct-answer');
+  });
+}
+
+// ===== 初始化 =====
+renderPassage();
+renderQuestions();
+</script>
+</body>
+</html>

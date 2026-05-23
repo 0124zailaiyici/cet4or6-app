@@ -714,7 +714,7 @@ Page<IListeningData, IListeningMethods>({
     const app = getApp<IAppOption>()
     app.globalData.studyData.completedListens = completed
     wx.setStorageSync('studyData', app.globalData.studyData)
-    doCheckIn()
+    doCheckIn('listen')
     wx.showToast({ title: '已标记完成', icon: 'success' })
   },
 

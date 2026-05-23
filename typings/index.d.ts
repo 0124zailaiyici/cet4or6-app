@@ -2,6 +2,7 @@
 
 interface IStudyData {
   completedListens: number[]
+  todayActivity: { date: string; listen: number; sentence: number; translation: number; writing: number; total: number }
   masteredSentences: number[]
   translationRecords: { id: number; userAnswer: string; score: number; date: string }[]
   writingRecords: { id: number; score: number; date: string }[]

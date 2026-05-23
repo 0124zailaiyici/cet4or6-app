@@ -164,7 +164,7 @@ Page({
     const records = [...(app.globalData.studyData.translationRecords || []), record]
     app.globalData.studyData.translationRecords = records
     wx.setStorageSync('studyData', app.globalData.studyData)
-    doCheckIn()
+    doCheckIn('translation')
 
     const validIds = new Set(this.data.translations.map((t: any) => t.id))
     const allIds = [...new Set(records.map(r => r.id))].filter(id => validIds.has(id))
