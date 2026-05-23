@@ -217,15 +217,6 @@
   color: #2d2d4e;
 }
 
-.sc-english .kw {
-  color: #e65100;
-  font-style: normal;
-  font-weight: 600;
-  background: rgba(230,81,0,0.08);
-  padding: 2rpx 8rpx;
-  border-radius: 6rpx;
-}
-
 .sc-chinese {
   margin-top: 16rpx;
   padding: 16rpx 20rpx;
@@ -366,14 +357,6 @@
   color: #2d2d4e;
   margin-bottom: 28rpx;
   font-weight: 500;
-}
-
-.imm-english .kw {
-  color: #e65100;
-  font-weight: 700;
-  background: rgba(230,81,0,0.08);
-  padding: 4rpx 10rpx;
-  border-radius: 8rpx;
 }
 
 .imm-chinese {

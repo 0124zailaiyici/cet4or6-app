@@ -44,7 +44,6 @@ interface ISentencesMethods {
   doFilter(): void
   goDict(): void
   noop(): void
-  highlightText(text: string, keywords: string[]): string
   switchMode(e: WechatMiniprogram.TouchEvent): void
   prevSentence(): void
   nextSentence(): void
