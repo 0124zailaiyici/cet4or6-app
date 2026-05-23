@@ -557,7 +557,7 @@ Page<IListeningData, IListeningMethods>({
     } else {
       audio.stop()
       audio.setRate(1)
-      this.setData({ focusMode: false, loopSentence: false, speed: 1, isPlaying: false })
+      this.setData({ focusMode: false, loopSentence: false, speed: 1, isPlaying: false, audioTime: 0, audioTimeStr: '0:00' })
     }
   },
 
