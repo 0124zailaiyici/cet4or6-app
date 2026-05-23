@@ -1,164 +1,86 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
 
-  <!-- ═══ 导航 ═══ -->
-  <view class="nav">
-    <view class="nav-l">
-      <view class="nav-avatar">🌟</view>
-      <view>
-        <view class="nav-greeting">✨ 翻译练习</view>
-        <view class="nav-title">每日一练</view>
-      </view>
+  <!-- ═══ 仪表盘 ═══ -->
+  <block wx:if="{{page === 'dashboard'}}">
+    <view class="nav">
+      <view class="nav-l"><view class="nav-avatar">🌟</view><view><view class="nav-greeting">✨ 翻译学习</view><view class="nav-title">每日一练</view></view></view>
+      <view class="nav-r"><view class="nav-icon">🔔</view><view class="nav-icon {{aiEnabled ? 'on' : ''}}" catchtap="toggleAi">🤖</view></view>
     </view>
-    <view class="nav-r">
-      <view class="nav-icon">🔔</view>
-      <view class="nav-icon {{aiEnabled ? 'on' : ''}}" catchtap="toggleAi">🤖</view>
+    <view class="gc">
+      <view class="gc-ring" style="background:conic-gradient(#f472b6 0deg {{ringDeg || 0}}deg, rgba(244,114,182,0.08) {{ringDeg || 0}}deg 360deg)"><view class="gc-ring-in"><text class="gc-num">{{completedIds.length}}</text><text class="gc-lb">/{{translations.length}}</text></view></view>
+      <view class="gc-body"><text class="gc-tip">今天已完成 3 题 ✨</text><text class="gc-sub">{{completedIds.length > 0 ? '已完成 ' + completedIds.length + ' 题' : '开始今天的练习吧'}}</text></view>
+      <view class="gc-streak"><text class="n">{{completedIds.length}}</text><text class="l">题</text></view>
     </view>
-  </view>
-
-  <!-- ═══ 进度卡片 ═══ -->
-  <view class="progress-card">
-    <view class="pc-ring" style="background: conic-gradient(#f472b6 0deg {{ringDeg}}deg, rgba(244,114,182,0.08) {{ringDeg}}deg 360deg)"><view class="pc-ring-in"><text class="pc-num">{{completedIds.length}}</text><text class="pc-unit">/{{translations.length}}</text></view></view>
-    <view class="pc-body">
-      <text class="pc-tip">已完成 {{completedIds.length}} 题 ✨</text>
-      <text class="pc-sub">{{translations.length - completedIds.length > 0 ? '还剩 ' + (translations.length - completedIds.length) + ' 题，加油哦' : '全部完成啦，太棒了 🎉'}}</text>
+    <view class="stitle">📈 学习进度</view>
+    <view class="levels">
+      <view class="lv"><view class="lv-ico l1">🌱</view><view class="lv-body"><view class="lv-name">L1 短句</view><view class="lv-bar-wrap"><view class="lv-bar"><view class="lv-fill l1" style="width:{{Math.min(completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 1).length / Math.max(translations.filter(t => t._level === 1).length, 1) * 100, 100)}}%"></view></view><text class="lv-pct">{{completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 1).length}}/{{translations.filter(t => t._level === 1).length}}</text></view></view><text class="lv-check" wx:if="{{completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 1).length >= translations.filter(t => t._level === 1).length && translations.filter(t => t._level === 1).length > 0}}">✅</text></view>
+      <view class="lv"><view class="lv-ico l2">🌿</view><view class="lv-body"><view class="lv-name">L2 复合句</view><view class="lv-bar-wrap"><view class="lv-bar"><view class="lv-fill l2" style="width:{{Math.min(completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 2).length / Math.max(translations.filter(t => t._level === 2).length, 1) * 100, 100)}}%"></view></view><text class="lv-pct">{{completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 2).length}}/{{translations.filter(t => t._level === 2).length}}</text></view></view></view>
+      <view class="lv"><view class="lv-ico l3">🌳</view><view class="lv-body"><view class="lv-name">L3 复杂句</view><view class="lv-bar-wrap"><view class="lv-bar"><view class="lv-fill l3" style="width:{{Math.min(completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 3).length / Math.max(translations.filter(t => t._level === 3).length, 1) * 100, 100)}}%"></view></view><text class="lv-pct">{{completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 3).length}}/{{translations.filter(t => t._level === 3).length}}</text></view></view><text class="lv-lock" wx:if="{{translations.filter(t => t._level === 2).length > 0 && completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 2).length < translations.filter(t => t._level === 2).length}}">🔒</text></view>
+      <view class="lv"><view class="lv-ico l4">🏔️</view><view class="lv-body"><view class="lv-name">L4 段落</view><view class="lv-bar-wrap"><view class="lv-bar"><view class="lv-fill l4" style="width:{{Math.min(completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 4).length / Math.max(translations.filter(t => t._level === 4).length, 1) * 100, 100)}}%"></view></view><text class="lv-pct">{{completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 4).length}}/{{translations.filter(t => t._level === 4).length}}</text></view></view><text class="lv-lock" wx:if="{{translations.filter(t => t._level === 3).length > 0 && completedIds.filter(id => (translations.find(t => t.id === id) || {})._level === 3).length < translations.filter(t => t._level === 3).length}}">🔒</text></view>
     </view>
-    <text class="pc-badge">{{pct}}%</text>
-  </view>
-
-  <!-- ═══ 标签 ═══ -->
-  <view class="tabs">
-    <view class="tab {{mode === 'list' ? 'active' : ''}}" catchtap="backToList">📚 题目</view>
-    <view class="tab {{mode === 'detail' ? 'active' : ''}}">✏️ 答题</view>
-  </view>
-
-  <!-- ════════════════ 列表模式 ════════════════ -->
-  <block wx:if="{{mode === 'list'}}">
-    <view class="list">
-      <view class="lc" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail" style="animation-delay:{{index * 60}}ms">
-        <view class="lc-emoji {{item._tag.type}}">{{item._emoji}}</view>
-        <view class="lc-body">
-          <text class="lc-text">{{item._display}}</text>
-          <view class="lc-tags">
-            <text class="lc-tag {{item._tag.type}}">{{item._tag.label}}</text>
-          </view>
-        </view>
-        <view class="lc-right">
-          <text class="lc-check done" wx:if="{{item._done}}">✅</text>
-          <text class="lc-score {{item._scoreClass || ''}}" wx:if="{{item._score}}">{{item._score}}</text>
-        </view>
+    <view class="stitle">📋 题目列表</view>
+    <view class="tasks">
+      <view class="task" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
+        <view class="task-emoji {{item._tag.type}}">{{item._emoji}}</view>
+        <view class="task-body"><text class="task-text">{{item._display}}</text><view class="task-tags"><text class="task-tag l{{item._level}}">L{{item._level}}</text><text class="task-tag {{item._tag.type}}">{{item._tag.label}}</text></view></view>
+        <view class="task-right"><text class="task-check {{item._done ? 'done' : ''}}">{{item._done ? '✅' : ''}}</text><text class="task-fav" data-id="{{item.id}}" catchtap="toggleFav">{{item._fav ? '⭐' : '☆'}}</text></view>
       </view>
     </view>
   </block>
 
-  <!-- ════════════════ 答题模式 ════════════════ -->
-  <block wx:else>
+  <!-- ═══ 答题（三步流程）═══ -->
+  <block wx:if="{{page === 'practice'}}">
     <view class="d-nav">
-      <view class="d-back" catchtap="backToList">←</view>
-      <text class="d-title">翻译 · {{currentItem._tag ? currentItem._tag.label : '练习'}}</text>
-      <view class="ai-badge {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">
-        <text class="ai-dot"></text>
-        <text>AI</text>
-      </view>
+      <view class="d-back" catchtap="switchPage" data-page="dashboard">←</view>
+      <text class="d-title">{{currentItem._topic || '练习'}} · L{{currentItem._level || ''}}</text>
+      <text class="d-step">{{step === 'prepare' ? '准备' : step === 'translate' ? '翻译' : '对比'}}</text>
     </view>
+    <view class="si"><view class="si-dot {{step === 'prepare' ? 'active' : ''}} {{step === 'translate' || step === 'compare' ? 'done' : ''}}"></view><view class="si-line"></view><view class="si-dot {{step === 'translate' ? 'active' : ''}} {{step === 'compare' ? 'done' : ''}}"></view><view class="si-line"></view><view class="si-dot {{step === 'compare' ? 'active' : ''}}"></view></view>
 
     <scroll-view class="d-scroll" scroll-y enhanced show-scrollbar="{{false}}">
 
-      <!-- 题目气泡 -->
-      <view class="q-bubble">
-        <view class="q-hint">📝 把它翻成英文吧</view>
-        <text class="q-text">{{currentItem.chinese}}</text>
-        <view class="q-kws" wx:if="{{currentItem.keywords && currentItem.keywords.length > 0}}">
-          <text class="q-kw" wx:for="{{currentItem.keywords}}" wx:for-index="idx" wx:key="idx">{{item}}</text>
+      <!-- Step 1: 准备 -->
+      <block wx:if="{{step === 'prepare'}}">
+        <view class="pc">
+          <view class="ps"><view class="pst">📖 关键词提示</view><view class="ps-kws"><text class="ps-kw" wx:for="{{currentItem.keywords || []}}" wx:for-index="i" wx:key="i">{{item}}</text></view></view>
+          <view class="ps"><view class="pst">🔍 句式分析</view><view class="ps-struct"><text class="c">{{currentItem.chinese}}</text><text class="e">→ {{currentItem.reference}}</text></view></view>
+          <view class="ps"><view class="pst">💡 翻译技巧</view><view class="ps-tip">先找到句子的主谓宾主干，再添加修饰成分。注意中英文语序差异。</view></view>
         </view>
-      </view>
+        <view class="btn-next" catchtap="goStep" data-step="2">准备好了 →</view>
+      </block>
 
-      <!-- 输入区 -->
-      <view class="input-area">
-        <textarea class="input-field" placeholder="写下你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height disabled="{{submitting}}"></textarea>
-        <view class="input-foot">
-          <text class="wc {{wordCount > 0 ? 'has' : ''}}">{{wordCount}} / 500</text>
-        </view>
-      </view>
+      <!-- Step 2: 翻译 -->
+      <block wx:if="{{step === 'translate'}}">
+        <view class="qt"><view class="qt-l">📝 请翻译成英文</view><text class="qt-b">{{currentItem.chinese}}</text></view>
+        <view class="ib"><textarea placeholder="写下你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height disabled="{{submitting}}"></textarea><view class="ib-foot"><text>{{wordCount}} / 500</text></view></view>
+        <view class="btn-next {{submitting ? 'disabled' : ''}}" catchtap="submit">{{submitting ? '评分中～' : '✨ 提交评分'}}</view>
+      </block>
 
-      <!-- 提交按钮 -->
-      <view class="btn-go {{submitting ? 'disabled' : ''}}" catchtap="submit">
-        <text wx:if="{{!submitting}}">✨ 提交评分</text>
-        <text wx:else>评分中～</text>
-      </view>
-
-      <!-- 结果卡片 -->
-      <view class="result-card" wx:if="{{result.show}}">
-        <view class="rc-top">
-          <view class="rc-stars">
-            <view class="rc-stars-in">
-              <text class="rc-star-num">{{result.score}}</text>
-              <text class="rc-star-lb">分</text>
-              <view class="rc-starlets">
-                <text class="{{result.score >= 20 ? 'on' : ''}}">★</text>
-                <text class="{{result.score >= 40 ? 'on' : ''}}">★</text>
-                <text class="{{result.score >= 60 ? 'on' : ''}}">★</text>
-                <text class="{{result.score >= 80 ? 'on' : ''}}">★</text>
-                <text class="{{result.score >= 95 ? 'on' : ''}}">★</text>
-              </view>
-            </view>
+      <!-- Step 3: 对比 -->
+      <block wx:if="{{step === 'compare' && result.show}}">
+        <view class="pc">
+          <view class="ct"><view class="cs"><view class="cs-in"><text class="cs-n">{{result.score}}</text><view class="cs-stars"><text class="s {{result.score >= 20 ? 'on' : 'off'}}">★</text><text class="s {{result.score >= 40 ? 'on' : 'off'}}">★</text><text class="s {{result.score >= 60 ? 'on' : 'off'}}">★</text><text class="s {{result.score >= 80 ? 'on' : 'off'}}">★</text><text class="s {{result.score >= 95 ? 'on' : 'off'}}">★</text></view></view></view><view class="cq"><view class="cqr"><text class="cql">最高</text><text class="cqr good">{{hMax}}</text></view><view class="cqr"><text class="cql">本次</text><text class="cqr good">{{result.score}}</text></view></view></view>
+          <view class="cds">
+            <view class="cd"><text class="cdl">词汇</text><view class="cdb"><view class="cdf {{result.dimensions.vocabulary >= 80 ? 'good' : result.dimensions.vocabulary >= 60 ? 'mid' : 'low'}}" style="width:{{result.dimensions.vocabulary}}%"></view></view><text class="cdn">{{result.dimensions.vocabulary}}</text></view>
+            <view class="cd"><text class="cdl">语法</text><view class="cdb"><view class="cdf {{result.dimensions.grammar >= 80 ? 'good' : result.dimensions.grammar >= 60 ? 'mid' : 'low'}}" style="width:{{result.dimensions.grammar}}%"></view></view><text class="cdn">{{result.dimensions.grammar}}</text></view>
+            <view class="cd"><text class="cdl">语义</text><view class="cdb"><view class="cdf {{result.dimensions.semantics >= 80 ? 'good' : result.dimensions.semantics >= 60 ? 'mid' : 'low'}}" style="width:{{result.dimensions.semantics}}%"></view></view><text class="cdn">{{result.dimensions.semantics}}</text></view>
+            <view class="cd"><text class="cdl">表达</text><view class="cdb"><view class="cdf {{result.dimensions.expression >= 80 ? 'good' : result.dimensions.expression >= 60 ? 'mid' : 'low'}}" style="width:{{result.dimensions.expression}}%"></view></view><text class="cdn">{{result.dimensions.expression}}</text></view>
           </view>
-          <view class="rc-quickie">
-            <view class="rc-q"><text class="rc-ql">最高</text><text class="rc-qr good">{{hMax}}</text></view>
-            <view class="rc-q"><text class="rc-ql">最低</text><text class="rc-qr low">{{hMin}}</text></view>
-            <view class="rc-q"><text class="rc-ql">趋势</text><text class="rc-qr {{hTrend === 'up' ? 'good' : 'mid'}}">{{questionHistory.length >= 1 ? (hTrend === 'up' ? '↗ 上升' : '↘ 下降') : '—'}}</text></view>
-          </view>
+          <view class="csec"><view class="cst">💡 修改建议</view><view class="csc-b">{{result.suggestions}}</view></view>
+          <view class="csec"><view class="cst">📖 参考译文</view><view class="crf"><text class="crf-t">{{result.reference}}</text><text class="crf-p">▶</text></view></view>
         </view>
-
-        <view class="rc-dims">
-          <view class="rc-dim" wx:for="{{[result.dimensions.vocabulary, result.dimensions.grammar, result.dimensions.semantics, result.dimensions.expression]}}" wx:for-index="i" wx:key="i">
-            <text class="rc-dl">{{['词汇', '语法', '语义', '表达'][i]}}</text>
-            <view class="rc-dbar"><view class="rc-dfill {{item >= 80 ? 'good' : item >= 60 ? 'mid' : 'low'}}" style="width: {{item}}%"></view></view>
-            <text class="rc-dn {{item >= 80 ? 'c-good' : item >= 60 ? 'c-mid' : 'c-low'}}">{{item}}</text>
-          </view>
-        </view>
-
-        <view class="rc-block">
-          <view class="rc-bt">💡 修改建议</view>
-          <view class="rc-suggest">{{result.suggestions}}</view>
-        </view>
-
-        <view class="rc-block">
-          <view class="rc-bt">📖 参考译文</view>
-          <view class="rc-ref">
-            <text class="rc-ref-t">{{result.reference}}</text>
-            <text class="rc-ref-play">▶</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 重做按钮 -->
-      <view class="btn-retry" wx:if="{{result.show}}" catchtap="retry">🔄 重新翻译</view>
-
-      <!-- 历史记录 -->
-      <view class="h-area" wx:if="{{questionHistory.length > 0}}">
-        <view class="h-title"><text class="h-star">⭐</text> 历史记录 · {{questionHistory.length}} 次</view>
-
-        <view class="h-chart">
-          <view class="h-bar" wx:for="{{questionHistory}}" wx:key="index" style="height: {{item.score / 3}}rpx; background: {{item.score >= 80 ? '#a5d6a7' : item.score >= 60 ? '#ffcc80' : '#ef9a9a'}}">
-            <text class="hb-l">{{item.score}}</text>
-          </view>
-        </view>
-
-        <view class="h-items">
-          <view class="h-item" wx:for="{{questionHistory}}" wx:for-index="i" wx:key="index">
-            <text class="h-idx">#{{questionHistory.length - i}}</text>
-            <view class="h-body">
-              <view class="h-head">
-                <text class="h-date">{{item.date.slice(5)}}</text>
-                <text class="h-sc {{item.score >= 80 ? 'good' : item.score >= 60 ? 'mid' : 'low'}}">{{item.score}}</text>
-              </view>
-              <text class="h-ans">{{item.userAnswer}}</text>
-            </view>
-        </view>
-      </view>
-      </view>
+        <view class="ca"><view class="b bg" catchtap="retry">🔄 重做</view><view class="b bp" catchtap="switchPage" data-page="dashboard">➡ 完成</view></view>
+      </block>
 
     </scroll-view>
   </block>
+
+  <!-- ═══ 底部 Tab ═══ -->
+  <view class="tabbar">
+    <view class="tab {{page === 'dashboard' ? 'active' : ''}}" catchtap="switchPage" data-page="dashboard"><text class="tab-ico">📊</text>仪表盘</view>
+    <view class="tab {{page === 'practice' ? 'active' : ''}}" catchtap="switchPage" data-page="practice"><text class="tab-ico">✏️</text>答题</view>
+    <view class="tab {{page === 'report' ? 'active' : ''}}" catchtap="switchPage" data-page="report"><text class="tab-ico">📈</text>报告</view>
+    <view class="tab {{page === 'favorites' ? 'active' : ''}}" catchtap="switchPage" data-page="favorites"><text class="tab-ico">⭐</text>收藏</view>
+  </view>
 
 </view>

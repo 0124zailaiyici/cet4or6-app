@@ -51,7 +51,7 @@
       </view>
       <view class="f-pos"><text>📍 {{currentSectionLabel}}</text></view>
       <view class="page-area">
-        <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
+        <view class="page-view">
           <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
             <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
               <view wx:if="{{item.type === 'dir'}}" class="p-dir">
@@ -75,9 +75,6 @@
       <view class="f-bar">
         <view class="f-nav" catchtap="prevPage">⬅ 上题</view>
         <view class="f-mark {{isCurrentMarked ? 'on' : ''}}" catchtap="markForReview">{{isCurrentMarked ? '✅ 已标记' : '❗ 标记'}}</view>
-        <view class="f-dots">
-          <view class="fd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
-        </view>
         <view class="f-nav" catchtap="nextPage">下题 ➔</view>
       </view>
     </block>

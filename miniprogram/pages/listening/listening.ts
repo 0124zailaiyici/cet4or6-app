@@ -308,6 +308,7 @@ Page<IListeningData, IListeningMethods>({
           const n = p.opts?.length || 0
           if (n < 4) warns.push(`${p.stem}缺${4-n}个选项`)
         }
+        // 精听模式默认开循环、慢速0.75
         this.setData({
           mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: true,
           hardSentences: localHard, audioMode: true, audioTime: 0, audioDuration: 0,
@@ -317,7 +318,10 @@ Page<IListeningData, IListeningMethods>({
           currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
           markedPages: [],
           markedFlags: new Array(pages.length).fill(false),
+          loopSentence: true,
+          speed: 0.75,
         })
+        if (audioCtx) audioCtx.playbackRate = 0.75
       } else {
         this.setData({
           mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: false,
@@ -378,7 +382,14 @@ Page<IListeningData, IListeningMethods>({
   },
 
   toggleFocus() {
-    this.setData({ focusMode: !this.data.focusMode })
+    const on = !this.data.focusMode
+    if (on) {
+      this.setData({ focusMode: true, loopSentence: true, speed: 0.75 })
+      if (audioCtx) audioCtx.playbackRate = 0.75
+    } else {
+      this.setData({ focusMode: false, loopSentence: false, speed: 1 })
+      if (audioCtx) audioCtx.playbackRate = 1
+    }
   },
 
   rewindAudio() {
