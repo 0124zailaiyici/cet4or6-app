@@ -13,7 +13,8 @@
     "pages/errors/errors",
     "pages/guide/guide",
     "pages/reminder/reminder",
-    "pages/feedback/feedback"
+    "pages/feedback/feedback",
+    "pages/vocab/vocab"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -95,6 +95,7 @@ Page<ISettingsData, ISettingsMethods>({
             readingAnswers: {},
             listeningAnswers: {},
             todayActivity: { date: '', listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 },
+            vocabWords: [],
             dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
           }
           wx.setStorageSync('studyData', app.globalData.studyData)

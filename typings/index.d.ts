@@ -3,6 +3,7 @@
 interface IStudyData {
   completedListens: number[]
   todayActivity: { date: string; listen: number; sentence: number; translation: number; writing: number; total: number }
+  vocabWords: { word: string; phonetic: string; definition: string; source: string; status: string; correctStreak: number }[]
   masteredSentences: number[]
   translationRecords: { id: number; userAnswer: string; score: number; date: string }[]
   writingRecords: { id: number; score: number; date: string }[]

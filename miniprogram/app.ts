@@ -10,6 +10,7 @@ const defaults = {
   hardSentences: [] as { passageId: number; sentenceIndex: number; text: string; passageTitle: string }[],
   readingAnswers: {} as Record<number, { blankAnswers: Record<string, string>; usedFlags: boolean[] }>,
   todayActivity: { date: '', listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 },
+  vocabWords: [] as { word: string; phonetic: string; definition: string; source: string; status: string; correctStreak: number }[],
   dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 }
 }
 

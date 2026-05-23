@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>单词本 v1</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background:#1a1a2e;font-family:-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;gap:20px;padding:20px;flex-wrap:wrap; }
+.phone { width:375px;height:780px;border-radius:38px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;background:#fff5f7;transition:0.3s; }
+.tb { background:linear-gradient(135deg,#ffb3c6,#ff8fab);padding:48px 20px 14px;color:#fff;flex-shrink:0; }
+.tb h1 { font-size:17px;font-weight:800; }
+.tb p { font-size:12px;opacity:.85;margin-top:2px; }
+
+.stats { display:flex;gap:8px;margin:12px 14px; }
+.st { flex:1;background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 2px 12px rgba(255,158,181,0.04); }
+.st .n { display:block;font-size:22px;font-weight:800;color:#ff6b8a; }
+.st .n.g { color:#388e3c; }
+.st .l { display:block;font-size:11px;color:#8a7a9a;margin-top:2px; }
+
+.tabs { display:flex;gap:4px;margin:0 14px 10px; }
+.tab { flex:1;text-align:center;padding:10px 0;font-size:13px;color:#8a7a9a;background:#fff;border-radius:10px;cursor:pointer; }
+.tab.on { color:#ff6b8a;font-weight:600;background:rgba(255,107,138,0.06);border:1px solid rgba(255,107,138,0.12); }
+
+.list { flex:1;margin:0 14px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:8px; }
+.wcard { background:#fff;border-radius:16px;padding:16px 18px;box-shadow:0 2px 12px rgba(255,158,181,0.04);display:flex;align-items:center;gap:14px; }
+.wcard .wi { width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0; }
+.wcard .wi.new { background:rgba(255,107,138,0.06);color:#ff6b8a; }
+.wcard .wi.review { background:rgba(255,152,0,0.06);color:#f57c00; }
+.wcard .wi.master { background:rgba(56,142,60,0.06);color:#388e3c; }
+.wcard .wb { flex:1; }
+.wcard .ww { font-size:16px;font-weight:700;color:#2d2d4e;margin-bottom:2px; }
+.wcard .wp { font-size:11px;color:#8a7a9a;margin-bottom:2px; }
+.wcard .wcn { font-size:12px;color:#2d2d4e; }
+.wcard .wsrc { font-size:10px;color:#ccc;margin-top:2px; }
+.wcard .wact { font-size:11px;color:#ff6b8a;padding:4px 12px;border-radius:8px;border:1px solid rgba(255,107,138,0.12);cursor:pointer;white-space:nowrap; }
+.wcard .wact.done { color:#388e3c;border-color:rgba(56,142,60,0.12);background:rgba(56,142,60,0.04); }
+
+/* Game modal */
+.game-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10; }
+.game-card { background:#fff;border-radius:20px;padding:30px 24px;width:320px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.2); }
+.game-card .gq { font-size:11px;color:#ff6b8a;font-weight:600;margin-bottom:4px; }
+.game-card .gw { font-size:32px;font-weight:800;color:#2d2d4e;margin-bottom:8px; }
+.game-card .gp { font-size:13px;color:#8a7a9a;margin-bottom:20px; }
+.game-card .gopts { display:flex;flex-direction:column;gap:8px; }
+.game-card .go {
+  padding:14px 20px;border-radius:12px;font-size:14px;color:#4a4a6a;background:#f8f5f4;
+  border:2px solid #ece4e2;cursor:pointer;transition:0.15s;text-align:left;
+}
+.game-card .go.on { color:#1e88e5;font-weight:600;border-color:#1e88e5;background:rgba(30,136,229,0.04); }
+.game-card .go.right { color:#388e3c;border-color:#388e3c;background:rgba(56,142,60,0.04); }
+.game-card .go.wrong { color:#d32f2f;border-color:#d32f2f;background:rgba(211,47,47,0.04); }
+.game-card .gf { display:flex;gap:10px;margin-top:16px; }
+.game-card .gf .gb { flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer; }
+.game-card .gb.skip { background:#fff0f3;color:#8a7a9a; }
+.game-card .gb.next { background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff; }
+
+.tgl { text-align:center;margin-bottom:4px;width:100%; }
+.tgl-btn { display:inline-flex;align-items:center;gap:8px;background:#2a2a4a;padding:6px 16px;border-radius:16px;cursor:pointer;color:#e0d0e8;font-size:12px;border:1px solid #3a3a5a;user-select:none; }
+
+.dark { background:#12121f !important; }
+.dark .tb { background:linear-gradient(135deg,#2a2a4a,#1a1a38) !important; }
+.dark .st,.dark .wcard,.dark .game-card { background:#1e1e38 !important;box-shadow:0 2px 12px rgba(0,0,0,0.25) !important; }
+.dark .st .l,.dark .wp,.dark .wcn,.dark .wsrc { color:#a090b0 !important; }
+.dark .tab { background:#1e1e38 !important;color:#a090b0 !important; }
+.dark .tab.on { color:#ff8fab !important;background:rgba(255,143,171,0.08) !important;border-color:rgba(255,143,171,0.2) !important; }
+.dark .ww { color:#e0d0e8 !important; }
+.dark .wcn { color:#a090b0 !important; }
+.dark .go { background:#2a2a4a !important;border-color:#3a3a5a !important;color:#a090b0 !important; }
+.dark .go.on { color:#4fc3f7 !important;border-color:#4fc3f7 !important;background:rgba(79,195,247,0.06) !important; }
+.dark .gw { color:#e0d0e8 !important; }
+.dark .gp { color:#a090b0 !important; }
+</style>
+</head>
+<body>
+
+<div class="tgl"><div class="tgl-btn" id="darkBtn">🌙 暗黑</div></div>
+
+<!-- 单词本 -->
+<div class="phone" id="p1">
+  <div class="tb"><h1>单词本</h1><p>从你做过的题中学，闯关拿下四级词汇</p></div>
+
+  <div class="stats">
+    <div class="st"><span class="n g">12</span><span class="l">✓ 已掌握</span></div>
+    <div class="st"><span class="n">23</span><span class="l">📝 学习中</span></div>
+    <div class="st"><span class="n">5</span><span class="l">🔥 今日复习</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on">📝 学习中</div>
+    <div class="tab">🔥 待复习</div>
+    <div class="tab">✓ 已掌握</div>
+  </div>
+
+  <div class="list">
+    <div class="wcard">
+      <div class="wi new">A</div>
+      <div class="wb">
+        <div class="ww">abandon</div>
+        <div class="wp">/əˈbændən/</div>
+        <div class="wcn">v. 抛弃，放弃</div>
+        <div class="wsrc">📖 仔细阅读 2019061</div>
+      </div>
+      <div class="wact" onclick="showGame('abandon','/əˈbændən/','v. 抛弃，放弃','仔细阅读 2019061')">挑战</div>
+    </div>
+    <div class="wcard">
+      <div class="wi review">B</div>
+      <div class="wb">
+        <div class="ww">legislation</div>
+        <div class="wp">/ˌledʒɪsˈleɪʃn/</div>
+        <div class="wcn">n. 法规；立法</div>
+        <div class="wsrc">📖 选词填空 2019061</div>
+      </div>
+      <div class="wact" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':'复习'">复习</div>
+    </div>
+    <div class="wcard">
+      <div class="wi master">C</div>
+      <div class="wb">
+        <div class="ww">dominance</div>
+        <div class="wp">/ˈdɒmɪnəns/</div>
+        <div class="wcn">n. 支配；优势</div>
+        <div class="wsrc">📖 选词填空 2019061</div>
+      </div>
+      <span style="font-size:11px;color:#388e3c">已掌握 ✓</span>
+    </div>
+    <div class="wcard">
+      <div class="wi new">D</div>
+      <div class="wb">
+        <div class="ww">cognitive</div>
+        <div class="wp">/ˈkɒɡnətɪv/</div>
+        <div class="wcn">adj. 认知的</div>
+        <div class="wsrc">📖 仔细阅读 2019061</div>
+      </div>
+      <div class="wact" onclick="showGame('cognitive','/ˈkɒɡnətɪv/','adj. 认知的','仔细阅读 2019061')">挑战</div>
+    </div>
+    <div class="wcard">
+      <div class="wi new">E</div>
+      <div class="wb">
+        <div class="ww">sibling</div>
+        <div class="wp">/ˈsɪblɪŋ/</div>
+        <div class="wcn">n. 兄弟姐妹</div>
+        <div class="wsrc">📖 仔细阅读 2019061</div>
+      </div>
+      <div class="wact" onclick="showGame('sibling','/ˈsɪblɪŋ/','n. 兄弟姐妹','仔细阅读 2019061')">挑战</div>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏弹窗 -->
+<div class="phone" id="p2" style="position:relative">
+  <div class="game-overlay" id="gameOverlay">
+    <div class="game-card">
+      <div class="gq" id="gSrc"></div>
+      <div class="gw" id="gWord"></div>
+      <div class="gp" id="gPhonetic"></div>
+      <div class="gopts" id="gOpts"></div>
+      <div class="gf">
+        <div class="gb skip" id="gSkip">不会</div>
+        <div class="gb next" id="gNext" style="display:none">下一词 →</div>
+        <div class="gb next" id="gCheck" onclick="checkAnswer()">确认</div>
+      </div>
+    </div>
+  </div>
+  <div class="tb" style="margin-top:auto"><h1>玩法说明</h1><p>看出单词 → 选释义 → 连续正确3次 = 掌握</p></div>
+</div>
+
+<script>
+const words = {
+  abandon: { def:'v. 抛弃，放弃', wr:['n. 抛弃，放弃','v. 抛弃，放弃','adj. 被抛弃的','adv. 放弃地'] },
+  cognitive: { def:'adj. 认知的', wr:['n. 认知','adj. 认知的','v. 认知','adv. 认知地'] },
+  sibling: { def:'n. 兄弟姐妹', wr:['v. 航海','adj. 安静的','n. 兄弟姐妹','n. 签字'] },
+  legislation: { def:'n. 法规；立法', wr:['n. 法规；立法','n. 代表团','n. 传奇','n. 合法性'] },
+  dominance: { def:'n. 支配；优势', wr:['n. 家庭','n. 支配；优势','adj. 占优势的','v. 支配'] }
+}
+
+let sel = -1
+function showGame(w,p,d,s) {
+  const wo = words[w]
+  if (!wo) return
+  sel = -1
+  document.getElementById('gSrc').textContent = '📖 '+s
+  document.getElementById('gWord').textContent = w
+  document.getElementById('gPhonetic').textContent = p
+  document.getElementById('gOpts').innerHTML = wo.wr.map((x,i) => `<div class="go" data-i="${i}" onclick="selectOpt(${i})">${x}</div>`).join('')
+  document.getElementById('gNext').style.display = 'none'
+  document.getElementById('gCheck').style.display = ''
+  document.getElementById('gSkip').style.display = ''
+  document.getElementById('gameOverlay').style.display = 'flex'
+}
+function selectOpt(i) {
+  sel = i
+  document.querySelectorAll('.go').forEach((o,j) => o.className = 'go' + (j===i?' on':''))
+}
+function checkAnswer() {
+  if (sel === -1) return
+  const w = document.getElementById('gWord').textContent
+  const wo = words[w]
+  const correct = wo.wr.indexOf(wo.def)
+  const opts = document.querySelectorAll('.go')
+  if (sel === correct) {
+    opts[sel].className = 'go right'
+    document.getElementById('gCheck').textContent = '✓ 正确！'
+  } else {
+    opts[sel].className = 'go wrong'
+    opts[correct].className = 'go right'
+    document.getElementById('gCheck').textContent = '✗'
+  }
+  document.getElementById('gCheck').style.display = 'none'
+  document.getElementById('gSkip').style.display = 'none'
+  document.getElementById('gNext').style.display = ''
+}
+document.getElementById('gNext').onclick = function() { document.getElementById('gameOverlay').style.display = 'none' }
+document.getElementById('gSkip').onclick = function() { document.getElementById('gameOverlay').style.display = 'none' }
+document.getElementById('darkBtn').onclick = () => document.querySelectorAll('.phone').forEach(p=>p.classList.toggle('dark'))
+</script>
+</body>
+</html>

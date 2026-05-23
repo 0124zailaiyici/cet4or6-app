@@ -88,5 +88,11 @@
       <text class="mc-name">错题本</text>
       <text class="mc-brief">查漏补缺</text>
     </view>
+    <view class="module-card mc-vocab" data-url="/pages/vocab/vocab" catchtap="goTo">
+      <view class="mc-badge">闯关</view>
+      <text class="mc-emoji">📕</text>
+      <text class="mc-name">单词本</text>
+      <text class="mc-brief">挑战 · 掌握</text>
+    </view>
   </view>
 </view>
