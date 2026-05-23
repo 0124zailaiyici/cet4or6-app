@@ -61,6 +61,7 @@ interface IListeningData {
   summaryMarked: number
   focusSentences: string[]
   focusSentenceMap: number[]
+  focusPageIndices: number[]
 }
 
 interface IListeningMethods {
@@ -179,15 +180,6 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
 
   if (pages.every(p => p.type === 'dir')) return []
   return pages
-}
-
-function isDirectionSentence(s: ISentence): boolean {
-  const t = s.text.toLowerCase()
-  if (t.includes('you hear') && t.length > 80) return true
-  if (t.includes('answer sheet') && t.includes('single line')) return true
-  if (t.includes('spoken only once') && t.includes('choose the best')) return true
-  if (/^\s*\(\d+\s*minutes?\s*\)/.test(s.text)) return true
-  return false
 }
 
 // ===== AudioManager =====
@@ -365,6 +357,7 @@ Page<IListeningData, IListeningMethods>({
     summaryMarked: 0,
     focusSentences: [],
     focusSentenceMap: [],
+    focusPageIndices: [],
   },
 
   onLoad(options: { passageId?: string }) {
@@ -565,16 +558,22 @@ Page<IListeningData, IListeningMethods>({
     const on = !this.data.focusMode
     if (on) {
       audio.pause()
-      const passage = this.data.currentPassage
-      const filtered: string[] = []
-      const map: number[] = []
-      if (passage) {
-        passage.sentences.forEach((s, i) => {
-          if (!isDirectionSentence(s)) {
-            filtered.push(s.text)
-            map.push(i)
+      const lines: string[] = []
+      const pageIdx: number[] = []
+      const pages = this.data.pages
+      for (let i = 0; i < pages.length; i++) {
+        const p = pages[i]
+        if (p.type === 'dir') {
+          const short = p.stem && p.stem.length > 60 ? p.stem.slice(0, 60) + '...' : (p.stem || '')
+          if (short) { lines.push(short); pageIdx.push(i) }
+        } else if (p.type === 'q' && p.opts && p.opts.length > 0) {
+          const parts = [p.stem || '']
+          for (let oi = 0; oi < p.opts.length; oi++) {
+            parts.push(['A', 'B', 'C', 'D'][oi] + ') ' + p.opts[oi])
           }
-        })
+          lines.push(parts.join('\n'))
+          pageIdx.push(i)
+        }
       }
       this.setData({
         focusMode: true,
@@ -583,8 +582,9 @@ Page<IListeningData, IListeningMethods>({
         isPlaying: false,
         showTranscript: true,
         dictationMode: false,
-        focusSentences: filtered,
-        focusSentenceMap: map,
+        focusSentences: lines,
+        focusSentenceMap: [],
+        focusPageIndices: pageIdx,
         currentIndex: 0,
         currentPage: 0,
       })
@@ -601,6 +601,7 @@ Page<IListeningData, IListeningMethods>({
         audioTimeStr: '0:00',
         focusSentences: [],
         focusSentenceMap: [],
+        focusPageIndices: [],
         currentIndex: 0,
         currentPage: 0,
       })
