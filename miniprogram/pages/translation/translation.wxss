@@ -56,9 +56,7 @@
 .task-fav{font-size:22rpx;display:block;margin-top:4rpx;color:#ffca28}
 .empty-tip{padding:60rpx 40rpx;text-align:center;font-size:24rpx;color:#f9a8d4;line-height:1.8}
 /* ── 答题导航 ── */
-.d-nav{display:flex;align-items:center;gap:12rpx;padding:14rpx 24rpx 10rpx}
-.d-back{width:48rpx;height:48rpx;border-radius:18rpx;background:rgba(244,114,182,0.06);display:flex;align-items:center;justify-content:center;font-size:24rpx;color:#f472b6}
-.d-back:active{transform:scale(0.9)}
+.d-nav{display:flex;align-items:center;padding:14rpx 24rpx 10rpx}
 .d-title{flex:1;font-size:26rpx;font-weight:700;color:#4a1a2e}
 .d-step{font-size:20rpx;font-weight:600;padding:6rpx 16rpx;border-radius:14rpx;background:#fce4ec;color:#ec407a}
 /* ── 步骤指示器 ── */
@@ -167,7 +165,7 @@
 .dark-theme .ps-struct .c{color:#dab0c8}
 .dark-theme .ps-struct .e{color:#b8a0c0}
 .dark-theme .ps-tip{background:#2a2020;color:#d4c0a0}
-.dark-theme .d-back{background:rgba(244,114,182,0.08)}
+
 .dark-theme .task-emoji.exam{background:#2d1a30}
 .dark-theme .task-emoji.sim{background:#1a2030}
 .dark-theme .task-emoji.para{background:#1a2a20}

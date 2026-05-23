@@ -33,7 +33,6 @@
   <!-- ═══ 答题（三步流程）═══ -->
   <block wx:if="{{page === 'practice'}}">
     <view class="d-nav">
-      <view class="d-back" catchtap="switchPage" data-page="dashboard">←</view>
       <text class="d-title">{{currentItem._topic || '练习'}} · L{{currentItem._level || ''}}</text>
       <text class="d-step">{{step === 'prepare' ? '准备' : step === 'translate' ? '翻译' : '对比'}}</text>
     </view>
