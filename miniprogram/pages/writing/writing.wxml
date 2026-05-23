@@ -57,10 +57,8 @@
 
     <!-- 最近使用 -->
     <view class="hint" style="margin-top:12px">📎 最近使用</view>
-    <view class="recent" wx:if="{{recentPatterns.length > 0}}">
-      <view class="rec" wx:for="{{recentPatterns}}" wx:key="item" data-id="{{item}}" catchtap="insertPattern">
-        <text wx:for="{{patterns}}" wx:key="id" wx:if="{{item === id}}">{{item.pattern}}</text>
-      </view>
+    <view class="recent" wx:if="{{recentPatternData.length > 0}}">
+      <view class="rec" wx:for="{{recentPatternData}}" wx:key="id" data-id="{{item.id}}" catchtap="insertPattern">{{item.pattern}}</view>
     </view>
     <view class="hint dim" wx:else>还没有使用记录，点句型上面的 + 选用</view>
 
@@ -126,8 +124,8 @@
         <textarea class="mini-input" placeholder="第 2 句：给出一个理由…" value="{{sentence2}}" bindinput="onSentence2Input" style="min-height:auto"></textarea>
         <textarea class="mini-input" placeholder="第 3 句：举例子或进一步说明…" value="{{sentence3}}" bindinput="onSentence3Input" style="min-height:auto"></textarea>
         <view class="mini-hint">
-          {{[sentence1, sentence2, sentence3].filter(s => s.trim()).length}}/3 句
-          <text wx:if="{{[sentence1, sentence2, sentence3].filter(s => s.trim()).length >= 3}}"> · 🎉 做到了！试试挑战更多？</text>
+          {{sentenceCount}}/3 句
+          <text wx:if="{{sentenceCount >= 3}}"> · 🎉 做到了！试试挑战更多？</text>
         </view>
       </view>
     </block>
@@ -256,7 +254,7 @@
         <view class="timer-label">{{timerPhaseLabel}}</view>
         <view class="timer-bar"><view class="timer-fill" style="width: {{timerPercent}}%"></view></view>
       </view>
-      <view class="timer-btn {{timerRunning ? 'stop' : ''}}" catchtap="{{timerRunning ? 'stopTimer' : 'startTimer'}}">{{timerRunning ? '⏹' : '▶️'}}</view>
+      <view class="timer-btn {{timerRunning ? 'stop' : ''}}" catchtap="toggleTimer">{{timerRunning ? '⏹' : '▶️'}}</view>
     </view>
 
     <!-- Phase tips -->

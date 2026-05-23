@@ -148,7 +148,8 @@ interface IWritingData {
   /* 句型急救包 */
   toolkitVisible: boolean; toolkitCategory: string; toolkitSearch: string
   categoryOptions: string[]; categoryEmojis: Record<string, string>
-  recentPatterns: number[]
+  patternCategories: Record<number, string>
+  recentPatterns: number[]; recentPatternData: IPattern[]
 
   /* 引导写作 - 提纲 */
   guideStep: number
@@ -157,7 +158,7 @@ interface IWritingData {
   outlineGenerated: string
 
   /* 新手模式 */
-  sentence1: string; sentence2: string; sentence3: string
+  sentence1: string; sentence2: string; sentence3: string; sentenceCount: number
 
   /* 计时 */
   timerRunning: boolean; timerRemaining: number; timerPhase: string
@@ -180,14 +181,14 @@ Page<IWritingData>({
     toolkitVisible: false, toolkitCategory: '全部', toolkitSearch: '',
     categoryOptions: CATEGORIES, categoryEmojis: CATEGORY_EMOJIS,
     patternCategories: PATTERN_CATEGORIES,
-    recentPatterns: [],
+    recentPatterns: [], recentPatternData: [],
 
     guideStep: 1,
     outlineOpinion: '', outlineReasons: [], outlineReasonInput: '',
     outlineExamples: [], outlineExampleInput: '',
     outlineGenerated: '',
 
-    sentence1: '', sentence2: '', sentence3: '',
+    sentence1: '', sentence2: '', sentence3: '', sentenceCount: 0,
 
     timerRunning: false, timerRemaining: 1800, timerPhase: 'review',
     timerPhaseLabel: '📋 审题', timerPercent: 100,
@@ -202,6 +203,7 @@ Page<IWritingData>({
       darkMode: app.globalData.darkMode,
       recentPatterns: recent,
     })
+    this.syncRecentPatterns()
     checkHealth().then(r => { if (r.apiKey) this.setData({ aiAvailable: true }) }).catch(() => {})
   },
 
@@ -210,6 +212,14 @@ Page<IWritingData>({
     this.setData({ darkMode: getApp<IAppOption>().globalData.darkMode })
   },
 
+  syncRecentPatterns() {
+    const data: IPattern[] = []
+    for (const id of this.data.recentPatterns) {
+      const p = this.data.patterns.find(pt => pt.id === id)
+      if (p) data.push(p)
+    }
+    this.setData({ recentPatternData: data })
+  },
   onSwitchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.tab as number
     this.setData({ tab, detailMode: false, showResult: false, result: null, timerRunning: false })
@@ -248,6 +258,7 @@ Page<IWritingData>({
       recentPatterns: recent,
       toolkitVisible: false,
     })
+    this.syncRecentPatterns()
     wx.setStorageSync('writingRecentPatterns', recent)
     wx.showToast({ title: '已选用 ' + pat.pattern, icon: 'none' })
   },
@@ -346,9 +357,27 @@ Page<IWritingData>({
   },
 
   /* 新手模式 */
-  onSentence1Input(e: WechatMiniprogram.Input) { this.setData({ sentence1: e.detail.value }) },
-  onSentence2Input(e: WechatMiniprogram.Input) { this.setData({ sentence2: e.detail.value }) },
-  onSentence3Input(e: WechatMiniprogram.Input) { this.setData({ sentence3: e.detail.value }) },
+  onSentence1Input(e: WechatMiniprogram.Input) {
+    const s1 = e.detail.value
+    this.setData({
+      sentence1: s1,
+      sentenceCount: [s1, this.data.sentence2, this.data.sentence3].filter(s => s.trim()).length,
+    })
+  },
+  onSentence2Input(e: WechatMiniprogram.Input) {
+    const s2 = e.detail.value
+    this.setData({
+      sentence2: s2,
+      sentenceCount: [this.data.sentence1, s2, this.data.sentence3].filter(s => s.trim()).length,
+    })
+  },
+  onSentence3Input(e: WechatMiniprogram.Input) {
+    const s3 = e.detail.value
+    this.setData({
+      sentence3: s3,
+      sentenceCount: [this.data.sentence1, this.data.sentence2, s3].filter(s => s.trim()).length,
+    })
+  },
 
   async submitParagraph() {
     const text = this.data.userParagraph.trim()
@@ -406,20 +435,27 @@ Page<IWritingData>({
       const rem = this.data.timerRemaining - 1
       const pct = Math.round(rem / 1800 * 100)
       let phase = this.data.timerPhase, label = this.data.timerPhaseLabel
-      const elapsed = 1800 - rem
-      if (elapsed <= 120) { phase = 'review'; label = '📋 审题 · 还剩 2:00' }
-      else if (elapsed <= 300) { phase = 'outline'; label = '📝 列提纲 · 还剩 ' + formatTime(300 - (elapsed - 120)) }
-      else if (elapsed <= 1680) { phase = 'writing'; label = '✍️ 写作 · 还剩 ' + formatTime(1680 - (elapsed - 300)) }
-      else { phase = 'check'; label = '🔍 检查 · 还剩 ' + formatTime(1800 - elapsed) }
-
       if (rem <= 0) {
         if (this._timer) { clearInterval(this._timer); this._timer = null }
-        this.setData({ timerRunning: false, timerRemaining: 0, timerPhase: 'done', timerPhaseLabel: '⏰ 时间到！', timerPercent: 0 })
+        this.setData({ timerRunning: false, timerRemaining: 0, timerPhase: 'done', timerPercent: 0 })
         wx.showToast({ title: '时间到！', icon: 'none' })
         return
       }
+      const elapsed = 1800 - rem
+      if (elapsed < 120) { phase = 'review'; label = '📋 审题阶段' }
+      else if (elapsed < 300) { phase = 'outline'; label = '📝 列提纲阶段' }
+      else if (elapsed < 1680) { phase = 'writing'; label = '✍️ 写作阶段' }
+      else { phase = 'check'; label = '🔍 检查阶段' }
       this.setData({ timerRemaining: rem, timerPercent: pct, timerPhase: phase, timerPhaseLabel: label })
     }, 1000)
+  },
+  toggleTimer() {
+    if (this.data.timerRunning) {
+      if (this._timer) { clearInterval(this._timer); this._timer = null }
+      this.setData({ timerRunning: false })
+    } else {
+      this.startTimer()
+    }
   },
   stopTimer() {
     if (this._timer) { clearInterval(this._timer); this._timer = null }
