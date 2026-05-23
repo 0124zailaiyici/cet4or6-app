@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>引导页 + 提醒 + 反馈 原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e; font-family: -apple-system, sans-serif;
+  display: flex; justify-content: center; align-items: center; min-height: 100vh;
+  gap: 20px; padding: 20px; flex-wrap: wrap;
+}
+.phone {
+  width: 375px; height: 780px; border-radius: 38px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; background: #fff5f7;
+  transition: 0.3s; position: relative;
+}
+
+/* ============ GUIDE page ============ */
+.guide-page {
+  width: 100%; height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 60px 40px;
+  flex-shrink: 0;
+}
+.gp-emoji { font-size: 72px; margin-bottom: 30px; }
+.gp-title { font-size: 24px; font-weight: 800; color: #2d2d4e; margin-bottom: 12px; }
+.gp-desc { font-size: 15px; color: #8a7a9a; line-height: 1.7; max-width: 280px; }
+.gp-dots { display: flex; gap: 8px; margin-top: 40px; }
+.gp-dot { width: 8px; height: 8px; border-radius: 50%; background: #d0c8d0; }
+.gp-dot.on { width: 24px; border-radius: 4px; background: #ff6b8a; }
+.gp-btn {
+  margin-top: 30px; padding: 14px 50px; border-radius: 28px;
+  background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff;
+  font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(255,107,138,0.3);
+}
+.gp-skip {
+  position: absolute; top: 50px; right: 24px; font-size: 14px; color: #8a7a9a; cursor: pointer;
+}
+.gp-swipe {
+  display: flex; width: 300%; height: 100%; transition: transform 0.3s ease;
+}
+
+/* ============ REMINDER ============ */
+.rem-card {
+  background: #fff; margin: 0 14px 8px; border-radius: 14px; padding: 14px 16px;
+  box-shadow: 0 2px 12px rgba(255,158,181,0.06);
+}
+.rem-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #fff0f3; }
+.rem-item:last-child { border-bottom: none; }
+.rem-left { display: flex; align-items: center; gap: 10px; }
+.rem-icon { font-size: 20px; }
+.rem-label { font-size: 14px; font-weight: 600; color: #2d2d4e; }
+.rem-time-row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+.rem-time {
+  font-size: 12px; color: #8a7a9a; background: #fff0f3; padding: 2px 10px; border-radius: 6px;
+  cursor: pointer;
+}
+.rem-time.on { color: #fff; background: #ff6b8a; }
+.rem-hint { font-size: 11px; color: #8a7a9a; margin-top: 4px; }
+.rem-sub {
+  font-size: 12px; color: #ff6b8a; font-weight: 600;
+  padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,107,138,0.2); cursor: pointer;
+}
+.rem-sub:active { background: rgba(255,107,138,0.06); }
+.preview-box {
+  margin: 8px 14px; padding: 12px 16px; border-radius: 12px;
+  background: #fff; box-shadow: 0 2px 12px rgba(255,158,181,0.06);
+}
+.preview-box .p { font-size: 13px; color: #2d2d4e; line-height: 1.6; }
+.preview-box .p b { color: #ff6b8a; }
+.preview-box .p-time { font-size: 11px; color: #8a7a9a; margin-top: 6px; }
+
+/* ============ FEEDBACK ============ */
+.fb-type { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.fb-t { padding: 6px 14px; border-radius: 16px; font-size: 12px; color: #8a7a9a; background: #fff0f3; cursor: pointer; border: 2px solid transparent; }
+.fb-t.on { color: #ff6b8a; background: rgba(255,107,138,0.06); border-color: rgba(255,107,138,0.15); }
+.fb-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #fff0f3; background: #fff; font-size: 13px; color: #2d2d4e; outline: none; resize: none; }
+.fb-input::placeholder { color: #ccc; }
+.fb-submit {
+  margin-top: 12px; padding: 12px; border-radius: 14px;
+  background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff;
+  text-align: center; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.fb-note { font-size: 11px; color: #8a7a9a; margin-top: 8px; text-align: center; }
+
+/* Dark */
+.dark { background: #12121f !important; }
+.dark .gp-title { color: #e0d0e8 !important; }
+.dark .gp-desc { color: #a090b0 !important; }
+.dark .gp-dot { background: #3a3a5a !important; }
+.dark .gp-dot.on { background: #ff8fab !important; }
+.dark .rem-card, .dark .preview-box { background: #1e1e38 !important; box-shadow: 0 2px 12px rgba(0,0,0,0.25) !important; }
+.dark .rem-label { color: #e0d0e8 !important; }
+.dark .rem-item { border-color: #2a2a4a !important; }
+.dark .rem-time { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark .rem-time.on { background: #ff8fab !important; color: #fff !important; }
+.dark .fb-t { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark .fb-t.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
+.dark .fb-input { background: #1e1e38 !important; border-color: #2a2a4a !important; color: #e0d0e8 !important; }
+.dark .fb-note { color: #a090b0 !important; }
+.dark .rem-hint { color: #a090b0 !important; }
+.dark .gp-skip { color: #a090b0 !important; }
+.dark .preview-box .p { color: #e0d0e8 !important; }
+.dark .preview-box .p-time { color: #a090b0 !important; }
+
+.tgl { text-align: center; margin-bottom: 4px; width: 100%; }
+.tgl-btn { display: inline-flex; align-items: center; gap: 8px; background: #2a2a4a; padding: 6px 16px; border-radius: 16px; cursor: pointer; color: #e0d0e8; font-size: 12px; border: 1px solid #3a3a5a; user-select: none; }
+</style>
+</head>
+<body>
+
+<div class="tgl"><div class="tgl-btn" id="darkBtn">🌙 暗黑</div></div>
+
+<!-- 手机1：引导页 -->
+<div class="phone" id="p1">
+  <div style="position:relative;flex:1;overflow:hidden">
+    <span class="gp-skip" onclick="goGuide(2)">跳过</span>
+    <div class="gp-swipe" id="swipe" style="transform:translateX(0%)">
+      <!-- 页1 -->
+      <div class="guide-page">
+        <div class="gp-emoji">🎧</div>
+        <div class="gp-title">欢迎使用<br>四级备考助手</div>
+        <div class="gp-desc">一站式 CET-4 真题练习平台<br>涵盖听力、阅读、翻译、写作四大模块</div>
+        <div class="gp-dots"><div class="gp-dot on"></div><div class="gp-dot"></div><div class="gp-dot"></div></div>
+        <div class="gp-btn" onclick="goGuide(1)">下一步</div>
+      </div>
+      <!-- 页2 -->
+      <div class="guide-page">
+        <div class="gp-emoji">📖</div>
+        <div class="gp-title">真题导入</div>
+        <div class="gp-desc">支持 PDF 真题一键导入<br>自动解析听力、阅读、翻译<br>配合 AI 批改精准提升</div>
+        <div class="gp-dots"><div class="gp-dot"></div><div class="gp-dot on"></div><div class="gp-dot"></div></div>
+        <div class="gp-btn" onclick="goGuide(2)">下一步</div>
+      </div>
+      <!-- 页3 -->
+      <div class="guide-page">
+        <div class="gp-emoji">🚀</div>
+        <div class="gp-title">开始学习</div>
+        <div class="gp-desc">设定每日目标，坚持打卡<br>错题自动收集，薄弱点逐个击破</div>
+        <div class="gp-dots"><div class="gp-dot"></div><div class="gp-dot"></div><div class="gp-dot on"></div></div>
+        <div class="gp-btn" onclick="this.textContent='已进入首页 ✓'">进入首页</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 手机2：每日提醒 -->
+<div class="phone" id="p2">
+  <div style="background:linear-gradient(135deg,#ffb3c6,#ff8fab);padding:48px 20px 14px;color:#fff">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1 style="font-size:17px;font-weight:800">学习提醒</h1>
+      <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:6px">📱 订阅消息</span>
+    </div>
+    <p style="font-size:12px;opacity:0.85;margin-top:2px">设置每日学习提醒，养成好习惯</p>
+  </div>
+
+  <div class="rem-card" style="margin-top:12px">
+    <div class="rem-item">
+      <div class="rem-left"><span class="rem-icon">🌅</span><span class="rem-label">晨间听力</span></div>
+      <div class="rem-sub" onclick="this.textContent=this.textContent.includes('已')?'订阅':'✓ 已订阅'">订阅</div>
+    </div>
+    <div class="rem-time-row" style="padding-left:30px">
+      <div class="rem-time">7:00</div>
+      <div class="rem-time on">7:30</div>
+      <div class="rem-time">8:00</div>
+      <div class="rem-time">8:30</div>
+    </div>
+    <div class="rem-hint" style="padding-left:30px">每天 {{remindTime}} 推送听力练习提醒</div>
+  </div>
+
+  <div class="rem-card">
+    <div class="rem-item">
+      <div class="rem-left"><span class="rem-icon">🌙</span><span class="rem-label">晚间复习</span></div>
+      <div class="rem-sub" onclick="this.textContent='✓ 已订阅'">订阅</div>
+    </div>
+    <div class="rem-time-row" style="padding-left:30px">
+      <div class="rem-time">19:00</div>
+      <div class="rem-time">20:00</div>
+      <div class="rem-time on">21:00</div>
+      <div class="rem-time">22:00</div>
+    </div>
+    <div class="rem-hint" style="padding-left:30px">每天 21:00 推送复习提醒</div>
+  </div>
+
+  <div style="font-size:11px;color:#ff6b8a;font-weight:600;padding:4px 14px">📋 提醒预览</div>
+  <div class="preview-box">
+    <div class="p">
+      <div style="color:#ff6b8a;font-weight:700;margin-bottom:4px">四级备考助手</div>
+      <div>🎧 <b>该练听力了</b> — 今天还没完成第1套 Section A，打开继续练习吧</div>
+      <div class="p-time">刚刚 · 四级备考助手</div>
+    </div>
+  </div>
+
+  <div class="rem-card" style="margin-top:8px;padding:10px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:#2d2d4e;font-weight:600">🌙 学习周报</span>
+      <span class="rem-sub" onclick="this.textContent='✓ 已订阅'">订阅</span>
+    </div>
+    <div class="rem-hint">每周日晚 21:00 推送本周学习总结</div>
+  </div>
+</div>
+
+<!-- 手机3：反馈 -->
+<div class="phone" id="p3">
+  <div style="background:linear-gradient(135deg,#ffb3c6,#ff8fab);padding:48px 20px 14px;color:#fff">
+    <h1 style="font-size:17px;font-weight:800">帮助与反馈</h1>
+    <p style="font-size:12px;opacity:0.85;margin-top:2px">你的意见帮助我们做得更好</p>
+  </div>
+
+  <div style="flex:1;padding:12px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px">
+    <div class="fb-type">
+      <div class="fb-t on" onclick="document.querySelectorAll('.fb-t').forEach(t=>t.classList.remove('on'));this.classList.add('on')">🐛 功能异常</div>
+      <div class="fb-t" onclick="document.querySelectorAll('.fb-t').forEach(t=>t.classList.remove('on'));this.classList.add('on')">💡 功能建议</div>
+      <div class="fb-t" onclick="document.querySelectorAll('.fb-t').forEach(t=>t.classList.remove('on'));this.classList.add('on')">😊 体验评价</div>
+      <div class="fb-t" onclick="document.querySelectorAll('.fb-t').forEach(t=>t.classList.remove('on'));this.classList.add('on')">📝 其他</div>
+    </div>
+
+    <textarea class="fb-input" rows="5" placeholder="请描述你的问题或建议..."></textarea>
+
+    <div class="fb-input" style="display:flex;align-items:center;gap:8px;color:#8a7a9a;font-size:13px">
+      <span>📎</span>
+      <span>可添加截图（最多3张）</span>
+      <span style="margin-left:auto;font-size:20px;color:#ffb3c6">+</span>
+    </div>
+
+    <div class="fb-submit" onclick="this.textContent='✓ 已提交，感谢反馈！'">提交反馈</div>
+    <div class="fb-note">我们会尽快处理你的反馈，通常 24 小时内回复</div>
+
+    <div style="margin-top:12px;border-top:1px solid #fff0f3;padding-top:12px">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;color:#8a7a9a;font-size:13px;cursor:pointer">
+        <span>📄 用户协议</span>
+        <span style="color:#ccc">›</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;color:#8a7a9a;font-size:13px;cursor:pointer;border-bottom:1px solid #fff0f3">
+        <span>🔒 隐私政策</span>
+        <span style="color:#ccc">›</span>
+      </div>
+      <div style="text-align:center;padding:16px 0;font-size:12px;color:#ccc">四级备考助手 v1.0.0</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let cur = 0;
+function goGuide(i) { cur = i; document.getElementById('swipe').style.transform = `translateX(-${cur*33.333}%)`; }
+document.getElementById('darkBtn').onclick = () => {
+  document.querySelectorAll('.phone').forEach(p => p.classList.toggle('dark'));
+};
+</script>
+</body>
+</html>

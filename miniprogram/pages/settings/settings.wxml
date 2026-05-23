@@ -96,6 +96,26 @@
     </view>
   </view>
 
+  <view class="goal-card" style="margin-top: 24rpx;">
+    <view class="goal-item" catchtap="goReminder">
+      <view class="goal-info">
+        <text class="goal-icon">🔔</text>
+        <text class="goal-label">学习提醒</text>
+      </view>
+      <text class="info-text">订阅 ›</text>
+    </view>
+  </view>
+
+  <view class="goal-card" style="margin-top: 24rpx;">
+    <view class="goal-item" catchtap="goFeedback">
+      <view class="goal-info">
+        <text class="goal-icon">💬</text>
+        <text class="goal-label">帮助与反馈</text>
+      </view>
+      <text class="info-text">意见 ›</text>
+    </view>
+  </view>
+
   <view class="tip-block">
     <text class="tip-text">💡 建议每天完成：1 篇听力 + 5 个句子 + 1 篇翻译 + 1 篇写作</text>
   </view>

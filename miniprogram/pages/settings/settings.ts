@@ -15,6 +15,8 @@ interface ISettingsMethods {
   toggleDark(): void
   clearCache(): void
   getCacheSize(): string
+  goReminder(): void
+  goFeedback(): void
 }
 
 Page<ISettingsData, ISettingsMethods>({
@@ -101,5 +103,13 @@ Page<ISettingsData, ISettingsMethods>({
         }
       },
     })
+  },
+
+  goReminder() {
+    wx.navigateTo({ url: '/pages/reminder/reminder' })
+  },
+
+  goFeedback() {
+    wx.navigateTo({ url: '/pages/feedback/feedback' })
   },
 })

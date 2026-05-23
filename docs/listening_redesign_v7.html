@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>听力精听 · 双模式设计 v7</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #fff8f5;
+  --card: #ffffff;
+  --peach: #ff9a8b;
+  --peach-light: #fff0ed;
+  --peach-soft: #ffe8e3;
+  --lavender: #c4b5fd;
+  --lavender-light: #f3efff;
+  --mint: #7ecba1;
+  --mint-light: #e8f8ef;
+  --sky: #93c5fd;
+  --sky-light: #eef5ff;
+  --butter: #fcd34d;
+  --butter-light: #fff9e6;
+  --text: #4a3b42;
+  --text-soft: #8a7b82;
+  --text-muted: #bfb0b6;
+  --radius: 20px;
+  --radius-sm: 14px;
+  --shadow: 0 2px 14px rgba(255,154,139,0.07);
+  --font-title: 'Fredoka', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+  --ease: 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #faf3ef;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; font-family: var(--font-body);
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,154,139,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(196,181,253,0.05) 0%, transparent 50%);
+}
+
+.wrapper {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+
+/* Mode Tabs */
+.mode-tabs {
+  display: flex; gap: 0; background: var(--card); border-radius: 16px;
+  padding: 4px; box-shadow: var(--shadow);
+}
+.mode-tab {
+  padding: 10px 24px; border-radius: 13px; border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: var(--ease); font-family: var(--font-body);
+  background: transparent; color: var(--text-soft);
+}
+.mode-tab.on {
+  background: var(--peach); color: #fff;
+  box-shadow: 0 3px 10px rgba(255,154,139,0.2);
+}
+.mode-tab .emoji { margin-right: 4px; }
+
+/* Phone */
+.phone {
+  width: 390px; height: 780px; border-radius: 40px;
+  overflow: hidden; display: flex; flex-direction: column;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.03), 0 28px 56px rgba(255,154,139,0.12);
+  transition: var(--ease);
+}
+.status-bar {
+  height: 50px; flex-shrink: 0; display: flex;
+  align-items: flex-end; justify-content: space-between;
+  padding: 0 26px 8px; font-size: 11px;
+  font-weight: 700; color: var(--text-muted);
+}
+
+/* Header */
+.top {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 16px 8px; flex-shrink: 0;
+}
+.top-back {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--peach-light); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 14px; color: var(--peach); cursor: pointer;
+  transition: var(--ease);
+}
+.top-back:hover { background: var(--peach); color: #fff; }
+.top-title {
+  flex: 1; font-family: var(--font-title); font-size: 15px;
+  font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.top-tag {
+  padding: 5px 14px; border-radius: 16px; font-size: 11px;
+  font-weight: 700; cursor: pointer; transition: var(--ease);
+}
+.top-tag.exam { background: var(--sky-light); color: var(--sky); }
+.top-tag.focus { background: var(--peach-light); color: var(--peach); }
+.top-tag.on { background: var(--peach); color: #fff; }
+.top-done {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--mint-light); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 15px; color: var(--mint); cursor: pointer;
+  transition: var(--ease); font-weight: 700;
+}
+.top-done:hover { background: var(--mint); color: #fff; }
+
+/* ============ EXAM MODE ============ */
+.exam-player {
+  flex-shrink: 0; margin: 0 14px 8px; padding: 14px 18px 14px;
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.ep-track {
+  height: 4px; border-radius: 2px; background: var(--peach-soft);
+  cursor: pointer; margin-bottom: 6px; position: relative;
+}
+.ep-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #ff9a8b, #ffb3a7); width: 38%;
+}
+.ep-fill::after {
+  content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+  width: 12px; height: 12px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1); border: 2px solid var(--peach);
+}
+.ep-time {
+  display: flex; justify-content: space-between;
+  font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px;
+}
+.ep-ctls {
+  display: flex; align-items: center; gap: 8px;
+}
+.ep-ctls-left {
+  display: flex; gap: 6px; flex: 1; justify-content: flex-end;
+}
+.ep-ctls-right {
+  display: flex; gap: 6px; flex: 1;
+}
+.ep-btn {
+  height: 34px; border-radius: 12px; padding: 0 14px; border: none;
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--ease);
+  background: #f5f2f0; color: var(--text-soft); font-family: var(--font-body);
+  display: flex; align-items: center; gap: 4px;
+}
+.ep-btn:hover { background: var(--peach-soft); }
+.ep-btn.on { background: var(--peach); color: #fff; }
+.ep-btn .icon { font-size: 14px; }
+.ep-play {
+  width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #ff9a8b, #ffb3a7); border: none;
+  font-size: 18px; color: #fff; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255,154,139,0.25); transition: var(--ease);
+  display: flex; align-items: center; justify-content: center;
+}
+.ep-play:hover { transform: scale(1.06); box-shadow: 0 6px 20px rgba(255,154,139,0.3); }
+.ep-play:active { transform: scale(0.94); }
+
+/* Exam Bottom */
+.exam-bar {
+  flex-shrink: 0; display: flex; align-items: center;
+  padding: 4px 14px 18px; gap: 8px;
+}
+.eb-nav {
+  height: 40px; border-radius: 14px; padding: 0 18px; border: none;
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--ease);
+  background: #f5f2f0; color: var(--text-soft); font-family: var(--font-body);
+  display: flex; align-items: center; gap: 3px;
+}
+.eb-nav:hover { background: var(--peach-soft); color: var(--peach); }
+.eb-nav .arr { font-size: 14px; }
+.eb-mark {
+  height: 40px; border-radius: 14px; padding: 0 14px; border: 2px solid #fde68a;
+  font-size: 11px; font-weight: 700; cursor: pointer; transition: var(--ease);
+  background: var(--butter-light); color: #b8921a; font-family: var(--font-body);
+  display: flex; align-items: center; gap: 3px;
+}
+.eb-mark:hover { background: #fef3c7; }
+.eb-dots { flex: 1; display: flex; justify-content: center; gap: 5px; }
+.eb-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #e8e0dc; transition: var(--ease);
+}
+.eb-dot.on { width: 20px; border-radius: 3px; background: var(--peach); }
+.eb-play {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #ff9a8b, #ffb3a7); border: none;
+  font-size: 14px; color: #fff; cursor: pointer;
+  box-shadow: 0 3px 12px rgba(255,154,139,0.18); transition: var(--ease);
+  display: flex; align-items: center; justify-content: center;
+}
+.eb-play:hover { transform: scale(1.06); }
+.exam-area {
+  flex: 1; margin: 0 14px 6px; border-radius: var(--radius);
+  overflow: hidden; background: var(--card); box-shadow: var(--shadow);
+}
+.exam-track {
+  display: flex; height: 100%;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.exam-page {
+  min-width: 100%; height: 100%; overflow-y: auto; padding: 16px 18px;
+}
+.exam-page::-webkit-scrollbar { width: 2px; }
+.exam-page::-webkit-scrollbar-thumb { background: var(--peach-soft); border-radius: 1px; }
+.exam-sec {
+  font-size: 10px; font-weight: 700; color: var(--peach);
+  letter-spacing: 0.04em; margin-bottom: 2px;
+}
+.exam-stem {
+  font-size: 15px; font-weight: 800; color: var(--text);
+  line-height: 1.5; margin-bottom: 14px; padding-bottom: 12px;
+  border-bottom: 2px dashed var(--peach-soft);
+  font-family: var(--font-title);
+}
+.exam-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.exam-opt {
+  padding: 13px 15px; border-radius: var(--radius-sm);
+  background: #fefefe; border: 2px solid #f5f0ee;
+  cursor: pointer; transition: var(--ease);
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.exam-opt:hover { border-color: var(--peach-soft); transform: translateY(-1px); }
+.exam-opt:active { transform: scale(0.97); }
+.exam-opt.sel {
+  border-color: var(--peach);
+  background: linear-gradient(135deg, var(--peach-light), #fff5f5);
+}
+.exam-ol {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: var(--peach-soft); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--peach);
+  flex-shrink: 0; transition: var(--ease);
+}
+.exam-opt.sel .exam-ol { background: var(--peach); color: #fff; }
+.exam-ot { font-size: 12px; font-weight: 600; color: var(--text-soft); line-height: 1.4; }
+.exam-opt.sel .exam-ot { color: var(--text); }
+
+/* Exam Bottom */
+
+/* ============ FOCUS MODE ============ */
+.focus-ctls {
+  flex-shrink: 0; display: flex; gap: 6px;
+  padding: 0 14px 8px; flex-wrap: wrap;
+}
+.fc-chip {
+  padding: 7px 14px; border-radius: 16px; border: none;
+  font-size: 11px; font-weight: 700; cursor: pointer; transition: var(--ease);
+  background: var(--card); color: var(--text-soft);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03); font-family: var(--font-body);
+}
+.fc-chip:hover { transform: translateY(-1px); }
+.fc-chip.on { background: var(--peach); color: #fff; }
+.fc-chip.on.hot { background: #ff7675; }
+
+.focus-list {
+  flex: 1; margin: 0 14px 8px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.focus-list::-webkit-scrollbar { width: 2px; }
+.focus-list::-webkit-scrollbar-thumb { background: var(--peach-soft); border-radius: 1px; }
+
+.sent {
+  padding: 14px 16px; border-radius: var(--radius-sm);
+  background: var(--card); box-shadow: var(--shadow);
+  cursor: pointer; transition: var(--ease);
+  border: 2px solid transparent;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.sent:hover { transform: translateY(-1px); }
+.sent.active {
+  border-color: var(--peach);
+  background: linear-gradient(135deg, var(--peach-light), #fff5f5);
+  box-shadow: 0 3px 14px rgba(255,154,139,0.1);
+}
+.sent.hard { border-left: 4px solid var(--butter); }
+.sent.dim { opacity: 0.45; }
+
+.sn {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: var(--peach-soft); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: var(--peach); flex-shrink: 0;
+}
+.sent.active .sn { background: var(--peach); color: #fff; }
+
+.sb { flex: 1; }
+.st {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  line-height: 1.7;
+}
+.st .gap {
+  display: inline-block; min-width: 36px;
+  border-bottom: 2px dashed var(--peach);
+  margin: 0 2px; color: transparent;
+}
+
+.sa { display: flex; gap: 4px; flex-shrink: 0; align-items: flex-start; padding-top: 2px; }
+.sa-play {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--peach-light); border: none;
+  font-size: 11px; color: var(--peach); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--ease);
+}
+.sa-play:hover { background: var(--peach); color: #fff; }
+.sa-play.playing { background: var(--peach); color: #fff; animation: pulsing 1.5s infinite; }
+@keyframes pulsing {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,154,139,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255,154,139,0); }
+}
+.sa-star {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: transparent; border: none;
+  font-size: 13px; cursor: pointer; transition: var(--ease);
+  display: flex; align-items: center; justify-content: center;
+}
+.sa-star:hover { background: var(--butter-light); }
+.sa-star.on { background: var(--butter-light); }
+
+/* Focus bottom */
+.focus-bar {
+  flex-shrink: 0; display: flex; align-items: center;
+  padding: 4px 14px 18px; gap: 8px;
+}
+.fb-play {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #ff9a8b, #ffb3a7); border: none;
+  font-size: 16px; color: #fff; cursor: pointer;
+  box-shadow: 0 3px 14px rgba(255,154,139,0.2); transition: var(--ease);
+  display: flex; align-items: center; justify-content: center;
+}
+.fb-play:hover { transform: scale(1.06); }
+.fb-track {
+  flex: 1; height: 5px; border-radius: 3px;
+  background: var(--peach-soft); overflow: hidden;
+}
+.fb-fill {
+  height: 100%; border-radius: 3px; background: var(--peach);
+  width: 20%; transition: width 0.3s;
+}
+
+/* ============ LIST VIEW ============ */
+.list-hero {
+  flex-shrink: 0; padding: 18px 20px 8px;
+}
+.list-hero .emoji { font-size: 34px; }
+.list-hero h1 {
+  font-family: var(--font-title); font-size: 28px;
+  font-weight: 700; color: var(--text); margin-top: 2px;
+}
+.list-hero h1 span { color: var(--peach); }
+.list-hero .sub {
+  font-size: 12px; font-weight: 600; color: var(--text-soft); margin-top: 2px;
+}
+.list-scroll {
+  flex: 1; overflow-y: auto; padding: 0 16px 16px;
+}
+.list-scroll::-webkit-scrollbar { width: 2px; }
+.list-scroll::-webkit-scrollbar-thumb { background: var(--peach-soft); border-radius: 1px; }
+
+.pcard {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px; border-radius: var(--radius);
+  background: var(--card); box-shadow: var(--shadow);
+  margin-bottom: 10px; cursor: pointer; transition: var(--ease);
+  border: 2px solid transparent;
+}
+.pcard:hover { transform: translateY(-2px); border-color: var(--peach-soft); }
+.pcard:active { transform: scale(0.98); }
+.pc-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.pc-icon.a { background: var(--peach-light); }
+.pc-icon.b { background: var(--lavender-light); }
+.pc-info { flex: 1; }
+.pc-title {
+  display: block; font-family: var(--font-title);
+  font-size: 14px; font-weight: 600; color: var(--text);
+}
+.pc-meta {
+  font-size: 10px; font-weight: 700; color: var(--text-soft); margin-top: 2px;
+}
+.pc-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 9px; font-weight: 700; margin-right: 3px;
+}
+.pc-tag.s { background: var(--peach-light); color: var(--peach); }
+.pc-tag.q { background: var(--lavender-light); color: #8b7ad8; }
+.pc-arrow {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--peach-light); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; color: var(--peach); transition: var(--ease);
+}
+.pcard:hover .pc-arrow { background: var(--peach); color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Mode Tabs -->
+  <div class="mode-tabs" id="tabs">
+    <button class="mode-tab on" onclick="switchMode('list')"><span class="emoji">📋</span>列表</button>
+    <button class="mode-tab" onclick="switchMode('exam')"><span class="emoji">📝</span>模拟考试</button>
+    <button class="mode-tab" onclick="switchMode('focus')"><span class="emoji">🎯</span>逐句精听</button>
+  </div>
+
+  <!-- Phone -->
+  <div class="phone" id="phone">
+    <div class="status-bar"><span>9:41</span><span>🔋 85%</span></div>
+
+    <!-- ===== LIST ===== -->
+    <div id="view-list" style="flex:1;display:flex;flex-direction:column;">
+      <div class="list-hero">
+        <span class="emoji">🎧</span>
+        <h1>听力<span>精听</span></h1>
+        <div class="sub">CET-4 · 2 套真题</div>
+      </div>
+      <div class="list-scroll">
+        <div class="pcard">
+          <div class="pc-icon a">🎵</div>
+          <div class="pc-info">
+            <span class="pc-title">CET-4 2019.06 第一套</span>
+            <div class="pc-meta"><span class="pc-tag s">Section A-C</span><span class="pc-tag q">25 题</span></div>
+          </div>
+          <div class="pc-arrow">→</div>
+        </div>
+        <div class="pcard">
+          <div class="pc-icon b">🎶</div>
+          <div class="pc-info">
+            <span class="pc-title">CET-4 2019.06 第二套</span>
+            <div class="pc-meta"><span class="pc-tag s">Section A-C</span><span class="pc-tag q">25 题</span></div>
+          </div>
+          <div class="pc-arrow">→</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EXAM MODE (模拟考试) ===== -->
+    <div id="view-exam" style="flex:1;display:none;flex-direction:column;">
+      <div class="top">
+        <div class="top-back">←</div>
+        <span class="top-title">CET-4 2019.06 第一套</span>
+        <div class="top-tag exam">模拟</div>
+        <div class="top-done">✓</div>
+      </div>
+      <div class="exam-player">
+        <div class="ep-track"><div class="ep-fill" style="width:42%"></div></div>
+        <div class="ep-time"><span>4:12</span><span>9:45</span></div>
+        <div class="ep-ctls">
+          <div class="ep-ctls-left">
+            <div class="ep-btn on"><span class="icon">🔁</span>循环</div>
+            <div class="ep-btn"><span class="icon">⏪</span>15s</div>
+          </div>
+          <div class="ep-ctls-right">
+            <div class="ep-btn"><span class="icon">⏩</span>15s</div>
+            <div class="ep-btn">1×</div>
+          </div>
+        </div>
+      </div>
+      <div class="exam-area">
+        <div class="exam-page">
+          <div class="exam-sec">Section A · News Reports</div>
+          <div class="exam-stem">Q1. What did the boy do?</div>
+          <div class="exam-opts">
+            <div class="exam-opt"><div class="exam-ol">A</div><div class="exam-ot">He set a record by swimming to and from an island.</div></div>
+            <div class="exam-opt sel"><div class="exam-ol">B</div><div class="exam-ot">He celebrated his ninth birthday on a small island.</div></div>
+            <div class="exam-opt"><div class="exam-ol">C</div><div class="exam-ot">He visited a prison located on a faraway island.</div></div>
+            <div class="exam-opt"><div class="exam-ol">D</div><div class="exam-ot">He swam around an island near San Francisco.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="exam-bar">
+        <div class="eb-nav"><span class="arr">←</span>上题</div>
+        <div class="eb-mark">⭐ 标记</div>
+        <div class="eb-play">▶</div>
+        <div class="eb-dots">
+          <div class="eb-dot"></div><div class="eb-dot"></div><div class="eb-dot on"></div>
+          <div class="eb-dot"></div><div class="eb-dot"></div>
+        </div>
+        <div class="eb-nav">下题<span class="arr">→</span></div>
+      </div>
+    </div>
+
+    <!-- ===== FOCUS MODE (逐句精听) ===== -->
+    <div id="view-focus" style="flex:1;display:none;flex-direction:column;">
+      <div class="top">
+        <div class="top-back">←</div>
+        <span class="top-title">CET-4 2019.06 第一套</span>
+        <div class="top-tag focus on">精听中</div>
+        <div class="top-done">✓</div>
+      </div>
+      <div class="focus-ctls">
+        <div class="fc-chip on">0.8x</div>
+        <div class="fc-chip">1x</div>
+        <div class="fc-chip on hot">🔁 单句循环</div>
+        <div class="fc-chip on">📖 原文</div>
+        <div class="fc-chip">✏️ 听写</div>
+        <div class="ep-play" style="margin-left:auto;">▶</div>
+      </div>
+      <div class="focus-list">
+        <div class="sent hard">
+          <div class="sn">1</div>
+          <div class="sb"><div class="st">In this section, you will hear two or three news reports.</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star on">⭐</div></div>
+        </div>
+        <div class="sent active">
+          <div class="sn">2</div>
+          <div class="sb"><div class="st">Both the news report and the questions will be spoken only once.</div></div>
+          <div class="sa"><div class="sa-play playing">⏸</div><div class="sa-star">☆</div></div>
+        </div>
+        <div class="sent">
+          <div class="sn">3</div>
+          <div class="sb"><div class="st">After you hear a question, you must choose the best answer.</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star">☆</div></div>
+        </div>
+        <div class="sent hard">
+          <div class="sn">4</div>
+          <div class="sb"><div class="st">Choose from the four choices marked A), B), C) and D).</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star on">⭐</div></div>
+        </div>
+        <div class="sent dim">
+          <div class="sn">5</div>
+          <div class="sb"><div class="st">Q1. A) He set a record <span class="gap">____</span> swimming to the island.</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star">☆</div></div>
+        </div>
+        <div class="sent">
+          <div class="sn">6</div>
+          <div class="sb"><div class="st">He celebrated his ninth birthday on a small island.</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star">☆</div></div>
+        </div>
+        <div class="sent">
+          <div class="sn">7</div>
+          <div class="sb"><div class="st">He visited a prison located on a faraway island.</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star">☆</div></div>
+        </div>
+        <div class="sent hard">
+          <div class="sn">8</div>
+          <div class="sb"><div class="st">He swam around an island near San Francisco.</div></div>
+          <div class="sa"><div class="sa-play">▶</div><div class="sa-star on">⭐</div></div>
+        </div>
+      </div>
+      <div class="focus-bar">
+        <div class="eb-nav"><span class="arr">←</span>上句</div>
+        <div class="fb-track"><div class="fb-fill" style="width:28%"></div></div>
+        <div class="eb-nav">下句<span class="arr">→</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchMode(mode) {
+  document.getElementById('view-list').style.display  = mode === 'list'  ? 'flex' : 'none';
+  document.getElementById('view-exam').style.display  = mode === 'exam'  ? 'flex' : 'none';
+  document.getElementById('view-focus').style.display = mode === 'focus' ? 'flex' : 'none';
+  document.querySelectorAll('.mode-tab').forEach((b,i) => {
+    b.classList.toggle('on', (i===0 && mode==='list') || (i===1 && mode==='exam') || (i===2 && mode==='focus'));
+  });
+}
+</script>
+</body>
+</html>

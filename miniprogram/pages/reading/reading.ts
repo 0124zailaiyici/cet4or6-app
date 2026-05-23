@@ -26,6 +26,10 @@ interface IResultItem {
   isCorrect: boolean
   locate?: string
   hint?: string
+  questionStem?: string
+  allOptions?: string[]
+  correctOptionIndex?: number
+  userOptionIndex?: number
 }
 
 interface IReadingData {
@@ -59,6 +63,7 @@ interface IReadingData {
   completionMap: Record<number, { submitted: boolean; score: number; totalScore: number }>
   showVocab: boolean
   vocabList: Array<{ word: string; zh: string }>
+  scrollTop: number
 }
 
 interface IReadingMethods {
@@ -86,6 +91,9 @@ interface IReadingMethods {
   saveMatch(): void
   submit(): void
   hideResult(): void
+  showResultAgain(): void
+  jumpToParagraph(e: WechatMiniprogram.TouchEvent): void
+  resetCurrent(): void
   checkAllAnswered(): boolean
   getMissingCount(): { total: number; answered: number }
   buildResult(): IResultItem[]
@@ -125,7 +133,8 @@ Page<IReadingData, IReadingMethods>({
     resultItems: [],
     completionMap: {},
     showVocab: false,
-    vocabList: []
+    vocabList: [],
+    scrollTop: 0
   },
 
   onLoad() {
@@ -166,7 +175,7 @@ Page<IReadingData, IReadingMethods>({
         : this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
       const formatted = item.sectionType !== 'B'
-        ? pages.map((p, i) => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.annotatePage(p, vocab, i)}</p>`)
+        ? pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.annotatePage(p, vocab)}</p>`)
         : []
       const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
       const app = getApp<IAppOption>()
@@ -215,7 +224,7 @@ Page<IReadingData, IReadingMethods>({
     this.setData({ showVocab: !this.data.showVocab })
   },
 
-  annotatePage(text: string, vocab: Record<string, string>, pageIdx: number): string {
+  annotatePage(text: string, vocab: Record<string, string>): string {
     if (!text) return ''
     let annotated = text
     if (Object.keys(vocab).length > 0) {
@@ -223,7 +232,6 @@ Page<IReadingData, IReadingMethods>({
       const pattern = new RegExp('\\b(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'gi')
       annotated = annotated.replace(pattern, '<span style="color:#e65100;border-bottom:1px dashed #e65100">$1</span>')
     }
-    const paraLabel = pageIdx > 0 ? '' : ''
     return annotated
   },
 
@@ -256,6 +264,7 @@ Page<IReadingData, IReadingMethods>({
     const item = this.data.current
     if (!item) return []
     const ca = item.correctAnswers || {}
+    const annot = readingAnnotations[item.id]
     const results: IResultItem[] = []
 
     if (item.sectionType === 'A') {
@@ -267,30 +276,44 @@ Page<IReadingData, IReadingMethods>({
           label: '第' + k + '空',
           userAnswer: user,
           correctAnswer: ca[k],
-          isCorrect: user.toLowerCase().trim() === (ca[k] || '').toLowerCase().trim()
+          isCorrect: user.toLowerCase().trim() === (ca[k] || '').toLowerCase().trim(),
+          locate: annot?.qLocate?.[k] || '',
+          hint: annot?.qHint?.[k] || ''
         })
       }
     } else if (item.sectionType === 'B') {
       const ma = this.data.matchAnswers
       for (let i = 0; i < item.questions.length; i++) {
         const user = ma[i] || '(未匹配)'
+        const ki = String(i + 36)
         results.push({
-          label: '#' + (i + 36),
+          label: '#' + ki,
           userAnswer: user,
           correctAnswer: ca[String(i)] || '',
-          isCorrect: user === ca[String(i)]
+          isCorrect: user === ca[String(i)],
+          locate: annot?.qLocate?.[String(i)] || '',
+          hint: annot?.qHint?.[String(i)] || ''
         })
       }
     } else if (item.sectionType === 'C') {
       const cAns = this.data.cAnswers
       const startNum = parseInt((item.questions[0]?.match(/^\d+/) || ['0'])[0])
+      const choiceLabels = ['A', 'B', 'C', 'D']
       for (let i = 0; i < item.questions.length; i++) {
         const user = cAns[i] || '(未作答)'
+        const correctLetter = ca[String(i)] || ''
+        const userLetter = String(cAns[i] || '')
         results.push({
           label: 'Q' + (startNum + i),
           userAnswer: user,
-          correctAnswer: ca[String(i)] || '',
-          isCorrect: user === ca[String(i)]
+          correctAnswer: correctLetter,
+          isCorrect: userLetter === correctLetter,
+          locate: annot?.qLocate?.[String(i)] || '',
+          hint: annot?.qHint?.[String(i)] || '',
+          questionStem: item.questions[i] || '',
+          allOptions: item.choices[i] || [],
+          correctOptionIndex: choiceLabels.indexOf(correctLetter),
+          userOptionIndex: choiceLabels.indexOf(userLetter)
         })
       }
     }
@@ -345,6 +368,51 @@ Page<IReadingData, IReadingMethods>({
 
   hideResult() {
     this.setData({ showResult: false })
+  },
+
+  showResultAgain() {
+    this.setData({ showResult: true })
+  },
+
+  jumpToParagraph(e: WechatMiniprogram.TouchEvent) {
+    const locate = e.currentTarget.dataset.locate as string
+    if (!locate) return
+    const num = parseInt(locate.replace(/[^0-9]/g, ''))
+    if (isNaN(num)) return
+    const st = this.data.current?.sectionType
+    if (st === 'B') {
+      this.setData({ passagePage: num - 1, bStmtPage: 0, scrollTop: this.data.scrollTop === 0 ? 1 : 0 })
+      return
+    }
+    const paraIndex = num - 1
+    const page = Math.floor(paraIndex / 2)
+    this.setData({ passagePage: page, currentQ: 0, scrollTop: this.data.scrollTop === 0 ? 1 : 0 })
+  },
+
+  resetCurrent() {
+    wx.showModal({
+      title: '重新开始',
+      content: '将清除当前篇目的所有答案和提交记录，确定重新开始吗？',
+      success: (res) => {
+        if (!res.confirm) return
+        const id = this.data.current?.id
+        if (id) {
+          const app = getApp<IAppOption>()
+          delete app.globalData.studyData.readingAnswers[id]
+          wx.setStorageSync('studyData', app.globalData.studyData)
+          const map = { ...this.data.completionMap }
+          delete map[id]
+          this.setData({ completionMap: map })
+        }
+        this.setData({
+          submitted: false, score: 0, showResult: false, resultItems: [],
+          blankAnswers: {}, usedFlags: [], activeBlank: null,
+          matchAnswers: {}, matchCount: 0, activeStmt: null,
+          availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
+          cAnswers: {}, cSelIdx: -1,
+        })
+      }
+    })
   },
 
   // ===== Section A =====

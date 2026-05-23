@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="topbar">
+    <h1>学习提醒</h1>
+    <text class="tag">📱 订阅消息</text>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="r-left"><text class="icon">🌅</text><text class="label">晨间听力</text></view>
+      <view class="sub {{morningSub ? 'on' : ''}}" catchtap="toggleMorning">{{morningSub ? '✓ 已订阅' : '订阅'}}</view>
+    </view>
+    <view class="times">
+      <view class="t {{morningTime === t ? 'on' : ''}}" wx:for="{{morningTimes}}" wx:key="*this" data-time="{{item}}" catchtap="setMorningTime">{{item}}</view>
+    </view>
+    <text class="hint">每天 {{morningTime}} 推送听力练习提醒</text>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="r-left"><text class="icon">🌙</text><text class="label">晚间复习</text></view>
+      <view class="sub {{eveningSub ? 'on' : ''}}" catchtap="toggleEvening">{{eveningSub ? '✓ 已订阅' : '订阅'}}</view>
+    </view>
+    <view class="times">
+      <view class="t {{eveningTime === t ? 'on' : ''}}" wx:for="{{eveningTimes}}" wx:key="*this" data-time="{{item}}" catchtap="setEveningTime">{{item}}</view>
+    </view>
+    <text class="hint">每天 {{eveningTime}} 推送复习提醒</text>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="r-left"><text class="icon">📊</text><text class="label">学习周报</text></view>
+      <view class="sub {{weeklySub ? 'on' : ''}}" catchtap="toggleWeekly">{{weeklySub ? '✓ 已订阅' : '订阅'}}</view>
+    </view>
+    <text class="hint">每周日晚 21:00 推送本周学习总结</text>
+  </view>
+
+  <view class="tip">
+    <text class="tip-t">💡 提醒将通过微信服务通知推送，请确保已开启通知权限</text>
+  </view>
+</view>

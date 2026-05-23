@@ -10,7 +10,10 @@
     "pages/settings/settings",
     "pages/dictionary/dictionary",
     "pages/reading/reading",
-    "pages/errors/errors"
+    "pages/errors/errors",
+    "pages/guide/guide",
+    "pages/reminder/reminder",
+    "pages/feedback/feedback"
   ],
   "window": {
     "navigationBarTextStyle": "black",

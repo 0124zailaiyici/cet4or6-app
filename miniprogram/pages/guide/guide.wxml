@@ -1,0 +1,16 @@
+<view class="page">
+  <text class="skip" catchtap="skip">跳过</text>
+  <view class="swipe-wrap">
+    <view class="swipe" style="transform: translateX(-{{current * 33.333}}%)">
+      <view class="gp" wx:for="{{pages}}" wx:key="*this" wx:for-item="p">
+        <text class="emoji">{{p.emoji}}</text>
+        <text class="title">{{p.title}}</text>
+        <text class="desc">{{p.desc}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="dots">
+    <view class="dot {{i === current ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
+  </view>
+  <view class="btn" catchtap="next">{{current === 2 ? '进入首页' : '下一步'}}</view>
+</view>

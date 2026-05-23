@@ -1,0 +1,33 @@
+<view class="page">
+  <view class="topbar">
+    <h1>帮助与反馈</h1>
+    <text class="tag">意见</text>
+  </view>
+
+  <view class="card">
+    <view class="types">
+      <view class="t {{fbType === item ? 'on' : ''}}" wx:for="{{types}}" wx:key="*this" data-type="{{item}}" catchtap="setType">{{item === '功能异常' ? '🐛' : item === '功能建议' ? '💡' : item === '体验评价' ? '😊' : '📝'}} {{item}}</view>
+    </view>
+
+    <textarea class="input" placeholder="请描述你的问题或建议..." value="{{fbText}}" bindinput="onInput" maxlength="500"></textarea>
+    <text class="count">{{fbText.length}}/500</text>
+
+    <view class="submit" catchtap="submit">提交反馈</view>
+    <text class="note">我们会尽快处理，通常 24 小时内回复</text>
+  </view>
+
+  <view class="card" style="margin-top:12rpx">
+    <view class="link" catchtap="openTerms">
+      <text>📄 用户协议</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="link" catchtap="openPrivacy">
+      <text>🔒 隐私政策</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="link" style="border-bottom:none">
+      <text>📦 版本</text>
+      <text class="ver">v1.0.0</text>
+    </view>
+  </view>
+</view>

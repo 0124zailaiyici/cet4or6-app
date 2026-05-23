@@ -30,5 +30,9 @@ App<IAppOption>({
     if (this.globalData.darkMode) {
       applyTheme(true)
     }
+    // 首次启动显示引导页
+    if (!wx.getStorageSync('hasGuided')) {
+      wx.reLaunch({ url: '/pages/guide/guide' })
+    }
   }
 })
