@@ -40,8 +40,10 @@
     </view>
 
     <!-- 分类 -->
-    <scroll-view class="cats" scroll-x show-scrollbar="{{false}}">
-      <view class="cat {{toolkitCategory === item ? 'on' : ''}}" wx:for="{{categoryOptions}}" wx:key="item" data-cat="{{item}}" catchtap="setToolkitCategory">{{categoryEmojis[item]}} {{item}}</view>
+    <scroll-view class="cats-scroll" scroll-x show-scrollbar="{{false}}">
+      <view class="cats">
+        <view class="cat {{toolkitCategory === item ? 'on' : ''}}" wx:for="{{categoryOptions}}" wx:key="item" data-cat="{{item}}" catchtap="setToolkitCategory">{{categoryEmojis[item]}} {{item}}</view>
+      </view>
     </scroll-view>
 
     <!-- 句型列表 -->
@@ -99,27 +101,46 @@
       <view class="fcard">
         <view class="fcard-tag">📋 第 1 步 · 审题</view>
         <view class="fcard-title">先理解题目在问什么</view>
-        <view class="fcard-desc">确定题型、主题、要求词数。想想自己对这个话题有什么看法。</view>
-        <view style="margin-top:10px;padding:10px 12px;background:#f9f5fc;border-radius:8px;font-size:12px;line-height:1.6;color:#504060">
-          <view>常见题型：</view>
-          <view>· 观点选择：Should…? / Do you agree…?</view>
-          <view>· 现象分析：The Impact of… / How to…</view>
-          <view>· 原因解释：Why…? / The Reason for…</view>
+        <view class="fcard-desc">选一个主题，看看你能回答下面的问题吗？</view>
+
+        <!-- 主题选择 -->
+        <view class="pills" style="margin-bottom:12px;margin-top:10px">
+          <view class="pill {{currentTopic.label === item.label ? 'on' : ''}}" wx:for="{{paragraphTopics}}" wx:key="label" data-index="{{index}}" catchtap="selectTopic">{{item.label}}</view>
         </view>
-        <view style="margin-top:12px;font-size:12px;color:#504060;font-weight:600">💡 试试回答这三个问题：</view>
-        <view style="margin-top:6px;font-size:11px;color:#b09bc0;line-height:1.6">
-          <view>1. 我对这个话题持什么态度？</view>
-          <view>2. 我能想到几个理由？</view>
-          <view>3. 我有例子吗？</view>
+
+        <!-- 当前主题分析 -->
+        <view style="padding:12px;background:#f9f5fc;border-radius:10px;font-size:12px;line-height:1.7;color:#504060">
+          <view style="font-weight:600;margin-bottom:6px">📝 当前主题句</view>
+          <view style="color:#3a2a4a">{{currentTopic.text}}</view>
         </view>
-        <view class="btn btn-primary" style="margin-top:12px" data-step="{{2}}" catchtap="setGuideStep">我知道了，去列提纲 →</view>
+
+        <!-- 引导问题 -->
+        <view style="margin-top:12px">
+          <view style="font-size:12px;color:#504060;font-weight:600;margin-bottom:8px">💡 想一想这三个问题：</view>
+          <view style="display:flex;flex-direction:column;gap:8px">
+            <view style="padding:10px;background:#fff;border-radius:8px;border:1.5px solid #ede4f0">
+              <view style="font-size:11px;color:#b09bc0">Q1: 这是什么题型？</view>
+              <view style="font-size:12px;color:#504060;margin-top:4px">观点选择 · 现象分析 · 原因解释 · 对策建议</view>
+            </view>
+            <view style="padding:10px;background:#fff;border-radius:8px;border:1.5px solid #ede4f0">
+              <view style="font-size:11px;color:#b09bc0">Q2: 这个话题的关键词是什么？</view>
+              <view style="font-size:12px;color:#504060;margin-top:4px">education / environment / technology / health / society</view>
+            </view>
+            <view style="padding:10px;background:#fff;border-radius:8px;border:1.5px solid #ede4f0">
+              <view style="font-size:11px;color:#b09bc0">Q3: 你有什么想说的？</view>
+              <textarea class="mini-input" placeholder="写下你的第一想法…" value="{{outlineReasonInput}}" bindinput="onReasonInput" style="margin-top:4px;min-height:auto;font-size:12px"></textarea>
+            </view>
+          </view>
+        </view>
+
+        <view class="btn btn-primary" style="margin-top:12px" data-step="{{2}}" catchtap="setGuideStep">审完了，去列提纲 →</view>
       </view>
 
       <!-- 新手模式 -->
       <view class="fcard" style="border-left-color:#4caf50">
         <view class="fcard-tag" style="background:rgba(76,175,80,0.07);color:#43a047">🌱 新手模式</view>
         <view class="fcard-title">不想列提纲？先写 3 句话</view>
-        <view class="fcard-desc">写够 3 句就获得成就 🎉，然后挑战五句 → 八句 → 整篇</view>
+        <view class="fcard-desc">根据"{{currentTopic.label}}"，直接开始写</view>
         <textarea class="mini-input" placeholder="第 1 句：表达你的观点…" value="{{sentence1}}" bindinput="onSentence1Input" style="margin-top:8px;min-height:auto"></textarea>
         <textarea class="mini-input" placeholder="第 2 句：给出一个理由…" value="{{sentence2}}" bindinput="onSentence2Input" style="min-height:auto"></textarea>
         <textarea class="mini-input" placeholder="第 3 句：举例子或进一步说明…" value="{{sentence3}}" bindinput="onSentence3Input" style="min-height:auto"></textarea>

@@ -63,7 +63,8 @@
 .srch:focus { border-color: #d4a0dc; }
 
 /* ══ Categories scroll ══ */
-.cats { display: flex; gap: 10rpx; margin-bottom: 20rpx; overflow-x: auto; white-space: nowrap; }
+.cats-scroll { margin-bottom: 20rpx; overflow: hidden; }
+.cats { display: flex; gap: 10rpx; white-space: nowrap; }
 .cat {
   padding: 10rpx 24rpx; border-radius: 20rpx; font-size: 22rpx;
   background: #f5f0f8; color: #b09bc0; flex-shrink: 0;
