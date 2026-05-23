@@ -26,7 +26,7 @@ interface IListeningPage {
 }
 
 interface IListeningData {
-  mode: 'list' | 'detail'
+  mode: 'list' | 'detail' | 'summary'
   passages: IListeningItem[]
   currentPassage: IListeningItem | null
   currentIndex: number
@@ -56,6 +56,9 @@ interface IListeningData {
   markedPages: number[]
   markedFlags: boolean[]
   isCurrentMarked: boolean
+  summaryTotal: number
+  summaryAnswered: number
+  summaryMarked: number
 }
 
 interface IListeningMethods {
@@ -84,6 +87,8 @@ interface IListeningMethods {
   rewindAudio(): void
   forwardAudio(): void
   markForReview(): void
+  viewSummary(): void
+  retryPages(): void
 }
 
 const LABELS: Record<string, string> = {
@@ -104,7 +109,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
   const lines = passage.sentences.map(s => s.text.trim()).filter(Boolean)
 
   const dirs: string[] = []
-  let currentQ: { section: string; stem: string; opts: Array<{l: string; t: string}> } | null = null
+  let currentQ: { section: string; stem: string; opts: Array<{ l: string; t: string }> } | null = null
   let hasContent = false
 
   function pushDir() {
@@ -115,12 +120,28 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     }
   }
 
+  function finalizeQ() {
+    if (!currentQ) return
+    pushDir()
+    currentQ.opts.sort((a, b) => a.l.localeCompare(b.l))
+    pages.push({
+      type: 'q',
+      section: currentQ.section,
+      stem: currentQ.stem,
+      opts: currentQ.opts.map(o => o.t),
+    })
+    currentQ = null
+  }
+
   function addOpts(text: string) {
     if (!currentQ) return
     const parts = text.split(/(?=[A-D]\))/).filter(Boolean)
     for (const p of parts) {
       const m = p.match(/^([A-D])\)\s*(.*)/)
-      if (m) currentQ.opts.push({ l: m[1], t: m[2].trim() })
+      if (m) {
+        const existing = currentQ.opts.find(o => o.l === m![1])
+        if (!existing) currentQ.opts.push({ l: m![1], t: m![2].trim() })
+      }
     }
   }
 
@@ -129,10 +150,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
 
     const qMatch = line.match(/^(?:Q)?(\d+)\.\s*(.*)/)
     if (qMatch) {
-      if (currentQ) {
-        pushDir()
-        pages.push({ type: 'q', ...currentQ, opts: currentQ.opts.map(o => o.t) })
-      }
+      finalizeQ()
       const qNum = parseInt(qMatch[1])
       const rest = qMatch[2].trim()
       currentQ = { section: sectionLabel(qNum), stem: `Q${qNum}.`, opts: [] }
@@ -150,77 +168,154 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     else if (line.length > 5) dirs.push(line)
   }
 
-  if (currentQ) {
-    pushDir()
-    pages.push({ type: 'q', ...currentQ, opts: currentQ.opts.map(o => o.t) })
-  }
+  finalizeQ()
 
-  // 每题直接使用导入的原始选项（导入已做了去重）
   for (const p of pages) {
     if (p.type !== 'q' || !p.opts) continue
-    // 只保留非空选项
     p.opts = p.opts.filter(o => o.length > 0)
   }
 
   if (pages.every(p => p.type === 'dir')) return []
-
-  // Add section dir pages at natural boundaries
   return pages
 }
 
-let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
-let pageRef: any = null
+// ===== AudioManager =====
+class AudioManager {
+  private ctx: WechatMiniprogram.InnerAudioContext | null = null
+  private pageRef: any = null
+  private customOnEnded: (() => void) | null = null
 
-function getAudioCtx(): WechatMiniprogram.InnerAudioContext {
-  if (!audioCtx) {
-    audioCtx = wx.createInnerAudioContext()
-    audioCtx.obeyMuteSwitch = false
-    audioCtx.volume = 1
-    audioCtx.autoplay = true
-    audioCtx.onCanplay(() => {
-      if (pageRef) pageRef.setData({ loading: false })
-    })
-    audioCtx.onEnded(() => {
-      if (!pageRef) return
-      if (pageRef.data.audioMode) {
-        if (pageRef.data.loopSentence) {
-          audioCtx!.seek(0)
-          audioCtx!.play()
-        } else {
-          pageRef.setData({ isPlaying: false })
-        }
-      } else if (pageRef.data.loopSentence) {
-        pageRef.playCurrent()
-      } else if (pageRef.data.currentIndex < pageRef.data.currentPassage.sentences.length - 1) {
-        pageRef.nextSentence()
-      } else {
-        pageRef.setData({ isPlaying: false })
-      }
-    })
-    audioCtx.onTimeUpdate(() => {
-      if (pageRef && pageRef.data.audioMode && audioCtx) {
-        const fmt = (t: number) => {
-          const m = Math.floor(t / 60)
-          const s = Math.floor(t % 60)
-          return `${m}:${s < 10 ? '0' : ''}${s}`
-        }
-        pageRef.setData({
-          audioTime: audioCtx.currentTime,
-          audioDuration: audioCtx.duration,
-          audioTimeStr: fmt(audioCtx.currentTime),
-          audioDurationStr: fmt(audioCtx.duration),
-        })
-      }
-    })
-    audioCtx.onError((res) => {
-      const code = (res as any).errCode
-      wx.showToast({ title: `播放失败${code ? '(' + code + ')' : ''}`, icon: 'none' })
-      if (pageRef) pageRef.setData({ isPlaying: false, loading: false })
-    })
+  attach(page: any) {
+    this.pageRef = page
   }
-  return audioCtx
+
+  detach() {
+    this.pageRef = null
+    this.customOnEnded = null
+  }
+
+  private getCtx(): WechatMiniprogram.InnerAudioContext {
+    if (!this.ctx) {
+      const ctx = wx.createInnerAudioContext()
+      ctx.obeyMuteSwitch = false
+      ctx.volume = 1
+      ctx.autoplay = true
+
+      ctx.onCanplay(() => {
+        if (this.pageRef) this.pageRef.setData({ loading: false })
+      })
+
+      ctx.onEnded(() => {
+        if (this.customOnEnded) {
+          this.customOnEnded()
+        } else if (this.pageRef) {
+          const d = this.pageRef.data
+          if (d.audioMode) {
+            if (d.loopSentence && this.ctx) {
+              this.ctx.seek(0)
+              this.ctx.play()
+            } else {
+              this.pageRef.setData({ isPlaying: false })
+            }
+          } else if (d.loopSentence) {
+            this.pageRef.playCurrent()
+          } else if (d.currentIndex < d.currentPassage.sentences.length - 1) {
+            this.pageRef.nextSentence()
+          } else {
+            this.pageRef.setData({ isPlaying: false })
+          }
+        }
+      })
+
+      ctx.onTimeUpdate(() => {
+        if (this.pageRef && this.pageRef.data.audioMode && this.ctx) {
+          const fmt = (t: number) => {
+            const m = Math.floor(t / 60)
+            const s = Math.floor(t % 60)
+            return `${m}:${s < 10 ? '0' : ''}${s}`
+          }
+          this.pageRef.setData({
+            audioTime: ctx.currentTime,
+            audioDuration: ctx.duration,
+            audioTimeStr: fmt(ctx.currentTime),
+            audioDurationStr: fmt(ctx.duration),
+          })
+        }
+      })
+
+      ctx.onError((res) => {
+        const code = (res as any).errCode
+        wx.showToast({ title: `播放失败${code ? '(' + code + ')' : ''}`, icon: 'none' })
+        if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
+      })
+
+      ctx.onPlay(() => {
+        if (this.pageRef) this.pageRef.setData({ loading: false })
+      })
+
+      this.ctx = ctx
+    }
+    return this.ctx
+  }
+
+  setOnEnded(handler: (() => void) | null) {
+    this.customOnEnded = handler
+  }
+
+  play(src: string, rate: number = 1) {
+    const ctx = this.getCtx()
+    ctx.stop()
+    ctx.playbackRate = rate
+    ctx.src = src
+    ctx.play()
+  }
+
+  resume(rate: number = 1) {
+    if (!this.ctx) return
+    this.ctx.playbackRate = rate
+    this.ctx.play()
+  }
+
+  pause() {
+    if (this.ctx) this.ctx.pause()
+  }
+
+  stop() {
+    if (this.ctx) this.ctx.stop()
+  }
+
+  seek(time: number) {
+    if (this.ctx) this.ctx.seek(time)
+  }
+
+  setRate(rate: number) {
+    if (this.ctx) this.ctx.playbackRate = rate
+  }
+
+  getCurrentTime(): number {
+    return this.ctx?.currentTime ?? 0
+  }
+
+  getDuration(): number {
+    return this.ctx?.duration ?? 0
+  }
+
+  hasSource(): boolean {
+    return !!this.ctx?.src
+  }
+
+  destroy() {
+    if (this.ctx) {
+      this.ctx.destroy()
+      this.ctx = null
+    }
+    this.detach()
+  }
 }
 
+const audio = new AudioManager()
+
+// ===== Page =====
 Page<IListeningData, IListeningMethods>({
   data: {
     mode: 'list',
@@ -229,7 +324,8 @@ Page<IListeningData, IListeningMethods>({
     currentIndex: 0,
     isPlaying: false,
     speed: 1,
-    speedOptions: [0.6, 0.8, 1, 1.15, 1.3],    showTranscript: true,
+    speedOptions: [0.6, 0.8, 1, 1.15, 1.3],
+    showTranscript: true,
     dictationMode: false,
     loopSentence: false,
     hardSentences: [],
@@ -245,17 +341,20 @@ Page<IListeningData, IListeningMethods>({
     currentPage: 0,
     selectedAnswers: {},
     pageTouchX: 0,
-    optionLetters: ['A','B','C','D'],
+    optionLetters: ['A', 'B', 'C', 'D'],
     dataWarning: '',
     focusMode: false,
     currentSectionLabel: '',
     markedPages: [],
     markedFlags: [],
     isCurrentMarked: false,
+    summaryTotal: 0,
+    summaryAnswered: 0,
+    summaryMarked: 0,
   },
 
   onLoad(options: { passageId?: string }) {
-    pageRef = this
+    audio.attach(this)
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
     const studyData = app.globalData.studyData
@@ -267,72 +366,106 @@ Page<IListeningData, IListeningMethods>({
     if (options.passageId) {
       const passage = passages.find(p => p.id === Number(options.passageId))
       if (passage) {
-        this.enterDetail({ currentTarget: { dataset: { id: passage.id } } } as WechatMiniprogram.TouchEvent)
+        this.enterDetail({ currentTarget: { dataset: { id: passage.id } } } as unknown as WechatMiniprogram.TouchEvent)
       }
     }
   },
 
   onShow() {
+    audio.attach(this)
     applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
   },
 
+  onHide() {
+    audio.pause()
+    this.setData({ isPlaying: false })
+  },
+
   onUnload() {
-    pageRef = null
-    if (audioCtx) { audioCtx.destroy(); audioCtx = null }
+    audio.destroy()
   },
 
   enterDetail(e: WechatMiniprogram.TouchEvent) {
     const id = Number(e.currentTarget.dataset.id)
     const passage = this.data.passages.find(p => p.id === id)
-    if (passage) {
-      const app = getApp<IAppOption>()
-      const stored = app.globalData.studyData.hardSentences || []
-      const localHard = stored.filter(h => h.passageId === passage.id).map(h => h.sentenceIndex)
-      const isAudio = !!passage.audioUrl
-      if (isAudio) {
-        const ctx = getAudioCtx()
-        ctx.stop()
-        ctx.src = passage.audioUrl!.startsWith('http')
-          ? passage.audioUrl!
-          : `${API_BASE}${encodeURI(passage.audioUrl!)}`
-        const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
-        const pages = buildPages(passage)
-        // 检查数据完整性
-        let warns: string[] = []
-        for (const p of pages) {
-          if (p.type !== 'q') continue
-          const n = p.opts?.length || 0
-          if (n < 4) warns.push(`${p.stem}缺${4-n}个选项`)
-        }
-        // 精听模式默认开循环、慢速0.75
-        const fm = this.data.focusMode
-        this.setData({
-          mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: true,
-          hardSentences: localHard, audioMode: true, audioTime: 0, audioDuration: 0,
-          pages, currentPage: 0, selectedAnswers: saved,
-          dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
-          currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
-          markedPages: [],
-          markedFlags: new Array(pages.length).fill(false),
-          loopSentence: fm,
-          speed: fm ? 0.8 : 1,
-        })
-        if (audioCtx) audioCtx.playbackRate = fm ? 0.8 : 1
-      } else {
-        this.setData({
-          mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: false,
-          hardSentences: localHard, audioMode: false, audioTime: 0, audioDuration: 0,
-          pages: [], currentPage: 0, selectedAnswers: {},
-        })
+    if (!passage) return
+
+    const app = getApp<IAppOption>()
+    const stored = app.globalData.studyData.hardSentences || []
+    const localHard = stored.filter(h => h.passageId === passage.id).map(h => h.sentenceIndex)
+    const isAudio = !!passage.audioUrl
+
+    if (isAudio) {
+      const audioUrl = passage.audioUrl!.startsWith('http')
+        ? passage.audioUrl!
+        : `${API_BASE}${encodeURI(passage.audioUrl!)}`
+      audio.stop()
+      audio.play(audioUrl)
+
+      const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
+      const pages = buildPages(passage)
+
+      let warns: string[] = []
+      for (const p of pages) {
+        if (p.type !== 'q') continue
+        const n = p.opts?.length || 0
+        if (n < 4) warns.push(`${p.stem}缺${4 - n}个选项`)
       }
+
+      const fm = this.data.focusMode
+      this.setData({
+        mode: 'detail',
+        currentPassage: passage,
+        currentIndex: 0,
+        isPlaying: true,
+        hardSentences: localHard,
+        audioMode: true,
+        audioTime: 0,
+        audioDuration: 0,
+        pages,
+        currentPage: 0,
+        selectedAnswers: saved,
+        dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
+        currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
+        markedPages: [],
+        markedFlags: new Array(pages.length).fill(false),
+        loopSentence: fm,
+        speed: fm ? 0.8 : 1,
+      })
+      audio.setRate(fm ? 0.8 : 1)
+    } else {
+      this.setData({
+        mode: 'detail',
+        currentPassage: passage,
+        currentIndex: 0,
+        isPlaying: false,
+        hardSentences: localHard,
+        audioMode: false,
+        audioTime: 0,
+        audioDuration: 0,
+        pages: [],
+        currentPage: 0,
+        selectedAnswers: {},
+      })
     }
   },
 
   backToList() {
-    if (audioCtx) { audioCtx.destroy(); audioCtx = null }
-    this.setData({ mode: 'list', currentPassage: null, isPlaying: false, audioMode: false, pages: [], currentPage: 0, dataWarning: '', focusMode: false, loopSentence: false, speed: 1 })
+    audio.destroy()
+    this.setData({
+      mode: 'list',
+      currentPassage: null,
+      isPlaying: false,
+      audioMode: false,
+      pages: [],
+      currentPage: 0,
+      dataWarning: '',
+      focusMode: false,
+      loopSentence: false,
+      speed: 1,
+    })
   },
 
   // ===== Page navigation (audio mode) =====
@@ -353,7 +486,7 @@ Page<IListeningData, IListeningMethods>({
     if (sa[i] === oi) delete sa[i]
     else sa[i] = oi
     this.setData({ selectedAnswers: sa })
-    // Persist
+
     const app = getApp<IAppOption>()
     const pid = this.data.currentPassage?.id
     if (pid) {
@@ -367,49 +500,71 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage > 0) {
       const cp = this.data.currentPage - 1
       const p = this.data.pages[cp]
-      const isPlaying = this.data.isPlaying
-      if (this.data.focusMode && isPlaying && audioCtx) {
-        audioCtx.pause()
+      const wasPlaying = this.data.isPlaying
+      if (this.data.focusMode && wasPlaying) {
+        audio.pause()
       }
-      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp], isPlaying: this.data.focusMode ? false : isPlaying })
+      this.setData({
+        currentPage: cp,
+        currentSectionLabel: p?.section || '',
+        isCurrentMarked: this.data.markedFlags[cp] || false,
+        isPlaying: this.data.focusMode ? false : wasPlaying,
+      })
     }
   },
 
   nextPage() {
-    if (this.data.currentPage < this.data.pages.length - 1) {
+    const lastIdx = this.data.pages.length - 1
+    if (this.data.currentPage < lastIdx) {
       const cp = this.data.currentPage + 1
       const p = this.data.pages[cp]
-      const isPlaying = this.data.isPlaying
-      if (this.data.focusMode && isPlaying && audioCtx) {
-        audioCtx.pause()
+      const wasPlaying = this.data.isPlaying
+      if (this.data.focusMode && wasPlaying) {
+        audio.pause()
       }
-      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp], isPlaying: this.data.focusMode ? false : isPlaying })
+      this.setData({
+        currentPage: cp,
+        currentSectionLabel: p?.section || '',
+        isCurrentMarked: this.data.markedFlags[cp] || false,
+        isPlaying: this.data.focusMode ? false : wasPlaying,
+      })
+    } else if (this.data.currentPage >= lastIdx && this.data.audioMode) {
+      this.viewSummary()
     }
+  },
+
+  viewSummary() {
+    audio.pause()
+    const qPages = this.data.pages.filter(p => p.type === 'q')
+    const total = qPages.length
+    const answered = Object.keys(this.data.selectedAnswers).length
+    const marked = this.data.markedPages.length
+    this.setData({ mode: 'summary', isPlaying: false, summaryTotal: total, summaryAnswered: answered, summaryMarked: marked })
+  },
+
+  retryPages() {
+    this.setData({ mode: 'detail', currentPage: 0 })
   },
 
   toggleFocus() {
     const on = !this.data.focusMode
     if (on) {
-      if (audioCtx) audioCtx.pause()
+      audio.pause()
       this.setData({ focusMode: true, loopSentence: true, speed: 0.8, isPlaying: false })
-      if (audioCtx) audioCtx.playbackRate = 0.8
+      audio.setRate(0.8)
     } else {
-      if (audioCtx) {
-        audioCtx.pause()
-        audioCtx.playbackRate = 1
-      }
+      audio.pause()
+      audio.setRate(1)
       this.setData({ focusMode: false, speed: 1, isPlaying: false })
     }
   },
 
   rewindAudio() {
-    if (!audioCtx) return
-    audioCtx.seek(Math.max(0, audioCtx.currentTime - 15))
+    audio.seek(Math.max(0, audio.getCurrentTime() - 15))
   },
 
   forwardAudio() {
-    if (!audioCtx) return
-    audioCtx.seek(Math.min(audioCtx.duration, audioCtx.currentTime + 15))
+    audio.seek(Math.min(audio.getDuration(), audio.getCurrentTime() + 15))
   },
 
   markForReview() {
@@ -439,39 +594,43 @@ Page<IListeningData, IListeningMethods>({
   },
 
   playText(text: string, useAudioUrl?: string) {
-    const ctx = getAudioCtx()
-    ctx.stop()
-    ctx.playbackRate = this.data.speed
+    let src: string
     if (useAudioUrl) {
-      ctx.src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${encodeURI(useAudioUrl)}`
+      src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${encodeURI(useAudioUrl)}`
     } else {
-      ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
+      src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
     }
-    ctx.play()
+    audio.play(src, this.data.speed)
     this.setData({ isPlaying: true, loading: true })
-    ctx.onPlay(() => this.setData({ loading: false }))
   },
 
   seekAudio(e: WechatMiniprogram.TouchEvent) {
-    if (!this.data.audioMode || !audioCtx) return
+    if (!this.data.audioMode) return
     const rect = (e.currentTarget as any).boundingClientRect
     if (!rect) return
     const x = e.detail.x - rect.left
     const ratio = Math.max(0, Math.min(1, x / rect.width))
     const seekTime = ratio * this.data.audioDuration
-    audioCtx.seek(seekTime)
+    audio.seek(seekTime)
   },
 
   playPause() {
-    const ctx = getAudioCtx()
     if (this.data.audioMode) {
-      if (this.data.isPlaying) { ctx.pause(); this.setData({ isPlaying: false }) }
-      else { ctx.playbackRate = this.data.speed; ctx.play(); this.setData({ isPlaying: true }) }
+      if (this.data.isPlaying) {
+        audio.pause()
+        this.setData({ isPlaying: false })
+      } else {
+        audio.resume(this.data.speed)
+        this.setData({ isPlaying: true })
+      }
     } else if (this.data.isPlaying) {
-      ctx.pause(); this.setData({ isPlaying: false })
+      audio.pause()
+      this.setData({ isPlaying: false })
     } else {
-      if (ctx.src) { ctx.play(); this.setData({ isPlaying: true }) }
-      else {
+      if (audio.hasSource()) {
+        audio.resume(this.data.speed)
+        this.setData({ isPlaying: true })
+      } else {
         const passage = this.data.currentPassage
         if (!passage) return
         if (passage.audioUrl) this.playText('', passage.audioUrl)
@@ -492,8 +651,7 @@ Page<IListeningData, IListeningMethods>({
 
   prevSentence() {
     if (this.data.audioMode) {
-      const ctx = getAudioCtx()
-      ctx.seek(Math.max(0, ctx.currentTime - 15))
+      audio.seek(Math.max(0, audio.getCurrentTime() - 15))
     } else if (this.data.currentIndex > 0) {
       this.setData({ currentIndex: this.data.currentIndex - 1 })
       this.playCurrent()
@@ -502,8 +660,7 @@ Page<IListeningData, IListeningMethods>({
 
   nextSentence() {
     if (this.data.audioMode) {
-      const ctx = getAudioCtx()
-      ctx.seek(Math.min(ctx.duration, ctx.currentTime + 15))
+      audio.seek(Math.min(audio.getDuration(), audio.getCurrentTime() + 15))
     } else {
       const passage = this.data.currentPassage
       if (!passage) return
@@ -517,7 +674,7 @@ Page<IListeningData, IListeningMethods>({
   setSpeed(e: WechatMiniprogram.TouchEvent) {
     const speed = parseFloat(e.currentTarget.dataset.speed as string)
     this.setData({ speed })
-    if (audioCtx) audioCtx.playbackRate = speed
+    audio.setRate(speed)
   },
 
   toggleTranscript() { this.setData({ showTranscript: !this.data.showTranscript }) },

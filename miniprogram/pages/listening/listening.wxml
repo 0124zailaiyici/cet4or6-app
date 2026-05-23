@@ -26,11 +26,57 @@
     </scroll-view>
   </block>
 
+  <block wx:elif="{{mode === 'summary'}}">
+    <view class="detail-header">
+      <view class="back-btn" catchtap="backToList">返回</view>
+      <text class="detail-title">{{currentPassage.title}}</text>
+      <view class="detail-complete" catchtap="markCompleted">✓</view>
+    </view>
+    <scroll-view class="summary-scroll" scroll-y>
+      <view class="sm-card">
+        <view class="sm-title">作答总结</view>
+        <view class="sm-stats">
+          <view class="sm-stat">
+            <text class="sm-num">{{summaryAnswered}}</text>
+            <text class="sm-label">已作答</text>
+          </view>
+          <view class="sm-divider"></view>
+          <view class="sm-stat">
+            <text class="sm-num">{{summaryTotal}}</text>
+            <text class="sm-label">总题数</text>
+          </view>
+          <view class="sm-divider"></view>
+          <view class="sm-stat">
+            <text class="sm-num">{{summaryMarked}}</text>
+            <text class="sm-label">已标记</text>
+          </view>
+        </view>
+      </view>
+      <view class="sm-marked" wx:if="{{summaryMarked > 0}}">
+        <view class="sm-subtitle">标记需重听的题目</view>
+        <view class="sm-mitem" wx:for="{{pages}}" wx:key="type" wx:for-index="pi" wx:if="{{markedFlags[pi] && item.type === 'q'}}">
+          <view class="smm-tag">{{item.stem}}</view>
+          <view class="smm-opt" wx:for="{{item.opts}}" wx:for-index="oi" wx:key="*this">
+            <text class="smm-o {{selectedAnswers[pi] === oi ? 'on' : ''}}">{{optionLetters[oi]}}. {{item}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="sm-marked" wx:else>
+        <view class="sm-empty">没有标记的题目，表现不错</view>
+      </view>
+      <view class="sm-actions">
+        <view class="sm-btn primary" catchtap="retryPages">继续做题</view>
+        <view class="sm-btn" catchtap="backToList">返回列表</view>
+      </view>
+    </scroll-view>
+  </block>
+
   <block wx:else>
     <view class="detail-header">
       <view class="back-btn" catchtap="backToList">返回</view>
       <text class="detail-title">{{currentPassage.title}}</text>
       <view wx:if="{{audioMode}}" class="focus-toggle {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">精听</view>
+      <view wx:if="{{pages.length > 0}}" class="focus-toggle" catchtap="viewSummary">总结</view>
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 

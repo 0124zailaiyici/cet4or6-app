@@ -251,3 +251,72 @@
 .dark-theme .spd.on, .dark-theme .ctl.on {
   color: #fff !important; background: #4fc3f7 !important; border-color: #4fc3f7 !important;
 }
+
+/* ===== 作答总结 ===== */
+.summary-scroll { flex: 1; padding: 0 24rpx; }
+.sm-card {
+  background: #fff; border-radius: 22rpx; padding: 36rpx 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(33,150,243,0.06); margin-bottom: 24rpx;
+}
+.sm-title {
+  font-size: 36rpx; font-weight: 700; color: #2d2d4e;
+  text-align: center; margin-bottom: 28rpx;
+}
+.sm-stats { display: flex; align-items: center; justify-content: center; gap: 0; }
+.sm-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6rpx; }
+.sm-num {
+  font-size: 48rpx; font-weight: 800;
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sm-label { font-size: 24rpx; color: #8a7a9a; }
+.sm-divider { width: 2rpx; height: 48rpx; background: #ece4e2; border-radius: 1rpx; }
+
+.sm-marked { margin-bottom: 24rpx; }
+.sm-subtitle {
+  font-size: 26rpx; font-weight: 600; color: #ff6b8a; margin-bottom: 14rpx; padding-left: 4rpx;
+}
+.sm-mitem {
+  background: #fff; border-radius: 18rpx; padding: 20rpx 24rpx;
+  margin-bottom: 12rpx; box-shadow: 0 2rpx 12rpx rgba(255,107,138,0.06);
+  border-left: 4rpx solid #ff6b8a;
+}
+.smm-tag { font-size: 26rpx; font-weight: 600; color: #2d2d4e; margin-bottom: 10rpx; }
+.smm-opt { display: block; }
+.smm-o {
+  font-size: 24rpx; color: #8a7a9a; line-height: 1.6; display: block; padding: 2rpx 0;
+}
+.smm-o.on { color: #1e88e5; font-weight: 600; }
+
+.sm-empty {
+  text-align: center; font-size: 26rpx; color: #b5a0c0;
+  padding: 40rpx 0; background: #fff; border-radius: 18rpx;
+  box-shadow: 0 2rpx 12rpx rgba(33,150,243,0.04);
+}
+
+.sm-actions { display: flex; gap: 16rpx; padding-bottom: 32rpx; }
+.sm-btn {
+  flex: 1; height: 80rpx; border-radius: 20rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28rpx; font-weight: 600;
+  background: #fff0f3; color: #8a7a9a;
+}
+.sm-btn.primary {
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  color: #fff; box-shadow: 0 6rpx 24rpx rgba(33,150,243,0.3);
+}
+.sm-btn:active { transform: translateY(1rpx); opacity: 0.9; }
+
+/* Dark mode summary */
+.dark-theme .sm-card { background: #1e1e38 !important; box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .sm-title { color: #e0d0e8 !important; }
+.dark-theme .sm-label { color: #a090b0 !important; }
+.dark-theme .sm-divider { background: #2a2a4a !important; }
+.dark-theme .sm-mitem { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(255,143,171,0.06) !important; }
+.dark-theme .smm-tag { color: #e0d0e8 !important; }
+.dark-theme .smm-o { color: #a090b0 !important; }
+.dark-theme .smm-o.on { color: #4fc3f7 !important; }
+.dark-theme .sm-empty { background: #1e1e38 !important; color: #685878 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .sm-btn { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .sm-btn.primary { background: linear-gradient(135deg, #4fc3f7, #2196f3) !important; color: #fff !important; }
