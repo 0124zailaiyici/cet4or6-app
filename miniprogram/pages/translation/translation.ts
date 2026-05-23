@@ -194,7 +194,7 @@ Page({
     /* 兜底：从头找第一个未完成 */
     if (!next) next = translations.find((t: any) => !t._done)
     /* 全部完成 */
-    if (!next) { wx.showToast({ title: '全部完成啦 🎉', icon: 'none' }); this.setData({ page: 'dashboard' }); return }
+    if (!next) { wx.showToast({ title: '全部完成啦 🎉', icon: 'none' }); this.setData({ page: 'dashboard', currentItem: null, result: null }); return }
     this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [] })
     wx.pageScrollTo({ scrollTop: 0 })
   },
