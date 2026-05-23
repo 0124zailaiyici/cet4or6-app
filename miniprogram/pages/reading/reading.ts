@@ -66,10 +66,9 @@ interface IReadingData {
   scrollTop: number
   passageParas: string[]
   highlightedPara: number
-  translations: string[]
-  showTrans: Record<number, boolean>
+  fullTranslation: string
+  showTrans: boolean
   pageParas: Array<{ text: string; paraIdx: number }>
-  currentPageTrans: string
 }
 
 interface IReadingMethods {
@@ -108,7 +107,7 @@ interface IReadingMethods {
   rebuildFormatted(vocab: Record<string, string>, highlightIdx: number): void
   getPassageParas(text: string): string[]
   toggleVocab(): void
-  toggleTrans(e: WechatMiniprogram.TouchEvent): void
+  toggleTrans(): void
   updatePageParas(): void
 }
 
@@ -147,10 +146,9 @@ Page<IReadingData, IReadingMethods>({
     scrollTop: 0,
     passageParas: [],
     highlightedPara: -1,
-    translations: [],
-    showTrans: {},
-    pageParas: [],
-    currentPageTrans: ''
+    fullTranslation: '',
+    showTrans: false,
+    pageParas: []
   },
 
   onLoad() {
@@ -195,7 +193,7 @@ Page<IReadingData, IReadingMethods>({
         : []
       const paras = item.sectionType === 'B' ? this.formatBPassage(item.passage) : this.getPassageParas(item.passage)
       const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
-      const translations = annot?.translation || []
+      const fullTranslation = annot?.translation || ''
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
       const matchSaved = saved?.matchAnswers || {}
@@ -232,32 +230,27 @@ Page<IReadingData, IReadingMethods>({
         scrollTop: 0,
         passageParas: paras,
         highlightedPara: -1,
-        translations,
-        showTrans: {},
+        fullTranslation,
+        showTrans: false,
         pageParas: (() => {
           const step = st === 'B' ? 1 : 2
           return paras.slice(0, step).map((t: string, i: number) => ({ text: t, paraIdx: i }))
         })(),
-        currentPageTrans: translations[0] || ''
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, translations: [], showTrans: {}, pageParas: [], currentPageTrans: '' })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [] })
   },
 
   toggleVocab() {
     this.setData({ showVocab: !this.data.showVocab })
   },
 
-  toggleTrans(e: WechatMiniprogram.TouchEvent) {
-    const paraIdx = parseInt(e.currentTarget.dataset.para as string)
-    if (isNaN(paraIdx)) return
-    const st = { ...this.data.showTrans }
-    if (st[paraIdx]) { delete st[paraIdx] } else { st[paraIdx] = true }
-    this.setData({ showTrans: st })
+  toggleTrans() {
+    this.setData({ showTrans: !this.data.showTrans })
   },
 
   updatePageParas() {
@@ -268,9 +261,7 @@ Page<IReadingData, IReadingMethods>({
     const start = page * step
     const slice = paras.slice(start, start + step)
     const result = slice.map((text, i) => ({ text, paraIdx: start + i }))
-    const trans = this.data.translations
-    const pageTrans = slice.map((_, i) => trans[start + i] || '').join('')
-    this.setData({ pageParas: result, currentPageTrans: pageTrans })
+    this.setData({ pageParas: result })
   },
 
   annotatePage(text: string, vocab: Record<string, string>): string {
