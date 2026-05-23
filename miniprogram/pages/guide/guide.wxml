@@ -1,7 +1,7 @@
 <view class="page">
   <text class="skip" catchtap="skip">跳过</text>
-  <view class="swipe-wrap">
-    <view class="swipe" style="transform: translateX(-{{current * 33.333}}%)">
+  <view class="swipe-wrap" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+    <view class="swipe" style="transform: translateX(-{{current}}00vw)">
       <view class="gp" wx:for="{{pages}}" wx:key="*this" wx:for-item="p">
         <text class="emoji">{{p.emoji}}</text>
         <text class="title">{{p.title}}</text>

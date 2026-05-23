@@ -64,6 +64,8 @@ interface IReadingData {
   showVocab: boolean
   vocabList: Array<{ word: string; zh: string }>
   scrollTop: number
+  passageParas: string[]
+  highlightedPara: number
 }
 
 interface IReadingMethods {
@@ -99,6 +101,8 @@ interface IReadingMethods {
   buildResult(): IResultItem[]
   refreshCompletionMap(): void
   annotatePage(text: string, vocab: Record<string, string>): string
+  rebuildFormatted(vocab: Record<string, string>, highlightIdx: number): void
+  getPassageParas(text: string): string[]
   toggleVocab(): void
 }
 
@@ -134,7 +138,9 @@ Page<IReadingData, IReadingMethods>({
     completionMap: {},
     showVocab: false,
     vocabList: [],
-    scrollTop: 0
+    scrollTop: 0,
+    passageParas: [],
+    highlightedPara: -1
   },
 
   onLoad() {
