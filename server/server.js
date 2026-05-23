@@ -140,16 +140,19 @@ app.get('/tts', async (req, res) => {
   const { text, lang } = req.query;
   if (!text) return res.status(400).json({ error: '缺少 text' });
 
+  const maxLen = 200
+  const shortText = text.length > maxLen ? text.slice(0, maxLen) : text
+
   try {
     const langCode = lang === 'zh' ? 1 : 2;
-    const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=${langCode}`;
+    const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(shortText)}&type=${langCode}`;
     const response = await axios({ url, method: 'GET', responseType: 'stream', timeout: 10000 });
     res.set('Content-Type', 'audio/mpeg');
     res.set('Cache-Control', 'public, max-age=86400');
     response.data.pipe(res);
   } catch {
     try {
-      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang || 'en'}&client=tw-ob`;
+      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=${lang || 'en'}&client=tw-ob`;
       const response = await axios({ url: fallbackUrl, method: 'GET', responseType: 'stream', timeout: 10000,
         headers: { 'User-Agent': 'Mozilla/5.0' }
       });

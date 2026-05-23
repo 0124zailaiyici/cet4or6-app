@@ -652,6 +652,11 @@ Page<IListeningData, IListeningMethods>({
   // ===== Audio controls =====
   playCurrent() {
     if (this.data.focusMode) {
+      if (this.data.currentPassage?.audioUrl) {
+        audio.resume(this.data.speed)
+        this.setData({ isPlaying: true })
+        return
+      }
       const text = this.data.focusSentences[this.data.currentIndex]
       if (text) this.playText(text)
       return
@@ -727,6 +732,11 @@ Page<IListeningData, IListeningMethods>({
           }
           return
         }
+        if (!this.data.isPlaying) {
+          audio.resume(this.data.speed)
+          this.setData({ isPlaying: true })
+        }
+        return
       }
       const text = this.data.focusSentences[rawIndex]
       if (text) this.playText(text)
