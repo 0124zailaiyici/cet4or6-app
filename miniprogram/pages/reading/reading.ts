@@ -183,7 +183,7 @@ Page<IReadingData, IReadingMethods>({
       const formatted = item.sectionType !== 'B'
         ? pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.annotatePage(p, vocab)}</p>`)
         : []
-      const paras = item.sectionType === 'B' ? [] : this.getPassageParas(item.passage)
+      const paras = item.sectionType === 'B' ? this.formatBPassage(item.passage) : this.getPassageParas(item.passage)
       const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
@@ -268,9 +268,11 @@ Page<IReadingData, IReadingMethods>({
   rebuildFormatted(vocab: Record<string, string>, highlightIdx: number) {
     const paras = this.data.passageParas
     if (!paras.length) return
+    const isB = this.data.current?.sectionType === 'B'
     const pages: string[] = []
-    for (let i = 0; i < paras.length; i += 2) {
-      const slice = paras.slice(i, i + 2)
+    const step = isB ? 1 : 2
+    for (let i = 0; i < paras.length; i += step) {
+      const slice = paras.slice(i, i + step)
       const html = slice.map((p, j) => {
         const idx = i + j
         const inner = this.annotatePage(p, vocab)
@@ -321,11 +323,12 @@ Page<IReadingData, IReadingMethods>({
       const sorted = Object.keys(ca).sort((a, b) => parseInt(a) - parseInt(b))
       for (const k of sorted) {
         const user = ba[k] || '(未填)'
+        const correct = ca[k] || ''
         results.push({
           label: '第' + k + '空',
           userAnswer: user,
-          correctAnswer: ca[k],
-          isCorrect: user.toLowerCase().trim() === (ca[k] || '').toLowerCase().trim(),
+          correctAnswer: correct,
+          isCorrect: user.toLowerCase().trim() === correct.toLowerCase().trim(),
           locate: annot?.qLocate?.[k] || '',
           hint: annot?.qHint?.[k] || ''
         })
@@ -341,7 +344,8 @@ Page<IReadingData, IReadingMethods>({
           correctAnswer: ca[String(i)] || '',
           isCorrect: user === ca[String(i)],
           locate: annot?.qLocate?.[String(i)] || '',
-          hint: annot?.qHint?.[String(i)] || ''
+          hint: annot?.qHint?.[String(i)] || '',
+          questionStem: item.questions[i] || ''
         })
       }
     } else if (item.sectionType === 'C') {
@@ -429,13 +433,21 @@ Page<IReadingData, IReadingMethods>({
   jumpToParagraph(e: WechatMiniprogram.TouchEvent) {
     const locate = e.currentTarget.dataset.locate as string
     if (!locate) return
-    const num = parseInt(locate.replace(/[^0-9]/g, ''))
-    if (isNaN(num)) return
     const st = this.data.current?.sectionType
-    const page = st === 'B' ? num - 1 : Math.floor((num - 1) / 2)
+    // Section B: locate is like "A段", "I段" → letter index
+    let paraIdx = -1
+    if (st === 'B') {
+      const letter = locate.charAt(0)
+      paraIdx = letter.charCodeAt(0) - 'A'.charCodeAt(0)
+    } else {
+      const num = parseInt(locate.replace(/[^0-9]/g, ''))
+      if (!isNaN(num)) paraIdx = num - 1
+    }
+    if (paraIdx < 0) return
+    const page = st === 'B' ? paraIdx : Math.floor(paraIdx / 2)
     const annot = readingAnnotations[this.data.current?.id || 0]
     const vocab = annot?.vocab || {}
-    this.rebuildFormatted(vocab, num - 1)
+    this.rebuildFormatted(vocab, paraIdx)
     this.setData({
       passagePage: page,
       bStmtPage: 0,
