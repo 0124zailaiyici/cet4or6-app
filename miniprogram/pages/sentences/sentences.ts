@@ -381,16 +381,6 @@ Page<ISentencesData, ISentencesMethods>({
         showPasteModal: false,
         parsing: false,
       })
-
-      this.setData({
-        allSentences,
-        topics,
-        topicCounts: tc,
-        showPasteModal: false,
-    parsing: false,
-    favTexts: [],
-    masterTexts: [],
-      })
       this.doFilter()
       const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english
       wx.setStorageSync('sentenceHash', hash)

@@ -279,14 +279,6 @@
   background: rgba(0,0,0,0.03);
 }
 
-.act-btn {
-  border: 2rpx solid rgba(0,0,0,0.1);
-}
-
-.act-btn.on {
-  opacity: 0.5;
-}
-
 .sc-action-label {
   font-size: 22rpx;
 }
