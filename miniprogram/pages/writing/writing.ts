@@ -37,6 +37,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   '举例': '📊', '观点': '💭', '强调': '❗', '因果': '🔗', '建议': '💡', '结尾': '🏁',
 }
 
+let _wgTimer: number | null = null
+
 function countWords(s: string): number {
   return s.trim() ? s.trim().split(/\s+/).length : 0
 }
@@ -223,9 +225,8 @@ Page<IWritingData>({
   onSwitchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.tab as number
     this.setData({ tab, detailMode: false, showResult: false, result: null, timerRunning: false })
-    if (this._timer) { clearInterval(this._timer); this._timer = null }
+    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
   },
-  _timer: number | null = null,
 
   /* ══ 句型急救包 ══ */
   togglePattern(e: WechatMiniprogram.TouchEvent) {
@@ -414,11 +415,11 @@ Page<IWritingData>({
       writingAnswer: '', writingWordCount: 0, showResult: false, result: null,
       timerRunning: false,
     })
-    if (this._timer) { clearInterval(this._timer); this._timer = null }
+    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
   },
   backToWritingList() {
     this.setData({ currentWriting: null, detailMode: false, writingAnswer: '', writingWordCount: 0, showResult: false, result: null })
-    if (this._timer) { clearInterval(this._timer); this._timer = null }
+    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
     this.setData({ timerRunning: false })
   },
   onWritingInput(e: WechatMiniprogram.Input) {
@@ -430,13 +431,13 @@ Page<IWritingData>({
   startTimer() {
     if (this.data.timerRunning) return
     this.setData({ timerRunning: true, timerRemaining: 1800, timerPhase: 'review', timerPhaseLabel: '📋 审题阶段', timerPercent: 100 })
-    if (this._timer) clearInterval(this._timer)
-    this._timer = setInterval(() => {
+    if (_wgTimer) clearInterval(_wgTimer)
+    _wgTimer = setInterval(() => {
       const rem = this.data.timerRemaining - 1
       const pct = Math.round(rem / 1800 * 100)
       let phase = this.data.timerPhase, label = this.data.timerPhaseLabel
       if (rem <= 0) {
-        if (this._timer) { clearInterval(this._timer); this._timer = null }
+        if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
         this.setData({ timerRunning: false, timerRemaining: 0, timerPhase: 'done', timerPercent: 0 })
         wx.showToast({ title: '时间到！', icon: 'none' })
         return
@@ -451,14 +452,14 @@ Page<IWritingData>({
   },
   toggleTimer() {
     if (this.data.timerRunning) {
-      if (this._timer) { clearInterval(this._timer); this._timer = null }
+      if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
       this.setData({ timerRunning: false })
     } else {
       this.startTimer()
     }
   },
   stopTimer() {
-    if (this._timer) { clearInterval(this._timer); this._timer = null }
+    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
     this.setData({ timerRunning: false })
   },
 
@@ -496,7 +497,7 @@ Page<IWritingData>({
     wx.setStorageSync('studyData', app.globalData.studyData)
     doCheckIn()
     wx.hideLoading(); this.setData({ submitting: false })
-    if (this._timer) { clearInterval(this._timer); this._timer = null }
+    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
     this.setData({ timerRunning: false })
   },
 
