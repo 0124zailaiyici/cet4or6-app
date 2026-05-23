@@ -219,6 +219,9 @@
 .f-sp { font-size: 22rpx; color: #8a7a9a; background: #fff0f3; padding: 6rpx 16rpx; border-radius: 10rpx; border: 2rpx solid transparent; }
 .f-sp.on { color: #2196f3; background: rgba(33,150,243,0.08); border-color: rgba(33,150,243,0.2); font-weight: 600; }
 
+.f-loop { font-size: 22rpx; color: #8a7a9a; background: #fff0f3; padding: 6rpx 16rpx; border-radius: 10rpx; border: 2rpx solid transparent; }
+.f-loop.on { color: #ff6b8a; background: rgba(255,107,138,0.06); border-color: rgba(255,107,138,0.15); font-weight: 600; }
+
 .f-pos { font-size: 22rpx; color: #2196f3; font-weight: 600; padding: 2rpx 14rpx 4rpx; flex-shrink: 0; }
 
 .f-bar { display: flex; align-items: center; gap: 6rpx; padding: 2rpx 10rpx 14rpx; flex-shrink: 0; }
@@ -235,7 +238,8 @@
 .dark-theme .f-track { background: #2a2a4a !important; }
 .dark-theme .f-time { color: #a090b0 !important; }
 .dark-theme .f-b { background: #2a2a4a !important; color: #a090b0 !important; }
-.dark-theme .f-b.on { color: #fff !important; background: #ff8fab !important; }
+.dark-theme .f-loop { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .f-loop.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
 .dark-theme .f-sp { background: #2a2a4a !important; color: #a090b0 !important; }
 .dark-theme .f-sp.on { color: #4fc3f7 !important; background: rgba(79,195,247,0.08) !important; border-color: rgba(79,195,247,0.25) !important; }
 .dark-theme .f-pos { color: #4fc3f7 !important; }

@@ -118,12 +118,12 @@ Page<IReadingData, IReadingMethods>({
   },
 
   onLoad() {
-    const readings = readingsData as IReadingItem[]
+    const readings = readingsData as unknown as IReadingItem[]
     const app = getApp<IAppOption>()
     const saved = app.globalData.studyData.readingAnswers
     const map: Record<number, { submitted: boolean; score: number; totalScore: number }> = {}
     for (const r of readings) {
-      const a = saved[r.id]
+      const a = saved[r.id] as any
       const submitted = !!(a && a.submitted)
       map[r.id] = {
         submitted,
