@@ -93,7 +93,7 @@
       </view>
 
       <view class="controls">
-        <view class="spd {{speed === s ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+        <view class="spd {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
         <view class="ctl {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
       </view>
 
