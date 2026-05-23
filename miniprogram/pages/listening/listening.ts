@@ -1,4 +1,4 @@
-import listeningData from '../../data/listening'
+import listeningData from '../../data/listening_generated'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
@@ -716,6 +716,18 @@ Page<IListeningData, IListeningMethods>({
       : rawIndex
     this.setData({ currentIndex: rawIndex })
     if (this.data.focusMode) {
+      const passage = this.data.currentPassage
+      if (passage && passage.audioUrl) {
+        const sent = passage.sentences[origIndex]
+        if (sent && sent.start > 0) {
+          audio.seek(sent.start)
+          if (!this.data.isPlaying) {
+            audio.resume(this.data.speed)
+            this.setData({ isPlaying: true })
+          }
+          return
+        }
+      }
       const text = this.data.focusSentences[rawIndex]
       if (text) this.playText(text)
     } else {
