@@ -69,6 +69,7 @@ interface IReadingData {
   translations: string[]
   showTrans: Record<number, boolean>
   pageParas: Array<{ text: string; paraIdx: number }>
+  currentPageTrans: string
 }
 
 interface IReadingMethods {
@@ -148,7 +149,8 @@ Page<IReadingData, IReadingMethods>({
     highlightedPara: -1,
     translations: [],
     showTrans: {},
-    pageParas: []
+    pageParas: [],
+    currentPageTrans: ''
   },
 
   onLoad() {
@@ -235,14 +237,15 @@ Page<IReadingData, IReadingMethods>({
         pageParas: (() => {
           const step = st === 'B' ? 1 : 2
           return paras.slice(0, step).map((t: string, i: number) => ({ text: t, paraIdx: i }))
-        })()
+        })(),
+        currentPageTrans: translations[0] || ''
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, translations: [], showTrans: {}, pageParas: [] })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, translations: [], showTrans: {}, pageParas: [], currentPageTrans: '' })
   },
 
   toggleVocab() {
@@ -265,7 +268,9 @@ Page<IReadingData, IReadingMethods>({
     const start = page * step
     const slice = paras.slice(start, start + step)
     const result = slice.map((text, i) => ({ text, paraIdx: start + i }))
-    this.setData({ pageParas: result })
+    const trans = this.data.translations
+    const pageTrans = slice.map((_, i) => trans[start + i] || '').join('')
+    this.setData({ pageParas: result, currentPageTrans: pageTrans })
   },
 
   annotatePage(text: string, vocab: Record<string, string>): string {

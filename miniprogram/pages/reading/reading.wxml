@@ -49,6 +49,12 @@
                 <text wx:else class="bk-tag {{blankAnswers[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}}" data-num="{{seg.num}}" catchtap="onBlankTap">{{blankAnswers[seg.num] || seg.num}}</text>
               </block>
             </text>
+            <view class="para-tl-bar" catchtap="toggleTrans" data-para="{{passagePage}}">
+              <text>{{showTrans[passagePage] ? '🔼 收起' : '🌐 翻译本段'}}</text>
+            </view>
+            <view class="para-tl-body" wx:if="{{showTrans[passagePage] && currentPageTrans}}">
+              <text class="para-tl-cn">{{currentPageTrans}}</text>
+            </view>
           </block>
           <block wx:elif="{{pageParas.length > 0}}">
             <view class="para-wrap" wx:for="{{pageParas}}" wx:key="paraIdx" wx:for-item="par">

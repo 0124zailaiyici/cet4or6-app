@@ -191,13 +191,18 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ lookingUp: true })
     try {
       const result = await lookupWord(word.word)
-      if (result && result.definition) {
+      // 解析词典API复杂响应
+      const entry = Array.isArray(result) ? result[0] : result
+      const phonetic = entry.phonetic || entry.phonetics?.[0]?.text || ''
+      const meanings = entry.meanings?.[0]
+      const definition = meanings?.definitions?.[0]?.definition || ''
+      if (definition) {
         const app = getApp<IAppOption>()
         const words = app.globalData.studyData.vocabWords
         const w = words.find(w => w.word === word.word)
         if (w) {
-          w.phonetic = result.phonetic || ''
-          w.definition = result.definition || ''
+          w.phonetic = phonetic
+          w.definition = definition
           wx.setStorageSync('studyData', app.globalData.studyData)
           this.loadWords()
           wx.showToast({ title: `已查到「${word.word}」`, icon: 'success' })

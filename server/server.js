@@ -29,7 +29,7 @@ function buildHeaders() {
   };
 }
 
-async function callDeepSeek(messages, temperature = 0.7) {
+async function callDeepSeek(messages, temperature = 0.7, timeout = 15000) {
   const res = await axios.post(
     `${BASE_URL}/chat/completions`,
     {
@@ -37,7 +37,7 @@ async function callDeepSeek(messages, temperature = 0.7) {
       messages,
       temperature,
     },
-    { headers: buildHeaders() }
+    { headers: buildHeaders(), timeout }
   );
   return res.data.choices[0].message.content;
 }
@@ -162,43 +162,6 @@ app.get('/dictionary', async (req, res) => {
     }
     entry.chinese = chinese;
 
-    const texts = []
-    if (entry.meanings) {
-      for (const m of entry.meanings) {
-        if (m.definitions) {
-          for (const d of m.definitions) {
-            if (d.definition) texts.push({ key: 'def', text: d.definition })
-            if (d.example) texts.push({ key: 'exp', text: d.example })
-          }
-        }
-      }
-    }
-
-    if (texts.length > 0) {
-      const trs = await Promise.allSettled(texts.map(t =>
-        axios.get(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t.text)}&langpair=en|zh-CN`, { timeout: 5000 })
-      ))
-      let idx = 0
-      for (const m of entry.meanings || []) {
-        if (m.definitions) {
-          for (const d of m.definitions) {
-            if (d.definition) {
-              const r = trs[idx++]
-              if (r.status === 'fulfilled' && r.value.data?.responseData?.translatedText) {
-                d.definitionCn = r.value.data.responseData.translatedText
-              }
-            }
-            if (d.example) {
-              const r = trs[idx++]
-              if (r.status === 'fulfilled' && r.value.data?.responseData?.translatedText) {
-                d.exampleCn = r.value.data.responseData.translatedText
-              }
-            }
-          }
-        }
-      }
-    }
-
     dictCache.set(word.toLowerCase(), { data, ts: Date.now() })
     res.json(data);
   } catch (err) {
@@ -236,16 +199,20 @@ app.get('/dictionary/ai', async (req, res) => {
 }
 每个词性最多3个义项，释义和例句都必须有英文原文和中文翻译。chinese字段用逗号分隔几个最常用的中文释义。` },
           { role: 'user', content: word },
-        ], 0.3),
+        ], 0.3, 20000),
         dictCache.get(word.toLowerCase()) ? Promise.resolve(null) : axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { timeout: 5000 }),
       ]);
 
       let result
       if (aiRes.status === 'fulfilled') {
-        const cleaned = aiRes.value.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-        result = JSON.parse(cleaned);
+        try {
+          const cleaned = aiRes.value.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+          result = JSON.parse(cleaned);
+        } catch {
+          return res.status(500).json({ error: 'AI 返回格式错误' });
+        }
       } else {
-        return res.status(500).json({ error: 'AI 词典失败' });
+        return res.status(500).json({ error: 'AI 查询超时或失败' });
       }
 
       if (dictRes.status === 'fulfilled' && dictRes.value) {
