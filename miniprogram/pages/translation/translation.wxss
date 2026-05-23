@@ -20,6 +20,8 @@
 .gc-streak{padding:8rpx 16rpx;border-radius:20rpx;background:rgba(255,202,40,0.12);text-align:center}
 .gc-streak .n{font-weight:800;color:#ff8f00;display:block;font-size:24rpx}
 .gc-streak .l{font-size:9rpx;color:#ffa000}
+.today-card{margin:0 24rpx 12rpx;padding:16rpx 18rpx;border-radius:20rpx;background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1rpx solid rgba(102,187,106,0.1)}
+.today-card .today-label{font-size:20rpx;font-weight:700;color:#388e3c;margin-bottom:8rpx;display:block}
 /* ── 等级进度 ── */
 .stitle{font-size:24rpx;font-weight:600;color:#4a1a2e;padding:12rpx 32rpx 8rpx}
 .levels{padding:0 24rpx;display:flex;flex-direction:column;gap:8rpx}
@@ -164,6 +166,8 @@
 .dark-theme .ps-struct{background:#2d1a30}
 .dark-theme .ps-struct .c{color:#dab0c8}
 .dark-theme .ps-struct .e{color:#b8a0c0}
+.dark-theme .today-card{background:linear-gradient(135deg,#1a2a20,#1a2a1e);border-color:rgba(102,187,106,0.06)}
+.dark-theme .today-card .today-label{color:#81c784}
 .dark-theme .ps-tip{background:#2a2020;color:#d4c0a0}
 
 .dark-theme .task-emoji.exam{background:#2d1a30}

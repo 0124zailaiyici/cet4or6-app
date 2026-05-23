@@ -248,7 +248,7 @@ Page<IListeningData, IListeningMethods>({
     pageTouchX: 0,
     optionLetters: ['A','B','C','D'],
     dataWarning: '',
-    focusMode: true,
+    focusMode: false,
     currentSectionLabel: '',
     markedPages: [],
     markedFlags: [],

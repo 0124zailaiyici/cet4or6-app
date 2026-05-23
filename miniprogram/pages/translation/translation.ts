@@ -17,18 +17,12 @@ const EMOJIS: Record<string, string> = {
   '共享单车为人们提供了一种便捷、环保的出行方式。': '🚲',
   '舞狮作为中国传统民间表演已有2000多年历史。在狮子舞中，两位表演者同披一件狮子服，一个舞动头部，另一个舞动身体和尾巴。他们熟练配合，模仿狮子的各种动作。狮子是兽中之王，象征幸福和好运，所以人们通常在春节和其他节日期间表演狮子舞。狮子舞也可能出现在其他重要场合，如商店开业和结婚典礼，往往吸引许多人观赏。': '🦁',
 }
-
 const TOPICS: Record<string, string> = {
-  '中国是一个历史悠久、文化丰富的国家。': '文化',
-  '越来越多的人意识到环境保护的重要性。': '环保',
-  '春节是中国最重要的传统节日，家人会聚在一起吃年夜饭。': '文化',
-  '随着互联网的发展，移动支付在中国变得越来越普遍。': '科技',
-  '据报道，今年参加高考的学生人数创下了历史新高。': '教育',
-  '太极拳是一种传统的中国武术，深受老年人的喜爱。': '文化',
-  '这座博物馆收藏了大量珍贵的文物，吸引了来自世界各地的游客。': '文化',
-  '手机已经成为我们日常生活中不可或缺的一部分。': '科技',
-  '为了保持健康，我们应该多吃水果和蔬菜，少吃垃圾食品。': '健康',
-  '共享单车为人们提供了一种便捷、环保的出行方式。': '环保',
+  '中国是一个历史悠久、文化丰富的国家。': '文化', '越来越多的人意识到环境保护的重要性。': '环保',
+  '春节是中国最重要的传统节日，家人会聚在一起吃年夜饭。': '文化', '随着互联网的发展，移动支付在中国变得越来越普遍。': '科技',
+  '据报道，今年参加高考的学生人数创下了历史新高。': '教育', '太极拳是一种传统的中国武术，深受老年人的喜爱。': '文化',
+  '这座博物馆收藏了大量珍贵的文物，吸引了来自世界各地的游客。': '文化', '手机已经成为我们日常生活中不可或缺的一部分。': '科技',
+  '为了保持健康，我们应该多吃水果和蔬菜，少吃垃圾食品。': '健康', '共享单车为人们提供了一种便捷、环保的出行方式。': '环保',
 }
 
 function getLevel(chinese: string): number {
@@ -60,51 +54,51 @@ function genSuggestions(s: ScorerResult): string {
   return parts.join('；')
 }
 
-interface ITranslation {
-  id: number; chinese: string; reference: string; source: string
-  keywords?: string[]; acceptableAnswers?: string[]
+/* 逐词对照 */
+function wordCompare(user: string, ref: string): { word: string; ok: boolean }[] {
+  const norm = (s: string) => s.toLowerCase().replace(/[.,!?;:'"()\-]/g, '').split(/\s+/).filter(Boolean)
+  const u = norm(user)
+  const r = norm(ref)
+  const rSet = new Set(r)
+  return u.map(w => ({ word: w, ok: rSet.has(w) }))
 }
+
+/* 句式分析提示（无参考译文） */
+function getStructHint(chinese: string): string {
+  if (chinese.length <= 10) return '找出主语和谓语，直接翻译。注意中文无时态，英文需加时态。'
+  if (chinese.includes('的')) return '注意 "的" 前面的修饰成分要放到名词前面或处理成定语从句。'
+  if (chinese.includes('随着')) return '"随着…" 常用 With + 名词 或 As 引导的状语从句开头。'
+  if (chinese.includes('为了')) return '"为了" 表目的，用 To / In order to 开头。'
+  if (chinese.includes('是')) return '找主系表结构：A + is/are + B。'
+  return '先找出主谓宾主干，再处理修饰成分。注意中英文语序差异。'
+}
+
+interface ITranslation { id: number; chinese: string; reference: string; source: string; keywords?: string[]; acceptableAnswers?: string[] }
 interface IDimensions { vocabulary: number; grammar: number; semantics: number; expression: number }
-interface ITranslationRecord {
-  id: number; userAnswer: string; score: number; dimensions: IDimensions
-  suggestions?: string; reference: string; date: string
-}
+interface ITranslationRecord { id: number; userAnswer: string; score: number; dimensions: IDimensions; suggestions?: string; reference: string; date: string }
 
 Page({
   data: {
-    page: 'dashboard',
-    step: 'list',
-    translations: [],
-    currentItem: null as ITranslation | null,
-    userAnswer: '',
-    result: null as { score: number; dimensions: IDimensions; suggestions: string; reference: string; show: boolean } | null,
-    history: [] as ITranslationRecord[],
-    questionHistory: [] as ITranslationRecord[],
-    completedIds: [] as number[],
-    submitting: false,
-    aiAvailable: false,
-    aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
-    darkMode: false,
-    wordCount: 0,
-    pct: 0,
-    ringDeg: 0,
+    page: 'dashboard', step: 'list', translations: [], currentItem: null as ITranslation | null,
+    userAnswer: '', result: null as { score: number; dimensions: IDimensions; suggestions: string; reference: string; show: boolean } | null,
+    history: [] as ITranslationRecord[], questionHistory: [] as ITranslationRecord[], completedIds: [] as number[],
+    submitting: false, aiAvailable: false, aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
+    darkMode: false, wordCount: 0, pct: 0, ringDeg: 0,
     levels: [] as { total: number; done: number; pct: number }[],
-    hMax: 0, hMin: 0, hTrend: 'up',
-    favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
+    hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
+    words: [] as { word: string; ok: boolean }[],
+    todayTask: null as number | null,
   },
 
   onLoad() {
     const app = getApp<IAppOption>()
-    this.setData({ darkMode: app.globalData.darkMode })
-    this.loadData()
+    this.setData({ darkMode: app.globalData.darkMode }); this.loadData()
     checkHealth().then(r => { if (r.apiKey) this.setData({ aiAvailable: true }) }).catch(() => {})
   },
 
   onShow() {
-    applyTheme(getDarkMode())
-    const app = getApp<IAppOption>()
-    this.setData({ darkMode: app.globalData.darkMode })
-    this.loadData()
+    applyTheme(getDarkMode()); const app = getApp<IAppOption>()
+    this.setData({ darkMode: app.globalData.darkMode }); this.loadData()
   },
 
   loadData() {
@@ -114,19 +108,25 @@ Page({
     const currentIds = new Set(items.map(t => t.id))
     const completedIds = [...new Set(history.map(r => r.id))].filter(id => currentIds.has(id))
     const pct = completedIds.length > 0 ? Math.round(completedIds.length / items.length * 100) : 0
-    const doneSet = new Set(completedIds)
-    const favSet = new Set(this.data.favIds)
+    const doneSet = new Set(completedIds); const favSet = new Set(this.data.favIds)
     const listItems = items.map(t => ({
       ...t, _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese,
-      _emoji: getEmoji(t.chinese), _tag: getTag(t), _level: getLevel(t.chinese),
-      _topic: getTopic(t.chinese), _done: doneSet.has(t.id), _fav: favSet.has(t.id),
+      _emoji: getEmoji(t.chinese), _tag: getTag(t), _level: getLevel(t.chinese), _topic: getTopic(t.chinese),
+      _done: doneSet.has(t.id), _fav: favSet.has(t.id),
     }))
     const levels = [1, 2, 3, 4].map(lv => {
       const total = items.filter(t => getLevel(t.chinese) === lv).length
       const done = completedIds.filter(id => { const t = items.find(t => t.id === id); return t && getLevel(t.chinese) === lv }).length
-      return { total, done, pct: total > 0 ? Math.round(done / total * 100) : 0, unlocked: true }
+      return { total, done, pct: total > 0 ? Math.round(done / total * 100) : 0 }
     })
-    this.setData({ translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360), levels })
+    /* 今日推荐：找第一个未完成的 L1 或 L2 题 */
+    let todayTask: number | null = null
+    const todo = listItems.filter(t => !t._done)
+    if (todo.length > 0) {
+      const first = todo.find(t => t._level <= 2) || todo[0]
+      todayTask = first.id
+    }
+    this.setData({ translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360), levels, todayTask })
   },
 
   switchPage(e: any) {
@@ -139,13 +139,12 @@ Page({
     const id = e.currentTarget.dataset.id as number
     const item = this.data.translations.find((t: any) => t.id === id) || null
     const questionHistory = this.data.history.filter(r => r.id === id)
-    this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0 })
+    this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [] })
   },
 
   goStep(e: any) {
     const n = typeof e === 'number' ? e : parseInt(e.currentTarget.dataset.step)
-    const steps = ['prepare', 'translate', 'compare']
-    this.setData({ step: steps[n - 1] })
+    this.setData({ step: ['prepare', 'translate', 'compare'][n - 1] })
   },
 
   onInput(e: WechatMiniprogram.Input) { this.setData({ userAnswer: e.detail.value, wordCount: e.detail.value.length }) },
@@ -166,9 +165,10 @@ Page({
         if (ai.suggestions) suggestions = ai.suggestions
         if (ai.reference) reference = ai.reference
         if (ai.score && Math.abs(ai.score - score) > 15) score = Math.round((score + ai.score) / 2)
-      } catch { /* keep local */ }
+      } catch {}
     }
 
+    const words = wordCompare(answer, reference)
     const record: ITranslationRecord = { id: currentItem.id, userAnswer: answer, score, dimensions, suggestions, reference, date: new Date().toISOString().slice(0, 10) }
     const app = getApp<IAppOption>()
     const records = [...(app.globalData.studyData.translationRecords || []), record]
@@ -188,15 +188,32 @@ Page({
       hMax: Math.max(...hScores, score), hMin: Math.min(...hScores, score),
       hTrend: questionHistory.length >= 1 && score >= hScores[hScores.length - 1] ? 'up' : 'down',
       translations: this.data.translations.map((t: any) => ({ ...t, _done: doneSet.has(t.id) })),
+      words,
     })
   },
 
-  retry() { this.setData({ userAnswer: '', result: null, wordCount: 0, step: 'translate' }) },
+  nextQ() {
+    const { currentItem, translations } = this.data
+    if (!currentItem) return
+    const idx = translations.findIndex((t: any) => t.id === currentItem.id)
+    const lv = (currentItem as any)._level || 1
+    /* 找同等级下一题 */
+    let next = translations.slice(idx + 1).find((t: any) => t._level === lv && !t._done)
+    /* 没有未完成的同等级题，找下一等级 */
+    if (!next) next = translations.slice(idx + 1).find((t: any) => !t._done)
+    /* 兜底：从头找第一个未完成 */
+    if (!next) next = translations.find((t: any) => !t._done)
+    /* 全部完成 */
+    if (!next) { wx.showToast({ title: '全部完成啦 🎉', icon: 'none' }); this.setData({ page: 'dashboard' }); return }
+    this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [] })
+    wx.pageScrollTo({ scrollTop: 0 })
+  },
+
+  retry() { this.setData({ userAnswer: '', result: null, wordCount: 0, step: 'translate', words: [] }) },
 
   toggleFav(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
-    let favIds = [...this.data.favIds]
-    const idx = favIds.indexOf(id)
+    let favIds = [...this.data.favIds]; const idx = favIds.indexOf(id)
     if (idx >= 0) favIds.splice(idx, 1); else favIds.push(id)
     wx.setStorageSync('translationFavIds', favIds)
     const favSet = new Set(favIds)

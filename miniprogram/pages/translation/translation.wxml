@@ -8,9 +8,20 @@
     </view>
     <view class="gc">
       <view class="gc-ring" style="background:conic-gradient(#f472b6 0deg {{ringDeg || 0}}deg, rgba(244,114,182,0.08) {{ringDeg || 0}}deg 360deg)"><view class="gc-ring-in"><text class="gc-num">{{completedIds.length}}</text><text class="gc-lb">/{{translations.length}}</text></view></view>
-      <view class="gc-body"><text class="gc-tip">今天已完成 3 题 ✨</text><text class="gc-sub">{{completedIds.length > 0 ? '已完成 ' + completedIds.length + ' 题' : '开始今天的练习吧'}}</text></view>
+      <view class="gc-body"><text class="gc-tip">已完成 {{completedIds.length}} 题 ✨</text><text class="gc-sub">{{completedIds.length < translations.length ? '还剩 ' + (translations.length - completedIds.length) + ' 题' : '全部完成 🎉'}}</text></view>
       <view class="gc-streak"><text class="n">{{completedIds.length}}</text><text class="l">题</text></view>
     </view>
+
+    <!-- 今日推荐 -->
+    <view class="today-card" wx:if="{{todayTask && todayTask > 0}}">
+      <view class="today-label">🎯 今日推荐</view>
+      <view class="task" data-id="{{todayTask}}" catchtap="enterDetail" wx:for="{{translations}}" wx:key="id" wx:if="{{item.id === todayTask}}">
+        <view class="task-emoji {{item._tag.type}}">{{item._emoji}}</view>
+        <view class="task-body"><text class="task-text">{{item._display}}</text><view class="task-tags"><text class="task-tag l{{item._level}}">L{{item._level}}</text><text class="task-tag {{item._tag.type}}">{{item._tag.label}}</text></view></view>
+        <view class="task-right"><text class="task-check {{item._done ? 'done' : ''}}">{{item._done ? '✅' : ''}}</text></view>
+      </view>
+    </view>
+
     <view class="stitle">📈 学习进度</view>
     <view class="levels">
       <view class="lv" wx:for="{{levels}}" wx:for-index="i" wx:key="i">
@@ -20,7 +31,7 @@
         <text class="lv-lock" wx:elif="{{i > 0 && levels[i-1].done < levels[i-1].total}}">🔒</text>
       </view>
     </view>
-    <view class="stitle">📋 题目列表</view>
+    <view class="stitle">📋 全部题目</view>
     <view class="tasks">
       <view class="task" wx:for="{{translations}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
         <view class="task-emoji {{item._tag.type}}">{{item._emoji}}</view>
@@ -30,22 +41,20 @@
     </view>
   </block>
 
-  <!-- ═══ 答题（三步流程）═══ -->
+  <!-- ═══ 答题（三步）═══ -->
   <block wx:if="{{page === 'practice'}}">
     <view class="d-nav">
       <text class="d-title">{{currentItem._topic || '练习'}} · L{{currentItem._level || ''}}</text>
       <text class="d-step">{{step === 'prepare' ? '准备' : step === 'translate' ? '翻译' : '对比'}}</text>
     </view>
     <view class="si"><view class="si-dot {{step === 'prepare' ? 'active' : ''}} {{step === 'translate' || step === 'compare' ? 'done' : ''}}"></view><view class="si-line"></view><view class="si-dot {{step === 'translate' ? 'active' : ''}} {{step === 'compare' ? 'done' : ''}}"></view><view class="si-line"></view><view class="si-dot {{step === 'compare' ? 'active' : ''}}"></view></view>
-
     <view class="d-scroll">
 
-      <!-- Step 1: 准备 -->
+      <!-- Step 1: 准备（不显示参考译文） -->
       <block wx:if="{{step === 'prepare'}}">
         <view class="pc">
           <view class="ps"><view class="pst">📖 关键词提示</view><view class="ps-kws"><text class="ps-kw" wx:for="{{currentItem.keywords || []}}" wx:for-index="i" wx:key="i">{{item}}</text></view></view>
-          <view class="ps"><view class="pst">🔍 句式分析</view><view class="ps-struct"><text class="c">{{currentItem.chinese}}</text><text class="e">→ {{currentItem.reference}}</text></view></view>
-          <view class="ps"><view class="pst">💡 翻译技巧</view><view class="ps-tip">先找到句子的主谓宾主干，再添加修饰成分。注意中英文语序差异。</view></view>
+          <view class="ps"><view class="pst">🔍 翻译提示</view><view class="ps-struct"><text class="c">{{currentItem.chinese}}</text><text class="hint">💡 {{['先找主语谓语，再添加修饰','注意"的"字结构处理','注意逻辑关系词的位置','先拆成短句再组合'][(currentItem._level||1)-1]}}</text></view></view>
         </view>
         <view class="btn-next" catchtap="goStep" data-step="2">准备好了 →</view>
       </block>
@@ -67,16 +76,23 @@
             <view class="cd"><text class="cdl">语义</text><view class="cdb"><view class="cdf {{result.dimensions.semantics >= 80 ? 'good' : result.dimensions.semantics >= 60 ? 'mid' : 'low'}}" style="width:{{result.dimensions.semantics}}%"></view></view><text class="cdn">{{result.dimensions.semantics}}</text></view>
             <view class="cd"><text class="cdl">表达</text><view class="cdb"><view class="cdf {{result.dimensions.expression >= 80 ? 'good' : result.dimensions.expression >= 60 ? 'mid' : 'low'}}" style="width:{{result.dimensions.expression}}%"></view></view><text class="cdn">{{result.dimensions.expression}}</text></view>
           </view>
+
+          <!-- 逐词对照 -->
+          <view class="csec" wx:if="{{words.length > 0}}">
+            <view class="cst">🔄 逐词对照</view>
+            <view class="cwc"><view class="cwg"><text class="cw {{item.ok ? 'ok' : 'err'}}" wx:for="{{words}}" wx:for-index="i" wx:key="i">{{item.word}}</text></view></view>
+          </view>
+
           <view class="csec"><view class="cst">💡 修改建议</view><view class="csc-b">{{result.suggestions}}</view></view>
           <view class="csec"><view class="cst">📖 参考译文</view><view class="crf"><text class="crf-t">{{result.reference}}</text><text class="crf-p">▶</text></view></view>
         </view>
-        <view class="ca"><view class="b bg" catchtap="retry">🔄 重做</view><view class="b bp" catchtap="switchPage" data-page="dashboard">➡ 完成</view></view>
+        <view class="ca"><view class="b bg" catchtap="retry">🔄 重做</view><view class="b bp" catchtap="nextQ">➡ 下一题</view></view>
       </block>
 
     </view>
   </block>
 
-  <!-- ═══ 报告 ═══ -->
+  <!-- ═══ 报告 / 收藏（同上）═══ -->
   <block wx:if="{{page === 'report'}}">
     <view class="nav"><view class="nav-l"><view class="nav-avatar">🌟</view><view><view class="nav-greeting">✨ 学习报告</view><view class="nav-title">我的数据</view></view></view><view class="nav-r"><view class="nav-icon">📅</view></view></view>
     <view class="stitle">📊 学习概况</view>
