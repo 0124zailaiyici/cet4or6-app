@@ -334,7 +334,7 @@ Page<IListeningData, IListeningMethods>({
 
   backToList() {
     if (audioCtx) { audioCtx.destroy(); audioCtx = null }
-    this.setData({ mode: 'list', currentPassage: null, isPlaying: false, audioMode: false, pages: [], currentPage: 0, dataWarning: '' })
+    this.setData({ mode: 'list', currentPassage: null, isPlaying: false, audioMode: false, pages: [], currentPage: 0, dataWarning: '', focusMode: false, loopSentence: false, speed: 1 })
   },
 
   // ===== Page navigation (audio mode) =====
