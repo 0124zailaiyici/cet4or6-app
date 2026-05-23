@@ -117,8 +117,8 @@
 
 .qz-label { font-size: 20rpx; font-weight: 600; color: #546e7a; padding: 8rpx 0 4rpx; flex-shrink: 0; }
 
-/* 选词填空 chips */
-.qz-chip-scroll { flex: 1; min-height: 0; }
+  /* 选词填空 chips */
+.qz-chip-scroll { flex: 1; min-height: 0; --scroll-bar-color: transparent; }
 .qz-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10rpx; align-content: start; padding: 4rpx 0; }
 .qzc {
   font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
@@ -143,6 +143,7 @@
   background: #fff; border-radius: 20rpx; padding: 24rpx 24rpx 16rpx;
   box-shadow: 0 2rpx 16rpx rgba(84,110,122,0.06);
 }
+.qz-c-card::-webkit-scrollbar { width: 0; height: 0; }
 .qz-c-question {
   font-size: 28rpx; line-height: 1.7; color: #2d2d4e; font-weight: 500;
   margin-bottom: 18rpx; display: block;
@@ -229,7 +230,7 @@
   background: #f7f0ef;
 }
 
-.rv-list { flex: 1; min-height: 0; height: 1rpx; padding: 16rpx 20rpx 0; }
+.rv-list { flex: 1; min-height: 0; height: 1rpx; padding: 16rpx 20rpx 0; --scroll-bar-color: transparent; }
 
 .rv-card {
   background: #fff; border-radius: 16rpx; padding: 20rpx 24rpx;
