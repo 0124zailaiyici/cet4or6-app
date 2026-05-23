@@ -135,20 +135,6 @@
 
         <view class="btn btn-primary" style="margin-top:12px" data-step="{{2}}" catchtap="setGuideStep">审完了，去列提纲 →</view>
       </view>
-
-      <!-- 新手模式 -->
-      <view class="fcard" style="border-left-color:#4caf50">
-        <view class="fcard-tag" style="background:rgba(76,175,80,0.07);color:#43a047">🌱 新手模式</view>
-        <view class="fcard-title">不想列提纲？先写 3 句话</view>
-        <view class="fcard-desc">根据"{{currentTopic.label}}"，直接开始写</view>
-        <textarea class="mini-input" placeholder="第 1 句：表达你的观点…" value="{{sentence1}}" bindinput="onSentence1Input" style="margin-top:8px;min-height:auto"></textarea>
-        <textarea class="mini-input" placeholder="第 2 句：给出一个理由…" value="{{sentence2}}" bindinput="onSentence2Input" style="min-height:auto"></textarea>
-        <textarea class="mini-input" placeholder="第 3 句：举例子或进一步说明…" value="{{sentence3}}" bindinput="onSentence3Input" style="min-height:auto"></textarea>
-        <view class="mini-hint">
-          {{sentenceCount}}/3 句
-          <text wx:if="{{sentenceCount >= 3}}"> · 🎉 做到了！试试挑战更多？</text>
-        </view>
-      </view>
     </block>
 
     <!-- Step 2: 列提纲 -->
@@ -201,14 +187,28 @@
         <view class="btn btn-primary" style="margin-top:8px" data-step="{{2}}" catchtap="setGuideStep">修改提纲</view>
       </view>
 
+      <!-- 新手模式（无提纲时显示） -->
+      <view wx:if="{{!outlineGenerated}}" class="fcard" style="border-left-color:#4caf50">
+        <view class="fcard-tag" style="background:rgba(76,175,80,0.07);color:#43a047">🌱 新手模式</view>
+        <view class="fcard-title">先写 3 句话</view>
+        <view class="fcard-desc">根据"{{currentTopic.label}}"，直接开始写</view>
+        <textarea class="mini-input" placeholder="第 1 句：表达你的观点…" value="{{sentence1}}" bindinput="onSentence1Input" style="margin-top:8px;min-height:auto"></textarea>
+        <textarea class="mini-input" placeholder="第 2 句：给出一个理由…" value="{{sentence2}}" bindinput="onSentence2Input" style="min-height:auto"></textarea>
+        <textarea class="mini-input" placeholder="第 3 句：举例子或进一步说明…" value="{{sentence3}}" bindinput="onSentence3Input" style="min-height:auto"></textarea>
+        <view class="mini-hint">
+          {{sentenceCount}}/3 句
+          <text wx:if="{{sentenceCount >= 3}}"> · 🎉 完成了！可以提交评审了</text>
+        </view>
+      </view>
+
       <!-- 写作区 -->
       <view class="practice" style="margin-top:0">
         <view class="practice-h">
           <view class="practice-label">你的段落</view>
-          <view class="practice-hint">参考提纲来写</view>
+          <view class="practice-hint">{{outlineGenerated ? '参考提纲来写' : '把上面的句子连成段落'}}</view>
         </view>
         <view class="pi-wrap">
-          <textarea class="pi" placeholder="根据提纲开始写作…" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
+          <textarea class="pi" placeholder="{{outlineGenerated ? '根据提纲开始写作…' : '把上面的 3 句话连成一段…'}}" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
           <text class="pi-wc {{paragraphWordCount > 0 ? 'on' : ''}}">{{paragraphWordCount}} 词</text>
         </view>
         <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitParagraph">{{submitting ? '提交中…' : '提交评审'}}</view>

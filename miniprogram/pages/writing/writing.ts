@@ -280,7 +280,7 @@ Page<IWritingData>({
         result = `【使用句型】${pattern.pattern}\n【你的句子】${text}\n\n${res.explanation}`
       } catch { /* keep local */ }
     }
-    this.setData({ showResult: true, result })
+    this.setData({ showResult: true, result, userSentence: '', sentenceWordCount: 0 })
     wx.hideLoading(); this.setData({ submitting: false })
   },
 
