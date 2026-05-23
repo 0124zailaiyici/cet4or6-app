@@ -129,6 +129,11 @@
 .ca .bp{background:linear-gradient(135deg,#f9a8d4,#f472b6);color:#fff;border:none;box-shadow:0 6rpx 20rpx rgba(244,114,182,0.15)}
 .ca .bg{background:transparent;border:2rpx solid #fce4ec;color:#f472b6}
 .ca .bg:active{background:#fce4ec}
+.cwc{background:#fff;border-radius:16rpx;padding:14rpx 16rpx;margin-top:6rpx}
+.cwg{display:flex;flex-wrap:wrap;gap:8rpx}
+.cw{padding:6rpx 12rpx;border-radius:8rpx;font-size:22rpx;font-weight:500}
+.cw.ok{background:#e8f5e9;color:#2e7d32}
+.cw.err{background:#ffebee;color:#c62828}
 /* ── Tab 栏 ── */
 .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;padding:6rpx 24rpx 12rpx;gap:4rpx;border-top:1rpx solid rgba(244,114,182,0.04);background:#fff8fc;box-shadow:0 -2rpx 12rpx rgba(0,0,0,0.02)}
 .tab{flex:1;text-align:center;padding:8rpx 0;font-size:18rpx;font-weight:600;border-radius:16rpx;color:#f9a8d4}
@@ -169,6 +174,9 @@
 .dark-theme .today-card{background:linear-gradient(135deg,#1a2a20,#1a2a1e);border-color:rgba(102,187,106,0.06)}
 .dark-theme .today-card .today-label{color:#81c784}
 .dark-theme .ps-tip{background:#2a2020;color:#d4c0a0}
+.dark-theme .cwc{background:#201628}
+.dark-theme .cw.ok{background:#1a2a20;color:#81c784}
+.dark-theme .cw.err{background:#2d1a20;color:#ef9a9a}
 
 .dark-theme .task-emoji.exam{background:#2d1a30}
 .dark-theme .task-emoji.sim{background:#1a2030}
