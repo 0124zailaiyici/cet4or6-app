@@ -87,6 +87,8 @@ Page({
     darkMode: false,
     wordCount: 0,
     pct: 0,
+    ringDeg: 0,
+    levels: [] as { total: number; done: number; pct: number }[],
     hMax: 0, hMin: 0, hTrend: 'up',
     favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
   },
