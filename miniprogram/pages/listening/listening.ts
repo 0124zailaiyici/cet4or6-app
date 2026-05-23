@@ -566,7 +566,8 @@ Page<IListeningData, IListeningMethods>({
   toggleFocus() {
     const on = !this.data.focusMode
     if (on) {
-      audio.stop()
+      audio.pause()
+      this.setData({ isPlaying: false })
       const passage = this.data.currentPassage
       const lines: string[] = []
       const pageIdx: number[] = []
