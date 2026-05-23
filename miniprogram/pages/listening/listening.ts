@@ -93,6 +93,7 @@ interface IListeningMethods {
   markForReview(): void
   viewSummary(): void
   retryPages(): void
+  seekFocusCurrent(): void
 }
 
 const LABELS: Record<string, string> = {
@@ -565,7 +566,7 @@ Page<IListeningData, IListeningMethods>({
   toggleFocus() {
     const on = !this.data.focusMode
     if (on) {
-      audio.pause()
+      audio.stop()
       const passage = this.data.currentPassage
       const lines: string[] = []
       const pageIdx: number[] = []
@@ -652,13 +653,7 @@ Page<IListeningData, IListeningMethods>({
   // ===== Audio controls =====
   playCurrent() {
     if (this.data.focusMode) {
-      if (this.data.currentPassage?.audioUrl) {
-        audio.resume(this.data.speed)
-        this.setData({ isPlaying: true })
-        return
-      }
-      const text = this.data.focusSentences[this.data.currentIndex]
-      if (text) this.playText(text)
+      this.seekFocusCurrent()
       return
     }
     const passage = this.data.currentPassage
@@ -753,8 +748,7 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.focusMode) {
       if (this.data.currentIndex > 0) {
         this.setData({ currentIndex: this.data.currentIndex - 1 })
-        const text = this.data.focusSentences[this.data.currentIndex]
-        if (text) this.playText(text)
+        this.seekFocusCurrent()
       }
     } else if (this.data.audioMode) {
       audio.seek(Math.max(0, audio.getCurrentTime() - 15))
@@ -768,8 +762,7 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.focusMode) {
       if (this.data.currentIndex < this.data.focusSentences.length - 1) {
         this.setData({ currentIndex: this.data.currentIndex + 1 })
-        const text = this.data.focusSentences[this.data.currentIndex]
-        if (text) this.playText(text)
+        this.seekFocusCurrent()
       }
     } else if (this.data.audioMode) {
       audio.seek(Math.min(audio.getDuration(), audio.getCurrentTime() + 15))
@@ -780,6 +773,18 @@ Page<IListeningData, IListeningMethods>({
         this.setData({ currentIndex: this.data.currentIndex + 1 })
         this.playCurrent()
       }
+    }
+  },
+
+  seekFocusCurrent() {
+    const origIndex = this.data.focusSentenceMap[this.data.currentIndex] ?? 0
+    const sent = this.data.currentPassage?.sentences[origIndex]
+    if (sent && sent.start > 0) {
+      audio.seek(sent.start)
+    }
+    if (!this.data.isPlaying) {
+      audio.resume(this.data.speed)
+      this.setData({ isPlaying: true })
     }
   },
 
