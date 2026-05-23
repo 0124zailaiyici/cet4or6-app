@@ -14,7 +14,8 @@
     "pages/guide/guide",
     "pages/reminder/reminder",
     "pages/feedback/feedback",
-    "pages/vocab/vocab"
+    "pages/vocab/vocab",
+    "pages/exam/exam"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -23,6 +24,17 @@
     "backgroundColor": "#fff5f7"
   },
   "style": "v2",
+  "tabBar": {
+    "color": "#8a7a9a",
+    "selectedColor": "#ff6b8a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页", "iconPath": "icons/home.png", "selectedIconPath": "icons/home_active.png" },
+      { "pagePath": "pages/vocab/vocab", "text": "单词本", "iconPath": "icons/vocab.png", "selectedIconPath": "icons/vocab_active.png" },
+      { "pagePath": "pages/settings/settings", "text": "我的", "iconPath": "icons/mine.png", "selectedIconPath": "icons/mine_active.png" }
+    ]
+  },
   "componentFramework": "glass-easel",
   "lazyCodeLoading": "requiredComponents"
 }

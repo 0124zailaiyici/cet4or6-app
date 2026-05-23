@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>模拟考试 + tabBar 原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background:#1a1a2e;font-family:-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;gap:20px;padding:20px;flex-wrap:wrap; }
+.phone { width:375px;height:780px;border-radius:38px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;background:#f3eeed;transition:0.3s;position:relative; }
+
+/* ===== EXAM LIST ===== */
+.ex-top { background:linear-gradient(135deg,#ffb3c6,#ff8fab);padding:48px 20px 16px;color:#fff;flex-shrink:0; }
+.ex-top h1 { font-size:20px;font-weight:800; }
+.ex-top p { font-size:12px;opacity:.85;margin-top:2px; }
+
+.ex-card { background:#fff;margin:10px 14px;border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(255,158,181,0.04); }
+.ex-card .row { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+.ex-card .t { font-size:16px;font-weight:700;color:#2d2d4e; }
+.ex-card .badge { font-size:11px;color:#ff6b8a;background:rgba(255,107,138,0.06);padding:3px 10px;border-radius:6px; }
+.ex-card .tabs { display:flex;gap:6px;margin:8px 0; }
+.ex-card .tb { font-size:11px;color:#8a7a9a;padding:4px 12px;border-radius:8px;background:#fff0f3; }
+.ex-card .start { margin-top:8px;padding:10px;border-radius:10px;background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;text-align:center;font-size:14px;font-weight:700;cursor:pointer; }
+
+/* ===== EXAM TIMER ===== */
+.timer-bar { display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;background:#1e1e38;color:#fff;flex-shrink:0; }
+.timer-bar .t-num { font-size:28px;font-weight:800;letter-spacing:2px; }
+.timer-bar .t-lbl { font-size:11px;opacity:0.7; }
+.timer-bar .t-warn { color:#ff6b8a;animation:blink 1s infinite; }
+@keyframes blink { 50% { opacity:0.4; } }
+.timer-bar .t-phase { margin-left:auto;font-size:12px;opacity:0.8; }
+
+/* Sections */
+.sects { display:flex;gap:4px;padding:8px 14px;flex-shrink:0; }
+.sect { flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:11px;color:#8a7a9a;background:#fff;cursor:pointer; }
+.sect.on { color:#ff6b8a;font-weight:600;background:rgba(255,107,138,0.06);border:1px solid rgba(255,107,138,0.12); }
+.sect.done { color:#388e3c;background:rgba(56,142,60,0.04); }
+
+/* Content */
+.ex-body { flex:1;margin:0 14px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:10px; }
+
+/* Writing */
+.w-card { background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.w-card .lbl { font-size:12px;color:#ff6b8a;font-weight:600;margin-bottom:4px; }
+.w-card .q { font-size:14px;color:#2d2d4e;line-height:1.7;margin-bottom:10px; }
+.w-card textarea { width:100%;min-height:120px;padding:12px;border-radius:10px;border:1px solid #ece4e2;font-size:13px;color:#2d2d4e;background:#fafafa;outline:none;resize:none;box-sizing:border-box; }
+.w-card .count { text-align:right;font-size:11px;color:#ccc;margin-top:4px; }
+
+/* Reading */
+.q-card { background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.q-card .qn { font-size:12px;color:#ff6b8a;font-weight:600; }
+.q-card .qt { font-size:14px;font-weight:600;color:#2d2d4e;margin:6px 0 10px;line-height:1.5; }
+.q-card .opts { display:flex;flex-wrap:wrap;gap:8px; }
+.q-card .o { width:calc(50% - 4px);padding:10px 12px;border-radius:10px;font-size:12px;color:#4a4a6a;background:#f8f5f4;border:1px solid #ece4e2;cursor:pointer;transition:0.12s; }
+.q-card .o.on { color:#1e88e5;font-weight:600;border-color:#1e88e5;background:rgba(30,136,229,0.04); }
+
+/* Submit */
+.submit-row { padding:8px 14px 14px;flex-shrink:0; }
+.submit-btn { padding:14px;border-radius:14px;background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;text-align:center;font-size:16px;font-weight:700;cursor:pointer; }
+
+/* Results */
+.res-card { background:#fff;margin:10px 14px;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.04);text-align:center; }
+.res-card .score { font-size:56px;font-weight:800;color:#ff6b8a; }
+.res-card .subl { font-size:13px;color:#8a7a9a;margin-bottom:16px; }
+.res-row { display:flex;justify-content:center;gap:20px;margin:12px 0; }
+.res-item { text-align:center; }
+.res-item .v { font-size:18px;font-weight:700; }
+.res-item .v.g { color:#388e3c; }
+.res-item .v.r { color:#d32f2f; }
+.res-item .l { font-size:11px;color:#8a7a9a; }
+
+/* ===== TAB BAR ===== */
+.tab-bar { display:flex;background:#fff;border-top:1px solid #fff0f3;flex-shrink:0; }
+.tab-bar .tb-item { flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 0 8px;font-size:10px;color:#8a7a9a;cursor:pointer; }
+.tab-bar .tb-item.on { color:#ff6b8a; }
+.tab-bar .tb-icon { font-size:20px;margin-bottom:2px; }
+.tab-bar .tb-item.on .tb-icon { font-size:22px; }
+
+.tgl { text-align:center;margin-bottom:4px;width:100%; }
+.tgl-btn { display:inline-flex;align-items:center;gap:8px;background:#2a2a4a;padding:6px 16px;border-radius:16px;cursor:pointer;color:#e0d0e8;font-size:12px;border:1px solid #3a3a5a;user-select:none; }
+
+.dark { background:#12121f !important; }
+.dark .ex-card,.dark .w-card,.dark .q-card,.dark .res-card { background:#1e1e38 !important;box-shadow:0 2px 12px rgba(0,0,0,0.2) !important; }
+.dark .ex-card .t,.dark .w-card .q,.dark .q-card .qt { color:#e0d0e8 !important; }
+.dark .ex-card .tb { background:#2a2a4a !important;color:#a090b0 !important; }
+.dark .w-card textarea { background:#2a2a4a !important;color:#e0d0e8 !important;border-color:#3a3a5a !important; }
+.dark .q-card .o { background:#2a2a4a !important;border-color:#3a3a5a !important;color:#a090b0 !important; }
+.dark .q-card .o.on { color:#4fc3f7 !important;border-color:#4fc3f7 !important; }
+.dark .sect { background:#1e1e38 !important; }
+.dark .tab-bar { background:#1e1e38 !important;border-color:#2a2a4a !important; }
+</style>
+</head>
+<body>
+
+<div class="tgl"><div class="tgl-btn" id="darkBtn">🌙 暗黑</div></div>
+
+<!-- 手机1：选套题 -->
+<div class="phone" id="p1">
+  <div class="ex-top"><h1>模拟考试</h1><p>选一套真题，计时模拟真实考场</p></div>
+  <div class="ex-card">
+    <div class="row"><span class="t">2019年6月 第1套</span><span class="badge">已导入</span></div>
+    <div class="tabs"><span class="tb">✏️ 写作</span><span class="tb">🎧 听力</span><span class="tb">📖 阅读</span><span class="tb">🌟 翻译</span></div>
+    <div class="tabs"><span class="tb">⏱ 125分钟</span><span class="tb">📊 自动评分</span></div>
+    <div class="start" onclick="document.getElementById('p1').style.display='none';document.getElementById('p1x').style.display='flex'">开始考试</div>
+  </div>
+
+  <!-- History -->
+  <div class="ex-card">
+    <div class="row"><span class="t">考试记录</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fff0f3;font-size:13px;color:#8a7a9a">
+      <span>2019061</span><span>487分</span><span>05-20</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;color:#8a7a9a">
+      <span>2019061</span><span>512分</span><span>05-15</span>
+    </div>
+  </div>
+</div>
+
+<!-- 手机1x：考试中 -->
+<div class="phone" id="p1x" style="display:none">
+  <div class="timer-bar">
+    <span class="t-num t-warn">12</span><span class="t-lbl">分</span>
+    <span class="t-num">34</span><span class="t-lbl">秒</span>
+    <span class="t-phase">✏️ 写作 · 还剩 2分30</span>
+  </div>
+  <div class="sects" id="examSects">
+    <div class="sect on" data-s="0">✏️ 写作</div>
+    <div class="sect" data-s="1">🎧 听力</div>
+    <div class="sect" data-s="2">📖 阅读</div>
+    <div class="sect" data-s="3">🌟 翻译</div>
+  </div>
+  <div class="ex-body" id="examBody">
+    <div class="w-card">
+      <div class="lbl">✏️ Part I Writing (30 min)</div>
+      <div class="q">For this part, you are allowed 30 minutes to write a news report to your campus newspaper on a visit to a farm organized by the Student Union.</div>
+      <textarea placeholder="在此写作...">Last week, our Student Union organized a visit to Guangming Farm...</textarea>
+      <div class="count">156 words</div>
+    </div>
+  </div>
+  <div class="submit-row"><div class="submit-btn" onclick="submitExam()">交卷</div></div>
+</div>
+
+<!-- 手机2：考试结果 + tabBar -->
+<div class="phone" id="p2">
+  <div class="ex-top"><h1>考试结果</h1><p>2019年6月 第1套 · 用时 118分钟</p></div>
+
+  <div class="res-card">
+    <div class="score">487</div>
+    <div class="subl">总分 710 · CET-4 模拟</div>
+  </div>
+
+  <div class="res-card" style="text-align:left">
+    <div style="font-size:13px;font-weight:600;color:#2d2d4e;margin-bottom:12px">📊 各题型得分</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px;width:30px">✏️</span>
+        <span style="width:60px;font-size:12px;color:#8a7a9a">写作</span>
+        <div style="flex:1;height:6px;background:#fff0f3;border-radius:3px"><div style="width:60%;height:100%;background:#ff6b8a;border-radius:3px"></div></div>
+        <span style="font-size:12px;font-weight:600;color:#ff6b8a">106</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px;width:30px">🎧</span>
+        <span style="width:60px;font-size:12px;color:#8a7a9a">听力</span>
+        <div style="flex:1;height:6px;background:#fff0f3;border-radius:3px"><div style="width:70%;height:100%;background:#4fc3f7;border-radius:3px"></div></div>
+        <span style="font-size:12px;font-weight:600;color:#4fc3f7">175</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px;width:30px">📖</span>
+        <span style="width:60px;font-size:12px;color:#8a7a9a">阅读</span>
+        <div style="flex:1;height:6px;background:#fff0f3;border-radius:3px"><div style="width:55%;height:100%;background:#81c784;border-radius:3px"></div></div>
+        <span style="font-size:12px;font-weight:600;color:#81c784">137</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px;width:30px">🌟</span>
+        <span style="width:60px;font-size:12px;color:#8a7a9a">翻译</span>
+        <div style="flex:1;height:6px;background:#fff0f3;border-radius:3px"><div style="width:45%;height:100%;background:#ffb74d;border-radius:3px"></div></div>
+        <span style="font-size:12px;font-weight:600;color:#ffb74d">69</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="res-card" style="text-align:left">
+    <div style="font-size:13px;font-weight:600;color:#2d2d4e;margin-bottom:8px">📋 详细结果</div>
+    <div style="font-size:12px;color:#8a7a9a;line-height:2">
+      ✓ 写作：提交成功<br>
+      ✓ 听力：25/25 · 正确 14 题<br>
+      ✓ 阅读：30/30 · 正确 19 题<br>
+      ✓ 翻译：提交成功<br>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tb-item on"><span class="tb-icon">🏠</span>首页</div>
+    <div class="tb-item"><span class="tb-icon">📕</span>单词本</div>
+    <div class="tb-item"><span class="tb-icon">📝</span>错题本</div>
+    <div class="tb-item"><span class="tb-icon">👤</span>我的</div>
+  </div>
+</div>
+
+<script>
+document.getElementById('darkBtn').onclick = () => document.querySelectorAll('.phone').forEach(p => p.classList.toggle('dark'));
+
+// Sect click
+document.querySelectorAll('.sect').forEach(s => {
+  s.onclick = function() {
+    document.querySelectorAll('.sect').forEach(x => x.classList.remove('on'));
+    this.classList.add('on');
+    const labels = ['写作中，请在此区域写作...','🎧 听力 Section A Q1-Q7\nA) ... B) ... C) ... D) ...','📖 仔细阅读 Q51-Q55\nHow might people often feel...','🌟 翻译段落...'];
+    document.getElementById('examBody').innerHTML = '<div class="w-card"><div class="lbl">'+labels[this.dataset.s]+'</div><div class="q">（模拟内容）</div></div>';
+  }
+});
+
+function submitExam() {
+  document.querySelectorAll('.sect').forEach(s => s.classList.add('done'));
+  document.getElementById('examBody').innerHTML = '<div class="res-card"><div class="score">487</div><div class="subl">交卷成功！</div><div class="res-row"><div class="res-item"><div class="v g">14</div><div class="l">听力正确</div></div><div class="res-item"><div class="v g">19</div><div class="l">阅读正确</div></div></div></div>';
+}
+</script>
+</body>
+</html>

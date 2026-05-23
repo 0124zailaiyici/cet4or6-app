@@ -1,0 +1,59 @@
+.page { min-height: 100vh; display: flex; flex-direction: column; background: #f3eeed; }
+.topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; }
+.topbar h1 { font-size: 34rpx; font-weight: 800; }
+.topbar .sub { display: block; font-size: 24rpx; opacity: 0.85; margin-top: 4rpx; }
+
+/* List */
+.card { background: #fff; margin: 12rpx 20rpx; border-radius: 18rpx; padding: 20rpx; box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04); }
+.c-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8rpx; }
+.c-row .t { font-size: 30rpx; font-weight: 700; color: #2d2d4e; }
+.badge { font-size: 20rpx; color: #ff6b8a; background: rgba(255,107,138,0.06); padding: 4rpx 14rpx; border-radius: 8rpx; }
+.tags { display: flex; gap: 8rpx; margin-bottom: 6rpx; }
+.tg { font-size: 20rpx; color: #8a7a9a; padding: 4rpx 14rpx; border-radius: 8rpx; background: #fff0f3; }
+.start { margin-top: 12rpx; padding: 16rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; text-align: center; font-size: 28rpx; font-weight: 700; }
+.empty { display: block; font-size: 26rpx; color: #8a7a9a; text-align: center; padding: 40rpx 0; }
+
+/* Timer */
+.timer-bar { display: flex; align-items: center; justify-content: center; gap: 10rpx; padding: 14rpx 20rpx; background: #1e1e38; color: #fff; flex-shrink: 0; }
+.t-num { font-size: 48rpx; font-weight: 800; letter-spacing: 2rpx; }
+.t-num.warn { color: #ff6b8a; }
+.t-phase { font-size: 22rpx; opacity: 0.7; margin-left: 16rpx; }
+
+/* Section tabs */
+.sects { display: flex; gap: 4rpx; padding: 10rpx 14rpx; flex-shrink: 0; }
+.se { flex: 1; text-align: center; padding: 12rpx 4rpx; border-radius: 10rpx; font-size: 20rpx; color: #8a7a9a; background: #fff; }
+.se.on { color: #ff6b8a; font-weight: 600; background: rgba(255,107,138,0.06); border: 2rpx solid rgba(255,107,138,0.12); }
+
+/* Body */
+.body { flex: 1; padding: 0 20rpx 10rpx; overflow-y: auto; }
+.qlbl { display: block; font-size: 22rpx; color: #ff6b8a; font-weight: 600; margin-bottom: 6rpx; }
+.qt { display: block; font-size: 28rpx; color: #2d2d4e; line-height: 1.7; margin-bottom: 14rpx; }
+.input { width: 100%; min-height: 240rpx; padding: 16rpx; border-radius: 12rpx; border: 2rpx solid #fff0f3; background: #fafafa; font-size: 26rpx; color: #2d2d4e; outline: none; resize: none; box-sizing: border-box; }
+.cnt { display: block; text-align: right; font-size: 20rpx; color: #ccc; margin-top: 4rpx; }
+
+/* Submit */
+.submit-row { padding: 10rpx 20rpx 20rpx; flex-shrink: 0; }
+.sbtn { padding: 18rpx; border-radius: 16rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; text-align: center; font-size: 30rpx; font-weight: 700; box-shadow: 0 4rpx 16rpx rgba(255,107,138,0.2); }
+
+/* Results */
+.score { display: block; font-size: 96rpx; font-weight: 800; color: #ff6b8a; }
+.subl { display: block; font-size: 24rpx; color: #8a7a9a; margin-top: 8rpx; }
+.bar-row { display: flex; align-items: center; gap: 12rpx; margin: 12rpx 0; }
+.bl { width: 60rpx; font-size: 24rpx; color: #8a7a9a; }
+.bb { flex: 1; height: 10rpx; background: #fff0f3; border-radius: 5rpx; }
+.bf { height: 100%; border-radius: 5rpx; min-width: 0; }
+.bn { font-size: 24rpx; font-weight: 600; color: #2d2d4e; }
+.note { display: block; font-size: 24rpx; color: #8a7a9a; line-height: 1.6; }
+
+/* Dark */
+.dark-theme.page { background: #12121f !important; }
+.dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
+.dark-theme .card { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .c-row .t, .dark-theme .qt { color: #e0d0e8 !important; }
+.dark-theme .tg { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .se { background: #1e1e38 !important; }
+.dark-theme .se.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
+.dark-theme .input { background: #2a2a4a !important; color: #e0d0e8 !important; border-color: #3a3a5a !important; }
+.dark-theme .bn { color: #e0d0e8 !important; }
+.dark-theme .note { color: #a090b0 !important; }
+.dark-theme .bb { background: #2a2a4a !important; }

@@ -15,12 +15,22 @@ const API_KEY = process.env.DEEPSEEK_API_KEY;
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 
 const DICT_CACHE_FILE = path.join(__dirname, 'dict_cache.json');
+const DICT_BASE_FILE = path.join(__dirname, 'dict_base.json');
+const dictBase = fs.existsSync(DICT_BASE_FILE) ? JSON.parse(fs.readFileSync(DICT_BASE_FILE, 'utf-8')) : {};
 const dictCache = new Map()
 if (fs.existsSync(DICT_CACHE_FILE)) {
   try {
     const raw = JSON.parse(fs.readFileSync(DICT_CACHE_FILE, 'utf-8'));
     for (const [k, v] of Object.entries(raw)) dictCache.set(k, v);
   } catch {}
+}
+for (const [k, v] of Object.entries(dictBase)) {
+  if (dictCache.has(k)) {
+    const entry = Array.isArray(dictCache.get(k).data) ? dictCache.get(k).data[0] : dictCache.get(k).data
+    if (entry && !entry.chinese) entry.chinese = v
+  } else {
+    dictCache.set(k, { ts: 0, chinese: v })
+  }
 }
 function saveDictCache() {
   const obj = {};
@@ -157,7 +167,7 @@ app.get('/dictionary', async (req, res) => {
   if (!word) return res.status(400).json({ error: '缺少 word' });
 
   const cached = dictCache.get(word.toLowerCase())
-  if (cached) return res.json(cached.data)
+  if (cached && cached.data) return res.json(cached.data)
 
   try {
     const [dictRes, transRes] = await Promise.allSettled([
@@ -172,8 +182,11 @@ app.get('/dictionary', async (req, res) => {
     const data = dictRes.value.data;
     const entry = Array.isArray(data) ? data[0] : data;
     let chinese = '';
+    const baseChinese = dictBase[word.toLowerCase()]
     if (transRes.status === 'fulfilled' && transRes.value.data?.responseData?.translatedText) {
       chinese = transRes.value.data.responseData.translatedText;
+    } else if (baseChinese) {
+      chinese = baseChinese;
     } else if (API_KEY) {
       try {
         chinese = await callDeepSeek([

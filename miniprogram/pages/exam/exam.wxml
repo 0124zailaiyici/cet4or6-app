@@ -1,0 +1,98 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+
+  <!-- ===== 选套题 ===== -->
+  <block wx:if="{{phase === 'list'}}">
+    <view class="topbar"><h1>模拟考试</h1><text class="sub">选一套真题，计时模拟真实考场</text></view>
+
+    <view class="card" wx:for="{{examSets}}" wx:key="id">
+      <view class="c-row">
+        <text class="t">{{item.label}}</text>
+        <text class="badge">已导入</text>
+      </view>
+      <view class="tags">
+        <text class="tg">✏️ 写作</text><text class="tg">🎧 听力</text><text class="tg">📖 阅读</text><text class="tg">🌟 翻译</text>
+      </view>
+      <view class="tags"><text class="tg">⏱ 125分钟</text><text class="tg">📊 自动评分</text></view>
+      <view class="start" data-set-id="{{item.id}}" catchtap="startExam">开始考试</view>
+    </view>
+
+    <view class="card">
+      <view class="c-row"><text class="t">考试记录</text></view>
+      <text class="empty">暂无记录</text>
+    </view>
+  </block>
+
+  <!-- ===== 考试中 ===== -->
+  <block wx:if="{{phase === 'exam'}}">
+    <view class="timer-bar">
+      <text class="t-num {{timer < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+      <text class="t-phase">{{sectionNames[currentSection]}} · 作答中</text>
+    </view>
+
+    <view class="sects">
+      <view class="se {{currentSection === 0 ? 'on' : ''}}" data-section="0" catchtap="switchSection">✏️ 写作</view>
+      <view class="se {{currentSection === 1 ? 'on' : ''}}" data-section="1" catchtap="switchSection">🎧 听力</view>
+      <view class="se {{currentSection === 2 ? 'on' : ''}}" data-section="2" catchtap="switchSection">📖 阅读</view>
+      <view class="se {{currentSection === 3 ? 'on' : ''}}" data-section="3" catchtap="switchSection">🌟 翻译</view>
+    </view>
+
+    <scroll-view class="body" scroll-y>
+      <!-- Writing -->
+      <view wx:if="{{currentSection === 0}}" class="card">
+        <text class="qlbl">✏️ Part I Writing (30 min)</text>
+        <text class="qt">For this part, you are allowed 30 minutes to write a news report...</text>
+        <textarea class="input" placeholder="在此写作..." value="{{answers[0].text}}" bindinput="onWritingInput" maxlength="2000"></textarea>
+        <text class="cnt">{{(answers[0].text || '').length}}/2000</text>
+      </view>
+
+      <!-- Listening -->
+      <view wx:if="{{currentSection === 1}}" class="card">
+        <text class="qlbl">🎧 Part II Listening Comprehension</text>
+        <text class="qt">请先在听力页面播放音频并作答，此处仅显示你的答案</text>
+      </view>
+
+      <!-- Reading -->
+      <view wx:if="{{currentSection === 2}}" class="card">
+        <text class="qlbl">📖 Part III Reading Comprehension</text>
+        <text class="qt">请在阅读理解页面逐篇作答，此处汇总你的答案</text>
+      </view>
+
+      <!-- Translation -->
+      <view wx:if="{{currentSection === 3}}" class="card">
+        <text class="qlbl">🌟 Part IV Translation (30 min)</text>
+        <text class="qt">舞狮作为中国传统民间表演已有2000多年历史...</text>
+        <textarea class="input" placeholder="在此翻译..." value="{{answers[3].text}}" bindinput="onTranslationInput" maxlength="2000"></textarea>
+        <text class="cnt">{{(answers[3].text || '').length}}/2000</text>
+      </view>
+    </scroll-view>
+
+    <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷并评分</view></view>
+  </block>
+
+  <!-- ===== 结果 ===== -->
+  <block wx:if="{{phase === 'result'}}">
+    <view class="topbar"><h1>考试结果</h1><text class="sub">{{currentSet.label}} · 模拟考试</text></view>
+
+    <view class="card" style="text-align:center">
+      <text class="score">{{score}}</text>
+      <text class="subl">总分 · 已答对{{sectionScores[1].correct + sectionScores[2].correct}}题</text>
+    </view>
+
+    <view class="card">
+      <text class="qt">📊 各题型得分</text>
+      <view class="bar-row" wx:for="{{sectionScores}}" wx:key="label" wx:for-item="s">
+        <text class="bl">{{s.label}}</text>
+        <view class="bb"><view class="bf" style="width:{{s.total > 0 ? s.correct / s.total * 100 : 0}}%;background:{{s.label === '听力' ? '#4fc3f7' : s.label === '阅读' ? '#81c784' : '#ff6b8a'}}"></view></view>
+        <text class="bn">{{s.correct}}/{{s.total}}</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="qt">📋 说明</text>
+      <text class="note">写作和翻译暂不支持自动评分，阅读和听力对答案自动计算。可在各题型页面完成作答后回到此处查看汇总。</text>
+    </view>
+
+    <view class="submit-row"><view class="sbtn" catchtap="backToList">返回列表</view></view>
+  </block>
+
+</view>

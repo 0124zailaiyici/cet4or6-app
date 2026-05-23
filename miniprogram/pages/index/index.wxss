@@ -128,6 +128,20 @@
   margin-top: 4rpx;
 }
 
+/* ===== Exam Banner ===== */
+.exam-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 28rpx 36rpx 6rpx; padding: 24rpx 28rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  box-shadow: 0 4rpx 20rpx rgba(33,150,243,0.2);
+}
+.exam-banner:active { opacity: 0.9; }
+.ex-info { flex: 1; }
+.ex-title { display: block; font-size: 30rpx; font-weight: 700; color: #fff; }
+.ex-desc { display: block; font-size: 22rpx; color: rgba(255,255,255,0.8); margin-top: 4rpx; }
+.ex-btn { font-size: 26rpx; color: #fff; font-weight: 600; background: rgba(255,255,255,0.2); padding: 8rpx 20rpx; border-radius: 14rpx; }
+
 /* ===== Section Header ===== */
 .section-header {
   padding: 40rpx 36rpx 24rpx;
