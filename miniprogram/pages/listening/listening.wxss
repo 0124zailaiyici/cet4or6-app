@@ -220,7 +220,7 @@
 .f-sp.on { color: #fff; background: #2196f3; border-color: #2196f3; font-weight: 700; }
 
 .f-loop { font-size: 22rpx; color: #8a7a9a; background: #fff0f3; padding: 6rpx 16rpx; border-radius: 10rpx; border: 2rpx solid transparent; }
-.f-loop.on { color: #ff6b8a; background: rgba(255,107,138,0.06); border-color: rgba(255,107,138,0.15); font-weight: 600; }
+.f-loop.on { color: #fff; background: #2196f3; border-color: #2196f3; font-weight: 700; }
 
 .f-pos { font-size: 22rpx; color: #2196f3; font-weight: 600; padding: 2rpx 14rpx 4rpx; flex-shrink: 0; }
 
@@ -239,7 +239,7 @@
 .dark-theme .f-time { color: #a090b0 !important; }
 .dark-theme .f-b { background: #2a2a4a !important; color: #a090b0 !important; }
 .dark-theme .f-loop { background: #2a2a4a !important; color: #a090b0 !important; }
-.dark-theme .f-loop.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
+.dark-theme .f-loop.on { color: #fff !important; background: #4fc3f7 !important; border-color: #4fc3f7 !important; }
 .dark-theme .f-sp { background: #2a2a4a !important; color: #a090b0 !important; }
 .dark-theme .f-sp.on { color: #fff !important; background: #4fc3f7 !important; border-color: #4fc3f7 !important; }
 .dark-theme .f-pos { color: #4fc3f7 !important; }
