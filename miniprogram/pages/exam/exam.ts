@@ -2,6 +2,24 @@ import readingsData from '../../data/readings'
 import listeningData from '../../data/listening'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
+interface IReadingPassage {
+  id: number
+  sectionType: 'A' | 'B' | 'C'
+  passage: string
+  questions: string[]
+  options: string[]
+  choices: string[][]
+  correctAnswers: Record<string, string>
+}
+
+interface IListeningPassage {
+  id: number
+  title: string
+  audioUrl: string
+  sentences: { text: string; start: number; end: number }[]
+  correctAnswers: Record<string, string>
+}
+
 interface IExamSet {
   id: string
   label: string
@@ -34,6 +52,8 @@ interface IExamMethods {
   startTimer(): void
 }
 
+const EXAM_DURATION = 7500
+const TWO_HOURS_FIVE = '125:00'
 let timerInterval: any = null
 
 Page<IExamData, IExamMethods>({
@@ -41,8 +61,8 @@ Page<IExamData, IExamMethods>({
     phase: 'list',
     examSets: [],
     currentSet: null,
-    timerStr: '125:00',
-    remainingSec: 7500,
+    timerStr: TWO_HOURS_FIVE,
+    remainingSec: EXAM_DURATION,
     readingDone: 0,
     readingTotal: 0,
     listeningDone: 0,
@@ -53,9 +73,10 @@ Page<IExamData, IExamMethods>({
   onLoad() {
     applyTheme(getDarkMode())
     this.setData({ darkMode: getDarkMode() })
+    const data = readingsData as IReadingPassage[]
     const sets: IExamSet[] = []
-    const listeningIds = (listeningData as any[]).filter((l: any) => l.audioUrl).map((l: any) => l.id)
-    const readingIds = (readingsData as any[]).map((r: any) => r.id)
+    const listeningIds = (listeningData as IListeningPassage[]).filter(l => l.audioUrl).map(l => l.id)
+    const readingIds = data.map(r => r.id)
     if (readingIds.length > 0) sets.push({ id: '2019061', label: '2019年6月 第1套', readingIds: readingIds.slice(0, 4), listeningId: listeningIds[0] || null })
     if (readingIds.length > 4) sets.push({ id: '2019062', label: '2019年6月 第2套', readingIds: readingIds.slice(4, 8), listeningId: listeningIds[1] || null })
     this.setData({ examSets: sets })
@@ -63,10 +84,8 @@ Page<IExamData, IExamMethods>({
 
   onShow() {
     this.setData({ darkMode: getDarkMode() })
-    // Recalculate progress from storage
     if (this.data.phase === 'exam') {
       this.recalcProgress()
-      // Restore timer from globalData
       const app = getApp<IAppOption>()
       const deadline = app.globalData.examDeadline
       if (deadline) {
@@ -91,11 +110,10 @@ Page<IExamData, IExamMethods>({
       content: '125 分钟倒计时，跳转到各题型页作答。交卷后自动评分。',
       success: (res) => {
         if (!res.confirm) return
-        const seconds = 7500 // 125 min
         const app = getApp<IAppOption>()
-        app.globalData.examDeadline = Date.now() + seconds * 1000
+        app.globalData.examDeadline = Date.now() + EXAM_DURATION * 1000
         app.globalData.examSet = setId
-        this.setData({ phase: 'exam', currentSet: set, remainingSec: seconds, timerStr: '125:00' })
+        this.setData({ phase: 'exam', currentSet: set, remainingSec: EXAM_DURATION, timerStr: TWO_HOURS_FIVE })
         this.recalcProgress()
         this.startTimer()
       },
@@ -118,36 +136,39 @@ Page<IExamData, IExamMethods>({
     const ra = sd.readingAnswers || {}
     const la = sd.listeningAnswers || {}
 
-    // Reading progress: count questions answered
     let rd = 0, rt = 0
+    const rData = readingsData as IReadingPassage[]
     for (const rid of this.data.currentSet.readingIds) {
-      const passage = (readingsData as any[]).find((r: any) => r.id === rid)
+      const passage = rData.find(r => r.id === rid)
       if (!passage) continue
       const ans = ra[rid]
-      if (passage.sectionType === 'C' && passage.questions) {
-        for (let qi = 0; qi < passage.questions.length; qi++) {
-          if (ans?.cAnswers?.[qi]) rd++
-          rt++
-        }
+
+      if (passage.sectionType === 'A') {
+        const total = Object.keys(passage.correctAnswers).length
+        rd += ans ? Object.keys(ans.blankAnswers).length : 0
+        rt += total
+      } else if (passage.sectionType === 'B') {
+        const total = passage.questions.length
+        rd += ans ? Object.keys(ans.matchAnswers || {}).length : 0
+        rt += total
+      } else if (passage.sectionType === 'C') {
+        const total = passage.questions.length
+        rd += ans ? Object.keys(ans.cAnswers || {}).length : 0
+        rt += total
       }
     }
 
-    // Listening progress
     let ld = 0, lt = 0
     if (this.data.currentSet.listeningId) {
       const lid = this.data.currentSet.listeningId
+      const passage = (listeningData as IListeningPassage[]).find(l => l.id === lid)
       const lans = la[lid]
-      const passage = (listeningData as any[]).find((l: any) => l.id === lid)
       if (passage?.correctAnswers) {
-        lt = Object.keys(passage.correctAnswers).length
+        const keys = Object.keys(passage.correctAnswers)
+        lt = keys.length
         if (lans) {
-          for (const qi of Object.keys(passage.correctAnswers)) {
-            for (const piStr of Object.keys(lans)) {
-              const pi = Number(piStr)
-              const sentText = passage.sentences[pi]?.text || ''
-              const qm = sentText.match(/^Q(\d+)\./)
-              if (qm && qm[1] === qi) { ld++; break }
-            }
+          for (const k of keys) {
+            if (lans[Number(k)] !== undefined) ld++
           }
         }
       }
@@ -180,8 +201,7 @@ Page<IExamData, IExamMethods>({
 
   goBack() {
     if (timerInterval) clearInterval(timerInterval)
-    const app = getApp<IAppOption>()
-    app.globalData.examDeadline = 0
+    getApp<IAppOption>().globalData.examDeadline = 0
     this.setData({ phase: 'list', currentSet: null })
   },
 })
