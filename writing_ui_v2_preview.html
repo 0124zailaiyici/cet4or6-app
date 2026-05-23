@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>写作教学 2.0 设计预览</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f2ecf6; display: flex; flex-direction: column; align-items: center;
+  padding: 16px; gap: 20px;
+}
+
+/* ── Phone mockup ── */
+.phone {
+  width: 375px; background: #fff;
+  box-shadow: 0 8px 40px rgba(80,30,100,0.1);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #d4a0dc 0%, #9c27b0 100%);
+  padding: 44px 20px 18px; position: relative;
+}
+.header-row { display: flex; align-items: center; justify-content: space-between; }
+.header-l { display: flex; align-items: center; gap: 10px; }
+.header-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.18); display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+.header-title { font-size: 19px; font-weight: 700; color: #fff; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+.header-ai {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 17px;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex; gap: 3px; margin: 12px 16px 0;
+  background: #f5f0f8; border-radius: 10px; padding: 3px;
+}
+.tab {
+  flex: 1; text-align: center; padding: 8px 0; font-size: 11px;
+  color: #a090b0; border-radius: 8px; cursor: pointer; font-weight: 500;
+}
+.tab.active { background: #fff; color: #9c27b0; font-weight: 700; }
+
+/* ── Content ── */
+.content { padding: 12px 16px 24px; }
+.pane { display: none; }
+.pane.show { display: block; }
+
+/* ── Section Label ── */
+.label { font-size: 11px; color: #b09bc0; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+
+/* ============ Feature Card ============ */
+.fcard {
+  background: #fff; border-radius: 12px; padding: 14px;
+  box-shadow: 0 1px 4px rgba(156,39,176,0.04);
+  border-left: 3px solid #d4a0dc; margin-bottom: 10px;
+}
+.fcard-tag {
+  display: inline-block; font-size: 9px; padding: 2px 8px; border-radius: 8px;
+  background: rgba(156,39,176,0.07); color: #9c27b0; font-weight: 600; margin-bottom: 6px;
+}
+.fcard-title { font-size: 14px; font-weight: 600; color: #3a2a4a; margin-bottom: 4px; }
+.fcard-desc { font-size: 11px; color: #b09bc0; line-height: 1.5; }
+
+/* ============ Step Wizard ============ */
+.steps { display: flex; gap: 4px; margin-bottom: 12px; }
+.step {
+  flex: 1; text-align: center; padding: 6px 0; border-radius: 8px;
+  font-size: 10px; color: #c0b0cc; background: #f9f5fc;
+}
+.step.done { background: rgba(156,39,176,0.08); color: #9c27b0; font-weight: 600; }
+.step.active { background: #9c27b0; color: #fff; font-weight: 600; }
+
+/* ============ Outline Builder ============ */
+.outline-box {
+  background: #f9f5fc; border-radius: 10px; padding: 12px; margin-bottom: 10px;
+}
+.outline-q { font-size: 12px; color: #504060; font-weight: 600; margin-bottom: 6px; }
+.outline-opt {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.oo {
+  padding: 5px 12px; border-radius: 12px; font-size: 11px;
+  background: #fff; border: 1.5px solid #ede4f0; color: #504060; cursor: pointer;
+}
+.oo.sel { background: rgba(156,39,176,0.08); border-color: #d4a0dc; color: #9c27b0; font-weight: 600; }
+.outline-kw {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.okw {
+  padding: 4px 10px; border-radius: 8px; font-size: 11px;
+  background: rgba(156,39,176,0.05); color: #504060;
+  display: flex; align-items: center; gap: 4px;
+}
+.okw.dim { color: #c0b0cc; font-size: 18px; cursor: pointer; }
+
+.outline-result {
+  background: #fff; border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.8; color: #504060;
+}
+.outline-result .or-sec { margin-bottom: 8px; }
+.outline-result .or-label { font-size: 10px; color: #b09bc0; margin-bottom: 2px; }
+.outline-result .or-blank {
+  display: inline-block; min-width: 60px; border-bottom: 2px dashed #d4a0dc;
+  color: #c0b0cc; padding: 0 4px;
+}
+
+/* ============ Toolkit Panel ============ */
+.toolkit-btn {
+  position: sticky; bottom: 12px; margin-top: 12px;
+  width: 100%; height: 40px; border-radius: 20px; border: none;
+  background: linear-gradient(135deg, #d4a0dc, #9c27b0); color: #fff;
+  font-size: 12px; font-weight: 600; display: flex; align-items: center;
+  justify-content: center; gap: 4px; cursor: pointer; z-index: 10;
+}
+
+.toolkit-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3); z-index: 100; display: none;
+}
+.toolkit-overlay.show { display: block; }
+
+.toolkit-panel {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 375px; background: #fff; border-radius: 20px 20px 0 0;
+  z-index: 101; padding: 16px 16px 24px; display: none;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.08);
+  max-height: 70vh; overflow-y: auto;
+}
+.toolkit-panel.show { display: block; }
+.tk-handle {
+  width: 36px; height: 4px; border-radius: 2px; background: #e0d0e8;
+  margin: 0 auto 12px;
+}
+.tk-search {
+  width: 100%; padding: 8px 12px; border-radius: 8px; border: 1.5px solid #ede4f0;
+  font-size: 12px; outline: none; margin-bottom: 10px;
+}
+.tk-search:focus { border-color: #d4a0dc; }
+.tk-cats { display: flex; gap: 4px; margin-bottom: 10px; overflow-x: auto; }
+.tk-cat {
+  padding: 4px 12px; border-radius: 10px; font-size: 10px; white-space: nowrap;
+  background: #f5f0f8; color: #b09bc0; cursor: pointer; flex-shrink: 0;
+}
+.tk-cat.sel { background: rgba(156,39,176,0.08); color: #9c27b0; font-weight: 600; }
+.tk-item {
+  padding: 8px 10px; border-radius: 8px; margin-bottom: 4px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #faf5fc; cursor: pointer;
+}
+.tk-item:active { background: #f0e4f8; }
+.tk-item-pat { font-size: 12px; color: #9c27b0; font-weight: 600; font-family: monospace; }
+.tk-item-cn { font-size: 10px; color: #b09bc0; }
+.tk-item-add {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(156,39,176,0.08); display: flex;
+  align-items: center; justify-content: center; font-size: 12px; color: #9c27b0; flex-shrink: 0;
+}
+
+/* ============ Timer ============ */
+.timer {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  background: #fff4f4; border-radius: 10px; margin-bottom: 10px;
+}
+.timer-ring {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  background: conic-gradient(#f44336 0deg 240deg, #fce4ec 240deg 360deg);
+  display: flex; align-items: center; justify-content: center;
+}
+.timer-in {
+  width: 36px; height: 36px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #f44336;
+}
+.timer-body { flex: 1; }
+.timer-label { font-size: 10px; color: #ef9a9a; }
+.timer-phase { font-size: 12px; font-weight: 600; color: #c62828; }
+.timer-bar { height: 3px; border-radius: 2px; background: #fce4ec; margin-top: 4px; overflow: hidden; }
+.timer-fill { height: 100%; border-radius: 2px; background: #f44336; width: 66%; }
+
+/* ============ Paragraph Entry (low barrier) ============ */
+.mini-input {
+  width: 100%; border: 1.5px solid #ede4f0; border-radius: 8px;
+  padding: 8px 10px; font-size: 12px; line-height: 1.6; resize: none;
+  outline: none; font-family: inherit; margin-bottom: 6px;
+}
+.mini-input:focus { border-color: #d4a0dc; }
+.mini-input::placeholder { color: #d0c0d8; }
+.mini-hint { font-size: 10px; color: #b09bc0; text-align: right; margin-bottom: 8px; }
+
+/* ============ Reference Parse ============ */
+.parse-sec { margin-bottom: 8px; }
+.parse-sec:last-child { margin-bottom: 0; }
+.parse-head { font-size: 11px; font-weight: 600; color: #504060; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.parse-text { font-size: 12px; line-height: 1.6; color: #504060; padding: 6px 8px; background: #faf5fc; border-radius: 6px; }
+.parse-note {
+  display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 4px;
+  background: rgba(156,39,176,0.06); color: #9c27b0; margin-top: 3px;
+}
+
+/* ============ Feature list on homepage ============ */
+.feature-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 600;
+}
+.feature-badge.purple { background: rgba(156,39,176,0.06); color: #9c27b0; }
+.feature-badge.green { background: rgba(76,175,80,0.06); color: #43a047; }
+.feature-badge.orange { background: rgba(255,152,0,0.06); color: #ef6c00; }
+.feature-badge.red { background: rgba(244,67,54,0.06); color: #f44336; }
+.feature-badge.blue { background: rgba(33,150,243,0.06); color: #1976d2; }
+
+.footer { font-size: 11px; color: #c0b0cc; text-align: center; padding: 12px 0; }
+
+/* Detail header */
+.detail-header {
+  background: linear-gradient(135deg, #d4a0dc 0%, #9c27b0 100%);
+  padding: 44px 20px 14px;
+}
+.dh-top { display: flex; align-items: center; gap: 10px; }
+.dh-back {
+  padding: 6px 14px; border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  font-size: 13px; font-weight: 500; color: #fff; flex-shrink: 0; cursor: pointer;
+}
+.dh-title {
+  font-size: 14px; font-weight: 600; color: #fff; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dh-ai {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 15px;
+}
+
+/* Disabled button style for preview */
+.btn {
+  display: flex; width: 100%; height: 40px; border-radius: 20px; border: none;
+  font-size: 13px; font-weight: 600; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.btn-primary { background: linear-gradient(135deg, #d4a0dc, #9c27b0); color: #fff; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ============================== -->
+<!-- Phone 1: Tab 0 句型急救包        -->
+<!-- ============================== -->
+<div class="phone">
+  <div class="header">
+    <div class="header-row">
+      <div class="header-l">
+        <div class="header-icon">✍️</div>
+        <div>
+          <div class="header-title">写作教学 2.0</div>
+          <div class="header-sub">引导式写作训练</div>
+        </div>
+      </div>
+      <div class="header-ai">🤖</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">📖 句型库</div>
+    <div class="tab">📝 引导写作</div>
+    <div class="tab">📄 考场模拟</div>
+  </div>
+
+  <div class="content">
+    <div class="label">💡 按功能分类查找句型，点击即插入</div>
+
+    <!-- 搜索 + 分类 -->
+    <input class="tk-search" placeholder="搜索句型…" value="environment">
+    <div class="tk-cats">
+      <span class="tk-cat sel">全部</span>
+      <span class="tk-cat">🔥 开头</span>
+      <span class="tk-cat">⚡ 递进</span>
+      <span class="tk-cat">🔄 转折</span>
+      <span class="tk-cat">📊 举例</span>
+      <span class="tk-cat">🏁 结尾</span>
+    </div>
+
+    <!-- 句型列表 -->
+    <div class="tk-item">
+      <div>
+        <div class="tk-item-pat">There is no doubt that…</div>
+        <div class="tk-item-cn">毫无疑问……（强表态，适合开头）</div>
+      </div>
+      <div class="tk-item-add">+</div>
+    </div>
+    <div class="tk-item">
+      <div>
+        <div class="tk-item-pat">It is + adj. + for sb. to do…</div>
+        <div class="tk-item-cn">对某人来说做某事是……的（万能句型）</div>
+      </div>
+      <div class="tk-item-add">+</div>
+    </div>
+    <div class="tk-item">
+      <div>
+        <div class="tk-item-pat">Not only… but also…</div>
+        <div class="tk-item-cn">不仅……而且……（递进，提升句式）</div>
+      </div>
+      <div class="tk-item-add">+</div>
+    </div>
+    <div class="tk-item">
+      <div>
+        <div class="tk-item-pat">However, I hold the view that…</div>
+        <div class="tk-item-cn">然而，我认为……（转折表观点）</div>
+      </div>
+      <div class="tk-item-add">+</div>
+    </div>
+    <div class="tk-item">
+      <div>
+        <div class="tk-item-pat">For instance/example…</div>
+        <div class="tk-item-cn">例如……（引出具体例子）</div>
+      </div>
+      <div class="tk-item-add">+</div>
+    </div>
+
+    <div class="label" style="margin-top:12px">📎 最近使用的句型</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="oo sel">There is no doubt that…</span>
+      <span class="oo sel">Not only… but also…</span>
+    </div>
+
+    <!-- 练习区 -->
+    <div style="margin-top:14px">
+      <div style="font-size:12px;font-weight:600;color:#504060;margin-bottom:6px">练习造句</div>
+      <textarea class="mini-input" rows="3" placeholder="在此输入你的句子…" style="min-height:60px">There is no doubt that protecting the environment is crucial for our future. Not only does it help preserve natural resources, but it also ensures a better quality of life.</textarea>
+      <div class="mini-hint">已使用 2 个句型 · 共 22 词</div>
+      <button class="btn btn-primary">提交练习</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- Phone 2: Tab 1 引导写作          -->
+<!-- ============================== -->
+<div class="phone">
+  <div class="header">
+    <div class="header-row">
+      <div class="header-l">
+        <div class="header-icon">✍️</div>
+        <div>
+          <div class="header-title">写作教学 2.0</div>
+          <div class="header-sub">引导式写作训练</div>
+        </div>
+      </div>
+      <div class="header-ai">🤖</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab">📖 句型库</div>
+    <div class="tab active">📝 引导写作</div>
+    <div class="tab">📄 考场模拟</div>
+  </div>
+
+  <div class="content">
+    <div class="label">🎯 跟着步骤走，作文不难写</div>
+
+    <!-- Step progress -->
+    <div class="steps">
+      <div class="step done">① 审题</div>
+      <div class="step active">② 列提纲</div>
+      <div class="step">③ 写作</div>
+      <div class="step">④ 检查</div>
+    </div>
+
+    <!-- Step 2: Outline Builder -->
+    <div class="fcard">
+      <span class="fcard-tag">📋 第 2 步 · 列提纲</span>
+      <div class="fcard-title">你的观点是什么？</div>
+
+      <div class="outline-box">
+        <div class="outline-q">Q1: 你对「大学生做兼职」持什么态度？</div>
+        <div class="outline-opt">
+          <span class="oo sel">✅ 支持</span>
+          <span class="oo">反对</span>
+          <span class="oo">中立</span>
+        </div>
+
+        <div class="outline-q">Q2: 有哪些理由？（点 + 号添加）</div>
+        <div class="outline-kw">
+          <span class="okw">赚经验 <span class="okw dim">✕</span></span>
+          <span class="okw">减轻家庭负担 <span class="okw dim">✕</span></span>
+          <span class="okw" style="color:#c0b0cc;border:1.5px dashed #e0d0e8;padding:3px 10px">+ 添加理由</span>
+        </div>
+
+        <div class="outline-q" style="margin-top:8px">Q3: 有什么例子？</div>
+        <div class="outline-kw">
+          <span class="okw">朋友做家教提升口才 <span class="okw dim">✕</span></span>
+          <span class="okw" style="color:#c0b0cc;border:1.5px dashed #e0d0e8;padding:3px 10px">+ 添加</span>
+        </div>
+      </div>
+
+      <div class="fcard-title">📝 你的提纲</div>
+      <div class="outline-result">
+        <div class="or-sec">
+          <div class="or-label">第 1 段 — 引入</div>
+          我认为大学生做兼职 <span class="or-blank">利大于弊</span>
+        </div>
+        <div class="or-sec">
+          <div class="or-label">第 2 段 — 理由 1</div>
+          首先，兼职能 <span class="or-blank">积累社会经验</span> ，为未来就业做准备。
+        </div>
+        <div class="or-sec">
+          <div class="or-label">第 2 段 — 理由 2</div>
+          其次，兼职可以 <span class="or-blank">减轻家庭经济负担</span> 。
+        </div>
+        <div class="or-sec">
+          <div class="or-label">第 3 段 — 总结</div>
+          总之， <span class="or-blank">合理安排时间</span> 的前提下，兼职对大学生的成长有益。
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:10px">✅ 提纲完成，去写作</button>
+    </div>
+
+    <!-- Low Barrier: 3-sentence entry -->
+    <div class="fcard" style="border-left-color:#4caf50">
+      <span class="fcard-tag" style="background:rgba(76,175,80,0.07);color:#43a047">🌱 新手模式</span>
+      <div class="fcard-title">先写 3 句话试试</div>
+      <div class="fcard-desc" style="margin-bottom:8px">写够 3 句就获得成就 🎉，然后挑战 5 句 → 8 句 → 整篇</div>
+
+      <textarea class="mini-input" rows="2" placeholder="第 1 句：表达你的观点…" style="min-height:auto;height:auto">I believe taking part-time jobs is beneficial for college students.</textarea>
+      <textarea class="mini-input" rows="2" placeholder="第 2 句：给出一个理由…" style="min-height:auto;height:auto">Firstly, part-time jobs can help students gain valuable working experience.</textarea>
+      <textarea class="mini-input" rows="2" placeholder="第 3 句：举例子或进一步说明…" style="min-height:auto;height:auto">For example, my friend improved his communication skills through a tutoring job.</textarea>
+      <div class="mini-hint">✅ 3/3 句完成 · 🎉 试试挑战 5 句？</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- Phone 3: Tab 2 考场模拟          -->
+<!-- ============================== -->
+<div class="phone">
+  <!-- Detail Header -->
+  <div class="detail-header">
+    <div class="dh-top">
+      <div class="dh-back">返回</div>
+      <div class="dh-title">Should College Students Take Part-time Jobs?</div>
+      <div class="dh-ai">🤖</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab">📖 句型库</div>
+    <div class="tab">📝 引导写作</div>
+    <div class="tab active">📄 考场模拟</div>
+  </div>
+
+  <div class="content">
+    <!-- Timer -->
+    <div class="timer">
+      <div class="timer-ring">
+        <div class="timer-in">20</div>
+      </div>
+      <div class="timer-body">
+        <div class="timer-label">离交卷还有</div>
+        <div class="timer-phase">🔵 写作阶段 · 还剩 20:00</div>
+        <div class="timer-bar"><div class="timer-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Phase reminder -->
+    <div style="display:flex;gap:10px;margin-bottom:10px;font-size:10px;color:#b09bc0">
+      <span>00:00–02:00 📋 审题</span>
+      <span>02:00–05:00 📝 列提纲</span>
+      <span>05:00–28:00 ✍️ 写作</span>
+      <span>28:00–30:00 🔍 检查</span>
+    </div>
+
+    <!-- Prompt -->
+    <div style="font-size:11px;color:#b09bc0;margin-bottom:4px">📋 题目</div>
+    <div style="font-size:12px;line-height:1.6;color:#504060;margin-bottom:10px;padding:10px 12px;background:#faf5fc;border-radius:8px">
+      Directions: For this part, you are allowed 30 minutes to write a short essay on the topic 'Should College Students Take Part-time Jobs?'. You should write at least 120 words but no more than 180 words.
+    </div>
+
+    <!-- Writing area -->
+    <textarea class="mini-input" rows="5" style="min-height:100px" placeholder="在此输入你的作文……">There is a heated debate on whether college students should take part-time jobs. Some people argue that part-time jobs can help students gain practical experience and earn some money. By working, students can learn how to communicate with others and solve problems in real life.</textarea>
+    <div class="mini-hint">86 词 · 建议 120–180 词</div>
+    <button class="btn btn-primary">📤 交卷</button>
+
+    <!-- Reference with parse -->
+    <div style="font-size:12px;font-weight:600;color:#504060;display:flex;align-items:center;gap:4px;margin-bottom:8px">📖 范文拆解</div>
+
+    <div class="parse-sec">
+      <div class="parse-head">📌 第 1 段 · 引入观点</div>
+      <div class="parse-text">There is a heated debate on whether college students should take part-time jobs.</div>
+      <span class="parse-note">💡 开头句：There is a heated debate on whether… 引出争议话题</span>
+    </div>
+
+    <div class="parse-sec">
+      <div class="parse-head">📌 第 2 段 · 正方观点</div>
+      <div class="parse-text">Some people argue that part-time jobs can help students gain practical experience and earn some money. By working, students can learn how to communicate with others and solve problems in real life.</div>
+      <span class="parse-note">💡 Some people argue that… 引出观点 · 连接词 By working 表示方式</span>
+    </div>
+
+    <div class="parse-sec">
+      <div class="parse-head">📌 第 3 段 · 反方观点 + 个人立场</div>
+      <div class="parse-text">However, others believe that part-time jobs may distract students from their studies. If students spend too much time on work, their academic performance may suffer. In my opinion, students should take part-time jobs as long as they can balance work and study properly.</div>
+      <span class="parse-note">💡 However 转折 · In my opinion 给出个人观点 · as long as 条件句</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- Feature Summary                 -->
+<!-- ============================== -->
+<div style="width:375px">
+  <div class="label" style="margin-bottom:10px">💡 写作教学 2.0 新增功能一览</div>
+
+  <div class="fcard" style="border-left-color:#9c27b0">
+    <span class="feature-badge purple">📋 提纲生成器</span>
+    <div class="fcard-title">从空白到提纲，三步走</div>
+    <div class="fcard-desc">问观点 → 填理由 → 加例子，自动生成填空式提纲框架，填完再展开写全文。解决"不知道写什么"。</div>
+  </div>
+
+  <div class="fcard" style="border-left-color:#1976d2">
+    <span class="feature-badge blue">📖 句型急救包</span>
+    <div class="fcard-title">按功能分类，即点即用</div>
+    <div class="fcard-desc">开头/递进/转折/举例/结尾分类展示，搜索 + 最近使用 + 一键插入。解决"不知道怎么表达"。</div>
+  </div>
+
+  <div class="fcard" style="border-left-color:#43a047">
+    <span class="feature-badge green">🌱 降门槛模式</span>
+    <div class="fcard-title">从 3 句话开始，逐步加量</div>
+    <div class="fcard-desc">先写 3 句 → 鼓励扩展 5 句 → 8 句 → 整篇。每达到里程碑给正反馈。解决"看到作文就害怕"。</div>
+  </div>
+
+  <div class="fcard" style="border-left-color:#ef6c00">
+    <span class="feature-badge orange">⏱️ 计时模拟</span>
+    <div class="fcard-title">30 分钟分阶段倒计时</div>
+    <div class="fcard-desc">审题 2min → 提纲 3min → 写作 23min → 检查 2min，每阶段提醒。解决"考场不会分配时间"。</div>
+  </div>
+
+  <div class="fcard" style="border-left-color:#f44336">
+    <span class="feature-badge red">📖 范文拆解</span>
+    <div class="fcard-title">逐段标注，教你抄出水平</div>
+    <div class="fcard-desc">每段标注"开头/展开/总结"角色，高亮关键词型和连接词，解释为什么好用。解决"看了范文也学不会"。</div>
+  </div>
+
+  <div class="footer">设计预览 · 先确认再改代码</div>
+</div>
+
+</body>
+</html>

@@ -392,14 +392,15 @@ Page<IListeningData, IListeningMethods>({
   toggleFocus() {
     const on = !this.data.focusMode
     if (on) {
-      this.setData({ focusMode: true, loopSentence: true, speed: 0.75 })
+      if (audioCtx) audioCtx.pause()
+      this.setData({ focusMode: true, loopSentence: true, speed: 0.75, isPlaying: false })
       if (audioCtx) audioCtx.playbackRate = 0.75
     } else {
       if (audioCtx) {
         audioCtx.pause()
         audioCtx.playbackRate = 1
       }
-      this.setData({ focusMode: false, loopSentence: false, speed: 1, isPlaying: false })
+      this.setData({ focusMode: false, speed: 1, isPlaying: false })
     }
   },
 
@@ -516,7 +517,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   setSpeed(e: WechatMiniprogram.TouchEvent) {
-    const speed = e.currentTarget.dataset.speed as number
+    const speed = parseFloat(e.currentTarget.dataset.speed as string)
     this.setData({ speed })
     if (audioCtx) audioCtx.playbackRate = speed
   },
