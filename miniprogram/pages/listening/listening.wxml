@@ -86,6 +86,7 @@
         <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
         <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 循环中' : '循环'}}</view>
         <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">{{dictationMode ? '✏️ 听写中' : '听写'}}</view>
+        <text class="focus-time">{{audioTimeStr}} / {{audioDurationStr}}</text>
       </view>
 
       <scroll-view class="sentence-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
