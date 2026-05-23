@@ -7,7 +7,7 @@
         <view class="header-icon">✍️</view>
         <view>
           <view class="header-t1">CET-4 写作训练</view>
-          <view class="header-t2">写作教学</view>
+          <view class="header-t2">写作教学 2.0</view>
         </view>
       </view>
       <view class="header-ai {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">🤖</view>
@@ -25,31 +25,51 @@
 
   <!-- ══ Tabs ══ -->
   <view class="tabs">
-    <view class="tab {{tab === 0 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{0}}">📖 句型库</view>
-    <view class="tab {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">📝 段落写作</view>
-    <view class="tab {{tab === 2 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{2}}">📄 全文模拟</view>
+    <view class="tab {{tab === 0 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{0}}">📖 句型急救包</view>
+    <view class="tab {{tab === 1 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{1}}">📝 引导写作</view>
+    <view class="tab {{tab === 2 ? 'active' : ''}}" catchtap="onSwitchTab" data-tab="{{2}}">📄 考场模拟</view>
   </view>
 
-  <!-- ═══════════ TAB 0: 句型库 ═══════════ -->
+  <!-- ═══════════ TAB 0: 句型急救包 ═══════════ -->
   <scroll-view class="content" scroll-y wx:if="{{tab === 0}}">
-    <view class="hint">📚 点击卡片展开例句，选一个句型练手</view>
+    <view class="hint">💡 按功能分类查找句型，点选用后造句练习</view>
 
-    <view class="pcard" wx:for="{{patterns}}" wx:key="id" data-id="{{item.id}}" catchtap="togglePattern">
-      <view class="pcard-row">
-        <view class="pcard-pat">{{item.pattern}}</view>
-        <view class="pcard-arrow {{expandedPattern === item.id ? 'open' : ''}}">{{expandedPattern === item.id ? '▼' : '▶'}}</view>
-      </view>
-      <view class="pcard-cn">{{item.chinese}}</view>
-      <view class="pcard-ex" wx:if="{{expandedPattern === item.id}}">
-        {{item.example}}
+    <!-- 搜索 -->
+    <view class="srch-wrap">
+      <input class="srch" placeholder="🔍 搜索句型…" value="{{toolkitSearch}}" bindinput="onToolkitSearch" />
+    </view>
+
+    <!-- 分类 -->
+    <scroll-view class="cats" scroll-x show-scrollbar="{{false}}">
+      <view class="cat {{toolkitCategory === item ? 'on' : ''}}" wx:for="{{categoryOptions}}" wx:key="item" data-cat="{{item}}" catchtap="setToolkitCategory">{{categoryEmojis[item]}} {{item}}</view>
+    </scroll-view>
+
+    <!-- 句型列表 -->
+    <view class="tkl" wx:for="{{patterns}}" wx:key="id" wx:if="{{toolkitCategory === '全部' || patternCategories[item.id] === toolkitCategory}}">
+      <view wx:if="{{!toolkitSearch || item.pattern.indexOf(toolkitSearch) > -1 || item.chinese.indexOf(toolkitSearch) > -1}}" class="tki" data-id="{{item.id}}" catchtap="insertPattern">
+        <view class="tki-bd">
+          <view class="tki-pat">{{item.pattern}}</view>
+          <view class="tki-cn">{{item.chinese}} · <text class="tki-tag">{{patternCategories[item.id] || '通用'}}</text></view>
+        </view>
+        <view class="tki-add">+</view>
       </view>
     </view>
 
+    <!-- 最近使用 -->
+    <view class="hint" style="margin-top:12px">📎 最近使用</view>
+    <view class="recent" wx:if="{{recentPatterns.length > 0}}">
+      <view class="rec" wx:for="{{recentPatterns}}" wx:key="item" data-id="{{item}}" catchtap="insertPattern">
+        <text wx:for="{{patterns}}" wx:key="id" wx:if="{{item === id}}">{{item.pattern}}</text>
+      </view>
+    </view>
+    <view class="hint dim" wx:else>还没有使用记录，点句型上面的 + 选用</view>
+
+    <!-- 练习区 -->
     <view class="practice">
       <view class="practice-h">
-        <view class="practice-label">用上方句型造句</view>
+        <view class="practice-label">造句练习</view>
         <text wx:if="{{selectedPattern}}" class="practice-hint">当前：{{selectedPattern.pattern}}</text>
-        <text wx:else class="practice-hint dim">请先点开一个句型</text>
+        <text wx:else class="practice-hint dim">请先在句型列表中选用一个</text>
       </view>
       <view class="pi-wrap">
         <textarea class="pi" placeholder="在此输入你的句子…" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
@@ -60,50 +80,159 @@
 
     <view class="result" wx:if="{{showResult}}">
       <view class="r-h">🔍 评审结果</view>
-      <view class="r-line"><text class="r-tag">句型：</text>{{selectedPattern.pattern}}</view>
-      <view class="r-line"><text class="r-tag">你的句子：</text>{{userSentence}}</view>
-      <view class="r-div"></view>
       <text class="r-text">{{result}}</text>
     </view>
   </scroll-view>
 
-  <!-- ═══════════ TAB 1: 段落写作 ═══════════ -->
+  <!-- ═══════════ TAB 1: 引导写作 ═══════════ -->
   <scroll-view class="content" scroll-y wx:elif="{{tab === 1}}">
-    <view class="hint">🎯 选主题 → 读主题句 → 续写</view>
+    <view class="hint">🎯 跟着步骤走，作文不难写</view>
 
+    <!-- Step bar -->
+    <view class="steps">
+      <view class="step {{guideStep > 1 ? 'done' : ''}} {{guideStep === 1 ? 'active' : ''}}" data-step="{{1}}" catchtap="setGuideStep">① 审题</view>
+      <view class="step {{guideStep > 2 ? 'done' : ''}} {{guideStep === 2 ? 'active' : ''}}" data-step="{{2}}" catchtap="setGuideStep">② 列提纲</view>
+      <view class="step {{guideStep > 3 ? 'done' : ''}} {{guideStep === 3 ? 'active' : ''}}" data-step="{{3}}" catchtap="setGuideStep">③ 写作</view>
+      <view class="step {{guideStep > 4 ? 'done' : ''}} {{guideStep === 4 ? 'active' : ''}}" data-step="{{4}}" catchtap="setGuideStep">④ 检查</view>
+    </view>
+
+    <!-- Step 1: 审题 -->
+    <block wx:if="{{guideStep === 1}}">
+      <view class="fcard">
+        <view class="fcard-tag">📋 第 1 步 · 审题</view>
+        <view class="fcard-title">先理解题目在问什么</view>
+        <view class="fcard-desc">确定题型、主题、要求词数。想想自己对这个话题有什么看法。</view>
+        <view style="margin-top:10px;padding:10px 12px;background:#f9f5fc;border-radius:8px;font-size:12px;line-height:1.6;color:#504060">
+          常见题型：<br>
+          · 观点选择：Should…? / Do you agree…?<br>
+          · 现象分析：The Impact of… / How to…<br>
+          · 原因解释：Why…? / The Reason for…
+        </view>
+        <view style="margin-top:12px;font-size:12px;color:#504060;font-weight:600">💡 试试回答这三个问题：</view>
+        <view style="margin-top:6px;font-size:11px;color:#b09bc0;line-height:1.6">
+          1. 我对这个话题持什么态度？<br>
+          2. 我能想到几个理由？<br>
+          3. 我有例子吗？
+        </view>
+        <view class="btn btn-primary" style="margin-top:12px" data-step="{{2}}" catchtap="setGuideStep">我知道了，去列提纲 →</view>
+      </view>
+
+      <!-- 新手模式 -->
+      <view class="fcard" style="border-left-color:#4caf50">
+        <view class="fcard-tag" style="background:rgba(76,175,80,0.07);color:#43a047">🌱 新手模式</view>
+        <view class="fcard-title">不想列提纲？先写 3 句话</view>
+        <view class="fcard-desc">写够 3 句就获得成就 🎉，然后挑战五句 → 八句 → 整篇</view>
+        <textarea class="mini-input" placeholder="第 1 句：表达你的观点…" value="{{sentence1}}" bindinput="onSentence1Input" style="margin-top:8px;min-height:auto"></textarea>
+        <textarea class="mini-input" placeholder="第 2 句：给出一个理由…" value="{{sentence2}}" bindinput="onSentence2Input" style="min-height:auto"></textarea>
+        <textarea class="mini-input" placeholder="第 3 句：举例子或进一步说明…" value="{{sentence3}}" bindinput="onSentence3Input" style="min-height:auto"></textarea>
+        <view class="mini-hint">
+          {{[sentence1, sentence2, sentence3].filter(s => s.trim()).length}}/3 句
+          <text wx:if="{{[sentence1, sentence2, sentence3].filter(s => s.trim()).length >= 3}}"> · 🎉 做到了！试试挑战更多？</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- Step 2: 列提纲 -->
+    <block wx:if="{{guideStep === 2}}">
+      <view class="fcard">
+        <view class="fcard-tag">📋 第 2 步 · 列提纲</view>
+        <view class="fcard-title">你的观点是什么？</view>
+
+        <view class="outline-q">Q1: 你对这个话题持什么态度？</view>
+        <view class="outline-opt">
+          <view class="oo {{outlineOpinion === '支持' ? 'sel' : ''}}" data-val="支持" catchtap="setOutlineOpinion">✅ 支持</view>
+          <view class="oo {{outlineOpinion === '反对' ? 'sel' : ''}}" data-val="反对" catchtap="setOutlineOpinion">❌ 反对</view>
+          <view class="oo {{outlineOpinion === '中立' ? 'sel' : ''}}" data-val="中立" catchtap="setOutlineOpinion">🤷 中立</view>
+        </view>
+
+        <view class="outline-q">Q2: 有哪些理由？</view>
+        <view class="outline-kws">
+          <view class="okw" wx:for="{{outlineReasons}}" wx:key="index">
+            <text>{{item}}</text>
+            <text class="okw-del" data-index="{{index}}" catchtap="removeReason">✕</text>
+          </view>
+        </view>
+        <view class="okw-add">
+          <input class="okw-input" placeholder="输入理由，回车添加…" value="{{outlineReasonInput}}" bindinput="onReasonInput" />
+          <view class="okw-btn" catchtap="addReason">添加</view>
+        </view>
+
+        <view class="outline-q" style="margin-top:10px">Q3: 有什么例子？</view>
+        <view class="outline-kws">
+          <view class="okw" wx:for="{{outlineExamples}}" wx:key="index">
+            <text>{{item}}</text>
+            <text class="okw-del" data-index="{{index}}" catchtap="removeExample">✕</text>
+          </view>
+        </view>
+        <view class="okw-add">
+          <input class="okw-input" placeholder="输入例子，回车添加…" value="{{outlineExampleInput}}" bindinput="onExampleInput" />
+          <view class="okw-btn" catchtap="addExample">添加</view>
+        </view>
+      </view>
+
+      <view class="btn btn-primary {{!outlineOpinion ? 'disabled' : ''}}" catchtap="generateOutline">✅ 生成提纲，去写作</view>
+    </block>
+
+    <!-- Step 3: 写作 -->
+    <block wx:if="{{guideStep === 3}}">
+      <!-- 填空式提纲 -->
+      <view wx:if="{{outlineGenerated}}" class="fcard">
+        <view class="fcard-tag">📝 你的提纲</view>
+        <view class="outline-preview">{{outlineGenerated}}</view>
+        <view class="btn btn-primary" style="margin-top:8px" data-step="{{2}}" catchtap="setGuideStep">修改提纲</view>
+      </view>
+
+      <!-- 写作区 -->
+      <view class="practice" style="margin-top:0">
+        <view class="practice-h">
+          <view class="practice-label">你的段落</view>
+          <view class="practice-hint">参考提纲来写</view>
+        </view>
+        <view class="pi-wrap">
+          <textarea class="pi" placeholder="根据提纲开始写作…" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
+          <text class="pi-wc {{paragraphWordCount > 0 ? 'on' : ''}}">{{paragraphWordCount}} 词</text>
+        </view>
+        <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitParagraph">{{submitting ? '提交中…' : '提交评审'}}</view>
+      </view>
+
+      <view class="result" wx:if="{{showResult}}">
+        <view class="r-h">📊 评审结果</view>
+        <text class="r-text">{{result}}</text>
+      </view>
+    </block>
+
+    <!-- Step 4: 检查 -->
+    <block wx:if="{{guideStep === 4}}">
+      <view class="fcard">
+        <view class="fcard-tag">🔍 第 4 步 · 检查清单</view>
+        <view class="fcard-title">逐项确认：</view>
+        <view style="margin-top:8px;font-size:12px;color:#504060;line-height:2">
+          □ 词数是否达标？<br>
+          □ 首字母大写了没？<br>
+          □ 句末标点正确吗？<br>
+          □ 有总—分—总结构吗？<br>
+          □ 用上了高级句型吗？
+        </view>
+      </view>
+      <view class="btn btn-primary" data-step="{{3}}" catchtap="setGuideStep">← 回写作修改</view>
+    </block>
+
+    <!-- 底部：选题场景 -->
+    <view class="hint" style="margin-top:16px">🎯 选一个场景练习</view>
     <view class="pills">
       <view class="pill {{currentTopic.label === item.label ? 'on' : ''}}" wx:for="{{paragraphTopics}}" wx:key="label" data-index="{{index}}" catchtap="selectTopic">{{item.label}}</view>
     </view>
-
     <view class="bubble">
       <view class="bubble-icon">💬</view>
       <view class="bubble-text">{{currentTopic.text}}</view>
     </view>
-
-    <view class="practice" style="margin-top:0">
-      <view class="practice-h">
-        <view class="practice-label">续写段落</view>
-        <view class="practice-hint">建议 60–120 词</view>
-      </view>
-      <view class="pi-wrap">
-        <textarea class="pi" placeholder="从此主题句开始续写……" value="{{userParagraph}}" bindinput="onParagraphInput" maxlength="800" auto-height disabled="{{submitting}}"></textarea>
-        <text class="pi-wc {{paragraphWordCount > 0 ? 'on' : ''}}">{{paragraphWordCount}} 词</text>
-      </view>
-      <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitParagraph">{{submitting ? '提交中…' : '提交评审'}}</view>
-    </view>
-
-    <view class="result" wx:if="{{showResult}}">
-      <view class="r-h">📊 评审结果</view>
-      <text class="r-text">{{result}}</text>
-    </view>
   </scroll-view>
 
-  <!-- ═══════════ TAB 2: 全文模拟 ═══════════ -->
+  <!-- ═══════════ TAB 2: 考场模拟 ═══════════ -->
 
   <!-- List -->
   <scroll-view class="content" scroll-y wx:elif="{{tab === 2 && !currentWriting}}">
     <view class="hint">📝 选一道题，模拟考场写作</view>
-
     <view class="wl">
       <view class="wi" wx:for="{{writings}}" wx:key="id" data-id="{{item.id}}" catchtap="enterWriting">
         <view class="wi-icon">📄</view>
@@ -118,12 +247,37 @@
   <!-- Detail -->
   <scroll-view class="content" scroll-y wx:elif="{{tab === 2 && currentWriting}}">
 
-    <view class="bubble">
+    <!-- Timer -->
+    <view class="timer {{timerRunning ? 'on' : ''}}">
+      <view class="timer-ring">
+        <view class="timer-in">{{Math.ceil(timerRemaining / 60)}}</view>
+      </view>
+      <view class="timer-body">
+        <view class="timer-label">{{timerPhaseLabel}}</view>
+        <view class="timer-bar"><view class="timer-fill" style="width: {{timerPercent}}%"></view></view>
+      </view>
+      <view class="timer-btn {{timerRunning ? 'stop' : ''}}" catchtap="{{timerRunning ? 'stopTimer' : 'startTimer'}}">{{timerRunning ? '⏹' : '▶️'}}</view>
+    </view>
+
+    <!-- Phase tips -->
+    <view class="phase-tips">
+      <text class="pt {{timerPhase === 'review' ? 'on' : ''}}">📋 审题 2′</text>
+      <text class="pt-arr">→</text>
+      <text class="pt {{timerPhase === 'outline' ? 'on' : ''}}">📝 提纲 3′</text>
+      <text class="pt-arr">→</text>
+      <text class="pt {{timerPhase === 'writing' ? 'on' : ''}}">✍️ 写作 23′</text>
+      <text class="pt-arr">→</text>
+      <text class="pt {{timerPhase === 'check' ? 'on' : ''}}">🔍 检查 2′</text>
+    </view>
+
+    <!-- Prompt -->
+    <view class="bubble" style="margin-bottom:12px">
       <view class="bubble-icon">📋</view>
       <view class="bubble-h">题目</view>
       <view class="bubble-text">{{currentWriting.prompt}}</view>
     </view>
 
+    <!-- Writing Area -->
     <view class="practice" style="margin-top:0">
       <view class="practice-h">
         <view class="practice-label">你的作文</view>
@@ -145,9 +299,10 @@
         <textarea class="pi" placeholder="在此输入你的作文……" value="{{writingAnswer}}" bindinput="onWritingInput" maxlength="2000" auto-height disabled="{{submitting}}"></textarea>
         <text class="pi-wc {{writingWordCount > 0 ? 'on' : ''}}">{{writingWordCount}} 词</text>
       </view>
-      <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitWriting">{{submitting ? '提交中…' : '提交批改'}}</view>
+      <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitWriting">{{submitting ? '提交中…' : '📤 交卷'}}</view>
     </view>
 
+    <!-- Result -->
     <view class="result" wx:if="{{showResult}}">
       <view class="r-h">📊 批改结果</view>
       <text class="r-text">{{result}}</text>
