@@ -82,34 +82,34 @@
 
     <!-- === 精听模式（逐句拆解） === -->
     <block wx:if="{{audioMode && focusMode}}">
-      <view class="focus-ctls-bar">
-        <view class="fc-speed {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-        <view class="fc-toggle {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
-        <view class="fc-toggle {{showTranscript ? 'on' : ''}}" catchtap="toggleTranscript">原文</view>
-        <view class="fc-toggle {{dictationMode ? 'on' : ''}}" catchtap="toggleDictation">听写</view>
+      <view class="controls-bar">
+        <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+        <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 循环中' : '循环'}}</view>
+        <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
+        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">听写</view>
       </view>
 
-      <scroll-view class="focus-sent-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
-        <view class="focus-sent-list">
-          <view class="fs-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
-            <view class="fs-num">{{index + 1}}</view>
-            <view class="fs-body">
-              <text class="fs-text" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
-              <text class="fs-text hidden" wx:else>🔇 点击播放</text>
+      <scroll-view class="sentence-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
+        <view class="sentence-list">
+          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
+            <view class="se-num">{{index + 1}}</view>
+            <view class="se-text">
+              <text class="se-en" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
+              <text class="se-en hidden" wx:else>🔇 点击播放收听</text>
             </view>
-            <view class="fs-act">
-              <view class="fs-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
-              <view class="fs-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
+            <view class="se-actions">
+              <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
+              <view class="se-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
             </view>
           </view>
         </view>
       </scroll-view>
 
-      <view class="focus-bar">
-        <view class="fb-nav" catchtap="prevSentence">◀ 上句</view>
-        <view class="fb-play-btn" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-        <view class="fb-progress"><view class="fb-prog-fill" style="width: {{focusSentences.length > 0 ? currentIndex / focusSentences.length * 100 : 0}}%"></view></view>
-        <view class="fb-nav" catchtap="nextSentence">下句 ▶</view>
+      <view class="player-bar">
+        <view class="pb-prev" catchtap="prevSentence">◀</view>
+        <view class="pb-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+        <view class="pb-next" catchtap="nextSentence">▶</view>
+        <view class="pb-progress"><view class="pb-fill" style="width: {{focusSentences.length > 0 ? currentIndex / focusSentences.length * 100 : 0}}%"></view></view>
       </view>
     </block>
 
