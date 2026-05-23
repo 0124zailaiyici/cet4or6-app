@@ -59,6 +59,8 @@ interface IListeningData {
   summaryTotal: number
   summaryAnswered: number
   summaryMarked: number
+  focusSentences: ISentence[]
+  focusSentenceMap: number[]
 }
 
 interface IListeningMethods {
@@ -177,6 +179,15 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
 
   if (pages.every(p => p.type === 'dir')) return []
   return pages
+}
+
+function isDirectionSentence(s: ISentence): boolean {
+  const t = s.text.toLowerCase()
+  if (t.includes('you hear') && t.length > 80) return true
+  if (t.includes('answer sheet') && t.includes('single line')) return true
+  if (t.includes('spoken only once') && t.includes('choose the best')) return true
+  if (/^\s*\(\d+\s*minutes?\s*\)/.test(s.text)) return true
+  return false
 }
 
 // ===== AudioManager =====
@@ -352,6 +363,8 @@ Page<IListeningData, IListeningMethods>({
     summaryTotal: 0,
     summaryAnswered: 0,
     summaryMarked: 0,
+    focusSentences: [],
+    focusSentenceMap: [],
   },
 
   onLoad(options: { passageId?: string }) {
@@ -552,12 +565,43 @@ Page<IListeningData, IListeningMethods>({
     const on = !this.data.focusMode
     if (on) {
       audio.pause()
-      this.setData({ focusMode: true, loopSentence: true, speed: 0.8, isPlaying: false })
+      const passage = this.data.currentPassage
+      const filtered: ISentence[] = []
+      const map: number[] = []
+      if (passage) {
+        passage.sentences.forEach((s, i) => {
+          if (!isDirectionSentence(s)) {
+            filtered.push(s)
+            map.push(i)
+          }
+        })
+      }
+      this.setData({
+        focusMode: true,
+        loopSentence: true,
+        speed: 0.8,
+        isPlaying: false,
+        focusSentences: filtered,
+        focusSentenceMap: map,
+        currentIndex: 0,
+        currentPage: 0,
+      })
       audio.setRate(0.8)
     } else {
       audio.stop()
       audio.setRate(1)
-      this.setData({ focusMode: false, loopSentence: false, speed: 1, isPlaying: false, audioTime: 0, audioTimeStr: '0:00' })
+      this.setData({
+        focusMode: false,
+        loopSentence: false,
+        speed: 1,
+        isPlaying: false,
+        audioTime: 0,
+        audioTimeStr: '0:00',
+        focusSentences: [],
+        focusSentenceMap: [],
+        currentIndex: 0,
+        currentPage: 0,
+      })
     }
   },
 
@@ -684,20 +728,23 @@ Page<IListeningData, IListeningMethods>({
   toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }) },
 
   toggleHard(e: WechatMiniprogram.TouchEvent) {
-    const index = Number(e.currentTarget.dataset.index)
+    const rawIndex = Number(e.currentTarget.dataset.index)
     const passage = this.data.currentPassage
     if (!passage) return
+    const origIndex = this.data.focusMode
+      ? (this.data.focusSentenceMap[rawIndex] ?? rawIndex)
+      : rawIndex
     const app = getApp<IAppOption>()
     const stored = app.globalData.studyData.hardSentences
     const hardSet = new Set(this.data.hardSentences)
-    if (hardSet.has(index)) {
-      hardSet.delete(index)
-      const idx = stored.findIndex(h => h.passageId === passage.id && h.sentenceIndex === index)
+    if (hardSet.has(origIndex)) {
+      hardSet.delete(origIndex)
+      const idx = stored.findIndex(h => h.passageId === passage.id && h.sentenceIndex === origIndex)
       if (idx !== -1) stored.splice(idx, 1)
       wx.showToast({ title: '已取消难句', icon: 'none' })
     } else {
-      hardSet.add(index)
-      stored.push({ passageId: passage.id, sentenceIndex: index, text: passage.sentences[index].text, passageTitle: passage.title })
+      hardSet.add(origIndex)
+      stored.push({ passageId: passage.id, sentenceIndex: origIndex, text: passage.sentences[origIndex].text, passageTitle: passage.title })
       wx.showToast({ title: '已标记难句', icon: 'none' })
     }
     this.setData({ hardSentences: [...hardSet] })

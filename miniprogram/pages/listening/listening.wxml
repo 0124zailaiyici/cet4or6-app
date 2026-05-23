@@ -80,48 +80,36 @@
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 
-    <!-- === 精听模式 === -->
+    <!-- === 精听模式（逐句拆解） === -->
     <block wx:if="{{audioMode && focusMode}}">
-      <view class="f-player">
-        <view class="f-track" catchtap="seekAudio">
-          <view class="f-fill" style="width: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>
-        </view>
-        <view class="f-time"><text>{{audioTimeStr}}</text><text>{{audioDurationStr}}</text></view>
-        <view class="f-row">
-          <view class="f-loop {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
-          <view class="f-b" catchtap="rewindAudio">⏪</view>
-          <view class="f-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-          <view class="f-b" catchtap="forwardAudio">⏩</view>
-          <view class="f-sp {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-        </view>
+      <view class="focus-ctls-bar">
+        <view class="fc-speed {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+        <view class="fc-toggle {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
+        <view class="fc-toggle {{showTranscript ? 'on' : ''}}" catchtap="toggleTranscript">原文</view>
+        <view class="fc-toggle {{dictationMode ? 'on' : ''}}" catchtap="toggleDictation">听写</view>
       </view>
-      <view class="f-pos"><text>📍 {{currentSectionLabel}}</text></view>
-      <view class="page-area">
-        <view class="page-view">
-          <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
-            <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
-              <view wx:if="{{item.type === 'dir'}}" class="p-dir">
-                <view class="p-section">{{item.section}}</view>
-                <view class="p-dir-text">{{item.stem}}</view>
-              </view>
-              <view wx:else class="p-q">
-                <view class="p-section">{{item.section}}<text wx:if="{{focusMode && markedFlags[pi]}}" style="color:#ff6b8a;font-size:20rpx;margin-left:8rpx"> 📌 标记</text></view>
-                <view class="p-stem">{{item.stem}}</view>
-                <view class="p-opts">
-                  <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
-                    <view class="po-l">{{optionLetters[oi]}}</view>
-                    <view class="po-t">{{item}}</view>
-                  </view>
-                </view>
-              </view>
+
+      <scroll-view class="focus-sent-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
+        <view class="focus-sent-list">
+          <view class="fs-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="start" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
+            <view class="fs-num">{{index + 1}}</view>
+            <view class="fs-body">
+              <text class="fs-text" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
+              <text class="fs-text hidden" wx:else>🔇 点击播放</text>
+            </view>
+            <view class="fs-act">
+              <view class="fs-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
+              <view class="fs-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
             </view>
           </view>
         </view>
-      </view>
-      <view class="f-bar">
-        <view class="f-nav" catchtap="prevPage">⬅ 上题</view>
-        <view class="f-mark {{isCurrentMarked ? 'on' : ''}}" catchtap="markForReview">{{isCurrentMarked ? '✅ 已标记' : '❗ 标记'}}</view>
-        <view class="f-nav" catchtap="nextPage">下题 ➔</view>
+      </scroll-view>
+
+      <view class="focus-bar">
+        <view class="fb-nav" catchtap="prevSentence">◀ 上句</view>
+        <view class="fb-play-btn" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+        <view class="fb-progress"><view class="fb-prog-fill" style="width: {{focusSentences.length > 0 ? currentIndex / focusSentences.length * 100 : 0}}%"></view></view>
+        <view class="fb-nav" catchtap="nextSentence">下句 ▶</view>
       </view>
     </block>
 
