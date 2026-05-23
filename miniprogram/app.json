@@ -9,7 +9,8 @@
     "pages/favorites/favorites",
     "pages/settings/settings",
     "pages/dictionary/dictionary",
-    "pages/reading/reading"
+    "pages/reading/reading",
+    "pages/errors/errors"
   ],
   "window": {
     "navigationBarTextStyle": "black",

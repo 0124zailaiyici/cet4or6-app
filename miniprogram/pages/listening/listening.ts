@@ -51,6 +51,8 @@ interface IListeningData {
   pageTouchX: number
   optionLetters: string[]
   dataWarning: string
+  focusMode: boolean
+  currentSectionLabel: string
 }
 
 interface IListeningMethods {
@@ -75,6 +77,10 @@ interface IListeningMethods {
   onOptionTap(e: WechatMiniprogram.TouchEvent): void
   prevPage(): void
   nextPage(): void
+  toggleFocus(): void
+  rewindAudio(): void
+  forwardAudio(): void
+  markForReview(): void
 }
 
 const LABELS: Record<string, string> = {
@@ -239,6 +245,8 @@ Page<IListeningData, IListeningMethods>({
     pageTouchX: 0,
     optionLetters: ['A','B','C','D'],
     dataWarning: '',
+    focusMode: true,
+    currentSectionLabel: '',
   },
 
   onLoad(options: { passageId?: string }) {
@@ -299,6 +307,8 @@ Page<IListeningData, IListeningMethods>({
           hardSentences: localHard, audioMode: true, audioTime: 0, audioDuration: 0,
           pages, currentPage: 0, selectedAnswers: saved,
           dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
+          focusMode: true,
+          currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
         })
       } else {
         this.setData({
@@ -344,11 +354,40 @@ Page<IListeningData, IListeningMethods>({
   },
 
   prevPage() {
-    if (this.data.currentPage > 0) this.setData({ currentPage: this.data.currentPage - 1 })
+    if (this.data.currentPage > 0) {
+      const cp = this.data.currentPage - 1
+      const p = this.data.pages[cp]
+      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '' })
+    }
   },
 
   nextPage() {
-    if (this.data.currentPage < this.data.pages.length - 1) this.setData({ currentPage: this.data.currentPage + 1 })
+    if (this.data.currentPage < this.data.pages.length - 1) {
+      const cp = this.data.currentPage + 1
+      const p = this.data.pages[cp]
+      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '' })
+    }
+  },
+
+  toggleFocus() {
+    this.setData({ focusMode: !this.data.focusMode })
+  },
+
+  rewindAudio() {
+    if (!audioCtx) return
+    audioCtx.seek(Math.max(0, audioCtx.currentTime - 15))
+  },
+
+  forwardAudio() {
+    if (!audioCtx) return
+    audioCtx.seek(Math.min(audioCtx.duration, audioCtx.currentTime + 15))
+  },
+
+  markForReview() {
+    const p = this.data.pages[this.data.currentPage]
+    if (!p || p.type !== 'q') return
+    wx.showToast({ title: `已标记「${p.stem}」`, icon: 'none' })
+    // 暂时用 toast 提示，后续可持久化到 studyData
   },
 
   // ===== Audio controls =====

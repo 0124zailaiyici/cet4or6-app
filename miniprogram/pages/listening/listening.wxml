@@ -30,11 +30,60 @@
     <view class="detail-header">
       <view class="back-btn" catchtap="backToList">返回</view>
       <text class="detail-title">{{currentPassage.title}}</text>
+      <view wx:if="{{audioMode}}" class="focus-toggle {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">精听</view>
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 
-    <!-- === 整段MP3翻页模式 === -->
-    <block wx:if="{{audioMode}}">
+    <!-- === 精听模式 === -->
+    <block wx:if="{{audioMode && focusMode}}">
+      <view class="f-player">
+        <view class="f-track" catchtap="seekAudio">
+          <view class="f-fill" style="width: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>
+        </view>
+        <view class="f-time"><text>{{audioTimeStr}}</text><text>{{audioDurationStr}}</text></view>
+        <view class="f-row">
+          <view class="f-b {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">🔁</view>
+          <view class="f-b" catchtap="rewindAudio">⏪</view>
+          <view class="f-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+          <view class="f-b" catchtap="forwardAudio">⏩</view>
+          <view class="f-sp {{speed === s ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+        </view>
+      </view>
+      <view class="f-pos"><text>📍 {{currentSectionLabel}}</text></view>
+      <view class="page-area">
+        <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
+          <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
+            <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
+              <view wx:if="{{item.type === 'dir'}}" class="p-dir">
+                <view class="p-section">{{item.section}}</view>
+                <view class="p-dir-text">{{item.stem}}</view>
+              </view>
+              <view wx:else class="p-q">
+                <view class="p-section">{{item.section}}</view>
+                <view class="p-stem">{{item.stem}}</view>
+                <view class="p-opts">
+                  <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
+                    <view class="po-l">{{optionLetters[oi]}}</view>
+                    <view class="po-t">{{item}}</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="f-bar">
+        <view class="f-nav" catchtap="prevPage">⬅ 上题</view>
+        <view class="f-mark" catchtap="markForReview">❗ 标记</view>
+        <view class="f-dots">
+          <view class="fd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
+        </view>
+        <view class="f-nav" catchtap="nextPage">下题 ➔</view>
+      </view>
+    </block>
+
+    <!-- === 标准MP3翻页模式 === -->
+    <block wx:elif="{{audioMode}}">
       <view class="audio-player">
         <view class="ap-bar" catchtap="seekAudio">
           <view class="ap-fill" style="width: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>

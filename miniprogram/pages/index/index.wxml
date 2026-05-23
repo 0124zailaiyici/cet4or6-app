@@ -82,5 +82,11 @@
       <text class="mc-name">阅读理解</text>
       <text class="mc-brief">真题 · 解析</text>
     </view>
+    <view class="module-card mc-errors" data-url="/pages/errors/errors" catchtap="goTo">
+      <view class="mc-badge">错题</view>
+      <text class="mc-emoji">📝</text>
+      <text class="mc-name">错题本</text>
+      <text class="mc-brief">查漏补缺</text>
+    </view>
   </view>
 </view>
