@@ -685,6 +685,15 @@ Page<IListeningData, IListeningMethods>({
   },
 
   playPause() {
+    if (this.data.focusMode) {
+      if (this.data.isPlaying) {
+        audio.pause()
+        this.setData({ isPlaying: false })
+      } else {
+        this.playCurrent()
+      }
+      return
+    }
     if (this.data.audioMode) {
       if (this.data.isPlaying) {
         audio.pause()
