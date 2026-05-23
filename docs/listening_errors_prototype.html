@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>精听 + 错题本 原型 v3</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e; font-family: -apple-system, sans-serif;
+  display: flex; justify-content: center; align-items: center; min-height: 100vh;
+  gap: 30px; padding: 20px; flex-wrap: wrap;
+}
+
+.phone {
+  width: 375px; height: 780px; border-radius: 38px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; background: #f3eeed;
+  transition: 0.3s;
+}
+
+/* ============ Header ============ */
+.topbar {
+  display: flex; align-items: center; gap: 10px; padding: 48px 20px 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #ffb3c6, #ff8fab); color: #fff;
+  transition: 0.3s;
+}
+.topbar .back { font-size: 20px; cursor: pointer; opacity: 0.8; }
+.topbar h1 { flex: 1; font-size: 17px; font-weight: 700; }
+.topbar .tag { font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 8px; }
+
+/* ============ Player (compact) ============ */
+.player {
+  background: #fff; margin: 0 14px 6px; border-radius: 12px; padding: 10px 14px 8px;
+  box-shadow: 0 1px 8px rgba(255,158,181,0.06); flex-shrink: 0; transition: 0.3s;
+}
+.player .track { height: 4px; border-radius: 2px; background: #ece4e2; position: relative; cursor: pointer; margin-bottom: 4px; }
+.player .track .fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #4fc3f7, #2196f3); width: 35%; }
+.player .time { display: flex; justify-content: space-between; font-size: 10px; color: #8a7a9a; margin-bottom: 6px; }
+.player .row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.player .row .b { width: 32px; height: 32px; border-radius: 50%; background: #fff0f3; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #8a7a9a; cursor: pointer; }
+.player .row .play { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#4fc3f7,#2196f3); display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; cursor: pointer; box-shadow: 0 3px 12px rgba(33,150,243,0.25); }
+.player .row .spd { font-size: 11px; color: #8a7a9a; background: #fff0f3; padding: 2px 8px; border-radius: 6px; cursor: pointer; }
+
+/* ============ Position indicator ============ */
+.pos {
+  display: flex; align-items: center; gap: 6px; padding: 0 14px 6px; flex-shrink: 0;
+  font-size: 11px; color: #2196f3; font-weight: 600;
+}
+
+/* ============ Swipe cards ============ */
+.swipe-wrap { flex: 1; margin: 0 14px 4px; overflow: hidden; position: relative; border-radius: 14px; background: #fff; box-shadow: 0 1px 8px rgba(255,158,181,0.04); }
+.swipe-track { display: flex; height: 100%; transition: transform 0.25s ease; }
+.scard { min-width: 100%; height: 100%; overflow-y: auto; padding: 18px 20px; }
+.scard .sec { font-size: 10px; color: #2196f3; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 6px; }
+.scard .stem { font-size: 14px; font-weight: 600; color: #2d2d4e; line-height: 1.6; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f5f0f0; }
+.scard .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.scard .o {
+  width: calc(50% - 4px); display: flex; align-items: flex-start; gap: 8px;
+  padding: 12px 14px; border-radius: 10px; font-size: 12px; color: #4a4a6a; line-height: 1.4;
+  background: #f8f5f4; border: 1px solid #ece4e2; cursor: pointer; transition: 0.12s;
+}
+.scard .o .l { width: 22px; height: 22px; border-radius: 6px; background: rgba(84,110,122,0.06); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8a7a9a; flex-shrink: 0; }
+.scard .o.on { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.04); }
+.scard .o.on .l { background: #1e88e5; color: #fff; }
+
+/* ============ Bottom ============ */
+.btm {
+  display: flex; align-items: center; gap: 6px; padding: 2px 10px 14px; flex-shrink: 0;
+}
+.btm .nav { height: 34px; border-radius: 8px; background: #fff0f3; padding: 0 12px; display: flex; align-items: center; font-size: 11px; color: #546e7a; font-weight: 600; cursor: pointer; }
+.btm .redo { height: 34px; border-radius: 8px; background: rgba(255,107,138,0.06); border: 1px solid rgba(255,107,138,0.12); padding: 0 10px; display: flex; align-items: center; font-size: 10px; color: #ff6b8a; cursor: pointer; }
+.btm .dots { flex: 1; display: flex; justify-content: center; gap: 4px; }
+.btm .dot { width: 5px; height: 5px; border-radius: 50%; background: #d0c8d0; }
+.btm .dot.on { width: 14px; border-radius: 3px; background: #546e7a; }
+
+/* ============ 错题本 ============ */
+.eb-top { display: flex; gap: 6px; margin: 8px 14px 6px; }
+.eb-top .s { flex: 1; background: #fff; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 1px 6px rgba(255,158,181,0.04); }
+.eb-top .s .n { font-size: 20px; font-weight: 800; color: #ff6b8a; }
+.eb-top .s .l { font-size: 10px; color: #8a7a9a; margin-top: 2px; }
+.eb-tabs { display: flex; gap: 3px; margin: 0 14px 6px; }
+.eb-tab { flex: 1; padding: 8px 0; font-size: 12px; color: #8a7a9a; background: #fff; border-radius: 8px; text-align: center; cursor: pointer; }
+.eb-tab.on { color: #ff6b8a; font-weight: 600; background: rgba(255,107,138,0.06); border: 1px solid rgba(255,107,138,0.12); }
+.eb-list { flex: 1; margin: 0 14px 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.eb-card { background: #fff; border-radius: 12px; padding: 12px 14px; border: 1px solid rgba(255,107,138,0.06); }
+.eb-card .h { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.eb-card .h .src { font-size: 10px; color: #ff6b8a; font-weight: 600; }
+.eb-card .h .qn { font-size: 10px; color: #8a7a9a; }
+.eb-card .q { font-size: 13px; color: #2d2d4e; line-height: 1.5; margin-bottom: 6px; }
+.eb-card .ans { font-size: 11px; color: #1e88e5; font-weight: 600; background: rgba(30,136,229,0.04); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+.eb-card .redo { font-size: 11px; color: #ff6b8a; margin-top: 6px; padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,107,138,0.15); display: inline-block; cursor: pointer; }
+.eb-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: #8a7a9a; font-size: 13px; }
+
+/* ============ Dark overrides ============ */
+.dark { background: #12121f !important; }
+.dark .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
+.dark .player { background: #1e1e38 !important; box-shadow: 0 1px 8px rgba(0,0,0,0.2) !important; }
+.dark .player .track { background: #2a2a4a !important; }
+.dark .player .time { color: #a090b0 !important; }
+.dark .player .row .b { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark .player .row .spd { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark .pos { color: #4fc3f7 !important; }
+.dark .swipe-wrap { background: #1e1e38 !important; box-shadow: 0 1px 8px rgba(0,0,0,0.15) !important; }
+.dark .scard .sec { color: #4fc3f7 !important; }
+.dark .scard .stem { color: #e0d0e8 !important; border-color: #2a2a4a !important; }
+.dark .scard .o { background: #2a2a4a !important; border-color: #3a3a5a !important; color: #a090b0 !important; }
+.dark .scard .o .l { background: rgba(160,144,176,0.08) !important; color: #a090b0 !important; }
+.dark .scard .o.on { color: #4fc3f7 !important; border-color: #4fc3f7 !important; background: rgba(79,195,247,0.06) !important; }
+.dark .scard .o.on .l { background: #4fc3f7 !important; color: #fff !important; }
+.dark .btm .nav { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark .btm .redo { background: rgba(255,143,171,0.06) !important; border-color: rgba(255,143,171,0.15) !important; color: #ff8fab !important; }
+.dark .btm .dot { background: #3a3a5a !important; }
+.dark .btm .dot.on { background: #a090b0 !important; }
+.dark .eb-top .s { background: #1e1e38 !important; box-shadow: 0 1px 6px rgba(0,0,0,0.15) !important; }
+.dark .eb-top .s .n { color: #ff8fab !important; }
+.dark .eb-top .s .l { color: #a090b0 !important; }
+.dark .eb-tab { background: #1e1e38 !important; color: #a090b0 !important; }
+.dark .eb-tab.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
+.dark .eb-card { background: #1e1e38 !important; border-color: rgba(255,143,171,0.08) !important; }
+.dark .eb-card .h .src { color: #ff8fab !important; }
+.dark .eb-card .h .qn { color: #a090b0 !important; }
+.dark .eb-card .q { color: #e0d0e8 !important; }
+.dark .eb-card .ans { color: #4fc3f7 !important; background: rgba(79,195,247,0.06) !important; }
+.dark .eb-card .redo { color: #ff8fab !important; border-color: rgba(255,143,171,0.2) !important; }
+
+.tgl { text-align: center; margin-bottom: 6px; width: 100%; }
+.tgl-btn { display: inline-flex; align-items: center; gap: 8px; background: #2a2a4a; padding: 6px 16px; border-radius: 16px; cursor: pointer; color: #e0d0e8; font-size: 12px; border: 1px solid #3a3a5a; user-select: none; }
+</style>
+</head>
+<body>
+
+<div class="tgl"><div class="tgl-btn" id="darkBtn">🌙 暗黑预览</div></div>
+
+<!-- 精听 -->
+<div class="phone" id="p1">
+  <div class="topbar">
+    <span class="back">←</span>
+    <h1>CET-4 听力 2019061</h1>
+    <span class="tag">精听</span>
+  </div>
+  <div class="player">
+    <div class="track"><div class="fill"></div></div>
+    <div class="time"><span>1:24</span><span>28:30</span></div>
+    <div class="row">
+      <div class="b">🔁</div><div class="b">⏪</div><div class="play">⏸</div><div class="b">⏩</div><div class="spd">1x</div>
+    </div>
+  </div>
+  <div class="pos">📍 News Report 2 · Q3</div>
+  <div class="swipe-wrap">
+    <div class="swipe-track" style="transform:translateX(-300%)">
+      <div class="scard">
+        <div class="sec">📰 News Report 1</div>
+        <div class="stem">Q1. What did the boy do to celebrate his ninth birthday?</div>
+        <div class="opts">
+          <div class="o"><div class="l">A</div>He set a record by swimming to an island.</div>
+          <div class="o"><div class="l">B</div>He celebrated on a small island.</div>
+          <div class="o on"><div class="l">C</div>He visited a prison on a faraway island.</div>
+          <div class="o"><div class="l">D</div>He swam around an island near SF.</div>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="sec">📰 News Report 1</div>
+        <div class="stem">Q2. What did the father do for the boy?</div>
+        <div class="opts">
+          <div class="o"><div class="l">A</div>He doubled the reward.</div>
+          <div class="o"><div class="l">B</div>He set him an example.</div>
+          <div class="o"><div class="l">C</div>He cheered him on all the way.</div>
+          <div class="o"><div class="l">D</div>He had the event covered on TV.</div>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="sec">📰 News Report 2</div>
+        <div class="stem">Q3. What new policy did the country introduce?</div>
+        <div class="opts">
+          <div class="o"><div class="l">A</div>To end the one-child policy.</div>
+          <div class="o"><div class="l">B</div>To encourage late marriage.</div>
+          <div class="o"><div class="l">C</div>To increase working efficiency.</div>
+          <div class="o"><div class="l">D</div>To give people more time to travel.</div>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="sec">📰 News Report 2</div>
+        <div class="stem">Q4. How do young people respond to the new policy?</div>
+        <div class="opts">
+          <div class="o"><div class="l">A</div>They will not be welcomed.</div>
+          <div class="o"><div class="l">B</div>Help popularize early marriage.</div>
+          <div class="o"><div class="l">C</div>Boost China's tourism industry.</div>
+          <div class="o"><div class="l">D</div>Not come into immediate effect.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btm">
+    <div class="nav">⬅ 上题</div>
+    <div class="redo">❗ 标记</div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div></div>
+    <div class="nav">下题 ➔</div>
+  </div>
+</div>
+
+<!-- 错题本 -->
+<div class="phone" id="p2">
+  <div class="topbar">
+    <h1>错题本</h1>
+    <span class="tag">12 已答</span>
+  </div>
+  <div class="eb-top">
+    <div class="s"><div class="n">12</div><div class="l">已答题</div></div>
+    <div class="s"><div class="n">8</div><div class="l">答错</div></div>
+    <div class="s"><div class="n">33%</div><div class="l">正确率</div></div>
+  </div>
+  <div class="eb-tabs">
+    <div class="eb-tab on">📖 阅读</div>
+    <div class="eb-tab">🎵 听力</div>
+  </div>
+  <div class="eb-list">
+    <div class="eb-card">
+      <div class="h"><span class="src">仔细阅读 · 2019061 第一篇</span><span class="qn">Q51</span></div>
+      <div class="q">How might people often feel when misnamed?</div>
+      <div class="ans">你选了：A) Unwanted.</div>
+      <div class="redo">↻ 重做</div>
+    </div>
+    <div class="eb-card">
+      <div class="h"><span class="src">仔细阅读 · 2019061 第一篇</span><span class="qn">Q53</span></div>
+      <div class="q">What is most likely the cause of misnaming?</div>
+      <div class="ans">你选了：C) Similar physical appearance.</div>
+      <div class="redo">↻ 重做</div>
+    </div>
+    <div class="eb-card">
+      <div class="h"><span class="src">长篇阅读 · 2019061</span><span class="qn">Stmt 3</span></div>
+      <div class="q">Some people may find it difficult to talk face to face.</div>
+      <div class="ans">你匹配了：J</div>
+      <div class="redo">↻ 重做</div>
+    </div>
+    <div class="eb-card">
+      <div class="h"><span class="src">听力 · 2019061 Section A</span><span class="qn">Q2</span></div>
+      <div class="q">What did the father do for the boy?</div>
+      <div class="ans">你选了：C) He cheered him on all the way.</div>
+      <div class="redo">↻ 重做</div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('darkBtn').onclick = () => {
+  document.querySelectorAll('.phone').forEach(p => p.classList.toggle('dark'));
+};
+</script>
+</body>
+</html>
