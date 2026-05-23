@@ -1,0 +1,10 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <view class="topbar"><h1>写作</h1></view>
+  <scroll-view class="scroll" scroll-y>
+    <view class="sec-label">题目</view>
+    <view class="prompt">{{prompt.prompt}}</view>
+    <view class="sec-label">你的作文</view>
+    <textarea class="ta" value="{{answer}}" bindinput="onInput" placeholder="在此输入..." maxlength="-1" />
+    <view class="btn-row"><view class="btn" catchtap="save">保存并返回</view></view>
+  </scroll-view>
+</view>

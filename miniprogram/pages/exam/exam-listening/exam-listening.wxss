@@ -1,0 +1,18 @@
+.page { min-height: 100vh; background: #f3eeed; display: flex; flex-direction: column; }
+.topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; display: flex; align-items: center; }
+.scroll { flex: 1; }
+.audio-row { padding: 16rpx 24rpx; }
+.audio-btn { display: inline-block; padding: 14rpx 28rpx; border-radius: 40rpx; background: #ff8fab; color: #fff; font-size: 26rpx; font-weight: 600; }
+.audio-btn.playing { background: #d81b60; }
+.card { background: #fff; margin: 8rpx 20rpx; border-radius: 14rpx; padding: 16rpx; }
+.q-stem { font-size: 24rpx; font-weight: 700; color: #2d2d4e; margin-bottom: 10rpx; }
+.opt { display: flex; align-items: center; gap: 8rpx; padding: 10rpx 16rpx; border-radius: 10rpx; background: #f8f0f3; font-size: 22rpx; color: #2d2d4e; margin-bottom: 6rpx; }
+.opt.sel { background: #ff8fab; color: #fff; }
+.letter { font-weight: 800; width: 28rpx; text-align: center; flex-shrink: 0; }
+.text { flex: 1; line-height: 1.4; }
+.dark-theme.page { background: #12121f !important; }
+.dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
+.dark-theme .card { background: #1e1e38 !important; }
+.dark-theme .q-stem { color: #e0d0e8 !important; }
+.dark-theme .opt { background: #2a2a4a !important; color: #c0b0d0 !important; }
+.dark-theme .opt.sel { background: #d81b60 !important; color: #fff !important; }

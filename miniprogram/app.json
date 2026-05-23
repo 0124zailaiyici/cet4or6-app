@@ -15,7 +15,11 @@
     "pages/reminder/reminder",
     "pages/feedback/feedback",
     "pages/vocab/vocab",
-    "pages/exam/exam"
+    "pages/exam/exam",
+    "pages/exam/exam-writing/exam-writing",
+    "pages/exam/exam-listening/exam-listening",
+    "pages/exam/exam-reading/exam-reading",
+    "pages/exam/exam-translation/exam-translation"
   ],
   "window": {
     "navigationBarTextStyle": "black",

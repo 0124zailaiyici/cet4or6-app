@@ -1,0 +1,56 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <view class="topbar">
+    <text catchtap="goBack">← 返回</text>
+    <text style="flex:1;text-align:center">{{passages[idx].sectionType === 'A' ? '选词填空' : passages[idx].sectionType === 'B' ? '长篇阅读匹配' : '仔细阅读'}}</text>
+    <text>{{idx + 1}}/{{passages.length}}</text>
+  </view>
+  <block wx:for="{{passages}}" wx:for-index="pi" wx:for-item="p" wx:key="id">
+    <block wx:if="{{pi === idx}}">
+      <view class="pass-zone">
+        <scroll-view class="pass-scroll" scroll-y>
+          <text class="pass-text">{{p.passage}}</text>
+        </scroll-view>
+      </view>
+      <view class="divider"></view>
+      <view class="quest-zone">
+        <scroll-view class="quest-scroll" scroll-y>
+          <block wx:if="{{p.sectionType === 'A'}}">
+            <view class="label">选词（15选10）</view>
+            <view class="chips">
+              <text wx:for="{{p.options}}" wx:for-index="wi" wx:for-item="w" wx:key="*this" data-key="{{p._firstKey}}" data-word="{{w}}" catchtap="onBlankTap">{{['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'][wi]}}. {{w}}</text>
+            </view>
+            <view wx:for="{{p.correctAnswers}}" wx:for-index="k" wx:key="k" class="blank-row">
+              <text class="blank-label">第{{k}}空</text>
+              <view class="blank-opts">
+                <text wx:for="{{p.options}}" wx:for-item="w" wx:key="*this" data-key="{{k}}" data-word="{{w}}" catchtap="onBlankTap">{{w}}</text>
+              </view>
+            </view>
+          </block>
+          <block wx:elif="{{p.sectionType === 'B'}}">
+            <view class="label">匹配陈述（先点陈述，再点字母）</view>
+            <view wx:for="{{p.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" data-qi="{{qi}}" catchtap="onSelectStmt" class="match-row">
+              <text class="match-num">{{qi + 36}}</text>
+              <text class="match-text">{{q}}</text>
+              <text class="match-ans" wx:if="{{p._matchAns[qi]}}">{{p._matchAns[qi]}}</text>
+            </view>
+            <view class="letters-bar">
+              <text wx:for="{{letters}}" wx:for-item="l" wx:key="*this" data-val="{{l}}" catchtap="onMatchLetter">{{l}}</text>
+            </view>
+          </block>
+          <block wx:elif="{{p.sectionType === 'C'}}">
+            <view wx:for="{{p.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="cq-card">
+              <view class="cq-stem">{{q}}</view>
+              <view class="cq-opts">
+                <view wx:for="{{p.choices[qi]}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" data-qi="{{qi}}" data-val="{{ch}}" catchtap="onSelectC">{{ch}}</view>
+              </view>
+            </view>
+          </block>
+          <view class="nav-row">
+            <view class="nav" catchtap="prev">← 上一篇</view>
+            <view class="nav" catchtap="next">下一篇 →</view>
+          </view>
+        </scroll-view>
+      </view>
+    </block>
+  </block>
+</view>

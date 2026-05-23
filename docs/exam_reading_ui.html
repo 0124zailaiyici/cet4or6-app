@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>考试阅读排版原型 v4</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0d1117; display: flex; justify-content: center; align-items: center; padding: 20px 10px; font-family: -apple-system,'PingFang SC','Helvetica Neue',sans-serif; }
+.phone { width: 375px; height: 812px; background: #f3eeed; border-radius: 36px; overflow: hidden; box-shadow: 0 0 0 8px #1a1a1a, 0 0 0 10px #333, 0 20px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
+.phone-status { height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #f3eeed; }
+.phone-notch { width: 120px; height: 6px; border-radius: 3px; background: #d0c8d0; }
+
+.header { display: flex; align-items: center; gap: 8px; padding: 4px 12px 2px; flex-shrink: 0; }
+.hd-back { padding: 4px 12px; height: 30px; border-radius: 7px; background: rgba(84,110,122,0.08); font-size: 13px; color: #546e7a; cursor: pointer; display: flex; align-items: center; flex-shrink: 0; }
+.hd-title { flex: 1; font-size: 15px; font-weight: 700; color: #2d2d4e; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.hd-badge { font-size: 10px; color: #fff; padding: 2px 9px; border-radius: 7px; flex-shrink: 0; }
+.b-A { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+.b-B { background: linear-gradient(135deg, #64b5f6, #1e88e5); }
+.b-C { background: linear-gradient(135deg, #81c784, #388e3c); }
+
+/* ===== Passage ===== */
+.pass-zone { flex: 1; display: flex; flex-direction: column; padding: 2px 10px 0; min-height: 0; }
+.pass-scroll { flex: 1; overflow-y: auto; background: #eef1f3; border-radius: 12px; padding: 14px 16px; font-size: 14px; line-height: 2; color: #2d3a4a; word-break: break-word; }
+.pass-scroll::-webkit-scrollbar { width: 0; }
+.pass-scroll p { margin-bottom: 10px; }
+.pass-scroll b { font-weight: 700; color: #546e7a; margin-right: 3px; }
+
+.bk-tag { display: inline; color: #ff6b8a; font-weight: 700; border-bottom: 2px solid #ff6b8a; padding: 0 2px; cursor: pointer; user-select: none; }
+.bk-tag.filled { color: #2d2d4e; border-color: #81c784; background: rgba(129,199,132,0.12); }
+.bk-tag.active { color: #fff; background: #ff6b8a; border-color: #ff6b8a; border-radius: 4px; padding: 0 5px; }
+
+.pass-dots { display: flex; justify-content: center; gap: 4px; padding: 3px 0 1px; }
+.pass-dot { width: 6px; height: 6px; border-radius: 50%; background: #d0c8d0; }
+.pass-dot.on { background: #546e7a; width: 14px; border-radius: 3px; }
+
+.divider { height: 1px; background: linear-gradient(90deg,transparent,rgba(84,110,122,0.15),transparent); margin: 0 24px; flex-shrink: 0; }
+
+/* ===== Question Zone ===== */
+.quest-zone { flex: 1; display: flex; flex-direction: column; padding: 2px 10px 8px; min-height: 0; background: #faf5f7; overflow: hidden; }
+.quest-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.quest-scroll::-webkit-scrollbar { width: 0; }
+
+/* --- Section A --- */
+.qz-label { font-size: 11px; font-weight: 600; color: #546e7a; padding: 2px 0; flex-shrink: 0; }
+.qz-label .hint { color: #ff6b8a; }
+
+.chip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 2px 0 4px; }
+.chip { font-size: 14px; color: #4a4a6a; padding: 10px 12px; border-radius: 10px; background: rgba(84,110,122,0.04); border: 1.5px solid rgba(84,110,122,0.08); cursor: pointer; text-align: center; user-select: none; word-break: break-word; }
+.chip.used { opacity: 0.3; border-color: #ccc; background: #f0f0f0; pointer-events: none; }
+
+.blank-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #e8e0e0; }
+.blank-row:last-child { border-bottom: none; }
+.blank-num { font-size: 13px; font-weight: 700; color: #2d2d4e; width: 54px; flex-shrink: 0; }
+.blank-val { font-size: 13px; color: #999; padding: 2px 12px; border-radius: 6px; background: #fff; min-width: 56px; text-align: center; }
+.blank-val.filled { color: #d81b60; background: #fce4ec; font-weight: 600; }
+.blank-clr { font-size: 13px; color: #ccc; cursor: pointer; padding: 2px; user-select: none; }
+
+/* --- Section B --- */
+.match-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: #fff; border-radius: 9px; margin-bottom: 5px; cursor: pointer; border-left: 3px solid transparent; }
+.match-item.active { background: rgba(30,136,229,0.06); border-left-color: #1e88e5; }
+.match-num { width: 24px; height: 24px; border-radius: 6px; background: rgba(30,136,229,0.06); font-size: 12px; font-weight: 700; color: #1e88e5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.match-txt { flex: 1; font-size: 13px; line-height: 1.5; color: #2d2d4e; word-break: break-word; min-width: 0; }
+.match-ans { width: 28px; min-width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#64b5f6,#1e88e5); font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+.letter-bar { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; padding: 6px 0 0; flex-shrink: 0; }
+.letter { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg,#64b5f6,#1e88e5); font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(30,136,229,0.3); user-select: none; }
+.letter:active { transform: scale(0.88); }
+
+/* --- Section C --- */
+.qc-dots { display: flex; justify-content: center; gap: 4px; padding: 2px 0 4px; flex-shrink: 0; }
+.qc-dot { width: 6px; height: 6px; border-radius: 50%; background: #d0c8d0; }
+.qc-dot.on { background: #546e7a; width: 14px; border-radius: 3px; }
+
+.cq-card { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 8px rgba(84,110,122,0.05); margin-bottom: 8px; }
+.cq-num { font-size: 11px; font-weight: 700; color: #546e7a; margin-bottom: 6px; }
+.cq-stem { font-size: 15px; line-height: 1.7; color: #2d2d4e; font-weight: 500; margin-bottom: 12px; word-break: break-word; }
+.cq-opts { display: flex; flex-direction: column; gap: 6px; }
+.cq-opt { font-size: 14px; color: #4a4a6a; padding: 11px 16px; border-radius: 12px; background: #faf7f6; border: 1.5px solid #ece4e2; cursor: pointer; display: flex; align-items: center; line-height: 1.5; word-break: break-word; }
+.cq-opt.sel { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.06); box-shadow: 0 2px 8px rgba(30,136,229,0.1); }
+
+/* ===== Switcher ===== */
+.switcher { display: flex; padding: 0 16px 0; flex-shrink: 0; background: #f3eeed; }
+.sw-btn { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; font-weight: 600; color: #8a7a9a; cursor: pointer; border-bottom: 2px solid transparent; }
+.sw-btn.on { color: #ff6b8a; border-bottom-color: #ff6b8a; }
+.panel { display: none; flex-direction: column; flex: 1; min-height: 0; }
+.panel.on { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="phone-status"><div class="phone-notch"></div></div>
+
+  <div class="switcher">
+    <div class="sw-btn on" onclick="sw('a')">选词填空</div>
+    <div class="sw-btn" onclick="sw('b')">匹配</div>
+    <div class="sw-btn" onclick="sw('c')">仔细阅读</div>
+  </div>
+
+  <!-- ===== A: 选词填空 ===== -->
+  <div id="p-a" class="panel on">
+    <div class="header">
+      <div class="hd-back">← 返回</div>
+      <div class="hd-title">选词填空</div>
+      <div class="hd-badge b-A">选词</div>
+    </div>
+    <div class="pass-zone">
+      <div class="pass-scroll">
+        The center of American automobile innovation has moved 2,000 miles away. It has <span class="bk-tag active">26</span> from Detroit to Silicon Valley, where self-driving vehicles are coming into life. In a <span class="bk-tag filled">bid</span> to take production back, lawmakers have introduced <span class="bk-tag">28</span> that could make their state the best place to develop self-driving vehicles. Michigan's <span class="bk-tag filled">dominance</span> in auto research is under attack, says Senator Mike Kowall. Manufacturers would have near total freedom to test self-driving technology on public roads, and even set up on-demand <span class="bk-tag">31</span> of self-driving cars.
+      </div>
+      <div class="pass-dots"><span class="pass-dot on"></span><span class="pass-dot"></span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="quest-zone">
+      <div class="qz-label">📋 选词（15选10）<span class="hint"> · 先点文章中的空，再选词</span></div>
+      <div class="quest-scroll">
+        <div class="chip-grid">
+          <div class="chip">A. bid</div><div class="chip used">B. image</div><div class="chip">C. contrast</div>
+          <div class="chip used">D. dominance</div><div class="chip">E. fleets</div><div class="chip">F. legislation</div>
+          <div class="chip">G. acquired</div><div class="chip">H. migrated</div><div class="chip">I. predators</div>
+          <div class="chip">J. represent</div><div class="chip">K. restrictive</div><div class="chip">L. replace</div>
+          <div class="chip">M. sponsor</div><div class="chip">N. cultivated</div><div class="chip">O. range</div>
+        </div>
+        <div class="blank-row"><span class="blank-num">第26空</span><span class="blank-val">未选</span></div>
+        <div class="blank-row"><span class="blank-num">第27空</span><span class="blank-val filled">image</span><span class="blank-clr">✕</span></div>
+        <div class="blank-row"><span class="blank-num">第28空</span><span class="blank-val">未选</span></div>
+        <div class="blank-row"><span class="blank-num">第29空</span><span class="blank-val filled">dominance</span><span class="blank-clr">✕</span></div>
+        <div class="blank-row"><span class="blank-num">第30空</span><span class="blank-val">未选</span></div>
+        <div class="blank-row"><span class="blank-num">第31空</span><span class="blank-val">未选</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== B: 匹配 ===== -->
+  <div id="p-b" class="panel">
+    <div class="header">
+      <div class="hd-back">← 返回</div>
+      <div class="hd-title">长篇阅读匹配</div>
+      <div class="hd-badge b-B">匹配</div>
+    </div>
+    <div class="pass-zone">
+      <div class="pass-scroll">
+        <p><b>A)</b> Today in the United States there are 72,000 centenarians. Worldwide, probably 450,000. If current trends continue, by 2050 there will be more than a million in the US alone.</p>
+        <p><b>B)</b> Understandably, there are concerns about what this means for public finances. However, living longer doesn't always mean living at the expense of others.</p>
+        <p><b>C)</b> Our view is that if many people are living longer and are healthier, this will result in an unprecedented opportunity for society as a whole.</p>
+        <p><b>D)</b> But the changes go further than that. Being young no longer means what it used to.</p>
+        <p><b>E)</b> While there are numerous factors behind these shifts, one is surely a rise in the age at which women have their first child.</p>
+        <p><b>F)</b> Longevity also pushes back the age of retirement, and not only for financial reasons.</p>
+        <p><b>G)</b> And yet that does not mean that simply extending our careers is appealing.</p>
+      </div>
+      <div class="pass-dots"><span class="pass-dot on"></span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="quest-zone">
+      <div class="qz-label">📋 匹配陈述 · 点击陈述 + 点字母</div>
+      <div class="quest-scroll">
+        <div class="match-item active"><span class="match-num">36</span><span class="match-txt">An extended lifespan in the future will allow people to have more careers than now.</span><span class="match-ans">I</span></div>
+        <div class="match-item"><span class="match-num">37</span><span class="match-txt">Just extending one's career may have both positive and negative effects.</span><span class="match-ans">G</span></div>
+        <div class="match-item"><span class="match-num">38</span><span class="match-txt">Older employees tend to be more reliable and experienced than younger ones.</span></div>
+        <div class="match-item"><span class="match-num">39</span><span class="match-txt">Some companies are now reconsidering their mandatory retirement policies for aging workers.</span><span class="match-ans">F</span></div>
+        <div class="match-item"><span class="match-num">40</span><span class="match-txt">People may need to adjust their expectations about career length.</span></div>
+        <div class="match-item"><span class="match-num">41</span><span class="match-txt">The traditional three-stage life model may no longer apply in the modern world.</span><span class="match-ans">K</span></div>
+        <div class="match-item"><span class="match-num">42</span><span class="match-txt">People are having children at a later age than previous generations did.</span><span class="match-ans">E</span></div>
+        <div class="match-item"><span class="match-num">43</span><span class="match-txt">Societies need to rethink the relationship between work and education.</span><span class="match-ans">N</span></div>
+        <div class="match-item"><span class="match-num">44</span><span class="match-txt">Some may choose to retire early rather than continue working long hours.</span></div>
+        <div class="match-item"><span class="match-num">45</span><span class="match-txt">Having multiple careers may become the norm for future generations.</span><span class="match-ans">M</span></div>
+      </div>
+      <div class="letter-bar">
+        <span class="letter">A</span><span class="letter">B</span><span class="letter">C</span><span class="letter">D</span>
+        <span class="letter">E</span><span class="letter">F</span><span class="letter">G</span><span class="letter">H</span>
+        <span class="letter">I</span><span class="letter">J</span><span class="letter">K</span><span class="letter">L</span>
+        <span class="letter">M</span><span class="letter">N</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== C: 仔细阅读 ===== -->
+  <div id="p-c" class="panel">
+    <div class="header">
+      <div class="hd-back">← 返回</div>
+      <div class="hd-title">仔细阅读</div>
+      <div class="hd-badge b-C">精读</div>
+    </div>
+    <div class="pass-zone">
+      <div class="pass-scroll">
+        In the classic marriage vow, couples promise to stay together in sickness and in health. But a new study finds that the risk of divorce among older couples rises when the wife — not the husband — becomes seriously ill. Married women diagnosed with a serious health condition may find themselves struggling with the impact of their disease while also experiencing the stress of divorce, said researcher Amelia Karraker. She and co-author Kenzie Latham analyzed 20 years of data on 2,717 marriages from a study conducted by Indiana University since 1992. At the time of the first interview, at least one partner was over the age of 50.
+      </div>
+      <div class="pass-dots"><span class="pass-dot on"></span><span class="pass-dot"></span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="quest-zone">
+      <div class="qc-dots"><span class="qc-dot on"></span><span class="qc-dot"></span><span class="qc-dot"></span><span class="qc-dot"></span><span class="qc-dot"></span></div>
+      <div class="quest-scroll">
+        <div class="cq-card">
+          <div class="cq-num">46. What can we learn about marriage vows from the passage?</div>
+          <div class="cq-opts">
+            <div class="cq-opt">A) They may not guarantee a lasting marriage.</div>
+            <div class="cq-opt sel">B) They are not taken seriously any more.</div>
+            <div class="cq-opt">C) They become invalid when one falls ill.</div>
+            <div class="cq-opt">D) They are more important for older couples.</div>
+          </div>
+        </div>
+        <div class="cq-card">
+          <div class="cq-num">47. What did Karraker and co-author find about elderly husbands?</div>
+          <div class="cq-opts">
+            <div class="cq-opt">A) They are generally not good at taking care of themselves.</div>
+            <div class="cq-opt sel">B) They are less likely to become seriously ill than wives.</div>
+            <div class="cq-opt">C) They tend to develop different illnesses from their wives.</div>
+            <div class="cq-opt">D) They are more vulnerable to serious health conditions.</div>
+          </div>
+        </div>
+        <div class="cq-card">
+          <div class="cq-num">48. What does Karraker say about women who fall ill?</div>
+          <div class="cq-opts">
+            <div class="cq-opt sel">A) They are more likely to be widowed.</div>
+            <div class="cq-opt">B) They are more likely to get divorced.</div>
+            <div class="cq-opt">C) They are less likely to receive good care.</div>
+            <div class="cq-opt">D) They are less likely to bother their spouses.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function sw(n) {
+  document.querySelectorAll('.sw-btn, .panel').forEach(e => e.classList.remove('on'));
+  document.querySelector('[onclick*="'+n+'"]').classList.add('on');
+  document.getElementById('p-'+n).classList.add('on');
+}
+</script>
+</body>
+</html>

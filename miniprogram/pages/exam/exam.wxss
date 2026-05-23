@@ -2,9 +2,6 @@
 .topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; }
 .topbar h1 { font-size: 34rpx; font-weight: 800; }
 .topbar .sub { display: block; font-size: 24rpx; opacity: 0.85; margin-top: 4rpx; }
-.topbar-row { display: flex; align-items: center; gap: 20rpx; }
-.back-btn { font-size: 36rpx; }
-.topbar-title { flex: 1; }
 
 .card { background: #fff; margin: 12rpx 20rpx; border-radius: 18rpx; padding: 20rpx; box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04); }
 .c-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8rpx; }
@@ -27,105 +24,14 @@
 .sd { display: block; font-size: 22rpx; color: #8a7a9a; margin-top: 4rpx; }
 .sa { font-size: 32rpx; color: #ccc; }
 .sp { position: absolute; bottom: 0; left: 0; height: 6rpx; border-radius: 0 3rpx 3rpx 0; transition: width 0.3s; }
-.sp-listen { background: #4fc3f7; }
-.sp-read { background: #81c784; }
 
 .submit-row { padding: 20rpx 20rpx 30rpx; }
 .sbtn { padding: 18rpx; border-radius: 16rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; text-align: center; font-size: 28rpx; font-weight: 700; box-shadow: 0 4rpx 16rpx rgba(255,107,138,0.2); }
 
-/* ===== Exam content top bar ===== */
-.exam-topbar { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 60rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; }
-.et-back { font-size: 28rpx; font-weight: 600; }
-.et-timer { font-size: 32rpx; font-weight: 800; letter-spacing: 2rpx; }
-.et-timer.warn { color: #ffe0e0; }
-
-/* ===== Content scroll area ===== */
-.content-scroll { flex: 1; }
-.content-hd { font-size: 36rpx; font-weight: 800; padding: 24rpx 24rpx 8rpx; color: #2d2d4e; }
-.sec-label { font-size: 24rpx; font-weight: 600; color: #8a7a9a; padding: 16rpx 24rpx 8rpx; }
-
-/* ===== Writing ===== */
-.writing-prompt { background: #fff; margin: 0 20rpx; border-radius: 14rpx; padding: 20rpx; font-size: 26rpx; color: #2d2d4e; line-height: 1.6; }
-.writing-ta { display: block; width: auto; margin: 8rpx 20rpx; padding: 20rpx; border-radius: 14rpx; background: #fff; font-size: 26rpx; min-height: 400rpx; }
-
-/* ===== Audio ===== */
-.audio-row { padding: 8rpx 24rpx 16rpx; }
-.audio-btn { display: inline-block; padding: 14rpx 28rpx; border-radius: 40rpx; background: #ff8fab; color: #fff; font-size: 26rpx; font-weight: 600; }
-.audio-btn.playing { background: #d81b60; }
-
-/* ===== Listening questions ===== */
-.lq-card { background: #fff; margin: 8rpx 20rpx; border-radius: 14rpx; padding: 16rpx; }
-.lq-stem { font-size: 24rpx; font-weight: 700; color: #2d2d4e; margin-bottom: 10rpx; }
-.lq-opts { display: flex; flex-wrap: wrap; gap: 8rpx; }
-.lq-opt { display: flex; align-items: center; gap: 8rpx; padding: 10rpx 16rpx; border-radius: 10rpx; background: #f8f0f3; font-size: 22rpx; color: #2d2d4e; flex: 1 1 45%; min-width: 0; }
-.lq-opt.sel { background: #ff8fab; color: #fff; }
-.lq-letter { font-weight: 800; width: 28rpx; text-align: center; flex-shrink: 0; }
-.lq-text { flex: 1; line-height: 1.4; }
-
-/* ===== Reading ===== */
-.rd-passage { background: #fff; margin: 0 20rpx; border-radius: 14rpx; padding: 20rpx; font-size: 24rpx; color: #2d2d4e; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
-
-/* Section A: Word bank & blanks */
-.word-bank { display: flex; flex-wrap: wrap; gap: 8rpx; margin: 8rpx 20rpx; }
-.wb-word { padding: 8rpx 16rpx; border-radius: 8rpx; background: #f0e8f0; font-size: 22rpx; color: #2d2d4e; border: 2rpx solid transparent; }
-.wb-word.used { opacity: 0.3; }
-.wb-word.sel { background: #ff8fab; color: #fff; border-color: #ff6b8a; }
-.word-bank.sm { margin: 4rpx 0; }
-.word-bank.sm .wb-word { padding: 4rpx 10rpx; font-size: 20rpx; }
-.blank-row { background: #fff; margin: 4rpx 20rpx; border-radius: 10rpx; padding: 12rpx 16rpx; display: flex; align-items: center; flex-wrap: wrap; gap: 8rpx; }
-.blank-label { font-size: 24rpx; font-weight: 700; color: #2d2d4e; width: 80rpx; flex-shrink: 0; }
-.blank-val { font-size: 22rpx; color: #999; padding: 4rpx 12rpx; border-radius: 6rpx; background: #f5f0f3; }
-.blank-val.filled { color: #d81b60; background: #fce4ec; }
-
-/* Section B: Matching */
-.match-row { background: #fff; margin: 6rpx 20rpx; border-radius: 12rpx; padding: 14rpx; }
-.match-stmt { font-size: 22rpx; color: #2d2d4e; line-height: 1.5; margin-bottom: 8rpx; }
-.match-opts { display: flex; flex-wrap: wrap; gap: 6rpx; }
-.match-letter { width: 48rpx; height: 48rpx; line-height: 48rpx; text-align: center; border-radius: 8rpx; background: #f0e8f0; font-size: 22rpx; font-weight: 700; color: #2d2d4e; }
-.match-letter.sel { background: #4fc3f7; color: #fff; }
-
-/* Section C: Multiple choice */
-.c-question { background: #fff; margin: 6rpx 20rpx; border-radius: 12rpx; padding: 14rpx; }
-.cq-stem { font-size: 24rpx; font-weight: 600; color: #2d2d4e; line-height: 1.5; margin-bottom: 8rpx; }
-.cq-opts { display: flex; flex-wrap: wrap; gap: 6rpx; }
-.cq-opt { flex: 1 1 45%; display: flex; align-items: center; gap: 6rpx; padding: 10rpx 12rpx; border-radius: 10rpx; background: #f8f0f3; font-size: 22rpx; color: #2d2d4e; }
-.cq-opt.sel { background: #81c784; color: #fff; }
-.cq-letter { font-weight: 800; width: 28rpx; text-align: center; flex-shrink: 0; }
-.cq-text { flex: 1; line-height: 1.4; }
-
-/* ===== Translation ===== */
-.translation-src { background: #fff; margin: 0 20rpx; border-radius: 14rpx; padding: 20rpx; font-size: 28rpx; color: #2d2d4e; line-height: 1.6; }
-.translation-ta { display: block; width: auto; margin: 8rpx 20rpx; padding: 20rpx; border-radius: 14rpx; background: #fff; font-size: 26rpx; min-height: 200rpx; }
-
-/* ===== Buttons ===== */
-.btn-row { display: flex; gap: 12rpx; padding: 20rpx 20rpx 40rpx; }
-.btn { flex: 1; padding: 16rpx; border-radius: 14rpx; text-align: center; font-size: 26rpx; font-weight: 600; background: #e8e0e8; color: #2d2d4e; }
-.btn-primary { background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; }
-.btn.disabled { opacity: 0.4; }
-
-/* ===== Dark theme ===== */
 .dark-theme.page { background: #12121f !important; }
 .dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
-.dark-theme .exam-topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
 .dark-theme .card, .dark-theme .scard { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
 .dark-theme .c-row .t, .dark-theme .sn { color: #e0d0e8 !important; }
 .dark-theme .t-n { color: #e0d0e8 !important; }
 .dark-theme .tg { background: #2a2a4a !important; color: #a090b0 !important; }
 .dark-theme .sd { color: #a090b0 !important; }
-.dark-theme .content-hd { color: #e0d0e8 !important; }
-.dark-theme .writing-prompt, .dark-theme .rd-passage, .dark-theme .translation-src,
-.dark-theme .lq-card, .dark-theme .c-question, .dark-theme .match-row,
-.dark-theme .blank-row, .dark-theme .writing-ta, .dark-theme .translation-ta { background: #1e1e38 !important; color: #e0d0e8 !important; }
-.dark-theme .lq-opt { background: #2a2a4a !important; color: #c0b0d0 !important; }
-.dark-theme .lq-opt.sel { background: #d81b60 !important; color: #fff !important; }
-.dark-theme .wb-word { background: #2a2a4a !important; color: #c0b0d0 !important; }
-.dark-theme .wb-word.sel { background: #d81b60 !important; color: #fff !important; }
-.dark-theme .match-letter { background: #2a2a4a !important; color: #c0b0d0 !important; }
-.dark-theme .match-letter.sel { background: #00897b !important; color: #fff !important; }
-.dark-theme .cq-opt { background: #2a2a4a !important; color: #c0b0d0 !important; }
-.dark-theme .cq-opt.sel { background: #2e7d32 !important; color: #fff !important; }
-.dark-theme .cq-stem, .dark-theme .lq-stem, .dark-theme .match-stmt, .dark-theme .blank-label { color: #e0d0e8 !important; }
-.dark-theme .btn { background: #2a2a4a !important; color: #c0b0d0 !important; }
-.dark-theme .btn-primary { background: linear-gradient(135deg, #d81b60, #ad1457) !important; color: #fff !important; }
-.dark-theme .blank-val { background: #2a2a4a !important; color: #9080a0 !important; }
-.dark-theme .blank-val.filled { background: #3a1a2a !important; color: #ff8fab !important; }

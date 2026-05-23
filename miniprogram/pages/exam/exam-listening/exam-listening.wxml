@@ -1,0 +1,19 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <view class="topbar">
+    <text catchtap="goBack">← 返回</text>
+    <h1 style="flex:1;text-align:center">听力</h1>
+    <text></text>
+  </view>
+  <scroll-view class="scroll" scroll-y>
+    <view class="audio-row">
+      <view class="audio-btn" catchtap="toggleAudio">▶ 播放音频</view>
+    </view>
+    <view wx:for="{{questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="card">
+      <view class="q-stem">Question {{q.qi}}</view>
+      <view wx:for="{{q.options}}" wx:for-index="oi" wx:for-item="opt" wx:key="*this" data-qi="{{q.qi}}" data-oi="{{oi}}" catchtap="select">
+        <text class="letter">{{['A','B','C','D'][oi]}}</text>
+        <text class="text">{{opt}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
