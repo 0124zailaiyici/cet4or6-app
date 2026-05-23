@@ -29,10 +29,11 @@
         <text class="ww">{{item.word}}</text>
         <text class="wp" wx:if="{{item.phonetic}}">{{item.phonetic}}</text>
         <text class="wcn">{{item.chn || item.definition || ''}}</text>
+        <text class="wsrc" wx:if="{{item.context}}">{{item.context}}</text>
         <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
       </view>
       <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.chn ? 'startGame' : 'lookupWord'}}">
-        {{item.status === 'master' ? '✓' : (item.chn ? '挑战' : '查词')}}
+        {{item.status === 'master' ? '✓' : (item.chn ? '浏览' : '查词')}}
       </view>
     </view>
   </scroll-view>
@@ -44,18 +45,25 @@
       </view>
       <view wx:elif="{{gameWord}}">
         <view class="gclose" catchtap="closeGame">✕</view>
-        <view class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source}}</view>
-        <view class="gw">{{gameWord.word}}</view>
-        <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
-        <view class="gopts">
-          <view class="go {{gameSelected === i ? 'on' : ''}} {{gameCorrect >= 0 ? (gameCorrect === i ? 'right' : (gameIndex === i ? 'wrong' : '')) : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="i" data-i="{{i}}" catchtap="selectOpt">{{item}}</view>
+        <view class="gbar">
+          <view class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</view>
         </view>
-        <view class="gf" wx:if="{{gameCorrect < 0}}">
-          <view class="gb skip" catchtap="skipWord">不会</view>
-          <view class="gb check {{gameSelected >= 0 ? '' : 'hide'}}" catchtap="confirmAnswer">确认</view>
+
+        <view class="gfront {{gameFlipped ? 'hide' : ''}}" catchtap="flipCard">
+          <view class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source}}</view>
+          <view class="gw">{{gameWord.word}}</view>
+          <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
+          <view class="gctx" wx:if="{{gameWord.context}}">{{gameWord.context}}</view>
+          <view class="ghint">点击翻转</view>
         </view>
-        <view class="gf" wx:if="{{gameCorrect >= 0}}">
-          <view class="gb next" catchtap="nextGame">下一词 →</view>
+
+        <view class="gback {{gameFlipped ? '' : 'hide'}}" catchtap="flipCard">
+          <view class="gchnttl">中文释义</view>
+          <view class="gchn">{{gameWord.chn}}</view>
+        </view>
+
+        <view class="gf">
+          <view class="gb next" catchtap="nextGame">下一个 →</view>
         </view>
       </view>
     </view>
