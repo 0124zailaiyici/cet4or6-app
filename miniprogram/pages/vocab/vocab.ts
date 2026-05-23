@@ -1,6 +1,6 @@
 import readingsData from '../../data/readings'
 import { applyTheme, getDarkMode } from '../../utils/theme'
-import { lookupWord } from '../../utils/api'
+import { lookupWord, aiTranslateWord } from '../../utils/api'
 
 interface IVocabWord {
   word: string
@@ -35,6 +35,8 @@ interface IVocabMethods {
   switchTab(e: WechatMiniprogram.TouchEvent): void
   startGame(e: WechatMiniprogram.TouchEvent): void
   showGameForIdx(idx: number, skipFrom?: number): Promise<void>
+  fetchChinese(w: IVocabWord): Promise<boolean>
+  persistChn(w: IVocabWord): Promise<void>
   selectOpt(e: WechatMiniprogram.TouchEvent): void
   confirmAnswer(): void
   skipWord(): void
@@ -706,6 +708,28 @@ Page<IVocabData, IVocabMethods>({
     this.showGameForIdx(idx)
   },
 
+  async fetchChinese(w: IVocabWord): Promise<boolean> {
+    if (w.chn) return true
+    try {
+      const result = await lookupWord(w.word)
+      const entry = Array.isArray(result) ? result[0] : result
+      if (entry.chinese) { w.chn = entry.chinese; return true }
+    } catch {}
+    try {
+      const ai = await aiTranslateWord(w.word)
+      if (ai.chinese) { w.chn = ai.chinese; return true }
+    } catch {}
+    return false
+  },
+
+  async persistChn(w: IVocabWord) {
+    if (!w.chn) return
+    const app = getApp<IAppOption>()
+    const stored = app.globalData.studyData.vocabWords as IVocabWord[]
+    const sw = stored.find(v => v.word === w.word)
+    if (sw) { sw.chn = w.chn; wx.setStorageSync('studyData', app.globalData.studyData) }
+  },
+
   async showGameForIdx(idx: number, skipFrom?: number) {
     const word = this.data.filteredWords[idx]
     if (!word) { this.closeGame(); return }
@@ -716,17 +740,8 @@ Page<IVocabData, IVocabMethods>({
     }
 
     if (!word.chn) {
-      try {
-        const result = await lookupWord(word.word)
-        const entry = Array.isArray(result) ? result[0] : result
-        if (entry.chinese) {
-          word.chn = entry.chinese
-          const app = getApp<IAppOption>()
-          const stored = app.globalData.studyData.vocabWords as IVocabWord[]
-          const sw = stored.find(v => v.word === word.word)
-          if (sw) { sw.chn = entry.chinese; wx.setStorageSync('studyData', app.globalData.studyData) }
-        }
-      } catch {}
+      const ok = await this.fetchChinese(word)
+      if (ok) await this.persistChn(word)
     }
 
     if (!word.chn) {
@@ -735,21 +750,13 @@ Page<IVocabData, IVocabMethods>({
       return this.nextGame(skipFrom ?? idx)
     }
 
-    // 补查干扰词的中文（如不足3个）
     let avail = this.data.words.filter(w => w.word !== word.word && w.chn)
     if (avail.length < 3) {
       const needChn = this.data.words.filter(w => w.word !== word.word && !w.chn)
-      for (const c of shuffleInPlace(needChn).slice(0, 15)) {
-        try {
-          const r = await lookupWord(c.word)
-          const e = Array.isArray(r) ? r[0] : r
-          if (e.chinese) {
-            c.chn = e.chinese
-            const app = getApp<IAppOption>()
-            const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === c.word)
-            if (sw) { sw.chn = e.chinese; wx.setStorageSync('studyData', app.globalData.studyData) }
-          }
-        } catch {}
+      for (const c of shuffleInPlace(needChn).slice(0, 30)) {
+        const ok = await this.fetchChinese(c)
+        if (ok) await this.persistChn(c)
+        if (this.data.words.filter(x => x.word !== word.word && x.chn).length >= 10) break
       }
       avail = this.data.words.filter(w => w.word !== word.word && w.chn)
     }
@@ -805,7 +812,7 @@ Page<IVocabData, IVocabMethods>({
   skipWord() {
     const correctChn = this.data.gameWord?.chn || ''
     const correctIdx = this.data.gameOptions.indexOf(correctChn)
-    this.setData({ gameIndex: -2, gameCorrect: correctIdx })
+    this.setData({ gameCorrect: correctIdx })
   },
 
   nextGame(skipFrom?: number) {

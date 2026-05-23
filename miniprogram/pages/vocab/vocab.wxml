@@ -43,16 +43,19 @@
         <view class="gloading">加载中，请稍后…</view>
       </view>
       <view wx:elif="{{gameWord}}">
+        <view class="gclose" catchtap="closeGame">✕</view>
         <view class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source}}</view>
         <view class="gw">{{gameWord.word}}</view>
         <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
         <view class="gopts">
-          <view class="go {{gameSelected === i ? 'on' : ''}} {{gameCorrect >= 0 ? (gameCorrect === i ? 'right' : (gameIndex === i ? 'wrong' : '')) : ''}} {{gameCorrect >= 0 && gameCorrect === i ? 'right' : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="i" data-i="{{i}}" catchtap="selectOpt">{{item}}</view>
+          <view class="go {{gameSelected === i ? 'on' : ''}} {{gameCorrect >= 0 ? (gameCorrect === i ? 'right' : (gameIndex === i ? 'wrong' : '')) : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="i" data-i="{{i}}" catchtap="selectOpt">{{item}}</view>
         </view>
-        <view class="gf">
-          <view class="gb skip" catchtap="skipWord" wx:if="{{gameCorrect < 0}}">不会</view>
-          <view class="gb check" catchtap="confirmAnswer" wx:if="{{gameSelected >= 0 && gameCorrect < 0}}">确认</view>
-          <view class="gb next" catchtap="nextGame" wx:if="{{gameCorrect >= 0}}">下一词 →</view>
+        <view class="gf" wx:if="{{gameCorrect < 0}}">
+          <view class="gb skip" catchtap="skipWord">不会</view>
+          <view class="gb check {{gameSelected >= 0 ? '' : 'hide'}}" catchtap="confirmAnswer">确认</view>
+        </view>
+        <view class="gf" wx:if="{{gameCorrect >= 0}}">
+          <view class="gb next" catchtap="nextGame">下一词 →</view>
         </view>
       </view>
     </view>
