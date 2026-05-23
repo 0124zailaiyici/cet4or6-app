@@ -6,11 +6,15 @@ interface ISettingsData {
   translation: number
   writing: number
   darkMode: boolean
+  version: string
+  cacheSize: string
 }
 
 interface ISettingsMethods {
   change(e: WechatMiniprogram.TouchEvent): void
   toggleDark(): void
+  clearCache(): void
+  getCacheSize(): string
 }
 
 Page<ISettingsData, ISettingsMethods>({
@@ -20,6 +24,8 @@ Page<ISettingsData, ISettingsMethods>({
     translation: 1,
     writing: 1,
     darkMode: false,
+    version: '1.0.0',
+    cacheSize: '',
   },
 
   onLoad() {
@@ -28,6 +34,7 @@ Page<ISettingsData, ISettingsMethods>({
     this.setData({
       listen: g.listen, sentence: g.sentence, translation: g.translation, writing: g.writing,
       darkMode: getDarkMode(),
+      cacheSize: this.getCacheSize(),
     })
   },
 
@@ -37,7 +44,7 @@ Page<ISettingsData, ISettingsMethods>({
 
   change(e: WechatMiniprogram.TouchEvent) {
     const field = e.currentTarget.dataset.field as string
-    const delta = e.currentTarget.dataset.delta as number
+    const delta = Number(e.currentTarget.dataset.delta)
     const key = field as 'listen' | 'sentence' | 'translation' | 'writing'
     const val = Math.max(0, this.data[key] + delta)
 
@@ -51,5 +58,48 @@ Page<ISettingsData, ISettingsMethods>({
     const newVal = toggleDarkMode()
     this.setData({ darkMode: newVal })
     wx.showToast({ title: newVal ? '已切换暗黑模式' : '已切换浅色模式', icon: 'none' })
+  },
+
+  getCacheSize(): string {
+    try {
+      const info = wx.getStorageInfoSync()
+      const kb = Math.round(info.currentSize)
+      return kb > 1024 ? `${(kb / 1024).toFixed(1)}MB` : `${kb}KB`
+    } catch (_) {
+      return ''
+    }
+  },
+
+  clearCache() {
+    wx.showModal({
+      title: '清除缓存',
+      content: '将清除所有学习记录和数据，此操作不可撤销。',
+      confirmText: '确认清除',
+      success: (res) => {
+        if (res.confirm) {
+          try {
+            wx.clearStorageSync()
+          } catch (_) {}
+          const app = getApp<IAppOption>()
+          app.globalData.studyData = {
+            completedListens: [],
+            masteredSentences: [],
+            translationRecords: [],
+            writingRecords: [],
+            checkInDates: [],
+            favoriteSentenceIds: [],
+            hardSentences: [],
+            readingAnswers: {},
+            listeningAnswers: {},
+            todayActivity: { date: '', listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 },
+            dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
+          }
+          wx.setStorageSync('studyData', app.globalData.studyData)
+          wx.setStorageSync('darkMode', false)
+          this.setData({ cacheSize: '0KB', listen: 1, sentence: 5, translation: 1, writing: 1, darkMode: false })
+          wx.showToast({ title: '已清除所有数据', icon: 'success' })
+        }
+      },
+    })
   },
 })

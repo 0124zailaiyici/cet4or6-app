@@ -1,4 +1,5 @@
 import readingsData from '../../data/readings'
+import readingAnnotations from './reading_annotations'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IReadingItem {
@@ -23,6 +24,8 @@ interface IResultItem {
   userAnswer: string
   correctAnswer: string
   isCorrect: boolean
+  locate?: string
+  hint?: string
 }
 
 interface IReadingData {
@@ -54,6 +57,8 @@ interface IReadingData {
   showResult: boolean
   resultItems: IResultItem[]
   completionMap: Record<number, { submitted: boolean; score: number; totalScore: number }>
+  showVocab: boolean
+  vocabList: Array<{ word: string; zh: string }>
 }
 
 interface IReadingMethods {
@@ -85,6 +90,8 @@ interface IReadingMethods {
   getMissingCount(): { total: number; answered: number }
   buildResult(): IResultItem[]
   refreshCompletionMap(): void
+  annotatePage(text: string, vocab: Record<string, string>): string
+  toggleVocab(): void
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -116,7 +123,9 @@ Page<IReadingData, IReadingMethods>({
     totalScore: 0,
     showResult: false,
     resultItems: [],
-    completionMap: {}
+    completionMap: {},
+    showVocab: false,
+    vocabList: []
   },
 
   onLoad() {
@@ -150,13 +159,16 @@ Page<IReadingData, IReadingMethods>({
     const id = e.currentTarget.dataset.id as number
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
+      const annot = readingAnnotations[item.id]
+      const vocab = annot?.vocab || {}
       const pages = item.sectionType === 'B'
         ? this.formatBPassage(item.passage)
         : this.splitPassage(item.passage)
       const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : []
       const formatted = item.sectionType !== 'B'
-        ? pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${p}</p>`)
+        ? pages.map((p, i) => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.annotatePage(p, vocab, i)}</p>`)
         : []
+      const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
       const matchSaved = saved?.matchAnswers || {}
@@ -187,14 +199,32 @@ Page<IReadingData, IReadingMethods>({
         score: (saved && (saved as any).score) || 0,
         totalScore: maxScore,
         showResult: false,
-        resultItems: []
+        resultItems: [],
+        showVocab: false,
+        vocabList
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [] })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [] })
+  },
+
+  toggleVocab() {
+    this.setData({ showVocab: !this.data.showVocab })
+  },
+
+  annotatePage(text: string, vocab: Record<string, string>, pageIdx: number): string {
+    if (!text) return ''
+    let annotated = text
+    if (Object.keys(vocab).length > 0) {
+      const words = Object.keys(vocab)
+      const pattern = new RegExp('\\b(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'gi')
+      annotated = annotated.replace(pattern, '<span style="color:#e65100;border-bottom:1px dashed #e65100">$1</span>')
+    }
+    const paraLabel = pageIdx > 0 ? '' : ''
+    return annotated
   },
 
   // ===== Submission & Scoring =====
