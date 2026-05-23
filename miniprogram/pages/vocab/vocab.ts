@@ -1,4 +1,6 @@
+import readingsData from '../../data/readings'
 import { applyTheme, getDarkMode } from '../../utils/theme'
+import { lookupWord } from '../../utils/api'
 
 interface IVocabWord {
   word: string
@@ -21,6 +23,7 @@ interface IVocabData {
   gameOptions: string[]
   gameIndex: number
   gameCorrect: number
+  lookingUp: boolean
 }
 
 interface IVocabMethods {
@@ -30,41 +33,68 @@ interface IVocabMethods {
   closeGame(): void
   addWord(): void
   loadWords(): void
+  lookupWord(e: WechatMiniprogram.TouchEvent): void
 }
 
-const CET4_WORDS: IVocabWord[] = [
-  { word: 'abandon', phonetic: '/əˈbændən/', definition: 'v. 抛弃，放弃', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'legislation', phonetic: '/ˌledʒɪsˈleɪʃn/', definition: 'n. 法规；立法', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'dominance', phonetic: '/ˈdɒmɪnəns/', definition: 'n. 支配；优势', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'cognitive', phonetic: '/ˈkɒɡnətɪv/', definition: 'adj. 认知的', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'sibling', phonetic: '/ˈsɪblɪŋ/', definition: 'n. 兄弟姐妹', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'replace', phonetic: '/rɪˈpleɪs/', definition: 'v. 取代；替换', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'contrast', phonetic: '/ˈkɒntrɑːst/', definition: 'n. 对比；对照', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'restrictive', phonetic: '/rɪˈstrɪktɪv/', definition: 'adj. 限制的', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'indifferent', phonetic: '/ɪnˈdɪfrənt/', definition: 'adj. 漠不关心的', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'resemble', phonetic: '/rɪˈzembl/', definition: 'v. 相似；像', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'sponsor', phonetic: '/ˈspɒnsə/', definition: 'v. 赞助；发起', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'represent', phonetic: '/ˌreprɪˈzent/', definition: 'v. 代表；表示', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
-  { word: 'immune', phonetic: '/ɪˈmjuːn/', definition: 'adj. 免疫的', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'infection', phonetic: '/ɪnˈfekʃn/', definition: 'n. 感染；传染病', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'colony', phonetic: '/ˈkɒləni/', definition: 'n. 殖民地；群体', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'scholarship', phonetic: '/ˈskɒləʃɪp/', definition: 'n. 奖学金', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'recommendation', phonetic: '/ˌrekəmenˈdeɪʃn/', definition: 'n. 推荐；建议', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'graduate', phonetic: '/ˈɡrædʒuət/', definition: 'n. 毕业生', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
-  { word: 'eliminate', phonetic: '/ɪˈlɪmɪneɪt/', definition: 'v. 消除；淘汰', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'procedure', phonetic: '/prəˈsiːdʒə/', definition: 'n. 程序；步骤', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'encourage', phonetic: '/ɪnˈkʌrɪdʒ/', definition: 'v. 鼓励', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'efficiency', phonetic: '/ɪˈfɪʃnsi/', definition: 'n. 效率', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'opportunity', phonetic: '/ˌɒpəˈtjuːnəti/', definition: 'n. 机会', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'environment', phonetic: '/ɪnˈvaɪrənmənt/', definition: 'n. 环境', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'technology', phonetic: '/tekˈnɒlədʒi/', definition: 'n. 技术', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'significant', phonetic: '/sɪɡˈnɪfɪkənt/', definition: 'adj. 重要的；显著的', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'establish', phonetic: '/ɪˈstæblɪʃ/', definition: 'v. 建立', source: '四级核心词', status: 'new', correctStreak: 0 },
-  { word: 'committee', phonetic: '/kəˈmɪti/', definition: 'n. 委员会', source: '四级核心词', status: 'new', correctStreak: 0 },
-]
+const ALNUM_RE = /[^a-zA-Z]/g
+const STOP_WORDS = new Set([
+  'the','and','for','that','this','with','from','have','were','their','they','about','which','been','would','there','could','these','those','also','between','other','through','during','after','before','people','first','many','years','more','because','into','over','only','each','every','some','such','just','like','most','very','well','than','then','when','where','what','both','few','while','high','late','long','near','next','once','over','same','able','much','face','name','part'
+])
+
+// Built-in CET-4 dictionary (词表作为释义来源)
+const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
+  abandon: { phonetic: '/əˈbændən/', definition: 'v. 抛弃，放弃' },
+  legislation: { phonetic: '/ˌledʒɪsˈleɪʃn/', definition: 'n. 法规；立法' },
+  dominance: { phonetic: '/ˈdɒmɪnəns/', definition: 'n. 支配；优势' },
+  cognitive: { phonetic: '/ˈkɒɡnətɪv/', definition: 'adj. 认知的' },
+  sibling: { phonetic: '/ˈsɪblɪŋ/', definition: 'n. 兄弟姐妹' },
+  replace: { phonetic: '/rɪˈpleɪs/', definition: 'v. 取代；替换' },
+  contrast: { phonetic: '/ˈkɒntrɑːst/', definition: 'n. 对比；对照' },
+  restrictive: { phonetic: '/rɪˈstrɪktɪv/', definition: 'adj. 限制的' },
+  indifferent: { phonetic: '/ɪnˈdɪfrənt/', definition: 'adj. 漠不关心的' },
+  resemble: { phonetic: '/rɪˈzembl/', definition: 'v. 相似；像' },
+  psychology: { phonetic: '/saɪˈkɒlədʒi/', definition: 'n. 心理学' },
+  sponsor: { phonetic: '/ˈspɒnsə/', definition: 'v. 赞助；发起' },
+  represent: { phonetic: '/ˌreprɪˈzent/', definition: 'v. 代表；表示' },
+  immune: { phonetic: '/ɪˈmjuːn/', definition: 'adj. 免疫的' },
+  infection: { phonetic: '/ɪnˈfekʃn/', definition: 'n. 感染；传染病' },
+  colony: { phonetic: '/ˈkɒləni/', definition: 'n. 殖民地；群体' },
+  volcano: { phonetic: '/vɒlˈkeɪnəʊ/', definition: 'n. 火山' },
+  scholarship: { phonetic: '/ˈskɒləʃɪp/', definition: 'n. 奖学金' },
+  recommendation: { phonetic: '/ˌrekəmenˈdeɪʃn/', definition: 'n. 推荐；建议' },
+  graduate: { phonetic: '/ˈɡrædʒuət/', definition: 'n. 毕业生' },
+  eliminate: { phonetic: '/ɪˈlɪmɪneɪt/', definition: 'v. 消除；淘汰' },
+  procedure: { phonetic: '/prəˈsiːdʒə/', definition: 'n. 程序；步骤' },
+  encourage: { phonetic: '/ɪnˈkʌrɪdʒ/', definition: 'v. 鼓励' },
+  efficiency: { phonetic: '/ɪˈfɪʃnsi/', definition: 'n. 效率' },
+  opportunity: { phonetic: '/ˌɒpəˈtjuːnəti/', definition: 'n. 机会' },
+  environment: { phonetic: '/ɪnˈvaɪrənmənt/', definition: 'n. 环境' },
+  technology: { phonetic: '/tekˈnɒlədʒi/', definition: 'n. 技术' },
+  significant: { phonetic: '/sɪɡˈnɪfɪkənt/', definition: 'adj. 重要的；显著的' },
+  establish: { phonetic: '/ɪˈstæblɪʃ/', definition: 'v. 建立' },
+  committee: { phonetic: '/kəˈmɪti/', definition: 'n. 委员会' },
+}
 
 function extractWords(): IVocabWord[] {
-  return CET4_WORDS
+  const words: Record<string, IVocabWord> = {}
+  for (const r of (readingsData as any[])) {
+    const passage = (r.passage || '').replace(ALNUM_RE, ' ')
+    const source = r.title || ''
+    const tokens: string[] = passage.toLowerCase().split(/\s+/).filter((w: string) => w.length >= 4 && !STOP_WORDS.has(w))
+    for (const t of [...new Set(tokens)]) {
+      if (words[t]) { if (!words[t].source.includes(source)) words[t].source += ' / ' + source; continue }
+      const known = WORD_BANK[t]
+      words[t] = {
+        word: t,
+        phonetic: known?.phonetic || '',
+        definition: known?.definition || '',
+        source,
+        status: 'new',
+        correctStreak: 0,
+      }
+    }
+  }
+  return Object.values(words)
 }
 
 Page<IVocabData, IVocabMethods>({
@@ -80,6 +110,7 @@ Page<IVocabData, IVocabMethods>({
     gameOptions: [],
     gameIndex: -1,
     gameCorrect: -1,
+    lookingUp: false,
   },
 
   onShow() {
@@ -96,15 +127,14 @@ Page<IVocabData, IVocabMethods>({
       app.globalData.studyData.vocabWords = stored
       wx.setStorageSync('studyData', app.globalData.studyData)
     }
-    const mastered = stored.filter((w: any) => w.status === 'master').length
-    const learning = stored.filter((w: any) => w.status !== 'master').length
-    const review = stored.filter((w: any) => w.status === 'review').length
+    const words = stored as IVocabWord[]
+    const mastered = words.filter(w => w.status === 'master').length
+    const learning = words.filter(w => w.status !== 'master').length
+    const review = words.filter(w => w.status === 'review').length
     this.setData({
-      words: stored as any,
-      filteredWords: stored.filter((w: any) => w.status !== 'master') as any,
-      mastered,
-      learning,
-      reviewCount: review,
+      words,
+      filteredWords: words.filter(w => w.status !== 'master'),
+      mastered, learning, reviewCount: review,
     })
   },
 
@@ -120,11 +150,10 @@ Page<IVocabData, IVocabMethods>({
   startGame(e: WechatMiniprogram.TouchEvent) {
     const idx = Number(e.currentTarget.dataset.idx)
     const word = this.data.filteredWords[idx]
-    if (!word) return
-    // Generate 4 options (1 correct + 3 random)
-    const all = this.data.words.filter(w => w.word !== word.word)
+    if (!word || !word.definition) return
+    const all = this.data.words.filter(w => w.word !== word.word && w.definition)
     const shuffled = all.sort(() => Math.random() - 0.5).slice(0, 3)
-    const options = [word.definition || '（待补充）', ...shuffled.map(w => w.definition || '（待补充）')].sort(() => Math.random() - 0.5)
+    const options = [word.definition, ...shuffled.map(w => w.definition)].sort(() => Math.random() - 0.5)
     this.setData({ gameWord: word, gameOptions: options, gameIndex: -1, gameCorrect: -1 })
   },
 
@@ -155,6 +184,33 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ gameWord: null, gameOptions: [], gameIndex: -1, gameCorrect: -1 })
   },
 
+  async lookupWord(e: WechatMiniprogram.TouchEvent) {
+    const idx = Number(e.currentTarget.dataset.idx)
+    const word = this.data.filteredWords[idx]
+    if (!word) return
+    this.setData({ lookingUp: true })
+    try {
+      const result = await lookupWord(word.word)
+      if (result && result.definition) {
+        const app = getApp<IAppOption>()
+        const words = app.globalData.studyData.vocabWords
+        const w = words.find(w => w.word === word.word)
+        if (w) {
+          w.phonetic = result.phonetic || ''
+          w.definition = result.definition || ''
+          wx.setStorageSync('studyData', app.globalData.studyData)
+          this.loadWords()
+          wx.showToast({ title: `已查到「${word.word}」`, icon: 'success' })
+        }
+      } else {
+        wx.showToast({ title: '未找到释义', icon: 'none' })
+      }
+    } catch (_) {
+      wx.showToast({ title: '请先启动 server', icon: 'none' })
+    }
+    this.setData({ lookingUp: false })
+  },
+
   addWord() {
     wx.showModal({
       title: '添加单词',
@@ -162,19 +218,18 @@ Page<IVocabData, IVocabMethods>({
       placeholderText: '输入英文单词',
       success: (res) => {
         if (res.confirm && res.content) {
-          const word = res.content.trim().toLowerCase()
+          const w = res.content.trim().toLowerCase()
           const app = getApp<IAppOption>()
-          if (app.globalData.studyData.vocabWords.find(w => w.word === word)) {
+          if (app.globalData.studyData.vocabWords.find(v => v.word === w)) {
             wx.showToast({ title: '单词已存在', icon: 'none' })
             return
           }
-          app.globalData.studyData.vocabWords.push({
-            word, phonetic: '', definition: '', source: '手动添加',
-            status: 'new', correctStreak: 0,
-          })
+          const known = WORD_BANK[w]
+          const word: any = { word: w, phonetic: known?.phonetic || '', definition: known?.definition || '', source: '手动添加', status: 'new', correctStreak: 0 }
+          app.globalData.studyData.vocabWords.push(word)
           wx.setStorageSync('studyData', app.globalData.studyData)
           this.loadWords()
-          wx.showToast({ title: '已添加 ' + word, icon: 'success' })
+          wx.showToast({ title: '已添加 ' + w, icon: 'success' })
         }
       },
     })

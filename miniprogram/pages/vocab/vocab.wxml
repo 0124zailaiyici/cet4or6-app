@@ -34,7 +34,10 @@
           <text style="font-size:18rpx;color:#8a7a9a;margin-left:6rpx">{{item.correctStreak}}/3</text>
         </view>
       </view>
-      <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.definition ? 'hint' : ''}}" data-idx="{{idx}}" catchtap="{{item.definition ? 'startGame' : ''}}">{{item.status === 'master' ? '✓' : (item.definition ? '挑战' : '补全')}}</view>
+      <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.definition ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.definition ? 'startGame' : 'lookupWord'}}">
+        {{item.status === 'master' ? '✓' : (item.definition ? '挑战' : '查词')}}
+        <text wx:if="{{lookingUp}}" style="margin-left:4rpx">...</text>
+      </view>
     </view>
   </scroll-view>
 

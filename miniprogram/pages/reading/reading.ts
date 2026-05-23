@@ -66,6 +66,9 @@ interface IReadingData {
   scrollTop: number
   passageParas: string[]
   highlightedPara: number
+  translations: string[]
+  showTrans: Record<number, boolean>
+  pageParas: Array<{ text: string; paraIdx: number }>
 }
 
 interface IReadingMethods {
@@ -104,6 +107,8 @@ interface IReadingMethods {
   rebuildFormatted(vocab: Record<string, string>, highlightIdx: number): void
   getPassageParas(text: string): string[]
   toggleVocab(): void
+  toggleTrans(e: WechatMiniprogram.TouchEvent): void
+  updatePageParas(): void
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -140,7 +145,10 @@ Page<IReadingData, IReadingMethods>({
     vocabList: [],
     scrollTop: 0,
     passageParas: [],
-    highlightedPara: -1
+    highlightedPara: -1,
+    translations: [],
+    showTrans: {},
+    pageParas: []
   },
 
   onLoad() {

@@ -32,6 +32,7 @@
 .sd.on { color: #ff6b8a; }
 .wact { font-size: 22rpx; color: #ff6b8a; padding: 6rpx 16rpx; border-radius: 10rpx; border: 2rpx solid rgba(255,107,138,0.12); flex-shrink: 0; }
 .wact.hint { color: #8a7a9a; border-color: #e0e0e0; }
+.wact.lookup { color: #1e88e5; border-color: rgba(30,136,229,0.15); }
 .wact.done { color: #388e3c; border-color: rgba(56,142,60,0.12); background: rgba(56,142,60,0.04); }
 
 .empty { display: flex; flex-direction: column; align-items: center; padding: 120rpx 0; font-size: 28rpx; color: #8a7a9a; }
