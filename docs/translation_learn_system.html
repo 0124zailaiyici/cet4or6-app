@@ -7,9 +7,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,"PingFang SC","Segoe UI",Roboto,sans-serif;background:#fdf2f8;display:flex;justify-content:center;padding:30px 16px;min-height:100vh;gap:20px;flex-wrap:wrap}
-.phone{width:375px;border-radius:36px;overflow:hidden;background:#fff8fc;box-shadow:0 20px 60px rgba(244,114,182,0.1);position:relative;margin-bottom:20px}
+.phone{width:375px;border-radius:36px;overflow:hidden;background:#fff8fc;box-shadow:0 20px 60px rgba(244,114,182,0.1);position:relative;margin-bottom:20px;display:flex;flex-direction:column;max-height:700px}
 .notch{height:40px;background:#fff8fc;display:flex;align-items:center;justify-content:center;font-size:9px;color:#f9a8d4;letter-spacing:4px;font-weight:600}
-.page{padding:0 0 16px}
+.page{flex:1;overflow-y:auto;padding:0 0 4px}
 .nav{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 8px}
 .nav-l{display:flex;align-items:center;gap:10px}
 .nav-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f9a8d4,#f472b6);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 10px rgba(244,114,182,0.2)}
@@ -17,10 +17,10 @@ body{font-family:-apple-system,"PingFang SC","Segoe UI",Roboto,sans-serif;backgr
 .nav-title{font-size:16px;font-weight:700;color:#4a1a2e}
 .nav-r{display:flex;gap:8px}
 .nav-icon{width:36px;height:36px;border-radius:12px;background:rgba(244,114,182,0.06);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
-.tabbar{display:flex;padding:4px 16px 8px;gap:2px}
-.tab{flex:1;text-align:center;padding:8px 0;font-size:11px;font-weight:600;border-radius:12px;color:#f9a8d4;cursor:pointer;transition:all 0.2s}
-.tab.active{background:#fff;color:#ec407a;box-shadow:0 2px 8px rgba(244,114,182,0.04)}
-.tab .tab-ico{display:block;font-size:18px;margin-bottom:2px}
+.tabbar{display:flex;padding:4px 16px 10px;gap:2px;border-top:1px solid rgba(244,114,182,0.04);flex-shrink:0}
+.tab{flex:1;text-align:center;padding:6px 0;font-size:10px;font-weight:600;border-radius:12px;color:#f9a8d4;cursor:pointer;transition:all 0.2s;user-select:none}
+.tab.active{background:#fce4ec;color:#ec407a}
+.tab .tab-ico{display:block;font-size:20px;margin-bottom:1px}
 .gc{margin:0 16px 10px;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,#fce4ec,#fff3e0);display:flex;align-items:center;gap:14px}
 .gc-ring{width:52px;height:52px;border-radius:50%;flex-shrink:0;background:conic-gradient(#f472b6 0deg 162deg,rgba(244,114,182,0.08)162deg 360deg);display:flex;align-items:center;justify-content:center}
 .gc-ring-in{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
