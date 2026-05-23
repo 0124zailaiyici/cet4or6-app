@@ -34,7 +34,7 @@
           <text style="font-size:18rpx;color:#8a7a9a;margin-left:6rpx">{{item.correctStreak}}/3</text>
         </view>
       </view>
-      <view class="wact {{item.status === 'master' ? 'done' : ''}}" data-idx="{{idx}}" catchtap="startGame">{{item.status === 'master' ? '✓' : '挑战'}}</view>
+      <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.definition ? 'hint' : ''}}" data-idx="{{idx}}" catchtap="{{item.definition ? 'startGame' : ''}}">{{item.status === 'master' ? '✓' : (item.definition ? '挑战' : '补全')}}</view>
     </view>
   </scroll-view>
 

@@ -1,4 +1,3 @@
-import readingsData from '../../data/readings'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IVocabWord {
@@ -33,21 +32,39 @@ interface IVocabMethods {
   loadWords(): void
 }
 
-const STOP_WORDS = new Set(['the','a','an','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','shall','should','may','might','must','can','could','i','you','he','she','it','we','they','me','him','her','us','them','my','your','his','its','our','their','this','that','these','those','and','but','or','not','no','yes','of','in','on','at','to','for','with','by','from','as','about','than','also','so','if','when','all','any','each','every','both','few','more','most','other','some','such','only','own','same','very','just','who','which','what','how','where','why','one','two','new','now','then','up','out','into','over','after','before','between','through','during','above','below','here','there','way','well','back','because','too','much','make','made','like','just','people','years','first','many','time','more'])
+const CET4_WORDS: IVocabWord[] = [
+  { word: 'abandon', phonetic: '/əˈbændən/', definition: 'v. 抛弃，放弃', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'legislation', phonetic: '/ˌledʒɪsˈleɪʃn/', definition: 'n. 法规；立法', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'dominance', phonetic: '/ˈdɒmɪnəns/', definition: 'n. 支配；优势', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'cognitive', phonetic: '/ˈkɒɡnətɪv/', definition: 'adj. 认知的', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'sibling', phonetic: '/ˈsɪblɪŋ/', definition: 'n. 兄弟姐妹', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'replace', phonetic: '/rɪˈpleɪs/', definition: 'v. 取代；替换', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'contrast', phonetic: '/ˈkɒntrɑːst/', definition: 'n. 对比；对照', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'restrictive', phonetic: '/rɪˈstrɪktɪv/', definition: 'adj. 限制的', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'indifferent', phonetic: '/ɪnˈdɪfrənt/', definition: 'adj. 漠不关心的', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'resemble', phonetic: '/rɪˈzembl/', definition: 'v. 相似；像', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'sponsor', phonetic: '/ˈspɒnsə/', definition: 'v. 赞助；发起', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'represent', phonetic: '/ˌreprɪˈzent/', definition: 'v. 代表；表示', source: '选词填空 2019061', status: 'new', correctStreak: 0 },
+  { word: 'immune', phonetic: '/ɪˈmjuːn/', definition: 'adj. 免疫的', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'infection', phonetic: '/ɪnˈfekʃn/', definition: 'n. 感染；传染病', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'colony', phonetic: '/ˈkɒləni/', definition: 'n. 殖民地；群体', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'scholarship', phonetic: '/ˈskɒləʃɪp/', definition: 'n. 奖学金', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'recommendation', phonetic: '/ˌrekəmenˈdeɪʃn/', definition: 'n. 推荐；建议', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'graduate', phonetic: '/ˈɡrædʒuət/', definition: 'n. 毕业生', source: '仔细阅读 2019061', status: 'new', correctStreak: 0 },
+  { word: 'eliminate', phonetic: '/ɪˈlɪmɪneɪt/', definition: 'v. 消除；淘汰', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'procedure', phonetic: '/prəˈsiːdʒə/', definition: 'n. 程序；步骤', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'encourage', phonetic: '/ɪnˈkʌrɪdʒ/', definition: 'v. 鼓励', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'efficiency', phonetic: '/ɪˈfɪʃnsi/', definition: 'n. 效率', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'opportunity', phonetic: '/ˌɒpəˈtjuːnəti/', definition: 'n. 机会', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'environment', phonetic: '/ɪnˈvaɪrənmənt/', definition: 'n. 环境', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'technology', phonetic: '/tekˈnɒlədʒi/', definition: 'n. 技术', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'significant', phonetic: '/sɪɡˈnɪfɪkənt/', definition: 'adj. 重要的；显著的', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'establish', phonetic: '/ɪˈstæblɪʃ/', definition: 'v. 建立', source: '四级核心词', status: 'new', correctStreak: 0 },
+  { word: 'committee', phonetic: '/kəˈmɪti/', definition: 'n. 委员会', source: '四级核心词', status: 'new', correctStreak: 0 },
+]
 
 function extractWords(): IVocabWord[] {
-  const words: Record<string, IVocabWord> = {}
-  for (const r of (readingsData as any[])) {
-    const passage = r.passage || ''
-    const source = r.title || ''
-    const tokens = passage.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter((w: string) => w.length >= 4 && !STOP_WORDS.has(w))
-    for (const t of new Set<string>(tokens)) {
-      if (!words[t]) {
-        words[t] = { word: t, phonetic: '', definition: '', source, status: 'new', correctStreak: 0 }
-      }
-    }
-  }
-  return Object.values(words)
+  return CET4_WORDS
 }
 
 Page<IVocabData, IVocabMethods>({
