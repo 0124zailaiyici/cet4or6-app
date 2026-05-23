@@ -617,7 +617,7 @@ function extractWords(): IVocabWord[] {
   return result
 }
 
-function hasCJK(s: string): boolean { return /[\u4e00-\u9fff]/.test(s) }
+function hasCJK(s: string | undefined): boolean { return !!(s && /[\u4e00-\u9fff]/.test(s)) }
 
 function shuffleInPlace<T>(arr: T[]): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -727,15 +727,18 @@ Page<IVocabData, IVocabMethods>({
       this.setData({ gameLoading: false })
     }
     if (!word.chn) return this.closeGame()
-    const candidates = this.data.words.filter(w => w.word !== word.word && w.chn)
-    if (candidates.length < 3) {
-      for (const c of candidates) {
-        if (c.chn) continue
+    if (this.data.words.filter(w => w.word !== word.word && w.chn).length < 3) {
+      const needChn = this.data.words.filter(w => w.word !== word.word && !w.chn && (w.definition || w.word))
+      for (const c of shuffleInPlace(needChn).slice(0, 5)) {
         try {
           const r = await lookupWord(c.word)
           const e = Array.isArray(r) ? r[0] : r
-          const cn = e.chinese || ''
-          if (cn) { c.chn = cn; const app = getApp<IAppOption>(); const sw = app.globalData.studyData.vocabWords.find((v: IVocabWord) => v.word === c.word); if (sw) { sw.chn = cn; wx.setStorageSync('studyData', app.globalData.studyData) } }
+          if (e.chinese) {
+            c.chn = e.chinese
+            const app = getApp<IAppOption>()
+            const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === c.word)
+            if (sw) { sw.chn = e.chinese; wx.setStorageSync('studyData', app.globalData.studyData) }
+          }
         } catch {}
       }
     }
