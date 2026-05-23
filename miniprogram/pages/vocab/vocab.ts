@@ -26,16 +26,18 @@ interface IVocabData {
   gameOptions: string[]
   gameIndex: number
   gameCorrect: number
+  gameSelected: number
   lookingUp: boolean
   gameLoading: boolean
-  gameAnswer: string
 }
 
 interface IVocabMethods {
   switchTab(e: WechatMiniprogram.TouchEvent): void
   startGame(e: WechatMiniprogram.TouchEvent): void
   showGameForIdx(idx: number, skipFrom?: number): Promise<void>
-  pickOption(e: WechatMiniprogram.TouchEvent): void
+  selectOpt(e: WechatMiniprogram.TouchEvent): void
+  confirmAnswer(): void
+  skipWord(): void
   nextGame(skipFrom?: number): void
   closeGame(): void
   addWord(): void
@@ -647,9 +649,9 @@ Page<IVocabData, IVocabMethods>({
     gameOptions: [],
     gameIndex: -1,
     gameCorrect: -1,
+    gameSelected: -1,
     lookingUp: false,
     gameLoading: false,
-    gameAnswer: '',
   },
 
   onShow() {
@@ -700,7 +702,7 @@ Page<IVocabData, IVocabMethods>({
   startGame(e: WechatMiniprogram.TouchEvent) {
     const idx = Number(e.currentTarget.dataset.idx)
     const word = this.data.filteredWords[idx]
-    if (!word?.definition) return
+    if (!word?.chn) return
     this.showGameForIdx(idx)
   },
 
@@ -756,23 +758,29 @@ Page<IVocabData, IVocabMethods>({
     const options = shuffleInPlace([word, ...pick])
     this.setData({
       gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
-      gameOptions: options.map(w => w.chn), gameIndex: -1, gameCorrect: -1,
-      gameLoading: false, gameAnswer: '',
+      gameOptions: options.map(w => w.chn), gameIndex: -1, gameCorrect: -1, gameSelected: -1,
+      gameLoading: false,
     })
   },
 
-  pickOption(e: WechatMiniprogram.TouchEvent) {
+  selectOpt(e: WechatMiniprogram.TouchEvent) {
     if (this.data.gameIndex >= 0) return
-    const oi = Number(e.currentTarget.dataset.oi)
+    this.setData({ gameSelected: Number(e.currentTarget.dataset.i) })
+  },
+
+  confirmAnswer() {
+    const sel = this.data.gameSelected
+    if (sel < 0) return
     const correctChn = this.data.gameWord?.chn || ''
-    const isCorrect = this.data.gameOptions[oi] === correctChn
-    this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctChn), gameAnswer: correctChn })
+    const correctIdx = this.data.gameOptions.indexOf(correctChn)
+    this.setData({ gameIndex: sel, gameCorrect: correctIdx })
 
     const app = getApp<IAppOption>()
     const words = app.globalData.studyData.vocabWords as IVocabWord[]
     const w = words.find(v => v.word === this.data.gameWord?.word)
     if (!w) return
 
+    const isCorrect = sel === correctIdx
     w.correctStreak = isCorrect ? w.correctStreak + 1 : Math.max(0, w.correctStreak - 1)
     w.status = w.correctStreak >= 3 ? 'master' : isCorrect ? 'learning' : 'review'
     wx.setStorageSync('studyData', app.globalData.studyData)
@@ -794,6 +802,12 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ words: wordsCopy, filteredWords: fwCopy, ...stats })
   },
 
+  skipWord() {
+    const correctChn = this.data.gameWord?.chn || ''
+    const correctIdx = this.data.gameOptions.indexOf(correctChn)
+    this.setData({ gameIndex: -2, gameCorrect: correctIdx })
+  },
+
   nextGame(skipFrom?: number) {
     const nextIdx = this.data.gameWordIdx + 1
     if (nextIdx >= this.data.gameTotal) {
@@ -809,7 +823,7 @@ Page<IVocabData, IVocabMethods>({
   },
 
   closeGame() {
-    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameOptions: [], gameIndex: -1, gameCorrect: -1, gameAnswer: '' })
+    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameOptions: [], gameIndex: -1, gameCorrect: -1, gameSelected: -1 })
   },
 
   async lookupWord(e: WechatMiniprogram.TouchEvent) {

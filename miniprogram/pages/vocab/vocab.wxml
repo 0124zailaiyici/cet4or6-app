@@ -1,25 +1,25 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="topbar">
+<view class="page {{darkMode ? 'dark' : ''}}">
+  <view class="tb">
     <view class="ttl">单词本</view>
-    <view class="add-btn" catchtap="addWord">+ 添加</view>
+    <view class="sub">从你做过的题中学，闯关拿下四级词汇</view>
   </view>
 
   <view class="stats">
-    <view class="st"><text class="n g">{{mastered}}</text><text class="l">已掌握</text></view>
-    <view class="st"><text class="n">{{learning}}</text><text class="l">学习中</text></view>
-    <view class="st"><text class="n">{{reviewCount}}</text><text class="l">待复习</text></view>
+    <view class="st"><text class="n g">{{mastered}}</text><text class="l">✓ 已掌握</text></view>
+    <view class="st"><text class="n">{{learning}}</text><text class="l">📝 学习中</text></view>
+    <view class="st"><text class="n">{{reviewCount}}</text><text class="l">🔥 今日复习</text></view>
   </view>
 
   <view class="tabs">
-    <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="0" catchtap="switchTab">学习中</view>
-    <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="1" catchtap="switchTab">待复习</view>
-    <view class="tab {{tab === 2 ? 'on' : ''}}" data-tab="2" catchtap="switchTab">已掌握</view>
+    <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="0" catchtap="switchTab">📝 学习中</view>
+    <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="1" catchtap="switchTab">🔥 待复习</view>
+    <view class="tab {{tab === 2 ? 'on' : ''}}" data-tab="2" catchtap="switchTab">✓ 已掌握</view>
   </view>
 
   <scroll-view class="list" scroll-y>
     <view class="empty" wx:if="{{filteredWords.length === 0}}">
       <text>暂无单词</text>
-      <text class="hint">从真题阅读自动收集，或点右上角 + 添加</text>
+      <text class="hint">从真题阅读自动收集</text>
     </view>
     <view class="wcard" wx:for="{{filteredWords}}" wx:key="word" wx:for-index="idx">
       <view class="wi {{item.status === 'master' ? 'master' : item.status === 'review' ? 'review' : 'new'}}">
@@ -27,40 +27,31 @@
       </view>
       <view class="wb">
         <text class="ww">{{item.word}}</text>
-        <text class="wdef">{{item.definition || '（点挑战查看释义）'}}</text>
-        <text class="wsrc">{{item.source}}</text>
-        <view class="wstreak" wx:if="{{item.correctStreak > 0 && item.correctStreak < 3}}">
-          <text class="sd {{i < item.correctStreak ? 'on' : ''}}" wx:for="{{[0,1,2]}}" wx:key="*this" wx:for-index="i">●</text>
-          <text style="font-size:18rpx;color:#8a7a9a;margin-left:6rpx">{{item.correctStreak}}/3</text>
-        </view>
+        <text class="wp" wx:if="{{item.phonetic}}">{{item.phonetic}}</text>
+        <text class="wcn">{{item.chn || item.definition || ''}}</text>
+        <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
       </view>
-      <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.definition ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.definition ? 'startGame' : 'lookupWord'}}">
-        <text>{{item.status === 'master' ? '✓' : (item.definition ? '挑战' : '查词')}}</text>
+      <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.chn ? 'startGame' : 'lookupWord'}}">
+        {{item.status === 'master' ? '✓' : (item.chn ? '挑战' : '查词')}}
       </view>
     </view>
   </scroll-view>
 
-  <view class="goverlay {{gameWord || gameLoading ? 'show' : ''}}" catchtap="closeGame">
-    <view class="gcard {{gameWord ? 'show' : ''}}" catchtap="">
+  <view class="game-overlay {{gameWord || gameLoading ? 'show' : ''}}" catchtap="closeGame">
+    <view class="game-card {{gameWord ? 'show' : ''}}" catchtap="">
       <view wx:if="{{gameLoading}}">
         <view class="gloading">加载中，请稍后…</view>
       </view>
       <view wx:elif="{{gameWord}}">
-        <view class="gbar">
-          <view class="gsrc">{{gameWord.source}}</view>
-          <text class="gprog" wx:if="{{gameTotal > 1}}">{{gameWordIdx + 1}}/{{gameTotal}}</text>
-        </view>
-        <view class="gq">选择以下单词的中文释义</view>
+        <view class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source}}</view>
         <view class="gw">{{gameWord.word}}</view>
         <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
-        <view class="gresult {{gameIndex >= 0 ? (gameIndex === gameCorrect ? 'ok' : 'fail') : ''}}" wx:if="{{gameIndex >= 0}}">
-          {{gameIndex === gameCorrect ? '✓ 回答正确' : '✗ 回答错误'}}
-        </view>
         <view class="gopts">
-          <view class="go {{gameIndex === oi ? (gameCorrect === oi ? 'right' : 'wrong') : ''}} {{gameCorrect >= 0 && gameCorrect === oi ? 'right' : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="oi" data-oi="{{oi}}" catchtap="pickOption">{{item}}</view>
+          <view class="go {{gameSelected === i ? 'on' : ''}} {{gameCorrect >= 0 ? (gameCorrect === i ? 'right' : (gameIndex === i ? 'wrong' : '')) : ''}} {{gameCorrect >= 0 && gameCorrect === i ? 'right' : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="i" data-i="{{i}}" catchtap="selectOpt">{{item}}</view>
         </view>
         <view class="gf">
-          <view class="gb skip" catchtap="closeGame">退出</view>
+          <view class="gb skip" catchtap="skipWord" wx:if="{{gameCorrect < 0}}">不会</view>
+          <view class="gb check" catchtap="confirmAnswer" wx:if="{{gameSelected >= 0 && gameCorrect < 0}}">确认</view>
           <view class="gb next" catchtap="nextGame" wx:if="{{gameCorrect >= 0}}">下一词 →</view>
         </view>
       </view>
