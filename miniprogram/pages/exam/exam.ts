@@ -13,6 +13,15 @@ interface IExamSet {
   translationId: number | null
 }
 
+interface IExamQ {
+  key: string
+  source: string
+  question: string
+  options: string[]
+  correct: string
+  userAnswer: string
+}
+
 interface IExamData {
   phase: 'list' | 'exam' | 'result'
   examSets: IExamSet[]
@@ -21,19 +30,22 @@ interface IExamData {
   timerStr: string
   currentSection: number
   sectionNames: string[]
-  answers: Record<string, string>[]
-  score: number
-  totalScore: number
-  sectionScores: { label: string; correct: number; total: number }[]
+  readingQuestions: IExamQ[]
+  listeningQuestions: IExamQ[]
   writingText: string
   translationText: string
+  readingCorrect: number
+  readingTotal: number
+  listeningCorrect: number
+  listeningTotal: number
   darkMode: boolean
 }
 
 interface IExamMethods {
   startExam(e: WechatMiniprogram.TouchEvent): void
   switchSection(e: WechatMiniprogram.TouchEvent): void
-  onAnswer(e: WechatMiniprogram.TouchEvent): void
+  selectReading(e: WechatMiniprogram.TouchEvent): void
+  selectListening(e: WechatMiniprogram.TouchEvent): void
   onWritingInput(e: WechatMiniprogram.Input): void
   onTranslationInput(e: WechatMiniprogram.Input): void
   submitExam(): void
@@ -52,29 +64,29 @@ Page<IExamData, IExamMethods>({
     timerStr: '125:00',
     currentSection: 0,
     sectionNames: ['写作', '听力', '阅读', '翻译'],
-    answers: [],
-    score: 0,
-    totalScore: 0,
-    sectionScores: [],
+    readingQuestions: [],
+    listeningQuestions: [],
     writingText: '',
     translationText: '',
+    readingCorrect: 0,
+    readingTotal: 0,
+    listeningCorrect: 0,
+    listeningTotal: 0,
     darkMode: false,
   },
 
   onLoad() {
     applyTheme(getDarkMode())
     this.setData({ darkMode: getDarkMode() })
-    // Build exam sets from available data
     const sets: IExamSet[] = []
-    const listeningIds = (listeningData as any[]).filter(l => l.audioUrl).map(l => l.id)
-    const readingIds = (readingsData as any[]).map(r => r.id)
-    const writingIds = (writingsData as any[]).map(w => w.id)
-    const translationIds = (translationsData as any[]).map(t => t.id)
+    const listeningIds = (listeningData as any[]).filter((l: any) => l.audioUrl).map((l: any) => l.id)
+    const readingIds = (readingsData as any[]).map((r: any) => r.id)
+    const writingIds = (writingsData as any[]).map((w: any) => w.id)
+    const translationIds = (translationsData as any[]).map((t: any) => t.id)
 
     if (readingIds.length > 0) {
       sets.push({
-        id: '2019061',
-        label: '2019年6月 第1套',
+        id: '2019061', label: '2019年6月 第1套',
         readingIds: readingIds.slice(0, 4),
         listeningId: listeningIds.length > 0 ? listeningIds[0] : null,
         writingId: writingIds.length > 0 ? writingIds[0] : null,
@@ -83,15 +95,13 @@ Page<IExamData, IExamMethods>({
     }
     if (readingIds.length > 4) {
       sets.push({
-        id: '2019062',
-        label: '2019年6月 第2套',
+        id: '2019062', label: '2019年6月 第2套',
         readingIds: readingIds.slice(4, 8),
         listeningId: listeningIds.length > 1 ? listeningIds[1] : null,
         writingId: writingIds.length > 1 ? writingIds[1] : null,
         translationId: translationIds.length > 1 ? translationIds[1] : null,
       })
     }
-
     this.setData({ examSets: sets })
   },
 
@@ -103,15 +113,63 @@ Page<IExamData, IExamMethods>({
     const setId = e.currentTarget.dataset.setId as string
     const set = this.data.examSets.find(s => s.id === setId)
     if (!set) return
-
     wx.showModal({
       title: '开始考试',
-      content: '125 分钟倒计时，交卷后自动评分。确定开始？',
+      content: '125 分钟倒计时，交卷后自动评分。写作和翻译需手动评分。',
       success: (res) => {
-        if (res.confirm) {
-          this.setData({ phase: 'exam', currentSet: set, timer: 7500, currentSection: 0, answers: [{}, {}, {}, {}] })
-          this.startTimer()
+        if (!res.confirm) return
+
+        // Load reading questions (Section C only, multiple choice)
+        const rq: IExamQ[] = []
+        for (const rid of set.readingIds) {
+          const passage = (readingsData as any[]).find((r: any) => r.id === rid)
+          if (!passage || !passage.questions || !passage.choices) continue
+          const correct = passage.correctAnswers || {}
+          if (passage.sectionType !== 'C') continue
+          for (let qi = 0; qi < passage.questions.length; qi++) {
+            rq.push({
+              key: `${rid}-${qi}`,
+              source: passage.title || '',
+              question: passage.questions[qi] || '',
+              options: (passage.choices[qi] || []).map((o: string) => o),
+              correct: correct[String(qi)] || '',
+              userAnswer: '',
+            })
+          }
         }
+
+        // Load listening questions
+        const lq: IExamQ[] = []
+        if (set.listeningId) {
+          const pass = (listeningData as any[]).find((l: any) => l.id === set.listeningId)
+          if (pass && pass.sentences) {
+            const correct = pass.correctAnswers || {}
+            for (const s of pass.sentences) {
+              const qm = s.text.match(/^Q(\d+)\./)
+              if (!qm) continue
+              const qn = qm[1]
+              const opts = s.text.split(/(?=[A-D]\))/).filter((p: string) => /^[A-D]\)/.test(p)).map((o: string) => o.trim())
+              if (opts.length >= 2) {
+                lq.push({
+                  key: `l-${set.listeningId}-${qn}`,
+                  source: pass.title || '',
+                  question: `Q${qn}`,
+                  options: opts,
+                  correct: correct[qn] || '',
+                  userAnswer: '',
+                })
+              }
+            }
+          }
+        }
+
+        this.setData({
+          phase: 'exam', currentSet: set, timer: 7500, currentSection: 0,
+          writingText: '', translationText: '',
+          readingQuestions: rq, listeningQuestions: lq,
+          readingCorrect: 0, readingTotal: 0, listeningCorrect: 0, listeningTotal: 0,
+        })
+        this.startTimer()
       },
     })
   },
@@ -131,15 +189,24 @@ Page<IExamData, IExamMethods>({
     this.setData({ currentSection: Number(e.currentTarget.dataset.section) })
   },
 
-  onAnswer(e: WechatMiniprogram.TouchEvent) {
-    const key = e.currentTarget.dataset.key as string
-    const val = e.currentTarget.dataset.val as string
-    const section = this.data.currentSection
-    const answers = [...this.data.answers]
-    answers[section] = answers[section] || {}
-    if (answers[section][key] === val) delete answers[section][key]
-    else answers[section][key] = val
-    this.setData({ answers })
+  selectReading(e: WechatMiniprogram.TouchEvent) {
+    const idx = Number(e.currentTarget.dataset.idx)
+    const rq = this.data.readingQuestions.map((q, i) => {
+      if (i !== idx) return q
+      const letter = 'ABCD'[Number(e.currentTarget.dataset.oi)]
+      return { ...q, userAnswer: q.userAnswer === letter ? '' : letter }
+    })
+    this.setData({ readingQuestions: rq })
+  },
+
+  selectListening(e: WechatMiniprogram.TouchEvent) {
+    const idx = Number(e.currentTarget.dataset.idx)
+    const lq = this.data.listeningQuestions.map((q, i) => {
+      if (i !== idx) return q
+      const letter = 'ABCD'[Number(e.currentTarget.dataset.oi)]
+      return { ...q, userAnswer: q.userAnswer === letter ? '' : letter }
+    })
+    this.setData({ listeningQuestions: lq })
   },
 
   onWritingInput(e: WechatMiniprogram.Input) {
@@ -152,64 +219,27 @@ Page<IExamData, IExamMethods>({
 
   submitExam() {
     if (timerInterval) clearInterval(timerInterval)
-    const sd = getApp<IAppOption>().globalData.studyData
-    const readingAnswers = sd.readingAnswers || {}
-    const listeningAnswers = sd.listeningAnswers || {}
 
-    // Score reading (Section C only)
-    let readingCorrect = 0, readingTotal = 0
-    if (this.data.currentSet) {
-      for (const rid of this.data.currentSet.readingIds) {
-        const ans = readingAnswers[rid]
-        const passage = (readingsData as any[]).find(r => r.id === rid)
-        if (!passage || !passage.correctAnswers || !ans?.cAnswers) continue
-        for (const qi of Object.keys(passage.correctAnswers)) {
-          if (passage.correctAnswers[qi] === ans.cAnswers[Number(qi)]) readingCorrect++
-          readingTotal++
-        }
-      }
+    // Score reading
+    let rc = 0, rt = 0
+    for (const q of this.data.readingQuestions) {
+      if (q.correct && q.userAnswer) { if (q.userAnswer === q.correct) rc++; rt++ }
+      else if (q.correct) { rt++ }
     }
 
     // Score listening
-    let listenCorrect = 0, listenTotal = 0
-    if (this.data.currentSet?.listeningId) {
-      const lid = this.data.currentSet.listeningId
-      const la = listeningAnswers[lid]
-      const passage = (listeningData as any[]).find(l => l.id === lid)
-      if (passage?.correctAnswers && la) {
-        for (const qi of Object.keys(passage.correctAnswers)) {
-          const correct = passage.correctAnswers[qi]
-          for (const piStr of Object.keys(la)) {
-            const pi = Number(piStr)
-            const sentText = passage.sentences[pi]?.text || ''
-            const qm = sentText.match(/^Q(\d+)\./)
-            if (qm && qm[1] === qi) {
-              if (optionLetter(la[pi]) === correct) listenCorrect++
-              break
-            }
-          }
-          listenTotal++
-        }
-      }
+    let lc = 0, lt = 0
+    for (const q of this.data.listeningQuestions) {
+      if (q.correct && q.userAnswer) { if (q.userAnswer === q.correct) lc++; lt++ }
+      else if (q.correct) { lt++ }
     }
 
-    const score = readingCorrect * 10 + listenCorrect * 7
     this.setData({
-      phase: 'result', score, totalScore: readingTotal * 10 + listenTotal * 7,
-      sectionScores: [
-        { label: '写作', correct: 0, total: 106 },
-        { label: '听力', correct: listenCorrect, total: listenTotal },
-        { label: '阅读', correct: readingCorrect, total: readingTotal },
-        { label: '翻译', correct: 0, total: 106 },
-      ],
+      phase: 'result', readingCorrect: rc, readingTotal: rt, listeningCorrect: lc, listeningTotal: lt,
     })
   },
 
   backToList() {
-    this.setData({ phase: 'list', currentSet: null, score: 0, sectionScores: [] })
+    this.setData({ phase: 'list', currentSet: null })
   },
 })
-
-function optionLetter(i: number): string {
-  return ['A', 'B', 'C', 'D'][i] || '?'
-}

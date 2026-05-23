@@ -45,6 +45,22 @@
 .bn { font-size: 24rpx; font-weight: 600; color: #2d2d4e; }
 .note { display: block; font-size: 24rpx; color: #8a7a9a; line-height: 1.6; }
 
+/* Options */
+.opts { display: flex; flex-direction: column; gap: 8rpx; margin-top: 10rpx; }
+.o { padding: 14rpx 18rpx; border-radius: 12rpx; font-size: 24rpx; color: #4a4a6a; background: #f8f5f4; border: 2rpx solid #ece4e2; transition: 0.12s; }
+.o.on { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.04); }
+
+/* Result rows */
+.rrow { padding: 10rpx 0; border-bottom: 1rpx solid #fff0f3; }
+.rrow:last-child { border-bottom: none; }
+.rq { display: block; font-size: 24rpx; color: #2d2d4e; }
+.ra { display: inline-block; font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 8rpx; margin-top: 4rpx; }
+.ra.g { color: #388e3c; background: rgba(56,142,60,0.06); }
+.ra.r { color: #d32f2f; background: rgba(211,47,47,0.04); }
+
+/* Submit button secondary */
+.sbtn2 { padding: 18rpx; border-radius: 16rpx; background: #fff; border: 2rpx solid rgba(255,107,138,0.15); color: #ff6b8a; text-align: center; font-size: 28rpx; font-weight: 600; }
+
 /* Dark */
 .dark-theme.page { background: #12121f !important; }
 .dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
@@ -57,3 +73,8 @@
 .dark-theme .bn { color: #e0d0e8 !important; }
 .dark-theme .note { color: #a090b0 !important; }
 .dark-theme .bb { background: #2a2a4a !important; }
+.dark-theme .o { background: #2a2a4a !important; border-color: #3a3a5a !important; color: #a090b0 !important; }
+.dark-theme .o.on { color: #4fc3f7 !important; border-color: #4fc3f7 !important; background: rgba(79,195,247,0.06) !important; }
+.dark-theme .rq { color: #e0d0e8 !important; }
+.dark-theme .rrow { border-color: #2a2a4a !important; }
+.dark-theme .sbtn2 { background: #1e1e38 !important; border-color: rgba(255,143,171,0.15) !important; color: #ff8fab !important; }

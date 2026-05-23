@@ -695,21 +695,21 @@ Page<IVocabData, IVocabMethods>({
     const word = this.data.filteredWords[idx]
     if (!word?.definition) return this.closeGame()
     const others = this.data.words.filter(w => w.word !== word.word && w.definition)
-    const pick = shuffleInPlace(others).slice(0, 3).map(w => w.word)
-    const options = shuffleInPlace([word.word, ...pick])
+    const pick = shuffleInPlace(others).slice(0, 3)
+    const options = shuffleInPlace([word, ...pick])
     this.setData({
       gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
-      gameOptions: options, gameIndex: -1, gameCorrect: -1,
+      gameOptions: [], gameIndex: -1, gameCorrect: -1,
     })
+    this.setData({ gameOptions: options.map(w => w.definition) })
   },
 
   pickOption(e: WechatMiniprogram.TouchEvent) {
     if (this.data.gameIndex >= 0) return
     const oi = Number(e.currentTarget.dataset.oi)
-    const correctWord = this.data.gameWord?.word || ''
-    const correctIdx = this.data.gameOptions.indexOf(correctWord)
-    const isCorrect = oi === correctIdx
-    this.setData({ gameIndex: oi, gameCorrect: correctIdx })
+    const correctDef = this.data.gameWord?.definition || ''
+    const isCorrect = this.data.gameOptions[oi] === correctDef
+    this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctDef) })
 
     const app = getApp<IAppOption>()
     const words = app.globalData.studyData.vocabWords as IVocabWord[]

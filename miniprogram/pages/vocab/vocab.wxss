@@ -64,7 +64,7 @@
 .gresult.ok { opacity: 1; color: #388e3c; }
 .gresult.fail { opacity: 1; color: #d32f2f; }
 .gopts { display: flex; flex-direction: column; gap: 10rpx; }
-.go { padding: 20rpx 24rpx; border-radius: 14rpx; font-size: 26rpx; color: #4a4a6a; background: #f8f5f4; border: 2rpx solid #ece4e2; text-align: left; transition: 0.15s; }
+.go { padding: 20rpx 24rpx; border-radius: 14rpx; font-size: 24rpx; color: #4a4a6a; background: #f8f5f4; border: 2rpx solid #ece4e2; text-align: left; transition: 0.15s; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .go.right { color: #388e3c; border-color: #388e3c; background: rgba(56,142,60,0.04); }
 .go.wrong { color: #d32f2f; border-color: #d32f2f; background: rgba(211,47,47,0.04); }
 .gf { display: flex; gap: 12rpx; margin-top: 20rpx; }

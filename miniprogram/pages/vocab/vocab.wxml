@@ -46,9 +46,9 @@
         <view class="gsrc">{{gameWord.source}}</view>
         <text class="gprog" wx:if="{{gameTotal > 1}}">{{gameWordIdx + 1}}/{{gameTotal}}</text>
       </view>
-      <view class="gq">请选出与以下释义对应的单词</view>
-      <view class="gw">{{gameWord.definition}}</view>
-      <view class="gp" wx:if="{{gameWord.phonetic}}">音标：{{gameWord.phonetic}}</view>
+      <view class="gq">请选出以下单词的正确释义</view>
+      <view class="gw">{{gameWord.word}}</view>
+      <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
       <view class="gresult {{gameIndex >= 0 ? (gameIndex === gameCorrect ? 'ok' : 'fail') : ''}}" wx:if="{{gameIndex >= 0}}">
         {{gameIndex === gameCorrect ? '✓ 回答正确' : '✗ 回答错误'}}
       </view>
