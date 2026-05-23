@@ -13,58 +13,174 @@
     </block>
   </block>
 
-  <!-- ===== 考试看板 ===== -->
+  <!-- ===== 考试阶段 ===== -->
   <block wx:else>
-    <view class="topbar">
-      <view class="topbar-row">
-        <text class="back-btn" catchtap="goBack">←</text>
-        <h1 class="topbar-title">{{currentSet.label}}</h1>
+
+    <!-- ===== 看板 ===== -->
+    <block wx:if="{{currentSection === 'dashboard'}}">
+      <view class="topbar">
+        <view class="topbar-row">
+          <text class="back-btn" catchtap="goBack">←</text>
+          <h1 class="topbar-title">{{currentSet.label}}</h1>
+        </view>
       </view>
-    </view>
-
-    <view class="timer-big">
-      <text class="t-n {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
-      <text class="t-desc">剩余时间 · {{currentSet.label}}</text>
-    </view>
-
-    <view class="scard" catchtap="goWriting">
-      <text class="si">✏️</text>
-      <view class="sb">
-        <text class="sn">写作 · 30分钟</text>
-        <text class="sd">前往写作页面作答</text>
+      <view class="timer-big">
+        <text class="t-n {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+        <text class="t-desc">剩余时间 · {{currentSet.label}}</text>
       </view>
-      <text class="sa">→</text>
-    </view>
-
-    <view class="scard" catchtap="goListening">
-      <text class="si">🎧</text>
-      <view class="sb">
-        <text class="sn">听力 · 25分钟</text>
-        <text class="sd" wx:if="{{listeningTotal > 0}}">已答 {{listeningDone}}/{{listeningTotal}} 题</text>
-        <text class="sd" wx:else>前往听力页面作答</text>
+      <view class="scard" catchtap="goWriting">
+        <text class="si">✏️</text>
+        <view class="sb">
+          <text class="sn">写作 · 30分钟</text>
+          <text class="sd">前往写作页面作答</text>
+        </view>
+        <text class="sa">→</text>
       </view>
-      <view wx:if="{{listeningDone > 0}}" class="sp sp-listen" style="width:{{listeningTotal > 0 ? listeningDone / listeningTotal * 100 : 0}}%"></view>
-    </view>
-
-    <view class="scard" catchtap="goReading">
-      <text class="si">📖</text>
-      <view class="sb">
-        <text class="sn">阅读 · 40分钟</text>
-        <text class="sd" wx:if="{{readingTotal > 0}}">已答 {{readingDone}}/{{readingTotal}} 题</text>
-        <text class="sd" wx:else>前往阅读页面作答</text>
+      <view class="scard" catchtap="goListening">
+        <text class="si">🎧</text>
+        <view class="sb">
+          <text class="sn">听力 · 25分钟</text>
+          <text class="sd" wx:if="{{listeningTotal > 0}}">已答 {{listeningDone}}/{{listeningTotal}} 题</text>
+          <text class="sd" wx:else>前往听力页面作答</text>
+        </view>
+        <view wx:if="{{listeningDone > 0}}" class="sp sp-listen" style="width:{{listeningTotal > 0 ? listeningDone / listeningTotal * 100 : 0}}%"></view>
       </view>
-      <view wx:if="{{readingDone > 0}}" class="sp sp-read" style="width:{{readingTotal > 0 ? readingDone / readingTotal * 100 : 0}}%"></view>
-    </view>
-
-    <view class="scard" catchtap="goTranslation">
-      <text class="si">🌟</text>
-      <view class="sb">
-        <text class="sn">翻译 · 30分钟</text>
-        <text class="sd">前往翻译页面作答</text>
+      <view class="scard" catchtap="goReading">
+        <text class="si">📖</text>
+        <view class="sb">
+          <text class="sn">阅读 · 40分钟</text>
+          <text class="sd" wx:if="{{readingTotal > 0}}">已答 {{readingDone}}/{{readingTotal}} 题</text>
+          <text class="sd" wx:else>前往阅读页面作答</text>
+        </view>
+        <view wx:if="{{readingDone > 0}}" class="sp sp-read" style="width:{{readingTotal > 0 ? readingDone / readingTotal * 100 : 0}}%"></view>
       </view>
-      <text class="sa">→</text>
-    </view>
+      <view class="scard" catchtap="goTranslation">
+        <text class="si">🌟</text>
+        <view class="sb">
+          <text class="sn">翻译 · 30分钟</text>
+          <text class="sd">前往翻译页面作答</text>
+        </view>
+        <text class="sa">→</text>
+      </view>
+      <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷并退出</view></view>
+    </block>
 
-    <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷并退出</view></view>
+    <!-- ===== 写作 ===== -->
+    <block wx:elif="{{currentSection === 'writing'}}">
+      <view class="exam-topbar">
+        <text class="et-back" catchtap="goDashboard">← 返回</text>
+        <text class="et-timer {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+      </view>
+      <scroll-view class="content-scroll" scroll-y>
+        <view class="content-hd">✏️ 写作</view>
+        <view class="sec-label">题目</view>
+        <view class="writing-prompt">{{writingPrompt.prompt}}</view>
+        <view class="sec-label">你的作文</view>
+        <textarea class="writing-ta" value="{{writingAnswer}}" bindinput="onWritingInput" placeholder="在此输入作文内容..." maxlength="-1" />
+        <view class="btn-row"><view class="btn btn-primary" catchtap="saveWriting">保存并返回</view></view>
+      </scroll-view>
+    </block>
+
+    <!-- ===== 听力 ===== -->
+    <block wx:elif="{{currentSection === 'listening'}}">
+      <view class="exam-topbar">
+        <text class="et-back" catchtap="goDashboard">← 返回</text>
+        <text class="et-timer {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+      </view>
+      <scroll-view class="content-scroll" scroll-y>
+        <view class="content-hd">🎧 听力</view>
+        <view class="audio-row">
+          <view class="audio-btn {{isAudioPlaying ? 'playing' : ''}}" catchtap="toggleAudio">{{isAudioPlaying ? '⏸ 暂停' : '▶ 播放音频'}}</view>
+        </view>
+        <view wx:for="{{listeningQuestions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi">
+          <view class="lq-card">
+            <view class="lq-stem">Question {{q.qi}}</view>
+            <view wx:for="{{q.options}}" wx:for-index="oi" wx:for-item="opt" wx:key="*this" class="lq-opt {{listeningSel[q.qi] === oi ? 'sel' : ''}}" data-qi="{{q.qi}}" data-oi="{{oi}}" catchtap="onListeningSelect">
+              <text class="lq-letter">{{['A','B','C','D'][oi]}}</text>
+              <text class="lq-text">{{opt}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </block>
+
+    <!-- ===== 阅读 ===== -->
+    <block wx:elif="{{currentSection === 'reading'}}">
+      <view class="exam-topbar">
+        <text class="et-back" catchtap="goDashboard">← 返回</text>
+        <text class="et-timer {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+      </view>
+      <scroll-view class="content-scroll" scroll-y>
+        <view class="content-hd">📖 阅读 · {{readingIdx + 1}}/{{readingPassages.length}}</view>
+
+        <block wx:for="{{readingPassages}}" wx:for-index="pi" wx:for-item="p" wx:key="id">
+          <block wx:if="{{pi === readingIdx}}">
+
+            <!-- Section A: 选词填空 -->
+            <block wx:if="{{p.sectionType === 'A'}}">
+              <view class="sec-label">选词填空</view>
+              <view class="word-bank">
+                <view wx:for="{{p.options}}" wx:for-index="wi" wx:for-item="w" wx:key="*this" class="wb-word {{p._usedFlags[wi] ? 'used' : ''}}" data-key="{{p._blankKeys[0]}}" data-word="{{w}}" catchtap="onReadingBlank">{{w}}</view>
+              </view>
+              <view class="rd-passage">{{p.passage}}</view>
+              <view wx:for="{{p._blankList}}" wx:for-index="bi" wx:for-item="bk" wx:key="key" class="blank-row">
+                <text class="blank-label">第{{bk.key}}空</text>
+                <text class="blank-val {{bk.selected ? 'filled' : ''}}">{{bk.selected || '点击选词'}}</text>
+                <view class="word-bank sm">
+                  <view wx:for="{{p.options}}" wx:for-index="wi" wx:for-item="w" wx:key="*this" class="wb-word {{bk.selected === w ? 'sel' : ''}}" data-key="{{bk.key}}" data-word="{{w}}" catchtap="onReadingBlank">{{w}}</view>
+                </view>
+              </view>
+            </block>
+
+            <!-- Section B: 匹配 -->
+            <block wx:elif="{{p.sectionType === 'B'}}">
+              <view class="sec-label">长篇阅读匹配</view>
+              <view class="rd-passage">{{p.passage}}</view>
+              <view wx:for="{{p._matchList}}" wx:for-index="mi" wx:for-item="m" wx:key="qi" class="match-row">
+                <view class="match-stmt">{{m.stem}}</view>
+                <view class="match-opts">
+                  <view wx:for="{{m.letters}}" wx:for-index="li" wx:for-item="l" wx:key="*this" class="match-letter {{m.selected === l ? 'sel' : ''}}" data-qi="{{m.qi}}" data-val="{{l}}" catchtap="onReadingSelect">{{l}}</view>
+                </view>
+              </view>
+            </block>
+
+            <!-- Section C: 仔细阅读 -->
+            <block wx:elif="{{p.sectionType === 'C'}}">
+              <view class="sec-label">仔细阅读</view>
+              <view class="rd-passage">{{p.passage}}</view>
+              <view wx:for="{{p._cqList}}" wx:for-index="ci" wx:for-item="cq" wx:key="qi" class="c-question">
+                <view class="cq-stem">{{cq.stem}}</view>
+                <view class="cq-opts">
+                  <view wx:for="{{cq.choices}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{cq.selected === ch ? 'sel' : ''}}" data-qi="{{cq.qi}}" data-val="{{ch}}" catchtap="onReadingSelect">{{ch}}</view>
+                </view>
+              </view>
+            </block>
+
+            <view class="btn-row">
+              <view class="btn {{readingIdx <= 0 ? 'disabled' : ''}}" catchtap="readingPrev">← 上一篇</view>
+              <view class="btn {{readingIdx >= readingPassages.length - 1 ? 'disabled' : ''}}" catchtap="readingNext">下一篇 →</view>
+            </view>
+
+          </block>
+        </block>
+      </scroll-view>
+    </block>
+
+    <!-- ===== 翻译 ===== -->
+    <block wx:elif="{{currentSection === 'translation'}}">
+      <view class="exam-topbar">
+        <text class="et-back" catchtap="goDashboard">← 返回</text>
+        <text class="et-timer {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
+      </view>
+      <scroll-view class="content-scroll" scroll-y>
+        <view class="content-hd">🌟 翻译</view>
+        <view class="sec-label">请将以下中文翻译成英文：</view>
+        <view class="translation-src">{{translationItem.chinese}}</view>
+        <view class="sec-label">你的翻译</view>
+        <textarea class="translation-ta" value="{{translationAnswer}}" bindinput="onTranslationInput" placeholder="在此输入你的翻译..." maxlength="-1" />
+        <view class="btn-row"><view class="btn btn-primary" catchtap="saveTranslation">保存并返回</view></view>
+      </scroll-view>
+    </block>
+
   </block>
 </view>

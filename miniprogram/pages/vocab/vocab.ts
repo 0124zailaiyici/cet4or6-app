@@ -34,9 +34,9 @@ interface IVocabData {
 interface IVocabMethods {
   switchTab(e: WechatMiniprogram.TouchEvent): void
   startGame(e: WechatMiniprogram.TouchEvent): void
-  showGameForIdx(idx: number): Promise<void>
+  showGameForIdx(idx: number, skipFrom?: number): Promise<void>
   pickOption(e: WechatMiniprogram.TouchEvent): void
-  nextGame(): void
+  nextGame(skipFrom?: number): void
   closeGame(): void
   addWord(): void
   loadWords(): void
@@ -585,8 +585,12 @@ const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
 }
 
 const EXTRACTED_CACHE_KEY = 'vocab_extracted_words'
+const EXTRACTED_VER_KEY = 'vocab_extracted_ver'
+const EXTRACTED_VER = 2
 
 function extractWords(): IVocabWord[] {
+  const ver = wx.getStorageSync(EXTRACTED_VER_KEY) as number | undefined
+  if (ver !== EXTRACTED_VER) { wx.removeStorageSync(EXTRACTED_CACHE_KEY) }
   const cached = wx.getStorageSync(EXTRACTED_CACHE_KEY) as IVocabWord[] | undefined
   if (cached && cached.length) return cached
 
@@ -614,6 +618,7 @@ function extractWords(): IVocabWord[] {
   }
   const result = Object.values(wordMap)
   wx.setStorageSync(EXTRACTED_CACHE_KEY, result)
+  wx.setStorageSync(EXTRACTED_VER_KEY, EXTRACTED_VER)
   return result
 }
 
@@ -699,37 +704,40 @@ Page<IVocabData, IVocabMethods>({
     this.showGameForIdx(idx)
   },
 
-  async showGameForIdx(idx: number) {
+  async showGameForIdx(idx: number, skipFrom?: number) {
     const word = this.data.filteredWords[idx]
-    if (!word?.chn && !word?.definition) return this.closeGame()
-    this.setData({
-      gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
-      gameOptions: [], gameIndex: -1, gameCorrect: -1, gameAnswer: '',
-    })
-    // 兼容老数据：definition 里存的是中文 → 挪到 chn
+    if (!word) { this.closeGame(); return }
+    this.setData({ gameLoading: true, gameOptions: [], gameWord: null })
+
     if (!word.chn && hasCJK(word.definition)) {
       word.chn = word.definition; word.definition = ''
     }
+
     if (!word.chn) {
-      this.setData({ gameLoading: true })
       try {
         const result = await lookupWord(word.word)
         const entry = Array.isArray(result) ? result[0] : result
-        const chn = entry.chinese || ''
-        if (chn) {
-          word.chn = chn
+        if (entry.chinese) {
+          word.chn = entry.chinese
           const app = getApp<IAppOption>()
           const stored = app.globalData.studyData.vocabWords as IVocabWord[]
           const sw = stored.find(v => v.word === word.word)
-          if (sw) { sw.chn = chn; wx.setStorageSync('studyData', app.globalData.studyData) }
+          if (sw) { sw.chn = entry.chinese; wx.setStorageSync('studyData', app.globalData.studyData) }
         }
       } catch {}
-      this.setData({ gameLoading: false })
     }
-    if (!word.chn) return this.closeGame()
-    if (this.data.words.filter(w => w.word !== word.word && w.chn).length < 3) {
-      const needChn = this.data.words.filter(w => w.word !== word.word && !w.chn && (w.definition || w.word))
-      for (const c of shuffleInPlace(needChn).slice(0, 5)) {
+
+    if (!word.chn) {
+      this.setData({ gameLoading: false })
+      wx.showToast({ title: `跳过「${word.word}」`, icon: 'none' })
+      return this.nextGame(skipFrom ?? idx)
+    }
+
+    // 补查干扰词的中文（如不足3个）
+    let avail = this.data.words.filter(w => w.word !== word.word && w.chn)
+    if (avail.length < 3) {
+      const needChn = this.data.words.filter(w => w.word !== word.word && !w.chn)
+      for (const c of shuffleInPlace(needChn).slice(0, 15)) {
         try {
           const r = await lookupWord(c.word)
           const e = Array.isArray(r) ? r[0] : r
@@ -741,11 +749,16 @@ Page<IVocabData, IVocabMethods>({
           }
         } catch {}
       }
+      avail = this.data.words.filter(w => w.word !== word.word && w.chn)
     }
-    const avail = this.data.words.filter(w => w.word !== word.word && w.chn)
+
     const pick = shuffleInPlace(avail).slice(0, 3)
     const options = shuffleInPlace([word, ...pick])
-    this.setData({ gameOptions: options.map(w => w.chn) })
+    this.setData({
+      gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
+      gameOptions: options.map(w => w.chn), gameIndex: -1, gameCorrect: -1,
+      gameLoading: false, gameAnswer: '',
+    })
   },
 
   pickOption(e: WechatMiniprogram.TouchEvent) {
@@ -781,14 +794,18 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ words: wordsCopy, filteredWords: fwCopy, ...stats })
   },
 
-  nextGame() {
+  nextGame(skipFrom?: number) {
     const nextIdx = this.data.gameWordIdx + 1
     if (nextIdx >= this.data.gameTotal) {
       this.closeGame()
       wx.showToast({ title: '全部挑战完成！', icon: 'success' })
       return
     }
-    this.showGameForIdx(nextIdx)
+    if (skipFrom !== undefined && nextIdx - this.data.gameWordIdx > 50) {
+      this.closeGame()
+      return
+    }
+    this.showGameForIdx(nextIdx, skipFrom ?? this.data.gameWordIdx)
   },
 
   closeGame() {

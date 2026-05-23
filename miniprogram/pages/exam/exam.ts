@@ -38,6 +38,11 @@ interface ITranslationItem {
   acceptableAnswers?: string[]
 }
 
+interface IListeningQ {
+  qi: number
+  options: string[]
+}
+
 interface IExamSet {
   id: string
   label: string
@@ -62,10 +67,12 @@ interface IExamData {
   writingPrompt: IWritingItem | null
   writingAnswer: string
   listeningPassage: IListeningPassage | null
+  listeningQuestions: IListeningQ[]
   listeningSel: Record<number, number>
   isAudioPlaying: boolean
-  readingPassages: IReadingPassage[]
+  readingPassages: any[]
   readingIdx: number
+  activeBlank: string
   translationItem: ITranslationItem | null
   translationAnswer: string
 }
@@ -86,7 +93,6 @@ interface IExamMethods {
   onListeningSelect(e: WechatMiniprogram.TouchEvent): void
   toggleAudio(): void
   onReadingSelect(e: WechatMiniprogram.TouchEvent): void
-  onReadingMatch(e: WechatMiniprogram.TouchEvent): void
   onReadingBlank(e: WechatMiniprogram.TouchEvent): void
   readingNext(): void
   readingPrev(): void
@@ -96,6 +102,7 @@ interface IExamMethods {
 
 const EXAM_DURATION = 7500
 const TWO_HOURS_FIVE = '125:00'
+const OPTS = ['A', 'B', 'C', 'D']
 let timerInterval: any = null
 let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
 
@@ -115,10 +122,12 @@ Page<IExamData, IExamMethods>({
     writingPrompt: null,
     writingAnswer: '',
     listeningPassage: null,
+    listeningQuestions: [],
     listeningSel: {},
     isAudioPlaying: false,
     readingPassages: [],
     readingIdx: 0,
+    activeBlank: '',
     translationItem: null,
     translationAnswer: '',
   },
@@ -163,7 +172,7 @@ Page<IExamData, IExamMethods>({
     if (!set) return
     wx.showModal({
       title: '开始考试',
-      content: '125 分钟倒计时，跳转到各题型页作答。交卷后自动评分。',
+      content: '125 分钟倒计时，各题型内直接作答。交卷后退出。',
       success: (res) => {
         if (!res.confirm) return
         const app = getApp<IAppOption>()
@@ -199,17 +208,14 @@ Page<IExamData, IExamMethods>({
       if (!passage) continue
       const ans = ra[rid]
       if (passage.sectionType === 'A') {
-        const total = Object.keys(passage.correctAnswers).length
+        rt += Object.keys(passage.correctAnswers).length
         rd += ans ? Object.keys(ans.blankAnswers).length : 0
-        rt += total
       } else if (passage.sectionType === 'B') {
-        const total = passage.questions.length
+        rt += passage.questions.length
         rd += ans ? Object.keys(ans.matchAnswers || {}).length : 0
-        rt += total
       } else if (passage.sectionType === 'C') {
-        const total = passage.questions.length
+        rt += passage.questions.length
         rd += ans ? Object.keys(ans.cAnswers || {}).length : 0
-        rt += total
       }
     }
 
@@ -236,7 +242,7 @@ Page<IExamData, IExamMethods>({
 
   goDashboard() {
     if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
-    this.setData({ currentSection: 'dashboard', isAudioPlaying: false, listeningSel: {} })
+    this.setData({ currentSection: 'dashboard', isAudioPlaying: false, activeBlank: '' })
     this.recalcProgress()
     if (timerInterval) clearInterval(timerInterval)
     this.startTimer()
@@ -262,16 +268,52 @@ Page<IExamData, IExamMethods>({
     if (!lid) { wx.showToast({ title: '暂无听力题', icon: 'none' }); return }
     const passage = (listeningData as IListeningPassage[]).find(l => l.id === lid)
     if (!passage) return
+
+    const questions: IListeningQ[] = []
+    for (const s of passage.sentences) {
+      const qm = s.text.match(/^Q(\d+)\.\s*/)
+      if (!qm) continue
+      const qi = parseInt(qm[1])
+      const parts = s.text.split(/[A-D]\)\s*/).filter(Boolean)
+      const options = parts.slice(1).map(p => p.replace(/\s+$/, ''))
+      if (options.length === 4) questions.push({ qi, options })
+    }
+
     const app = getApp<IAppOption>()
     const saved = app.globalData.studyData.listeningAnswers?.[lid] || {}
-    this.setData({ currentSection: 'listening', listeningPassage: passage, listeningSel: saved })
+    this.setData({ currentSection: 'listening', listeningPassage: passage, listeningQuestions: questions, listeningSel: saved })
   },
 
   goReading() {
     const rData = readingsData as IReadingPassage[]
     const ids = this.data.currentSet?.readingIds || []
-    const passages = ids.map(id => rData.find(r => r.id === id)).filter(Boolean) as IReadingPassage[]
-    this.setData({ currentSection: 'reading', readingPassages: passages, readingIdx: 0 })
+    const app = getApp<IAppOption>()
+    const allLetters = 'ABCDEFGHIJKLMN'.split('')
+    const passages = ids.map(id => {
+      const p = rData.find(r => r.id === id)
+      if (!p) return null
+      const ans = app.globalData.studyData.readingAnswers[id] || {}
+      if (p.sectionType === 'A') {
+        const blankKeys = Object.keys(p.correctAnswers)
+        const blankList = blankKeys.map(k => ({ key: k, selected: (ans.blankAnswers || {})[k] || '' }))
+        const usedFlags = p.options.map((_, i) => !!((ans.blankAnswers || {})[blankKeys.find(k => (ans.blankAnswers || {})[k] === p.options[i]) || '']))
+        return { ...p, _ans: ans, _blankList: blankList, _blankKeys: blankKeys, _usedFlags: usedFlags }
+      }
+      if (p.sectionType === 'B') {
+        const matchList = p.questions.map((q, qi) => ({ stem: q, qi, letters: allLetters, selected: (ans.matchAnswers || {})[qi] || '' }))
+        return { ...p, _ans: ans, _matchList: matchList }
+      }
+      if (p.sectionType === 'C') {
+        const cqList = p.questions.map((q, qi) => ({
+          stem: q, qi,
+          choices: (p.choices && p.choices[qi]) ? [...p.choices[qi]] : ['A', 'B', 'C', 'D'],
+          selected: (ans.cAnswers || {})[qi] || ''
+        }))
+        return { ...p, _ans: ans, _cqList: cqList }
+      }
+      return { ...p, _ans: ans }
+    }).filter(Boolean) as any[]
+    this.setData({ currentSection: 'reading', readingPassages: passages, readingIdx: 0, activeBlank: '' })
   },
 
   goTranslation() {
@@ -343,54 +385,66 @@ Page<IExamData, IExamMethods>({
   onReadingSelect(e: WechatMiniprogram.TouchEvent) {
     const qi = Number(e.currentTarget.dataset.qi)
     const val = e.currentTarget.dataset.val as string
-    const passage = this.data.readingPassages[this.data.readingIdx]
-    if (!passage) return
+    const passages = [...this.data.readingPassages]
+    const p = passages[this.data.readingIdx]
+    if (!p) return
     const app = getApp<IAppOption>()
-    let ans = app.globalData.studyData.readingAnswers[passage.id] || { blankAnswers: {}, usedFlags: [] }
-    if (passage.sectionType === 'C') {
+    let ans = app.globalData.studyData.readingAnswers[p.id] || { blankAnswers: {}, usedFlags: [] }
+    if (p.sectionType === 'C') {
       const ca = { ...(ans.cAnswers || {}) }
       if (ca[qi] === val) delete ca[qi]
       else ca[qi] = val
       ans = { ...ans, cAnswers: ca }
-    } else if (passage.sectionType === 'B') {
+      const cqList = p._cqList.map((cq: any) => ({ ...cq, selected: (ca || {})[cq.qi] || '' }))
+      passages[this.data.readingIdx] = { ...p, _ans: ans, _cqList: cqList }
+    } else if (p.sectionType === 'B') {
       const ma = { ...(ans.matchAnswers || {}) }
       if (ma[qi] === val) delete ma[qi]
       else ma[qi] = val
       ans = { ...ans, matchAnswers: ma }
+      const matchList = p._matchList.map((m: any) => ({ ...m, selected: (ma || {})[m.qi] || '' }))
+      passages[this.data.readingIdx] = { ...p, _ans: ans, _matchList: matchList }
     }
-    app.globalData.studyData.readingAnswers[passage.id] = ans
+    app.globalData.studyData.readingAnswers[p.id] = ans
     wx.setStorageSync('studyData', app.globalData.studyData)
-    this.setData({ readingPassages: [...this.data.readingPassages] })
+    this.setData({ readingPassages: passages })
   },
 
   onReadingBlank(e: WechatMiniprogram.TouchEvent) {
-    const blankKey = e.currentTarget.dataset.key as string
+    const key = e.currentTarget.dataset.key as string
     const word = e.currentTarget.dataset.word as string
-    const passage = this.data.readingPassages[this.data.readingIdx]
-    if (!passage) return
+    const passages = [...this.data.readingPassages]
+    const p = passages[this.data.readingIdx]
+    if (!p || !key) return
+
     const app = getApp<IAppOption>()
-    let ans = app.globalData.studyData.readingAnswers[passage.id] || { blankAnswers: {}, usedFlags: [] }
+    let ans = app.globalData.studyData.readingAnswers[p.id] || { blankAnswers: {}, usedFlags: [] }
     const ba = { ...ans.blankAnswers }
     const used = [...(ans.usedFlags || [])]
-    const options = passage.options || []
-    const prevWord = ba[blankKey]
-    if (prevWord === word) {
-      delete ba[blankKey]
+    const options = p.options || []
+
+    if (ba[key] === word) {
+      delete ba[key]
       const oi = options.indexOf(word)
       if (oi >= 0) used[oi] = false
     } else {
-      if (prevWord) {
-        const prevOi = options.indexOf(prevWord)
+      const blankKeys = Object.keys(p.correctAnswers)
+      if (ba[key]) {
+        const prevOi = options.indexOf(ba[key])
         if (prevOi >= 0) used[prevOi] = false
       }
-      ba[blankKey] = word
+      ba[key] = word
       const oi = options.indexOf(word)
       if (oi >= 0) used[oi] = true
     }
     ans = { ...ans, blankAnswers: ba, usedFlags: used }
-    app.globalData.studyData.readingAnswers[passage.id] = ans
+    app.globalData.studyData.readingAnswers[p.id] = ans
     wx.setStorageSync('studyData', app.globalData.studyData)
-    this.setData({ readingPassages: [...this.data.readingPassages] })
+
+    const blankList = Object.keys(p.correctAnswers).map(k => ({ key: k, selected: ba[k] || '' }))
+    passages[this.data.readingIdx] = { ...p, _ans: ans, _blankList: blankList, _usedFlags: used }
+
+    this.setData({ readingPassages: passages, activeBlank: '' })
   },
 
   readingNext() {
