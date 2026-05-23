@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>翻译学习系统 · 原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Segoe UI",Roboto,sans-serif;background:#fdf2f8;display:flex;justify-content:center;padding:30px 16px;min-height:100vh;gap:20px;flex-wrap:wrap}
+.phone{width:375px;border-radius:36px;overflow:hidden;background:#fff8fc;box-shadow:0 20px 60px rgba(244,114,182,0.1);position:relative;margin-bottom:20px}
+.notch{height:40px;background:#fff8fc;display:flex;align-items:center;justify-content:center;font-size:9px;color:#f9a8d4;letter-spacing:4px;font-weight:600}
+.page{padding:0 0 16px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 8px}
+.nav-l{display:flex;align-items:center;gap:10px}
+.nav-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f9a8d4,#f472b6);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 10px rgba(244,114,182,0.2)}
+.nav-greeting{font-size:11px;color:#f9a8d4;font-weight:500}
+.nav-title{font-size:16px;font-weight:700;color:#4a1a2e}
+.nav-r{display:flex;gap:8px}
+.nav-icon{width:36px;height:36px;border-radius:12px;background:rgba(244,114,182,0.06);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.tabbar{display:flex;padding:4px 16px 8px;gap:2px}
+.tab{flex:1;text-align:center;padding:8px 0;font-size:11px;font-weight:600;border-radius:12px;color:#f9a8d4;cursor:pointer;transition:all 0.2s}
+.tab.active{background:#fff;color:#ec407a;box-shadow:0 2px 8px rgba(244,114,182,0.04)}
+.tab .tab-ico{display:block;font-size:18px;margin-bottom:2px}
+.gc{margin:0 16px 10px;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,#fce4ec,#fff3e0);display:flex;align-items:center;gap:14px}
+.gc-ring{width:52px;height:52px;border-radius:50%;flex-shrink:0;background:conic-gradient(#f472b6 0deg 162deg,rgba(244,114,182,0.08)162deg 360deg);display:flex;align-items:center;justify-content:center}
+.gc-ring-in{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gc-num{font-size:16px;font-weight:800;color:#ec407a;line-height:1}
+.gc-lb{font-size:7px;color:#f9a8d4}
+.gc-body{flex:1}
+.gc-tip{font-size:13px;font-weight:600;color:#4a1a2e}
+.gc-sub{font-size:11px;color:#f9a8d4;margin-top:2px}
+.gc-streak{padding:4px 12px;border-radius:14px;background:rgba(255,202,40,0.12);font-size:18px;text-align:center}
+.gc-streak .n{font-weight:800;color:#ff8f00;display:block;font-size:20px}
+.gc-streak .l{font-size:9px;color:#ffa000}
+.stitle{font-size:13px;font-weight:600;color:#4a1a2e;padding:12px 20px 8px}
+.levels{padding:0 16px;display:flex;flex-direction:column;gap:8px}
+.lv{background:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.lv-ico{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.lv-ico.l1{background:#e8f5e9}.lv-ico.l2{background:#e3f2fd}.lv-ico.l3{background:#fff3e0}.lv-ico.l4{background:#fce4ec}
+.lv-body{flex:1}.lv-name{font-size:12px;font-weight:600;color:#4a1a2e}
+.lv-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
+.lv-bar{flex:1;height:6px;border-radius:3px;background:#f0f0f0;overflow:hidden}
+.lv-fill{height:100%;border-radius:3px}
+.lv-fill.l1{background:linear-gradient(90deg,#81c784,#66bb6a)}
+.lv-fill.l2{background:linear-gradient(90deg,#64b5f6,#42a5f5)}
+.lv-fill.l3{background:linear-gradient(90deg,#ffcc80,#ffa726)}
+.lv-fill.l4{background:linear-gradient(90deg,#f48fb1,#ec407a)}
+.lv-pct{font-size:11px;font-weight:600;color:#999;min-width:30px;text-align:right}
+.lv-lock{font-size:14px;color:#ddd}
+.tasks{padding:4px 16px}
+.task{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.task:active{transform:scale(0.98)}
+.task-num{width:24px;height:24px;border-radius:50%;background:#fce4ec;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#ec407a;flex-shrink:0}
+.task-body{flex:1;min-width:0}
+.task-tag{font-size:9px;font-weight:600;padding:1px 8px;border-radius:6px;display:inline-block}
+.task-tag.l1{background:#e8f5e9;color:#388e3c}.task-tag.l2{background:#e3f2fd;color:#1976d2}
+.task-tag.tc{background:#fce4ec;color:#c2185b}.task-tag.te{background:#e0f2f1;color:#00796b}.task-tag.tn{background:#e8f5e9;color:#2e7d32}
+.task-text{display:block;font-size:12px;color:#4a1a2e;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.task-status{font-size:16px}.task-status.done{color:#66bb6a}.task-status.wait{color:#f9a8d4}
+.calendar{padding:0 16px}.cal-grid{display:flex;gap:4px;justify-content:center;padding:8px 0}
+.cal-d{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.cal-d.has{background:#fce4ec;color:#ec407a}.cal-d.today{background:linear-gradient(135deg,#f9a8d4,#f472b6);color:#fff}
+.d-nav{display:flex;align-items:center;gap:10px;padding:10px 16px 12px}
+.d-back{width:36px;height:36px;border-radius:14px;background:rgba(244,114,182,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#f472b6}
+.d-title{flex:1;font-size:14px;font-weight:700;color:#4a1a2e}
+.d-step{font-size:11px;font-weight:600;padding:4px 12px;border-radius:12px;background:#fce4ec;color:#ec407a}
+.si{display:flex;align-items:center;justify-content:center;gap:6px;padding:4px 16px 12px}
+.si-dot{width:8px;height:8px;border-radius:50%;background:#fce4ec;transition:all .3s}
+.si-dot.active{width:24px;border-radius:4px;background:#f472b6}.si-dot.done{background:#66bb6a}
+.si-line{width:20px;height:2px;background:#fce4ec}
+.step{display:none;animation:fadeStep .35s ease}.step.active{display:block}
+@keyframes fadeStep{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.d-scroll{padding:0 16px 16px}
+.pc{background:#fff;border-radius:20px;padding:20px;margin-bottom:12px}
+.ps{margin-bottom:14px}.ps:last-child{margin-bottom:0}
+.pst{font-size:12px;font-weight:600;color:#ec407a;margin-bottom:8px}
+.ps-kws{display:flex;gap:6px;flex-wrap:wrap}
+.ps-kw{padding:4px 12px;border-radius:10px;background:#fce4ec;font-size:12px;color:#4a1a2e;font-weight:500}
+.ps-kw .en{color:#d81b60}
+.ps-struct{background:#f8f4ff;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.8}
+.ps-struct .c{color:#6d3352}.ps-struct .e{color:#7c4d8a;font-weight:500}
+.ps-tip{background:#fff8e6;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.7;color:#6d4c2a}
+.btn-go{width:100%;height:46px;border-radius:23px;border:none;background:linear-gradient(135deg,#f9a8d4,#f472b6);color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(244,114,182,0.15);margin-bottom:8px}
+.btn-go:active{transform:scale(0.97)}
+.qt{background:#fff;border-radius:20px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
+.qt::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f9a8d4,#f472b6)}
+.qt-l{font-size:10px;font-weight:600;color:#f9a8d4;margin-bottom:8px}
+.qt-b{font-size:16px;font-weight:600;line-height:1.8;color:#4a1a2e}
+.ib{background:#fff;border-radius:18px;padding:14px;border:2px solid #fce4ec;margin-bottom:12px}
+.ib textarea{width:100%;min-height:120px;border:none;outline:none;font-size:14px;line-height:1.7;color:#4a1a2e;background:transparent;resize:none}
+.ib textarea::placeholder{color:#f9a8d4}
+.ib-foot{display:flex;justify-content:flex-end;padding:4px 2px 0;font-size:11px;color:#f9a8d4}
+.ct{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.cs{width:80px;height:80px;border-radius:50%;flex-shrink:0;background:conic-gradient(#f472b6 0deg 306deg,#fce4ec 306deg 360deg);display:flex;align-items:center;justify-content:center}
+.cs-in{width:62px;height:62px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cs-n{font-size:24px;font-weight:800;color:#ec407a;line-height:1}
+.cs-stars{display:flex;gap:1px;margin-top:2px}
+.cs-stars .s{font-size:10px}.cs-stars .on{color:#ffca28}.cs-stars .off{color:#fce4ec}
+.cq{flex:1}.cqr{display:flex;justify-content:space-between;padding:3px 0;font-size:11px}
+.cql{color:#f9a8d4}.cqr{font-weight:600}.cqr.good{color:#66bb6a}
+.cds{margin-bottom:14px}
+.cd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.cdl{width:32px;font-size:11px;color:#f9a8d4;text-align:right;flex-shrink:0}
+.cdb{flex:1;height:8px;border-radius:4px;background:#fce4ec;overflow:hidden}
+.cdf{height:100%;border-radius:4px}
+.cdf.good{background:linear-gradient(90deg,#81c784,#66bb6a)}
+.cdf.mid{background:linear-gradient(90deg,#ffcc80,#ffa726)}
+.cdf.low{background:linear-gradient(90deg,#ef9a9a,#ef5350)}
+.cdn{width:22px;font-size:11px;font-weight:600;text-align:right;flex-shrink:0}
+.csec{margin-bottom:12px}
+.cst{font-size:11px;font-weight:600;color:#f9a8d4;margin-bottom:6px}
+.cwc{background:#fff;border-radius:14px;padding:12px 14px}
+.cwg{display:flex;flex-wrap:wrap;gap:6px}
+.cw{padding:3px 8px;border-radius:6px;font-size:12px}
+.cw.ok{background:#e8f5e9;color:#2e7d32}
+.cw.err{background:#ffebee;color:#c62828;position:relative}
+.cw.err::after{content:attr(data-fix);position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:#ef5350;white-space:nowrap;font-weight:500}
+.csc{background:#f8f4ff;border-radius:14px;padding:12px 14px}
+.csl{margin-bottom:8px}.csl-l{font-size:10px;color:#ab47bc;font-weight:600;margin-bottom:2px}
+.csl-t{font-size:12px;line-height:1.6;color:#4a1a2e}
+.csl-t .hl{background:#fff8e6;padding:1px 4px;border-radius:3px}
+.csl-t .hl.err{background:#ffebee;color:#c62828}
+.csc-b{margin-top:6px;font-size:11px;color:#6d3352;background:#fce4ec;padding:8px 10px;border-radius:8px}
+.crf{background:#f3e8ff;border-radius:14px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.crf-t{flex:1;font-size:13px;line-height:1.7;color:#6b3d7a}
+.crf-p{width:30px;height:30px;border-radius:50%;background:rgba(171,71,188,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#ab47bc}
+.ca{display:flex;gap:8px}
+.ca .b{flex:1;height:42px;border-radius:21px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ca .bp{background:linear-gradient(135deg,#f9a8d4,#f472b6);color:#fff;border:none;box-shadow:0 4px 12px rgba(244,114,182,0.15)}
+.ca .bg{background:transparent;border:1px solid #fce4ec;color:#f472b6}
+.rc{background:#fff;border-radius:20px;padding:20px;margin:0 16px 12px}
+.rct{font-size:13px;font-weight:600;color:#4a1a2e;margin-bottom:12px}
+.radar-wrap{display:flex;justify-content:center;padding:10px 0}
+.radar-wrap svg{width:180px;height:180px}
+.wi{display:flex;flex-direction:column;gap:6px}
+.wi-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff8fc;border-radius:10px}
+.wi-ico{font-size:16px}.wi-body{flex:1}
+.wi-name{font-size:12px;font-weight:600;color:#4a1a2e}
+.wi-desc{font-size:10px;color:#f9a8d4;margin-top:1px}
+.wi-btn{padding:4px 12px;border-radius:10px;background:#fce4ec;font-size:10px;font-weight:600;color:#ec407a;cursor:pointer}
+.ri{display:flex;flex-direction:column;gap:6px}
+.ri-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;cursor:pointer}
+.ri-ico{font-size:16px}.ri-body{flex:1}
+.ri-tag{font-size:9px;font-weight:600;padding:1px 8px;border-radius:6px;display:inline-block;background:#e8f5e9;color:#388e3c}
+.ri-text{display:block;font-size:11px;color:#4a1a2e;margin-top:2px}
+.ri-arrow{color:#f9a8d4;font-size:14px}
+.filter-bar{display:flex;gap:6px;padding:4px 16px 8px;overflow-x:auto}
+.filter-bar::-webkit-scrollbar{display:none}
+.ft{flex-shrink:0;padding:4px 12px;border-radius:12px;background:#fff;font-size:11px;font-weight:500;color:#f9a8d4;border:1px solid rgba(244,114,182,0.06);cursor:pointer}
+.ft.active{background:#fce4ec;color:#ec407a;border-color:transparent}
+.fl{padding:4px 16px}
+.fi{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.fi-ico{font-size:16px}.fi-body{flex:1;min-width:0}
+.fi-text{display:block;font-size:12px;color:#4a1a2e;line-height:1.5}
+.fi-meta{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.fi-tag{font-size:9px;font-weight:600;padding:1px 8px;border-radius:6px}
+.fi-tag.l2{background:#e3f2fd;color:#1976d2}.fi-tag.exam{background:#fce4ec;color:#c2185b}
+.fi-del{font-size:14px;color:#f9a8d4;cursor:pointer}
+</style>
+</head>
+<body>
+<!-- P1: 仪表盘 -->
+<div class="phone" id="p1">
+<div class="notch">✦ DASHBOARD</div>
+<div class="page">
+<div class="nav"><div class="nav-l"><div class="nav-avatar">🌟</div><div><div class="nav-greeting">✨ 下午好</div><div class="nav-title">翻译学习</div></div></div><div class="nav-r"><div class="nav-icon">🔔</div><div class="nav-icon" style="background:rgba(255,202,40,0.1)">🔥</div></div></div>
+<div class="gc"><div class="gc-ring"><div class="gc-ring-in"><span class="gc-num">7</span><span class="gc-lb">/11</span></div></div><div class="gc-body"><div class="gc-tip">今天已完成 3 题 ✨</div><div class="gc-sub">L1短句·L2复合句·文化主题</div></div><div class="gc-streak"><span class="n">7</span><span class="l">天</span></div></div>
+<div class="stitle">📈 学习进度</div>
+<div class="levels">
+<div class="lv"><div class="lv-ico l1">🌱</div><div class="lv-body"><div class="lv-name">L1 短句</div><div class="lv-bar-wrap"><div class="lv-bar"><div class="lv-fill l1" style="width:100%"></div></div><span class="lv-pct">5/5</span></div></div><span style="color:#66bb6a">✅</span></div>
+<div class="lv"><div class="lv-ico l2">🌿</div><div class="lv-body"><div class="lv-name">L2 复合句</div><div class="lv-bar-wrap"><div class="lv-bar"><div class="lv-fill l2" style="width:40%"></div></div><span class="lv-pct">2/5</span></div></div></div>
+<div class="lv"><div class="lv-ico l3">🌳</div><div class="lv-body"><div class="lv-name">L3 复杂句</div><div class="lv-bar-wrap"><div class="lv-bar"><div class="lv-fill l3" style="width:0%"></div></div><span class="lv-pct">0/5</span></div></div><span class="lv-lock">🔒</span></div>
+<div class="lv"><div class="lv-ico l4">🏔️</div><div class="lv-body"><div class="lv-name">L4 段落</div><div class="lv-bar-wrap"><div class="lv-bar"><div class="lv-fill l4" style="width:0%"></div></div><span class="lv-pct">0/3</span></div></div><span class="lv-lock">🔒</span></div>
+</div>
+<div class="stitle">📋 今日任务</div>
+<div class="tasks">
+<div class="task"><span class="task-num">1</span><div class="task-body"><span class="task-tag l1">L1</span><span class="task-tag tc" style="margin-left:4px">文化</span><span class="task-text">中国是一个历史悠久、文化丰富的国家。</span></div><span class="task-status done">✅</span></div>
+<div class="task"><span class="task-num">2</span><div class="task-body"><span class="task-tag l2">L2</span><span class="task-tag tn" style="margin-left:4px">环保</span><span class="task-text">越来越多的人意识到环境保护的重要性。</span></div><span class="task-status done">✅</span></div>
+<div class="task"><span class="task-num">3</span><div class="task-body"><span class="task-tag l2">L2</span><span class="task-tag te" style="margin-left:4px">科技</span><span class="task-text">随着互联网的发展，移动支付在中国变得越来越普遍。</span></div><span class="task-status wait">⏳</span></div>
+<div class="task" style="background:#f8f4ff;border:1px dashed #ce93d8;opacity:0.6"><span class="task-num" style="background:#f3e8ff;color:#ab47bc">复</span><div class="task-body"><span class="task-tag l1">L1</span><span class="task-tag tc" style="margin-left:4px">文化</span><span class="task-text">春节是中国最重要的传统节日。</span></div><span class="task-status wait">⏳</span></div>
+<div class="task" style="background:#f8f4ff;border:1px dashed #ce93d8;opacity:0.6"><span class="task-num" style="background:#f3e8ff;color:#ab47bc">复</span><div class="task-body"><span class="task-tag l2">L2</span><span class="task-tag tn" style="margin-left:4px">环保</span><span class="task-text">为了保持健康，我们应该多吃水果和蔬菜。</span></div><span class="task-status wait">⏳</span></div>
+</div>
+<div class="stitle">🔥 连续 7 天</div>
+<div class="calendar"><div class="cal-grid"><div class="cal-d has">一</div><div class="cal-d has">二</div><div class="cal-d has">三</div><div class="cal-d has">四</div><div class="cal-d has">五</div><div class="cal-d has">六</div><div class="cal-d today">日</div></div></div>
+<div class="tabbar"><div class="tab active" onclick="sw('p1')"><span class="tab-ico">📊</span>仪表盘</div><div class="tab" onclick="sw('p2')"><span class="tab-ico">✏️</span>答题</div><div class="tab" onclick="sw('p3')"><span class="tab-ico">📈</span>报告</div><div class="tab" onclick="sw('p4')"><span class="tab-ico">⭐</span>收藏</div></div>
+</div></div>
+
+<!-- P2: 答题（三步） -->
+<div class="phone" id="p2" style="display:none">
+<div class="notch">✦ THREE-STEP</div>
+<div class="page">
+<div class="d-nav"><div class="d-back" onclick="sw('p1')">←</div><div class="d-title">🌿 环保·L2</div><div class="d-step" id="sl">准备</div></div>
+<div class="si"><div class="si-dot active" id="s1"></div><div class="si-line"></div><div class="si-dot" id="s2"></div><div class="si-line"></div><div class="si-dot" id="s3"></div></div>
+<div class="d-scroll">
+<div class="step active" id="st1">
+<div class="pc">
+<div class="ps"><div class="pst">📖 关键词提示</div><div class="ps-kws"><span class="ps-kw">越来越多 <span class="en">→ more and more</span></span><span class="ps-kw">意识到 <span class="en">→ realize</span></span><span class="ps-kw">重要性 <span class="en">→ importance</span></span><span class="ps-kw">环境保护 <span class="en">→ environmental protection</span></span></div></div>
+<div class="ps"><div class="pst">🔍 句式分析</div><div class="ps-struct"><div class="c">「越来越多的人」+「意识到」+「…的重要性」</div><div class="e">→ More and more people + have realized + the importance of ...</div></div></div>
+<div class="ps"><div class="pst">💡 翻译技巧</div><div class="ps-tip">「意识到…的重要性」→ <b>realize the importance of + 名词/动名词</b><br>例：realize the importance of <b>protecting</b> the environment</div></div>
+</div>
+<div class="btn-go" onclick="gs(2)">准备好了 →</div>
+</div>
+<div class="step" id="st2">
+<div class="qt"><div class="qt-l">📝 请翻译成英文</div><div class="qt-b">越来越多的人意识到环境保护的重要性。</div></div>
+<div class="ib"><textarea placeholder="写下你的翻译…" oninput="this.nextElementSibling.firstChild.textContent=this.value.length+' / 500'"></textarea><div class="ib-foot"><span>0 / 500</span></div></div>
+<div class="btn-go" onclick="gs(3)">✨ 提交评分</div>
+</div>
+<div class="step" id="st3">
+<div class="pc">
+<div class="ct"><div class="cs"><div class="cs-in"><span class="cs-n">85</span><div class="cs-stars"><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s on">★</span><span class="s off">★</span></div></div></div><div class="cq"><div class="cqr"><span class="cql">最高</span><span class="cqr good">92</span></div><div class="cqr"><span class="cql">本次</span><span class="cqr good">85 ↗+12</span></div><div class="cqr"><span class="cql">连续</span><span style="font-weight:600;color:#ff8f00">🔥7天</span></div></div></div>
+<div class="cds">
+<div class="cd"><span class="cdl">词汇</span><div class="cdb"><div class="cdf mid" style="width:70%"></div></div><span class="cdn" style="color:#ffa726">70</span></div>
+<div class="cd"><span class="cdl">语法</span><div class="cdb"><div class="cdf good" style="width:85%"></div></div><span class="cdn" style="color:#66bb6a">85</span></div>
+<div class="cd"><span class="cdl">语义</span><div class="cdb"><div class="cdf good" style="width:92%"></div></div><span class="cdn" style="color:#66bb6a">92</span></div>
+<div class="cd"><span class="cdl">表达</span><div class="cdb"><div class="cdf low" style="width:55%"></div></div><span class="cdn" style="color:#ef5350">55</span></div>
+</div>
+<div class="csec"><div class="cst">🔄 逐词对照</div><div class="cwc"><div class="cwg"><span class="cw ok">More and more</span><span class="cw ok">people</span><span class="cw ok">have</span><span class="cw ok">realized</span><span class="cw ok">the</span><span class="cw ok">importance</span><span class="cw ok">of</span><span class="cw ok">environmental</span><span class="cw err" data-fix="→ protection">protect</span></div></div></div>
+<div class="csec"><div class="cst">📝 句式对比</div><div class="csc"><div class="csl"><div class="csl-l">你的</div><div class="csl-t">...of environmental <span class="hl err">protect</span>.</div></div><div class="csl"><div class="csl-l">参考</div><div class="csl-t">...of environmental <span class="hl">protection</span>.</div></div><div class="csc-b">💡 protect是动词，应用名词protection</div></div></div>
+<div class="csec"><div class="cst">📖 参考译文</div><div class="crf"><span class="crf-t">More and more people have realized the importance of environmental protection.</span><span class="crf-p">▶</span></div></div>
+</div>
+<div class="ca"><div class="b bg">🔄重做</div><div class="b bg">🔖收藏</div><div class="b bp">➡下一题</div></div>
+</div>
+</div>
+<div class="tabbar"><div class="tab" onclick="sw('p1')"><span class="tab-ico">📊</span>仪表盘</div><div class="tab active"><span class="tab-ico">✏️</span>答题</div><div class="tab" onclick="sw('p3')"><span class="tab-ico">📈</span>报告</div><div class="tab" onclick="sw('p4')"><span class="tab-ico">⭐</span>收藏</div></div>
+</div></div>
+
+<!-- P3: 报告 -->
+<div class="phone" id="p3" style="display:none">
+<div class="notch">✦ REPORT</div>
+<div class="page">
+<div class="nav"><div class="nav-l"><div class="nav-avatar">🌟</div><div><div class="nav-greeting">✨ 学习报告</div><div class="nav-title">我的数据</div></div></div><div class="nav-r"><div class="nav-icon">📅</div></div></div>
+<div class="rc"><div class="rct">📊 能力雷达·本周</div><div class="radar-wrap"><svg viewBox="0 0 180 180"><polygon points="90,8 158,50 158,130 90,172 22,130 22,50" fill="#fce4ec" fill-opacity="0.3" stroke="#f9a8d4" stroke-width="0.5"/><polygon points="90,33 139,60 139,120 90,145 41,120 41,60" fill="none" stroke="#f9a8d4" stroke-width="0.3"/><polygon points="90,58 120,70 120,110 90,118 60,110 60,70" fill="none" stroke="#f9a8d4" stroke-width="0.3"/><polygon points="90,18 152,58 145,122 90,158 50,128 38,70" fill="rgba(244,114,182,0.15)" stroke="#f472b6" stroke-width="1.5"/><text x="90" y="4" text-anchor="middle" font-size="9" fill="#ec407a" font-weight="600">词汇65</text><text x="164" y="55" text-anchor="middle" font-size="9" fill="#66bb6a" font-weight="600">语法88</text><text x="164" y="133" text-anchor="middle" font-size="9" fill="#66bb6a" font-weight="600">语义90</text><text x="90" y="178" text-anchor="middle" font-size="9" fill="#ffa726" font-weight="600">表达62</text><text x="16" y="130" text-anchor="middle" font-size="9" fill="#f9a8d4" font-weight="600">结构70</text><text x="16" y="52" text-anchor="middle" font-size="9" fill="#f9a8d4" font-weight="600">逻辑75</text></svg></div></div>
+<div class="rc"><div class="rct">🎯 弱项诊断</div><div class="wi"><div class="wi-item"><span class="wi-ico">📖</span><div class="wi-body"><div class="wi-name">词汇·65分</div><div class="wi-desc">关键词替换较弱</div></div><span class="wi-btn" onclick="sw('p2')">去练习</span></div><div class="wi-item"><span class="wi-ico">✍️</span><div class="wi-body"><div class="wi-name">表达·62分</div><div class="wi-desc">中式英语较明显</div></div><span class="wi-btn" onclick="sw('p2')">去练习</span></div><div class="wi-item"><span class="wi-ico">🔗</span><div class="wi-body"><div class="wi-name">结构·70分</div><div class="wi-desc">从句使用较少</div></div><span class="wi-btn" onclick="sw('p2')">去练习</span></div></div></div>
+<div class="rc"><div class="rct">💡 为你推荐</div><div class="ri"><div class="ri-item"><span class="ri-ico">📖</span><div class="ri-body"><span class="ri-tag">L1词汇专项</span><span class="ri-text">近义词替换·5题</span></div><span class="ri-arrow">→</span></div><div class="ri-item" style="opacity:0.5"><span class="ri-ico">🔒</span><div class="ri-body"><span class="ri-tag">L2表达提升</span><span class="ri-text">完成L1后解锁</span></div><span class="ri-arrow" style="color:#ddd">🔒</span></div></div></div>
+<div class="tabbar"><div class="tab" onclick="sw('p1')"><span class="tab-ico">📊</span>仪表盘</div><div class="tab" onclick="sw('p2')"><span class="tab-ico">✏️</span>答题</div><div class="tab active"><span class="tab-ico">📈</span>报告</div><div class="tab" onclick="sw('p4')"><span class="tab-ico">⭐</span>收藏</div></div>
+</div></div>
+
+<!-- P4: 收藏 -->
+<div class="phone" id="p4" style="display:none">
+<div class="notch">✦ FAVORITES</div>
+<div class="page">
+<div class="nav"><div class="nav-l"><div class="nav-avatar">🌟</div><div><div class="nav-greeting">✨ 收藏</div><div class="nav-title">收藏本</div></div></div><div class="nav-r"><div class="nav-icon">🔍</div></div></div>
+<div class="filter-bar"><span class="ft active">全部</span><span class="ft">🏛️文化</span><span class="ft">🌿环保</span><span class="ft">📱科技</span><span class="ft">🎓教育</span><span class="ft">❤️健康</span></div>
+<div class="fl">
+<div class="fi"><span class="fi-ico">🏛️</span><div class="fi-body"><span class="fi-text">中国是一个历史悠久、文化丰富的国家。</span><div class="fi-meta"><span class="fi-tag l2">L2</span><span class="fi-tag exam">真题</span></div></div><span class="fi-del">✕</span></div>
+<div class="fi"><span class="fi-ico">🌿</span><div class="fi-body"><span class="fi-text">越来越多的人意识到环境保护的重要性。</span><div class="fi-meta"><span class="fi-tag l2">L2</span><span class="fi-tag exam">真题</span></div></div><span class="fi-del">✕</span></div>
+<div class="fi"><span class="fi-ico">🧧</span><div class="fi-body"><span class="fi-text">春节是中国最重要的传统节日，家人会聚在一起吃年夜饭。</span><div class="fi-meta"><span class="fi-tag l3">L3</span><span class="fi-tag exam">真题</span></div></div><span class="fi-del">✕</span></div>
+</div>
+<div class="tabbar"><div class="tab" onclick="sw('p1')"><span class="tab-ico">📊</span>仪表盘</div><div class="tab" onclick="sw('p2')"><span class="tab-ico">✏️</span>答题</div><div class="tab" onclick="sw('p3')"><span class="tab-ico">📈</span>报告</div><div class="tab active"><span class="tab-ico">⭐</span>收藏</div></div>
+</div></div>
+
+<script>
+function sw(i){[1,2,3,4].forEach(n=>document.getElementById('p'+n).style.display=n===parseInt(i.slice(1))?'':'none')}
+function gs(n){
+document.querySelectorAll('#p2 .step').forEach(s=>s.classList.remove('active'))
+document.getElementById('st'+n).classList.add('active')
+document.getElementById('sl').textContent='准备→翻译→对比'.split('→')[n-1]
+document.querySelectorAll('#p2 .si-dot').forEach((d,i)=>{d.classList.toggle('active',i===n-1);d.classList.toggle('done',i<n-1)})
+}
+</script>
+</body>
+</html>

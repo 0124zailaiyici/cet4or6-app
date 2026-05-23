@@ -54,6 +54,8 @@ interface IListeningData {
   focusMode: boolean
   currentSectionLabel: string
   markedPages: number[]
+  markedFlags: boolean[]
+  isCurrentMarked: boolean
 }
 
 interface IListeningMethods {
@@ -249,6 +251,8 @@ Page<IListeningData, IListeningMethods>({
     focusMode: true,
     currentSectionLabel: '',
     markedPages: [],
+    markedFlags: [],
+    isCurrentMarked: false,
   },
 
   onLoad(options: { passageId?: string }) {
@@ -312,6 +316,7 @@ Page<IListeningData, IListeningMethods>({
           focusMode: true,
           currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
           markedPages: [],
+          markedFlags: new Array(pages.length).fill(false),
         })
       } else {
         this.setData({
@@ -360,7 +365,7 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage > 0) {
       const cp = this.data.currentPage - 1
       const p = this.data.pages[cp]
-      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '' })
+      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp] })
     }
   },
 
@@ -368,7 +373,7 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage < this.data.pages.length - 1) {
       const cp = this.data.currentPage + 1
       const p = this.data.pages[cp]
-      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '' })
+      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp] })
     }
   },
 
@@ -389,15 +394,18 @@ Page<IListeningData, IListeningMethods>({
   markForReview() {
     const cp = this.data.currentPage
     const m = [...this.data.markedPages]
+    const flags = [...this.data.markedFlags]
     const idx = m.indexOf(cp)
     if (idx >= 0) {
       m.splice(idx, 1)
+      flags[cp] = false
       wx.showToast({ title: '已取消标记', icon: 'none' })
     } else {
       m.push(cp)
+      flags[cp] = true
       wx.showToast({ title: '已标记需重听', icon: 'none' })
     }
-    this.setData({ markedPages: m })
+    this.setData({ markedPages: m, markedFlags: flags, isCurrentMarked: flags[cp] })
   },
 
   // ===== Audio controls =====
