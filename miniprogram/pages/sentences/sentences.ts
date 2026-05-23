@@ -241,20 +241,6 @@ Page<ISentencesData, ISentencesMethods>({
     }
   },
 
-  highlightText(text: string, keywords: string[]): string {
-    let result = text
-    for (const kw of keywords) {
-      const parts = kw.split(' ')
-      if (parts.length > 1) {
-        result = result.replace(new RegExp(`(${kw})`, 'gi'), '<em class="kw">$1</em>')
-      } else {
-        const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        result = result.replace(new RegExp(`(${escaped})`, 'gi'), '<em class="kw">$1</em>')
-      }
-    }
-    return result
-  },
-
   openGenModal() {
     this.setData({ showGenModal: true, genInput: '' })
   },
