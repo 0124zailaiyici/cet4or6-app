@@ -1,5 +1,5 @@
 page { height: 100%; }
-.page { height: 100vh; display: flex; flex-direction: column; }
+.page { min-height: 100vh; display: flex; flex-direction: column; }
 
 /* ===== 列表页 ===== */
 .l-header { position: relative; margin-bottom: 0; overflow: hidden; }
@@ -83,7 +83,7 @@ page { height: 100%; }
 }
 
 /* ===== 题目卡片区 ===== */
-.page-area { flex: 1; padding: 0 18rpx 4rpx; min-height: 0; overflow: hidden; }
+.page-area { flex: 1; padding: 0 18rpx 150rpx; min-height: 0; overflow: hidden; }
 .page-view {
   height: 100%; overflow: hidden; position: relative;
   border-radius: 22rpx; background: #fff;
@@ -128,7 +128,9 @@ page { height: 100%; }
 /* ===== 标准模式 底部栏 ===== */
 .p-bar {
   display: flex; align-items: center; gap: 8rpx;
-  padding: 8rpx 18rpx 20rpx; flex-shrink: 0;
+  padding: 8rpx 18rpx 36rpx; flex-shrink: 0;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+  background: #fff;
 }
 .p-nav {
   height: 52rpx; border-radius: 16rpx; background: #f5f2f0; padding: 0 18rpx;
@@ -226,7 +228,7 @@ page { height: 100%; }
 }
 .speed-btn.active, .ctrl-btn.active { background: #ff9a8b; color: #fff; }
 
-.sentence-scroll { flex: 1; padding: 0 36rpx; }
+.sentence-scroll { flex: 1; padding: 0 36rpx 150rpx; }
 .sentence-list { display: flex; flex-direction: column; gap: 12rpx; }
 .sentence-item {
   display: flex; align-items: flex-start; gap: 14rpx; padding: 24rpx;
@@ -254,8 +256,9 @@ page { height: 100%; }
 .se-hard.active { background: #fff9e6; color: #d4a017; font-weight: 700; }
 
 .player-bar {
-  display: flex; align-items: center; gap: 20rpx; padding: 20rpx 36rpx;
+  display: flex; align-items: center; gap: 20rpx; padding: 20rpx 36rpx 36rpx;
   background: #fff; border-top: 2rpx solid #f5f0ee; flex-shrink: 0;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
 }
 .pb-prev, .pb-next {
   width: 72rpx; height: 72rpx; border-radius: 50%; background: #f5f2f0;
@@ -357,6 +360,7 @@ page { height: 100%; }
 
 .dark-theme .p-nav { background: #2a2a4a !important; color: #a090b0 !important; }
 .dark-theme .p-nav:active { background: #3a2a3a !important; }
+.dark-theme .p-bar { background: #1e1e38 !important; }
 .dark-theme .pd { background: #3a3a5a !important; }
 .dark-theme .pd.on { background: #ff8fab !important; }
 
