@@ -416,6 +416,9 @@ Page<IReadingData, IReadingMethods>({
   },
 
   hideResult() {
+    const annot = readingAnnotations[this.data.current?.id || 0]
+    const vocab = annot?.vocab || {}
+    this.rebuildFormatted(vocab, -1)
     this.setData({ showResult: false })
   },
 
