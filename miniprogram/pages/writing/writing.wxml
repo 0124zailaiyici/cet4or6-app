@@ -103,16 +103,16 @@
         <view class="fcard-title">先理解题目在问什么</view>
         <view class="fcard-desc">确定题型、主题、要求词数。想想自己对这个话题有什么看法。</view>
         <view style="margin-top:10px;padding:10px 12px;background:#f9f5fc;border-radius:8px;font-size:12px;line-height:1.6;color:#504060">
-          常见题型：<br>
-          · 观点选择：Should…? / Do you agree…?<br>
-          · 现象分析：The Impact of… / How to…<br>
-          · 原因解释：Why…? / The Reason for…
+          <view>常见题型：</view>
+          <view>· 观点选择：Should…? / Do you agree…?</view>
+          <view>· 现象分析：The Impact of… / How to…</view>
+          <view>· 原因解释：Why…? / The Reason for…</view>
         </view>
         <view style="margin-top:12px;font-size:12px;color:#504060;font-weight:600">💡 试试回答这三个问题：</view>
         <view style="margin-top:6px;font-size:11px;color:#b09bc0;line-height:1.6">
-          1. 我对这个话题持什么态度？<br>
-          2. 我能想到几个理由？<br>
-          3. 我有例子吗？
+          <view>1. 我对这个话题持什么态度？</view>
+          <view>2. 我能想到几个理由？</view>
+          <view>3. 我有例子吗？</view>
         </view>
         <view class="btn btn-primary" style="margin-top:12px" data-step="{{2}}" catchtap="setGuideStep">我知道了，去列提纲 →</view>
       </view>
@@ -207,11 +207,11 @@
         <view class="fcard-tag">🔍 第 4 步 · 检查清单</view>
         <view class="fcard-title">逐项确认：</view>
         <view style="margin-top:8px;font-size:12px;color:#504060;line-height:2">
-          □ 词数是否达标？<br>
-          □ 首字母大写了没？<br>
-          □ 句末标点正确吗？<br>
-          □ 有总—分—总结构吗？<br>
-          □ 用上了高级句型吗？
+          <view>□ 词数是否达标？</view>
+          <view>□ 首字母大写了没？</view>
+          <view>□ 句末标点正确吗？</view>
+          <view>□ 有总—分—总结构吗？</view>
+          <view>□ 用上了高级句型吗？</view>
         </view>
       </view>
       <view class="btn btn-primary" data-step="{{3}}" catchtap="setGuideStep">← 回写作修改</view>

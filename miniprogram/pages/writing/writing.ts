@@ -215,7 +215,7 @@ Page<IWritingData>({
     this.setData({ tab, detailMode: false, showResult: false, result: null, timerRunning: false })
     if (this._timer) { clearInterval(this._timer); this._timer = null }
   },
-  private _timer: number | null = null,
+  _timer: number | null = null,
 
   /* ══ 句型急救包 ══ */
   togglePattern(e: WechatMiniprogram.TouchEvent) {
