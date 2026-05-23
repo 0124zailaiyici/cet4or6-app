@@ -69,6 +69,7 @@ interface IReadingData {
   fullTranslation: string
   showTrans: boolean
   pageParas: Array<{ text: string; paraIdx: number }>
+  pageWordSegments: Array<{ type: string; text: string; word?: string; zh?: string }>
 }
 
 interface IReadingMethods {
@@ -108,6 +109,7 @@ interface IReadingMethods {
   getPassageParas(text: string): string[]
   toggleVocab(): void
   toggleTrans(): void
+  onWordTap(e: WechatMiniprogram.TouchEvent): void
   updatePageParas(): void
 }
 
@@ -148,7 +150,8 @@ Page<IReadingData, IReadingMethods>({
     highlightedPara: -1,
     fullTranslation: '',
     showTrans: false,
-    pageParas: []
+    pageParas: [],
+    pageWordSegments: []
   },
 
   onLoad() {
@@ -236,13 +239,29 @@ Page<IReadingData, IReadingMethods>({
           const step = st === 'B' ? 1 : 2
           return paras.slice(0, step).map((t: string, i: number) => ({ text: t, paraIdx: i }))
         })(),
+        pageWordSegments: (() => {
+          const segs: Array<{ type: string; text: string; word?: string; zh?: string }> = []
+          for (const p of paras.slice(0, st === 'B' ? 1 : 2)) {
+            const tokens = p.split(/(\s+)/).filter((t: string) => t)
+            for (const token of tokens) {
+              const clean = token.replace(/[^a-zA-Z'-]+/g, '')
+              if (clean.length >= 2 && /^[a-zA-Z]/.test(clean)) {
+                const key = clean.toLowerCase()
+                segs.push({ type: 'word', text: token, word: clean, zh: vocab[key] || '' })
+              } else {
+                segs.push({ type: 'sep', text: token })
+              }
+            }
+          }
+          return segs
+        })(),
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [] })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [] })
   },
 
   toggleVocab() {
@@ -253,6 +272,39 @@ Page<IReadingData, IReadingMethods>({
     this.setData({ showTrans: !this.data.showTrans })
   },
 
+  onWordTap(e: WechatMiniprogram.TouchEvent) {
+    const word = (e.currentTarget.dataset.word as string || '').toLowerCase().trim()
+    const zh = e.currentTarget.dataset.zh as string || ''
+    if (!word) return
+    const app = getApp<IAppOption>()
+    const existing = app.globalData.studyData.vocabWords || []
+    if (existing.some((w: any) => w.word === word)) {
+      wx.showToast({ title: '已在单词本中', icon: 'none' })
+      return
+    }
+    wx.showModal({
+      title: word,
+      content: zh || '暂无释义',
+      confirmText: '加入单词本',
+      cancelText: '取消',
+      success: (res) => {
+        if (!res.confirm) return
+        const vw = app.globalData.studyData.vocabWords || []
+        vw.push({
+          word,
+          phonetic: '',
+          definition: zh,
+          source: this.data.current?.title || '阅读理解',
+          status: 'new',
+          correctStreak: 0
+        })
+        app.globalData.studyData.vocabWords = vw
+        wx.setStorageSync('studyData', app.globalData.studyData)
+        wx.showToast({ title: '已加入单词本', icon: 'success' })
+      }
+    })
+  },
+
   updatePageParas() {
     const paras = this.data.passageParas
     const page = this.data.passagePage
@@ -261,7 +313,22 @@ Page<IReadingData, IReadingMethods>({
     const start = page * step
     const slice = paras.slice(start, start + step)
     const result = slice.map((text, i) => ({ text, paraIdx: start + i }))
-    this.setData({ pageParas: result })
+    const vocab = readingAnnotations[this.data.current?.id || 0]?.vocab || {}
+    const segments: Array<{ type: string; text: string; word?: string; zh?: string }> = []
+    for (const para of slice) {
+      const tokens = para.split(/(\s+)/).filter(t => t)
+      for (const token of tokens) {
+        const clean = token.replace(/[^a-zA-Z'-]+/g, '')
+        if (clean.length >= 2 && /^[a-zA-Z]/.test(clean)) {
+          const key = clean.toLowerCase()
+          const zh = vocab[key] || ''
+          segments.push({ type: 'word', text: token, word: clean, zh })
+        } else {
+          segments.push({ type: 'sep', text: token })
+        }
+      }
+    }
+    this.setData({ pageParas: result, pageWordSegments: segments })
   },
 
   annotatePage(text: string, vocab: Record<string, string>): string {

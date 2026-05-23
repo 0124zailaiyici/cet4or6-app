@@ -114,6 +114,18 @@
 }
 .pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; }
 
+/* Tappable words in passage */
+.pz-word {
+  color: inherit; border-bottom: 1px solid transparent; cursor: pointer;
+  transition: all 0.15s;
+}
+.pz-word:active { background: rgba(84,110,122,0.08); border-radius: 4rpx; }
+.pz-vocab {
+  color: #e65100; border-bottom: 1px dashed #e65100; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.pz-vocab:active { background: rgba(230,81,0,0.15); border-radius: 4rpx; }
+
 /* Paragraph wrappers for translation */
 .para-wrap { margin-bottom: 8rpx; }
 .para-tl-bar {

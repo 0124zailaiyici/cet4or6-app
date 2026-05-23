@@ -41,8 +41,8 @@
       <view wx:if="{{currentSection === 0}}" class="card">
         <text class="qlbl">✏️ Part I Writing (30 min)</text>
         <text class="qt">For this part, you are allowed 30 minutes to write a news report...</text>
-        <textarea class="input" placeholder="在此写作..." value="{{answers[0].text}}" bindinput="onWritingInput" maxlength="2000"></textarea>
-        <text class="cnt">{{(answers[0].text || '').length}}/2000</text>
+        <textarea class="input" placeholder="在此写作..." value="{{writingText}}" bindinput="onWritingInput" maxlength="2000"></textarea>
+        <text class="cnt">{{writingText.length}}/2000</text>
       </view>
 
       <!-- Listening -->
@@ -61,8 +61,8 @@
       <view wx:if="{{currentSection === 3}}" class="card">
         <text class="qlbl">🌟 Part IV Translation (30 min)</text>
         <text class="qt">舞狮作为中国传统民间表演已有2000多年历史...</text>
-        <textarea class="input" placeholder="在此翻译..." value="{{answers[3].text}}" bindinput="onTranslationInput" maxlength="2000"></textarea>
-        <text class="cnt">{{(answers[3].text || '').length}}/2000</text>
+        <textarea class="input" placeholder="在此翻译..." value="{{translationText}}" bindinput="onTranslationInput" maxlength="2000"></textarea>
+        <text class="cnt">{{translationText.length}}/2000</text>
       </view>
     </scroll-view>
 

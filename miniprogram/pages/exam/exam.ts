@@ -25,12 +25,25 @@ interface IExamData {
   score: number
   totalScore: number
   sectionScores: { label: string; correct: number; total: number }[]
+  writingText: string
+  translationText: string
   darkMode: boolean
+}
+
+interface IExamMethods {
+  startExam(e: WechatMiniprogram.TouchEvent): void
+  switchSection(e: WechatMiniprogram.TouchEvent): void
+  onAnswer(e: WechatMiniprogram.TouchEvent): void
+  onWritingInput(e: WechatMiniprogram.Input): void
+  onTranslationInput(e: WechatMiniprogram.Input): void
+  submitExam(): void
+  backToList(): void
+  startTimer(): void
 }
 
 let timerInterval: any = null
 
-Page<IExamData, {}>({
+Page<IExamData, IExamMethods>({
   data: {
     phase: 'list',
     examSets: [],
@@ -43,6 +56,8 @@ Page<IExamData, {}>({
     score: 0,
     totalScore: 0,
     sectionScores: [],
+    writingText: '',
+    translationText: '',
     darkMode: false,
   },
 
@@ -128,17 +143,11 @@ Page<IExamData, {}>({
   },
 
   onWritingInput(e: WechatMiniprogram.Input) {
-    const val = e.detail.value
-    const answers = [...this.data.answers]
-    answers[0] = { text: val }
-    this.setData({ answers })
+    this.setData({ writingText: e.detail.value })
   },
 
   onTranslationInput(e: WechatMiniprogram.Input) {
-    const val = e.detail.value
-    const answers = [...this.data.answers]
-    answers[3] = { text: val }
-    this.setData({ answers })
+    this.setData({ translationText: e.detail.value })
   },
 
   submitExam() {

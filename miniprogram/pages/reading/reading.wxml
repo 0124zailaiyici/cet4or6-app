@@ -50,10 +50,13 @@
               </block>
             </text>
           </block>
-          <block wx:elif="{{pageParas.length > 0}}">
-            <view class="para-wrap" wx:for="{{pageParas}}" wx:key="paraIdx" wx:for-item="par">
-              <text class="pz-text">{{par.text}}</text>
-            </view>
+          <block wx:elif="{{pageWordSegments.length > 0}}">
+            <text class="pz-text">
+              <block wx:for="{{pageWordSegments}}" wx:key="*this" wx:for-item="seg">
+                <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
+                <text wx:else class="{{seg.zh ? 'pz-vocab' : 'pz-word'}}" data-word="{{seg.word}}" data-zh="{{seg.zh}}" catchtap="onWordTap">{{seg.text}}</text>
+              </block>
+            </text>
           </block>
           <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
           <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
