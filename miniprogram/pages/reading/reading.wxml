@@ -50,6 +50,17 @@
               </block>
             </text>
           </block>
+          <block wx:elif="{{pageParas.length > 0}}">
+            <view class="para-wrap" wx:for="{{pageParas}}" wx:key="paraIdx" wx:for-item="par">
+              <text class="pz-text">{{par.text}}</text>
+              <view class="para-tl-bar" catchtap="toggleTrans" data-para="{{par.paraIdx}}">
+                <text>{{showTrans[par.paraIdx] ? '🔼 收起' : '🌐 翻译'}}</text>
+              </view>
+              <view class="para-tl-body" wx:if="{{showTrans[par.paraIdx]}}">
+                <text class="para-tl-cn">{{translations[par.paraIdx]}}</text>
+              </view>
+            </view>
+          </block>
           <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
           <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
         </scroll-view>

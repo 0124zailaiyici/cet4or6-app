@@ -193,6 +193,7 @@ Page<IReadingData, IReadingMethods>({
         : []
       const paras = item.sectionType === 'B' ? this.formatBPassage(item.passage) : this.getPassageParas(item.passage)
       const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
+      const translations = annot?.translation || []
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
       const matchSaved = saved?.matchAnswers || {}
@@ -228,18 +229,43 @@ Page<IReadingData, IReadingMethods>({
         vocabList,
         scrollTop: 0,
         passageParas: paras,
-        highlightedPara: -1
+        highlightedPara: -1,
+        translations,
+        showTrans: {},
+        pageParas: (() => {
+          const step = st === 'B' ? 1 : 2
+          return paras.slice(0, step).map((t: string, i: number) => ({ text: t, paraIdx: i }))
+        })()
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1 })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, translations: [], showTrans: {}, pageParas: [] })
   },
 
   toggleVocab() {
     this.setData({ showVocab: !this.data.showVocab })
+  },
+
+  toggleTrans(e: WechatMiniprogram.TouchEvent) {
+    const paraIdx = parseInt(e.currentTarget.dataset.para as string)
+    if (isNaN(paraIdx)) return
+    const st = { ...this.data.showTrans }
+    if (st[paraIdx]) { delete st[paraIdx] } else { st[paraIdx] = true }
+    this.setData({ showTrans: st })
+  },
+
+  updatePageParas() {
+    const paras = this.data.passageParas
+    const page = this.data.passagePage
+    const st = this.data.current?.sectionType
+    const step = st === 'B' ? 1 : 2
+    const start = page * step
+    const slice = paras.slice(start, start + step)
+    const result = slice.map((text, i) => ({ text, paraIdx: start + i }))
+    this.setData({ pageParas: result })
   },
 
   annotatePage(text: string, vocab: Record<string, string>): string {
@@ -462,6 +488,7 @@ Page<IReadingData, IReadingMethods>({
       currentQ: 0,
       scrollTop: Date.now() % 100
     })
+    this.updatePageParas()
   },
 
   resetCurrent() {
@@ -606,10 +633,16 @@ Page<IReadingData, IReadingMethods>({
     }
   },
   prevPassage() {
-    if (this.data.passagePage > 0) this.setData({ passagePage: this.data.passagePage - 1 })
+    if (this.data.passagePage > 0) {
+      this.setData({ passagePage: this.data.passagePage - 1 })
+      this.updatePageParas()
+    }
   },
   nextPassage() {
-    if (this.data.passagePage < this.data.passagePages.length - 1) this.setData({ passagePage: this.data.passagePage + 1 })
+    if (this.data.passagePage < this.data.passagePages.length - 1) {
+      this.setData({ passagePage: this.data.passagePage + 1 })
+      this.updatePageParas()
+    }
   },
 
   onTouchStart(e: WechatMiniprogram.TouchEvent) { this.setData({ touchStartX: e.touches[0].clientX }) },

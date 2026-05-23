@@ -14,7 +14,7 @@
   <scroll-view class="f-content" scroll-y scroll-top="{{scrollTop}}">
     <block wx:if="{{tab === 0}}">
       <view class="f-list" wx:if="{{favSentences.length > 0}}">
-        <view class="fcard" wx:for="{{favSentences}}" wx:key="id" data-id="{{item.id}}" catchtap="gotoSentence">
+        <view class="fcard" wx:for="{{favSentences}}" wx:key="id" data-id="{{item.id}}" bindtap="gotoSentence">
           <view class="fc-head">
             <text class="fc-english">{{item.english}}</text>
             <view class="fc-mastered" wx:if="{{item.mastered}}">✓ 已掌握</view>
@@ -34,7 +34,7 @@
     </block>
     <block wx:elif="{{tab === 1}}">
       <view class="f-list" wx:if="{{hardListens.length > 0}}">
-        <view class="hcard" wx:for="{{hardListens}}" wx:for-index="idx" wx:key="passageId + '-' + sentenceIndex" data-passageid="{{item.passageId}}" catchtap="goToListening">
+        <view class="hcard" wx:for="{{hardListens}}" wx:for-index="idx" wx:key="passageId + '-' + sentenceIndex" data-passageid="{{item.passageId}}" bindtap="goToListening">
           <view class="hc-header">
             <text class="hc-source">🎵 {{item.passageTitle}}</text>
             <text class="hc-index">第{{item.sentenceIndex + 1}}句</text>

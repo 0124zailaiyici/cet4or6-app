@@ -25,7 +25,16 @@ interface IFavoritesData {
   darkMode: boolean
 }
 
-Page<IFavoritesData, {}>({
+interface IFavoritesMethods {
+  onSwitchTab(e: WechatMiniprogram.TouchEvent): void
+  removeFavorite(e: WechatMiniprogram.TouchEvent): void
+  removeHard(e: WechatMiniprogram.TouchEvent): void
+  gotoSentence(e: WechatMiniprogram.TouchEvent): void
+  goToListening(e: WechatMiniprogram.TouchEvent): void
+  refresh(): void
+}
+
+Page<IFavoritesData, IFavoritesMethods>({
   data: {
     tab: 0,
     tabs: ['⭐ 收藏句子', '❗ 难句记录'],

@@ -217,12 +217,14 @@ app.get('/dictionary/ai', async (req, res) => {
 
   try {
     if (full === 'true') {
-      const result = await callDeepSeek([
-        { role: 'system', content: `你是一个英汉词典。查询英文单词"${word}"，返回如下格式的JSON（只返回JSON，不要markdown）：
+      const [aiRes, dictRes] = await Promise.allSettled([
+        callDeepSeek([
+          { role: 'system', content: `你是一个英汉词典。查询英文单词"${word}"，返回如下格式的JSON（只返回JSON，不要markdown）：
 {
   "word": "${word}",
   "phonetic": "音标",
   "audio": "",
+  "chinese": "简短中文释义（逗号分隔多个义项）",
   "meanings": [
     {
       "partOfSpeech": "词性（中文）",
@@ -232,11 +234,31 @@ app.get('/dictionary/ai', async (req, res) => {
     }
   ]
 }
-每个词性最多3个义项，释义和例句都必须有英文原文和中文翻译。` },
-        { role: 'user', content: word },
-      ], 0.3);
-      const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-      res.json(JSON.parse(cleaned));
+每个词性最多3个义项，释义和例句都必须有英文原文和中文翻译。chinese字段用逗号分隔几个最常用的中文释义。` },
+          { role: 'user', content: word },
+        ], 0.3),
+        dictCache.get(word.toLowerCase()) ? Promise.resolve(null) : axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { timeout: 5000 }),
+      ]);
+
+      let result
+      if (aiRes.status === 'fulfilled') {
+        const cleaned = aiRes.value.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        result = JSON.parse(cleaned);
+      } else {
+        return res.status(500).json({ error: 'AI 词典失败' });
+      }
+
+      if (dictRes.status === 'fulfilled' && dictRes.value) {
+        const dictData = Array.isArray(dictRes.value.data) ? dictRes.value.data[0] : dictRes.value.data;
+        if (dictData) {
+          const phonetics = dictData.phonetics || [];
+          result.phonetic = dictData.phonetic || phonetics.find(p => p.text)?.text || result.phonetic;
+          const audio = phonetics.find(p => p.audio)?.audio || '';
+          if (audio) result.audio = audio;
+        }
+      }
+
+      res.json(result);
     } else {
       const chinese = await callDeepSeek([
         { role: 'system', content: '你是一个英汉词典助手。将用户输入的英文单词翻译成中文，给出2-3个最常见的中文释义，用逗号分隔。只返回中文翻译，不要多余内容。' },

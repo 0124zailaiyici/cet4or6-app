@@ -1,4 +1,4 @@
-import { lookupWord, checkHealth, aiTranslateWord, aiFullDict } from '../../utils/api'
+import { lookupWord, checkHealth, aiFullDict } from '../../utils/api'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IMeaning {
@@ -58,7 +58,7 @@ Page<IDictData>({
     this._applyDarkMode()
     const raw = wx.getStorageSync('dictHistory')
     if (raw) this.setData({ history: raw })
-    this.setData({ aiEnabled: wx.getStorageSync('dictAiEnabled') === true })
+    this.setData({ aiEnabled: wx.getStorageSync('dictAiEnabled') !== false })
     checkHealth().then(r => {
       if (r.apiKey) this.setData({ aiAvailable: true })
     }).catch(() => {})
