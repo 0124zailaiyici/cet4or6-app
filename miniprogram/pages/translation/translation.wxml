@@ -77,6 +77,39 @@
     </scroll-view>
   </block>
 
+  <!-- ═══ 报告 ═══ -->
+  <block wx:if="{{page === 'report'}}">
+    <view class="nav"><view class="nav-l"><view class="nav-avatar">🌟</view><view><view class="nav-greeting">✨ 学习报告</view><view class="nav-title">我的数据</view></view></view><view class="nav-r"><view class="nav-icon">📅</view></view></view>
+    <view class="stitle">📊 学习概况</view>
+    <view class="gc"><view class="gc-ring" style="background:conic-gradient(#f472b6 0deg {{ringDeg || 0}}deg, rgba(244,114,182,0.08) {{ringDeg || 0}}deg 360deg)"><view class="gc-ring-in"><text class="gc-num">{{completedIds.length}}</text><text class="gc-lb">/{{translations.length}}</text></view></view><view class="gc-body"><text class="gc-tip">已完成 {{completedIds.length}} 题</text><text class="gc-sub">完成率 {{pct}}%</text></view></view>
+    <view class="stitle">📈 等级进度</view>
+    <view class="levels">
+      <view class="lv" wx:for="{{levels}}" wx:for-index="i" wx:key="i">
+        <view class="lv-ico l{{i+1}}">{{['🌱','🌿','🌳','🏔️'][i]}}</view>
+        <view class="lv-body"><view class="lv-name">{{['L1 短句','L2 复合句','L3 复杂句','L4 段落'][i]}}</view><view class="lv-bar-wrap"><view class="lv-bar"><view class="lv-fill l{{i+1}}" style="width:{{item.pct}}%"></view></view><text class="lv-pct">{{item.done}}/{{item.total}}</text></view></view>
+        <text class="lv-check" wx:if="{{item.total > 0 && item.done >= item.total}}">✅</text>
+      </view>
+    </view>
+    <view class="stitle">💡 弱项提示</view>
+    <view class="ps-tip" style="margin:0 24rpx 20rpx">完成更多练习后，这里会显示你的薄弱维度（词汇/语法/语义/表达）和针对性推荐。</view>
+  </block>
+
+  <!-- ═══ 收藏 ═══ -->
+  <block wx:if="{{page === 'favorites'}}">
+    <view class="nav"><view class="nav-l"><view class="nav-avatar">🌟</view><view><view class="nav-greeting">✨ 我的收藏</view><view class="nav-title">收藏本</view></view></view><view class="nav-r"><view class="nav-icon">🔍</view></view></view>
+    <view class="stitle">⭐ 收藏的题目</view>
+    <view class="tasks">
+      <block wx:for="{{translations}}" wx:key="id">
+        <view class="task" wx:if="{{item._fav}}" data-id="{{item.id}}" catchtap="enterDetail">
+          <view class="task-emoji {{item._tag.type}}">{{item._emoji}}</view>
+          <view class="task-body"><text class="task-text">{{item._display}}</text><view class="task-tags"><text class="task-tag l{{item._level}}">L{{item._level}}</text><text class="task-tag {{item._tag.type}}">{{item._tag.label}}</text></view></view>
+          <view class="task-right"><text class="task-fav" catchtap="toggleFav" data-id="{{item.id}}">⭐</text></view>
+        </view>
+      </block>
+      <view class="empty-tip" wx:if="{{favIds.length === 0}}"><text>还没有收藏题目哦，在题目列表点击 ☆ 即可收藏</text></view>
+    </view>
+  </block>
+
   <!-- ═══ 底部 Tab ═══ -->
   <view class="tabbar">
     <view class="tab {{page === 'dashboard' ? 'active' : ''}}" catchtap="switchPage" data-page="dashboard"><text class="tab-ico">📊</text>仪表盘</view>

@@ -132,7 +132,6 @@ Page({
   switchPage(e: any) {
     const p = typeof e === 'string' ? e : e.currentTarget.dataset.page
     if (p === 'practice' && !this.data.currentItem) { wx.showToast({ title: '请先从列表选一题', icon: 'none' }); return }
-    if (p === 'report' || p === 'favorites') { wx.showToast({ title: '功能开发中～', icon: 'none' }); return }
     this.setData({ page: p || 'dashboard', result: null, userAnswer: '', wordCount: 0 })
   },
 
