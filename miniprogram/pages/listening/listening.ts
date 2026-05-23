@@ -285,7 +285,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   enterDetail(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as number
+    const id = Number(e.currentTarget.dataset.id)
     const passage = this.data.passages.find(p => p.id === id)
     if (passage) {
       const app = getApp<IAppOption>()
@@ -295,7 +295,6 @@ Page<IListeningData, IListeningMethods>({
       if (isAudio) {
         const ctx = getAudioCtx()
         ctx.stop()
-        ctx.playbackRate = this.data.speed
         ctx.src = passage.audioUrl!.startsWith('http')
           ? passage.audioUrl!
           : `${API_BASE}${encodeURI(passage.audioUrl!)}`
@@ -349,9 +348,9 @@ Page<IListeningData, IListeningMethods>({
   },
 
   onOptionTap(e: WechatMiniprogram.TouchEvent) {
-    const i = e.currentTarget.dataset.i as number  // page index
-    const oi = e.currentTarget.dataset.oi as number  // option index
-    const sa = { ...this.data.selectedAnswers }
+    const i = parseInt(e.currentTarget.dataset.i as string)
+    const oi = parseInt(e.currentTarget.dataset.oi as string)
+    const sa: Record<number, number> = { ...this.data.selectedAnswers }
     if (sa[i] === oi) delete sa[i]
     else sa[i] = oi
     this.setData({ selectedAnswers: sa })
@@ -483,7 +482,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   playSentence(e: WechatMiniprogram.TouchEvent) {
-    const index = e.currentTarget.dataset.index as number
+    const index = Number(e.currentTarget.dataset.index)
     this.setData({ currentIndex: index })
     const passage = this.data.currentPassage
     if (passage) {
@@ -527,7 +526,7 @@ Page<IListeningData, IListeningMethods>({
   toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }) },
 
   toggleHard(e: WechatMiniprogram.TouchEvent) {
-    const index = e.currentTarget.dataset.index as number
+    const index = Number(e.currentTarget.dataset.index)
     const passage = this.data.currentPassage
     if (!passage) return
     const app = getApp<IAppOption>()
