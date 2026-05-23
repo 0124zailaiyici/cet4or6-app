@@ -380,13 +380,13 @@ Page<IReadingData, IReadingMethods>({
     const num = parseInt(locate.replace(/[^0-9]/g, ''))
     if (isNaN(num)) return
     const st = this.data.current?.sectionType
-    if (st === 'B') {
-      this.setData({ passagePage: num - 1, bStmtPage: 0, scrollTop: this.data.scrollTop === 0 ? 1 : 0 })
-      return
-    }
-    const paraIndex = num - 1
-    const page = Math.floor(paraIndex / 2)
-    this.setData({ passagePage: page, currentQ: 0, scrollTop: this.data.scrollTop === 0 ? 1 : 0 })
+    const page = st === 'B' ? num - 1 : Math.floor((num - 1) / 2)
+    this.setData({
+      passagePage: page,
+      bStmtPage: 0,
+      currentQ: 0,
+      scrollTop: Date.now() % 100
+    })
   },
 
   resetCurrent() {

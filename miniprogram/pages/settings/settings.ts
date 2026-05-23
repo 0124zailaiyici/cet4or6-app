@@ -17,6 +17,7 @@ interface ISettingsMethods {
   getCacheSize(): string
   goReminder(): void
   goFeedback(): void
+  goGuide(): void
 }
 
 Page<ISettingsData, ISettingsMethods>({
@@ -111,5 +112,9 @@ Page<ISettingsData, ISettingsMethods>({
 
   goFeedback() {
     wx.navigateTo({ url: '/pages/feedback/feedback' })
+  },
+
+  goGuide() {
+    wx.navigateTo({ url: '/pages/guide/guide' })
   },
 })

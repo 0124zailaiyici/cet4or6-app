@@ -225,9 +225,8 @@
 
 /* ===== 结果视图（提交后） ===== */
 .result-view {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  display: flex; flex-direction: column;
-  background: #f7f0ef; z-index: 2;
+  flex: 1; display: flex; flex-direction: column; min-height: 0;
+  background: #f7f0ef;
 }
 
 .rv-list { flex: 1; min-height: 0; height: 1rpx; padding: 16rpx 20rpx 0; }
