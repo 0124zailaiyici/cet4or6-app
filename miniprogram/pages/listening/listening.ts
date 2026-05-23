@@ -369,7 +369,11 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage > 0) {
       const cp = this.data.currentPage - 1
       const p = this.data.pages[cp]
-      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp] })
+      const isPlaying = this.data.isPlaying
+      if (this.data.focusMode && isPlaying && audioCtx) {
+        audioCtx.pause()
+      }
+      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp], isPlaying: this.data.focusMode ? false : isPlaying })
     }
   },
 
@@ -377,7 +381,11 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage < this.data.pages.length - 1) {
       const cp = this.data.currentPage + 1
       const p = this.data.pages[cp]
-      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp] })
+      const isPlaying = this.data.isPlaying
+      if (this.data.focusMode && isPlaying && audioCtx) {
+        audioCtx.pause()
+      }
+      this.setData({ currentPage: cp, currentSectionLabel: p?.section || '', isCurrentMarked: this.data.markedFlags[cp], isPlaying: this.data.focusMode ? false : isPlaying })
     }
   },
 
