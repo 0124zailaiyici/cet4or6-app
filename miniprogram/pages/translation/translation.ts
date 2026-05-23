@@ -63,16 +63,6 @@ function wordCompare(user: string, ref: string): { word: string; ok: boolean }[]
   return u.map(w => ({ word: w, ok: rSet.has(w) }))
 }
 
-/* 句式分析提示（无参考译文） */
-function getStructHint(chinese: string): string {
-  if (chinese.length <= 10) return '找出主语和谓语，直接翻译。注意中文无时态，英文需加时态。'
-  if (chinese.includes('的')) return '注意 "的" 前面的修饰成分要放到名词前面或处理成定语从句。'
-  if (chinese.includes('随着')) return '"随着…" 常用 With + 名词 或 As 引导的状语从句开头。'
-  if (chinese.includes('为了')) return '"为了" 表目的，用 To / In order to 开头。'
-  if (chinese.includes('是')) return '找主系表结构：A + is/are + B。'
-  return '先找出主谓宾主干，再处理修饰成分。注意中英文语序差异。'
-}
-
 interface ITranslation { id: number; chinese: string; reference: string; source: string; keywords?: string[]; acceptableAnswers?: string[] }
 interface IDimensions { vocabulary: number; grammar: number; semantics: number; expression: number }
 interface ITranslationRecord { id: number; userAnswer: string; score: number; dimensions: IDimensions; suggestions?: string; reference: string; date: string }
@@ -87,7 +77,7 @@ Page({
     levels: [] as { total: number; done: number; pct: number }[],
     hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
     words: [] as { word: string; ok: boolean }[],
-    todayTask: null as number | null,
+    todayItem: null as any,
   },
 
   onLoad() {
@@ -109,24 +99,24 @@ Page({
     const completedIds = [...new Set(history.map(r => r.id))].filter(id => currentIds.has(id))
     const pct = completedIds.length > 0 ? Math.round(completedIds.length / items.length * 100) : 0
     const doneSet = new Set(completedIds); const favSet = new Set(this.data.favIds)
-    const listItems = items.map(t => ({
-      ...t, _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese,
-      _emoji: getEmoji(t.chinese), _tag: getTag(t), _level: getLevel(t.chinese), _topic: getTopic(t.chinese),
-      _done: doneSet.has(t.id), _fav: favSet.has(t.id),
-    }))
+    const HINTS = ['先找主语谓语，再添加修饰', '注意"的"字结构处理', '注意逻辑关系词的位置', '先拆成短句再组合']
+    const listItems = items.map(t => {
+      const lv = getLevel(t.chinese)
+      return {
+        ...t, _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese,
+        _emoji: getEmoji(t.chinese), _tag: getTag(t), _level: lv, _topic: getTopic(t.chinese),
+        _done: doneSet.has(t.id), _fav: favSet.has(t.id), _hint: HINTS[lv - 1] || HINTS[0],
+      }
+    })
     const levels = [1, 2, 3, 4].map(lv => {
       const total = items.filter(t => getLevel(t.chinese) === lv).length
       const done = completedIds.filter(id => { const t = items.find(t => t.id === id); return t && getLevel(t.chinese) === lv }).length
       return { total, done, pct: total > 0 ? Math.round(done / total * 100) : 0 }
     })
     /* 今日推荐：找第一个未完成的 L1 或 L2 题 */
-    let todayTask: number | null = null
     const todo = listItems.filter(t => !t._done)
-    if (todo.length > 0) {
-      const first = todo.find(t => t._level <= 2) || todo[0]
-      todayTask = first.id
-    }
-    this.setData({ translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360), levels, todayTask })
+    const todayItem = todo.length > 0 ? (todo.find(t => t._level <= 2) || todo[0]) : null
+    this.setData({ translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360), levels, todayItem })
   },
 
   switchPage(e: any) {

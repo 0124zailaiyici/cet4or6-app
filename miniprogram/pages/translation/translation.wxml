@@ -13,12 +13,12 @@
     </view>
 
     <!-- 今日推荐 -->
-    <view class="today-card" wx:if="{{todayTask && todayTask > 0}}">
+    <view class="today-card" wx:if="{{todayItem}}">
       <view class="today-label">🎯 今日推荐</view>
-      <view class="task" data-id="{{todayTask}}" catchtap="enterDetail" wx:for="{{translations}}" wx:key="id" wx:if="{{item.id === todayTask}}">
-        <view class="task-emoji {{item._tag.type}}">{{item._emoji}}</view>
-        <view class="task-body"><text class="task-text">{{item._display}}</text><view class="task-tags"><text class="task-tag l{{item._level}}">L{{item._level}}</text><text class="task-tag {{item._tag.type}}">{{item._tag.label}}</text></view></view>
-        <view class="task-right"><text class="task-check {{item._done ? 'done' : ''}}">{{item._done ? '✅' : ''}}</text></view>
+      <view class="task" data-id="{{todayItem.id}}" catchtap="enterDetail">
+        <view class="task-emoji {{todayItem._tag.type}}">{{todayItem._emoji}}</view>
+        <view class="task-body"><text class="task-text">{{todayItem._display}}</text><view class="task-tags"><text class="task-tag l{{todayItem._level}}">L{{todayItem._level}}</text><text class="task-tag {{todayItem._tag.type}}">{{todayItem._tag.label}}</text></view></view>
+        <view class="task-right"><text class="task-check {{todayItem._done ? 'done' : ''}}">{{todayItem._done ? '✅' : ''}}</text></view>
       </view>
     </view>
 
@@ -54,7 +54,7 @@
       <block wx:if="{{step === 'prepare'}}">
         <view class="pc">
           <view class="ps"><view class="pst">📖 关键词提示</view><view class="ps-kws"><text class="ps-kw" wx:for="{{currentItem.keywords || []}}" wx:for-index="i" wx:key="i">{{item}}</text></view></view>
-          <view class="ps"><view class="pst">🔍 翻译提示</view><view class="ps-struct"><text class="c">{{currentItem.chinese}}</text><text class="hint">💡 {{['先找主语谓语，再添加修饰','注意"的"字结构处理','注意逻辑关系词的位置','先拆成短句再组合'][(currentItem._level||1)-1]}}</text></view></view>
+          <view class="ps"><view class="pst">🔍 翻译提示</view><view class="ps-struct"><text class="c">{{currentItem.chinese}}</text><text class="hint">💡 {{currentItem._hint || '先找主谓宾主干，再处理修饰成分'}}</text></view></view>
         </view>
         <view class="btn-next" catchtap="goStep" data-step="2">准备好了 →</view>
       </block>
@@ -92,7 +92,7 @@
     </view>
   </block>
 
-  <!-- ═══ 报告 / 收藏（同上）═══ -->
+  <!-- ═══ 报告 ═══ -->
   <block wx:if="{{page === 'report'}}">
     <view class="nav"><view class="nav-l"><view class="nav-avatar">🌟</view><view><view class="nav-greeting">✨ 学习报告</view><view class="nav-title">我的数据</view></view></view><view class="nav-r"><view class="nav-icon">📅</view></view></view>
     <view class="stitle">📊 学习概况</view>
