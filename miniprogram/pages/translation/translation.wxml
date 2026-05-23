@@ -39,7 +39,7 @@
     </view>
     <view class="si"><view class="si-dot {{step === 'prepare' ? 'active' : ''}} {{step === 'translate' || step === 'compare' ? 'done' : ''}}"></view><view class="si-line"></view><view class="si-dot {{step === 'translate' ? 'active' : ''}} {{step === 'compare' ? 'done' : ''}}"></view><view class="si-line"></view><view class="si-dot {{step === 'compare' ? 'active' : ''}}"></view></view>
 
-    <scroll-view class="d-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="d-scroll">
 
       <!-- Step 1: 准备 -->
       <block wx:if="{{step === 'prepare'}}">
@@ -74,7 +74,7 @@
         <view class="ca"><view class="b bg" catchtap="retry">🔄 重做</view><view class="b bp" catchtap="switchPage" data-page="dashboard">➡ 完成</view></view>
       </block>
 
-    </scroll-view>
+    </view>
   </block>
 
   <!-- ═══ 报告 ═══ -->

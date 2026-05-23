@@ -1,4 +1,4 @@
-.page{min-height:100vh;padding-bottom:0;display:flex;flex-direction:column;background:#fff8fc}
+.page{min-height:100vh;padding-bottom:110rpx;background:#fff8fc}
 /* ── 导航 ── */
 .nav{display:flex;justify-content:space-between;align-items:center;padding:20rpx 32rpx 10rpx}
 .nav-l{display:flex;align-items:center;gap:12rpx}
@@ -67,7 +67,7 @@
 .si-dot.active{width:28rpx;border-radius:6rpx;background:#f472b6}
 .si-dot.done{background:#66bb6a}
 .si-line{width:24rpx;height:3rpx;background:#fce4ec}
-.d-scroll{padding:0 24rpx 20rpx;flex:1;overflow-y:auto}
+.d-scroll{padding:0 24rpx 20rpx}
 /* ── 准备卡片 ── */
 .pc{background:#fff;border-radius:28rpx;padding:24rpx;margin-bottom:14rpx}
 .ps{margin-bottom:16rpx}.ps:last-child{margin-bottom:0}
@@ -130,7 +130,7 @@
 .ca .bg{background:transparent;border:2rpx solid #fce4ec;color:#f472b6}
 .ca .bg:active{background:#fce4ec}
 /* ── Tab 栏 ── */
-.tabbar{display:flex;padding:6rpx 24rpx 12rpx;gap:4rpx;border-top:1rpx solid rgba(244,114,182,0.04);flex-shrink:0;background:#fff8fc}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;padding:6rpx 24rpx 12rpx;gap:4rpx;border-top:1rpx solid rgba(244,114,182,0.04);background:#fff8fc;box-shadow:0 -2rpx 12rpx rgba(0,0,0,0.02)}
 .tab{flex:1;text-align:center;padding:8rpx 0;font-size:18rpx;font-weight:600;border-radius:16rpx;color:#f9a8d4}
 .tab.active{background:#fce4ec;color:#ec407a}
 .tab:active{transform:scale(0.96)}
@@ -160,7 +160,7 @@
 .dark-theme .csc-b{background:#2d1a30;color:#dab0c8}
 .dark-theme .crf{background:#201630}
 .dark-theme .crf-t{color:#b8a0c0}
-.dark-theme .tabbar{background:#1a1025;border-top-color:rgba(244,114,182,0.06)}
+.dark-theme .tabbar{background:#1a1025;border-top-color:rgba(244,114,182,0.06);box-shadow:0 -2rpx 12rpx rgba(0,0,0,0.2)}
 .dark-theme .tab{color:#6a4a6a}
 .dark-theme .tab.active{background:#2d1a30;color:#f472b6}
 .dark-theme .ps-struct{background:#2d1a30}
