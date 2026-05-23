@@ -686,12 +686,15 @@ Page<IListeningData, IListeningMethods>({
   },
 
   playSentence(e: WechatMiniprogram.TouchEvent) {
-    const index = Number(e.currentTarget.dataset.index)
-    this.setData({ currentIndex: index })
+    const rawIndex = Number(e.currentTarget.dataset.index)
+    const origIndex = this.data.focusMode
+      ? (this.data.focusSentenceMap[rawIndex] ?? rawIndex)
+      : rawIndex
+    this.setData({ currentIndex: rawIndex })
     const passage = this.data.currentPassage
     if (passage) {
       if (passage.audioUrl) this.playText('', passage.audioUrl)
-      else this.playText(passage.sentences[index].text)
+      else this.playText(passage.sentences[origIndex].text)
     }
   },
 
