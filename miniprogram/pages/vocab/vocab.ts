@@ -617,10 +617,7 @@ function extractWords(): IVocabWord[] {
   return result
 }
 
-function trimDef(d: string): string {
-  const s = d.split('. ')[0].trim()
-  return s.length > 50 ? s.slice(0, 50) + '…' : s
-}
+function hasCJK(s: string): boolean { return /[\u4e00-\u9fff]/.test(s) }
 
 function shuffleInPlace<T>(arr: T[]): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -709,39 +706,51 @@ Page<IVocabData, IVocabMethods>({
       gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
       gameOptions: [], gameIndex: -1, gameCorrect: -1, gameAnswer: '',
     })
-    const needFetch = !word.definition || !word.chn
-    if (needFetch) {
+    // 兼容老数据：definition 里存的是中文 → 挪到 chn
+    if (!word.chn && hasCJK(word.definition)) {
+      word.chn = word.definition; word.definition = ''
+    }
+    if (!word.chn) {
       this.setData({ gameLoading: true })
       try {
         const result = await lookupWord(word.word)
         const entry = Array.isArray(result) ? result[0] : result
-        const engDef = entry.meanings?.[0]?.definitions?.[0]?.definition || ''
         const chn = entry.chinese || ''
-        if (engDef || chn) {
-          if (engDef) word.definition = engDef
-          if (chn) word.chn = chn
+        if (chn) {
+          word.chn = chn
           const app = getApp<IAppOption>()
           const stored = app.globalData.studyData.vocabWords as IVocabWord[]
           const sw = stored.find(v => v.word === word.word)
-          if (sw) { sw.definition = word.definition; sw.chn = word.chn; wx.setStorageSync('studyData', app.globalData.studyData) }
+          if (sw) { sw.chn = chn; wx.setStorageSync('studyData', app.globalData.studyData) }
         }
       } catch {}
       this.setData({ gameLoading: false })
     }
-    if (!word.definition) return this.closeGame()
-    const others = this.data.words.filter(w => w.word !== word.word && w.definition)
-    const pick = shuffleInPlace(others).slice(0, 3)
+    if (!word.chn) return this.closeGame()
+    const candidates = this.data.words.filter(w => w.word !== word.word && w.chn)
+    if (candidates.length < 3) {
+      for (const c of candidates) {
+        if (c.chn) continue
+        try {
+          const r = await lookupWord(c.word)
+          const e = Array.isArray(r) ? r[0] : r
+          const cn = e.chinese || ''
+          if (cn) { c.chn = cn; const app = getApp<IAppOption>(); const sw = app.globalData.studyData.vocabWords.find((v: IVocabWord) => v.word === c.word); if (sw) { sw.chn = cn; wx.setStorageSync('studyData', app.globalData.studyData) } }
+        } catch {}
+      }
+    }
+    const avail = this.data.words.filter(w => w.word !== word.word && w.chn)
+    const pick = shuffleInPlace(avail).slice(0, 3)
     const options = shuffleInPlace([word, ...pick])
-    this.setData({ gameOptions: options.map(w => trimDef(w.definition)) })
+    this.setData({ gameOptions: options.map(w => w.chn) })
   },
 
   pickOption(e: WechatMiniprogram.TouchEvent) {
     if (this.data.gameIndex >= 0) return
     const oi = Number(e.currentTarget.dataset.oi)
-    const correctDef = trimDef(this.data.gameWord?.definition || '')
-    const isCorrect = this.data.gameOptions[oi] === correctDef
-    const answer = this.data.gameWord?.chn || ''
-    this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctDef), gameAnswer: answer })
+    const correctChn = this.data.gameWord?.chn || ''
+    const isCorrect = this.data.gameOptions[oi] === correctChn
+    this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctChn), gameAnswer: correctChn })
 
     const app = getApp<IAppOption>()
     const words = app.globalData.studyData.vocabWords as IVocabWord[]

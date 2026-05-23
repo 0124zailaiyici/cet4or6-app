@@ -30,7 +30,7 @@
     <view class="detail-header">
       <view class="back-btn" catchtap="backToList">{{examMode ? '返回考试' : '返回'}}</view>
       <text class="detail-title">{{currentPassage.title}}</text>
-      <view class="detail-complete" catchtap="markCompleted">✓</view>
+      <view wx:if="{{!examMode}}" class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
     <scroll-view class="summary-scroll" scroll-y>
       <view class="sm-card">
@@ -75,9 +75,9 @@
     <view class="detail-header">
       <view class="back-btn" catchtap="backToList">{{examMode ? '返回考试' : '返回'}}</view>
       <text class="detail-title">{{currentPassage.title}}</text>
-      <view wx:if="{{audioMode}}" class="focus-toggle {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">精听</view>
-      <view wx:if="{{pages.length > 0}}" class="focus-toggle" catchtap="viewSummary">总结</view>
-      <view class="detail-complete" catchtap="markCompleted">✓</view>
+      <view wx:if="{{audioMode && !examMode}}" class="focus-toggle {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">精听</view>
+      <view wx:if="{{!examMode && pages.length > 0}}" class="focus-toggle" catchtap="viewSummary">总结</view>
+      <view wx:if="{{!examMode}}" class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
 
     <!-- === 精听模式（逐句拆解） === -->

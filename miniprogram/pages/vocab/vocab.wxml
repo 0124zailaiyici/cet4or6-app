@@ -46,13 +46,12 @@
         <view class="gsrc">{{gameWord.source}}</view>
         <text class="gprog" wx:if="{{gameTotal > 1}}">{{gameWordIdx + 1}}/{{gameTotal}}</text>
       </view>
-      <view class="gq">请选出以下单词的正确释义</view>
+      <view class="gq">选择以下单词的中文释义</view>
       <view class="gw">{{gameWord.word}}</view>
       <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
-      <view class="gloading" wx:if="{{gameLoading}}">加载中…</view>
+      <view class="gloading" wx:if="{{gameLoading}}">加载中，请稍后…</view>
       <view class="gresult {{gameIndex >= 0 ? (gameIndex === gameCorrect ? 'ok' : 'fail') : ''}}" wx:if="{{gameIndex >= 0}}">
-        <text>{{gameIndex === gameCorrect ? '✓ 回答正确' : '✗ 回答错误'}}</text>
-        <text class="gachn" wx:if="{{gameAnswer}}">  →  {{gameAnswer}}</text>
+        {{gameIndex === gameCorrect ? '✓ 回答正确' : '✗ 回答错误'}}
       </view>
       <view class="gopts" wx:if="{{!gameLoading}}">
         <view class="go {{gameIndex === oi ? (gameCorrect === oi ? 'right' : 'wrong') : ''}} {{gameCorrect >= 0 && gameCorrect === oi ? 'right' : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="oi" data-oi="{{oi}}" catchtap="pickOption">{{item}}</view>
