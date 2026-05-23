@@ -54,6 +54,14 @@
 .hint { font-size: 24rpx; color: #b09bc0; margin-bottom: 24rpx; }
 .hint.dim { color: #ddd0e0; }
 
+/* ══ Selected hint ══ */
+.selected-hint {
+  display: flex; align-items: center; gap: 6rpx;
+  padding: 12rpx 16rpx; background: rgba(156,39,176,0.04);
+  border-radius: 12rpx; font-size: 22rpx; color: #504060; margin: 12rpx 0;
+}
+.selected-pat { color: #9c27b0; font-weight: 600; font-family: monospace; }
+
 /* ══ Search ══ */
 .srch-wrap { margin-bottom: 16rpx; }
 .srch {

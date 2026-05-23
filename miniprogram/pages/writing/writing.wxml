@@ -32,11 +32,11 @@
 
   <!-- ═══════════ TAB 0: 句型急救包 ═══════════ -->
   <scroll-view class="content" scroll-y wx:if="{{tab === 0}}">
-    <view class="hint">💡 按功能分类查找句型，点选用后造句练习</view>
+    <view class="hint">💡 三步走：选分类 → 点 + 选用 → 在下面造句</view>
 
     <!-- 搜索 -->
     <view class="srch-wrap">
-      <input class="srch" placeholder="🔍 搜索句型…" value="{{toolkitSearch}}" bindinput="onToolkitSearch" />
+      <input class="srch" placeholder="🔍 搜索句型（如 environment）…" value="{{toolkitSearch}}" bindinput="onToolkitSearch" />
     </view>
 
     <!-- 分类 -->
@@ -53,26 +53,25 @@
           <view class="tki-pat">{{item.pattern}}</view>
           <view class="tki-cn">{{item.chinese}} · <text class="tki-tag">{{patternCategories[item.id] || '通用'}}</text></view>
         </view>
-        <view class="tki-add">+</view>
+        <view class="tki-add">选用</view>
       </view>
     </view>
 
-    <!-- 最近使用 -->
-    <view class="hint" style="margin-top:12px">📎 最近使用</view>
-    <view class="recent" wx:if="{{recentPatternData.length > 0}}">
-      <view class="rec" wx:for="{{recentPatternData}}" wx:key="id" data-id="{{item.id}}" catchtap="insertPattern">{{item.pattern}}</view>
+    <!-- 当前选用状态 -->
+    <view class="selected-hint" wx:if="{{selectedPattern}}">
+      <text>✅ 已选用：</text>
+      <text class="selected-pat">{{selectedPattern.pattern}}</text>
     </view>
-    <view class="hint dim" wx:else>还没有使用记录，点句型上面的 + 选用</view>
 
     <!-- 练习区 -->
     <view class="practice">
       <view class="practice-h">
         <view class="practice-label">造句练习</view>
-        <text wx:if="{{selectedPattern}}" class="practice-hint">当前：{{selectedPattern.pattern}}</text>
-        <text wx:else class="practice-hint dim">请先在句型列表中选用一个</text>
+        <text wx:if="{{selectedPattern}}" class="practice-hint">用上面选中的句型写句子</text>
+        <text wx:else class="practice-hint dim">先在列表中点「选用」选一个句型</text>
       </view>
       <view class="pi-wrap">
-        <textarea class="pi" placeholder="在此输入你的句子…" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
+        <textarea class="pi" placeholder="{{selectedPattern ? '用「' + selectedPattern.pattern + '」写一个句子…' : '请先在句型列表中选用一个句型'}}" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
         <text class="pi-wc {{sentenceWordCount > 0 ? 'on' : ''}}">{{sentenceWordCount}} 词</text>
       </view>
       <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitSentence">{{submitting ? '提交中…' : '提交练习'}}</view>
