@@ -395,8 +395,11 @@ Page<IListeningData, IListeningMethods>({
       this.setData({ focusMode: true, loopSentence: true, speed: 0.75 })
       if (audioCtx) audioCtx.playbackRate = 0.75
     } else {
-      this.setData({ focusMode: false, loopSentence: false, speed: 1 })
-      if (audioCtx) audioCtx.playbackRate = 1
+      if (audioCtx) {
+        audioCtx.pause()
+        audioCtx.playbackRate = 1
+      }
+      this.setData({ focusMode: false, loopSentence: false, speed: 1, isPlaying: false })
     }
   },
 
