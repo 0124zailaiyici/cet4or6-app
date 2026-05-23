@@ -4,23 +4,38 @@ const cors = require('cors');
 require('dotenv').config();
 
 const path = require('path');
+const fs = require('fs');
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
 
 const PORT = process.env.PORT || 3001;
+const API_KEY = process.env.DEEPSEEK_API_KEY;
+const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 
+const DICT_CACHE_FILE = path.join(__dirname, 'dict_cache.json');
 const dictCache = new Map()
-const CACHE_TTL = 30 * 60 * 1000
+if (fs.existsSync(DICT_CACHE_FILE)) {
+  try {
+    const raw = JSON.parse(fs.readFileSync(DICT_CACHE_FILE, 'utf-8'));
+    for (const [k, v] of Object.entries(raw)) dictCache.set(k, v);
+  } catch {}
+}
+function saveDictCache() {
+  const obj = {};
+  for (const [k, v] of dictCache) obj[k] = v;
+  fs.writeFile(DICT_CACHE_FILE, JSON.stringify(obj), () => {});
+}
+
+let cacheDirty = false
 setInterval(() => {
   const now = Date.now()
   for (const [k, v] of dictCache) {
-    if (now - v.ts > CACHE_TTL) dictCache.delete(k)
+    if (now - v.ts > 86400000) dictCache.delete(k)
   }
-}, 60000)
-const API_KEY = process.env.DEEPSEEK_API_KEY;
-const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+  if (cacheDirty) { saveDictCache(); cacheDirty = false }
+}, 30000)
 
 function buildHeaders() {
   return {
@@ -159,10 +174,17 @@ app.get('/dictionary', async (req, res) => {
     let chinese = '';
     if (transRes.status === 'fulfilled' && transRes.value.data?.responseData?.translatedText) {
       chinese = transRes.value.data.responseData.translatedText;
+    } else if (API_KEY) {
+      try {
+        chinese = await callDeepSeek([
+          { role: 'system', content: '将英文单词翻译成中文，只返回最常用的1-2个中文释义，用逗号分隔，不要多余内容。' },
+          { role: 'user', content: word },
+        ], 0.1, 5000);
+      } catch {}
     }
     entry.chinese = chinese;
 
-    dictCache.set(word.toLowerCase(), { data, ts: Date.now() })
+    dictCache.set(word.toLowerCase(), { data, ts: Date.now() }); cacheDirty = true
     res.json(data);
   } catch (err) {
     if (err.response?.status === 404) {

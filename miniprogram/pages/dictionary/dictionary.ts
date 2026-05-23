@@ -89,10 +89,16 @@ Page<IDictData>({
       let result: IWordResult
 
       if (this.data.aiAvailable && this.data.aiEnabled) {
-        const ai = await aiFullDict(q)
-        result = ai as IWordResult
-        if (result.meanings) {
-          result.meanings.forEach(m => { m._posClass = POS_MAP[m.partOfSpeech] || m.partOfSpeech })
+        try {
+          const ai = await aiFullDict(q)
+          result = ai as IWordResult
+          if (result.meanings) {
+            result.meanings.forEach(m => { m._posClass = POS_MAP[m.partOfSpeech] || m.partOfSpeech })
+          }
+        } catch {
+          this.setData({ aiEnabled: false })
+          wx.setStorageSync('dictAiEnabled', false)
+          return this.search()
         }
       } else {
         const data = await lookupWord(q)

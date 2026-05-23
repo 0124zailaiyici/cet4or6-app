@@ -121,20 +121,19 @@ Page<IVocabData, IVocabMethods>({
 
   loadWords() {
     const app = getApp<IAppOption>()
-    let stored = app.globalData.studyData.vocabWords
+    let stored: any[] = app.globalData.studyData.vocabWords
     if (!stored || stored.length === 0) {
       stored = extractWords()
       app.globalData.studyData.vocabWords = stored
       wx.setStorageSync('studyData', app.globalData.studyData)
     }
-    const words = stored as IVocabWord[]
-    const mastered = words.filter(w => w.status === 'master').length
-    const learning = words.filter(w => w.status !== 'master').length
-    const review = words.filter(w => w.status === 'review').length
+    const words: IVocabWord[] = [...stored]
     this.setData({
       words,
       filteredWords: words.filter(w => w.status !== 'master'),
-      mastered, learning, reviewCount: review,
+      mastered: words.filter(w => w.status === 'master').length,
+      learning: words.filter(w => w.status !== 'master').length,
+      reviewCount: words.filter(w => w.status === 'review').length,
     })
   },
 
@@ -210,8 +209,15 @@ Page<IVocabData, IVocabMethods>({
       } else {
         wx.showToast({ title: '未找到释义', icon: 'none' })
       }
-    } catch (_) {
-      wx.showToast({ title: '请先启动 server', icon: 'none' })
+    } catch (e: any) {
+      const msg = e?.message || ''
+      if (msg.includes('404') || msg.includes('未找到')) {
+        wx.showToast({ title: '词库暂无此词', icon: 'none' })
+      } else if (msg.includes('fail') || msg.includes('request')) {
+        wx.showToast({ title: '请先启动 server', icon: 'none' })
+      } else {
+        wx.showToast({ title: '查询失败', icon: 'none' })
+      }
     }
     this.setData({ lookingUp: false })
   },
