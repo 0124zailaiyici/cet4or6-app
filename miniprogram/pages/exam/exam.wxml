@@ -14,21 +14,19 @@
   </block>
 
   <!-- ===== 考试看板 ===== -->
-  <block wx:if="{{phase === 'exam'}}">
+  <block wx:else>
     <view class="topbar">
-      <view style="display:flex;align-items:center;gap:10px">
-        <text style="font-size:20px" catchtap="goBack">←</text>
-        <h1 style="flex:1">{{currentSet.label}}</h1>
+      <view class="topbar-row">
+        <text class="back-btn" catchtap="goBack">←</text>
+        <h1 class="topbar-title">{{currentSet.label}}</h1>
       </view>
     </view>
 
-    <!-- Timer -->
     <view class="timer-big">
       <text class="t-n {{remainingSec < 300 ? 'warn' : ''}}">{{timerStr}}</text>
       <text class="t-desc">剩余时间 · {{currentSet.label}}</text>
     </view>
 
-    <!-- Section cards -->
     <view class="scard" catchtap="goWriting">
       <text class="si">✏️</text>
       <view class="sb">
@@ -45,7 +43,7 @@
         <text class="sd" wx:if="{{listeningTotal > 0}}">已答 {{listeningDone}}/{{listeningTotal}} 题</text>
         <text class="sd" wx:else>前往听力页面作答</text>
       </view>
-      <view wx:if="{{listeningDone > 0}}" class="sp" style="background:#4fc3f7;width:{{listeningTotal > 0 ? listeningDone / listeningTotal * 100 : 0}}%"></view>
+      <view wx:if="{{listeningDone > 0}}" class="sp sp-listen" style="width:{{listeningTotal > 0 ? listeningDone / listeningTotal * 100 : 0}}%"></view>
     </view>
 
     <view class="scard" catchtap="goReading">
@@ -55,7 +53,7 @@
         <text class="sd" wx:if="{{readingTotal > 0}}">已答 {{readingDone}}/{{readingTotal}} 题</text>
         <text class="sd" wx:else>前往阅读页面作答</text>
       </view>
-      <view wx:if="{{readingDone > 0}}" class="sp" style="background:#81c784;width:{{readingTotal > 0 ? readingDone / readingTotal * 100 : 0}}%"></view>
+      <view wx:if="{{readingDone > 0}}" class="sp sp-read" style="width:{{readingTotal > 0 ? readingDone / readingTotal * 100 : 0}}%"></view>
     </view>
 
     <view class="scard" catchtap="goTranslation">

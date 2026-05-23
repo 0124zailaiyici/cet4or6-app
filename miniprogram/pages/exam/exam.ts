@@ -1,5 +1,7 @@
 import readingsData from '../../data/readings'
 import listeningData from '../../data/listening'
+import writingsData from '../../data/writings'
+import translationsData from '../../data/translations'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IReadingPassage {
@@ -20,17 +22,36 @@ interface IListeningPassage {
   correctAnswers: Record<string, string>
 }
 
+interface IWritingItem {
+  id: number
+  title: string
+  prompt: string
+  reference: string
+}
+
+interface ITranslationItem {
+  id: number
+  chinese: string
+  reference: string
+  source: string
+  keywords?: string[]
+  acceptableAnswers?: string[]
+}
+
 interface IExamSet {
   id: string
   label: string
   readingIds: number[]
   listeningId: number | null
+  writingId?: number
+  translationId?: number
 }
 
 interface IExamData {
   phase: 'list' | 'exam'
   examSets: IExamSet[]
   currentSet: IExamSet | null
+  currentSection: 'dashboard' | 'writing' | 'listening' | 'reading' | 'translation'
   timerStr: string
   remainingSec: number
   readingDone: number
@@ -38,29 +59,52 @@ interface IExamData {
   listeningDone: number
   listeningTotal: number
   darkMode: boolean
+  writingPrompt: IWritingItem | null
+  writingAnswer: string
+  listeningPassage: IListeningPassage | null
+  listeningSel: Record<number, number>
+  isAudioPlaying: boolean
+  readingPassages: IReadingPassage[]
+  readingIdx: number
+  translationItem: ITranslationItem | null
+  translationAnswer: string
 }
 
 interface IExamMethods {
   startExam(e: WechatMiniprogram.TouchEvent): void
-  goReading(): void
-  goListening(): void
+  goBack(): void
+  goDashboard(): void
   goWriting(): void
+  goListening(): void
+  goReading(): void
   goTranslation(): void
   submitExam(): void
-  goBack(): void
   recalcProgress(): void
   startTimer(): void
+  onWritingInput(e: WechatMiniprogram.Input): void
+  saveWriting(): void
+  onListeningSelect(e: WechatMiniprogram.TouchEvent): void
+  toggleAudio(): void
+  onReadingSelect(e: WechatMiniprogram.TouchEvent): void
+  onReadingMatch(e: WechatMiniprogram.TouchEvent): void
+  onReadingBlank(e: WechatMiniprogram.TouchEvent): void
+  readingNext(): void
+  readingPrev(): void
+  onTranslationInput(e: WechatMiniprogram.Input): void
+  saveTranslation(): void
 }
 
 const EXAM_DURATION = 7500
 const TWO_HOURS_FIVE = '125:00'
 let timerInterval: any = null
+let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
 
 Page<IExamData, IExamMethods>({
   data: {
     phase: 'list',
     examSets: [],
     currentSet: null,
+    currentSection: 'dashboard',
     timerStr: TWO_HOURS_FIVE,
     remainingSec: EXAM_DURATION,
     readingDone: 0,
@@ -68,6 +112,15 @@ Page<IExamData, IExamMethods>({
     listeningDone: 0,
     listeningTotal: 0,
     darkMode: false,
+    writingPrompt: null,
+    writingAnswer: '',
+    listeningPassage: null,
+    listeningSel: {},
+    isAudioPlaying: false,
+    readingPassages: [],
+    readingIdx: 0,
+    translationItem: null,
+    translationAnswer: '',
   },
 
   onLoad() {
@@ -77,14 +130,16 @@ Page<IExamData, IExamMethods>({
     const sets: IExamSet[] = []
     const listeningIds = (listeningData as IListeningPassage[]).filter(l => l.audioUrl).map(l => l.id)
     const readingIds = data.map(r => r.id)
-    if (readingIds.length > 0) sets.push({ id: '2019061', label: '2019年6月 第1套', readingIds: readingIds.slice(0, 4), listeningId: listeningIds[0] || null })
-    if (readingIds.length > 4) sets.push({ id: '2019062', label: '2019年6月 第2套', readingIds: readingIds.slice(4, 8), listeningId: listeningIds[1] || null })
+    const writings = writingsData as IWritingItem[]
+    const translations = (translationsData as ITranslationItem[]).filter(t => t && t.chinese)
+    if (readingIds.length > 0) sets.push({ id: '2019061', label: '2019年6月 第1套', readingIds: readingIds.slice(0, 4), listeningId: listeningIds[0] || null, writingId: writings[0]?.id, translationId: translations.find(t => t.source?.includes('真题'))?.id || translations[0]?.id })
+    if (readingIds.length > 4) sets.push({ id: '2019062', label: '2019年6月 第2套', readingIds: readingIds.slice(4, 8), listeningId: listeningIds[1] || null, writingId: writings[1]?.id || writings[0]?.id, translationId: translations.filter(t => t.source?.includes('真题'))[1]?.id || translations[0]?.id })
     this.setData({ examSets: sets })
   },
 
   onShow() {
     this.setData({ darkMode: getDarkMode() })
-    if (this.data.phase === 'exam') {
+    if (this.data.phase === 'exam' && this.data.currentSection === 'dashboard') {
       this.recalcProgress()
       const app = getApp<IAppOption>()
       const deadline = app.globalData.examDeadline
@@ -99,6 +154,7 @@ Page<IExamData, IExamMethods>({
 
   onUnload() {
     if (timerInterval) clearInterval(timerInterval)
+    if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
   },
 
   startExam(e: WechatMiniprogram.TouchEvent) {
@@ -113,7 +169,7 @@ Page<IExamData, IExamMethods>({
         const app = getApp<IAppOption>()
         app.globalData.examDeadline = Date.now() + EXAM_DURATION * 1000
         app.globalData.examSet = setId
-        this.setData({ phase: 'exam', currentSet: set, remainingSec: EXAM_DURATION, timerStr: TWO_HOURS_FIVE })
+        this.setData({ phase: 'exam', currentSet: set, currentSection: 'dashboard', remainingSec: EXAM_DURATION, timerStr: TWO_HOURS_FIVE })
         this.recalcProgress()
         this.startTimer()
       },
@@ -142,7 +198,6 @@ Page<IExamData, IExamMethods>({
       const passage = rData.find(r => r.id === rid)
       if (!passage) continue
       const ans = ra[rid]
-
       if (passage.sectionType === 'A') {
         const total = Object.keys(passage.correctAnswers).length
         rd += ans ? Object.keys(ans.blankAnswers).length : 0
@@ -177,32 +232,208 @@ Page<IExamData, IExamMethods>({
     this.setData({ readingDone: rd, readingTotal: rt, listeningDone: ld, listeningTotal: lt })
   },
 
-  goReading() {
-    wx.navigateTo({ url: '/pages/reading/reading?examMode=1' })
+  // ========== Navigation ==========
+
+  goDashboard() {
+    if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
+    this.setData({ currentSection: 'dashboard', isAudioPlaying: false, listeningSel: {} })
+    this.recalcProgress()
+    if (timerInterval) clearInterval(timerInterval)
+    this.startTimer()
   },
-  goListening() {
-    wx.navigateTo({ url: '/pages/listening/listening?examMode=1' })
+
+  goBack() {
+    if (timerInterval) clearInterval(timerInterval)
+    if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
+    getApp<IAppOption>().globalData.examDeadline = 0
+    this.setData({ phase: 'list', currentSet: null, currentSection: 'dashboard', isAudioPlaying: false })
   },
+
   goWriting() {
-    wx.navigateTo({ url: '/pages/writing/writing?examMode=1' })
+    const writings = writingsData as IWritingItem[]
+    const prompt = this.data.currentSet?.writingId
+      ? writings.find(w => w.id === this.data.currentSet!.writingId) || writings[0]
+      : writings[0]
+    this.setData({ currentSection: 'writing', writingPrompt: prompt, writingAnswer: '' })
   },
+
+  goListening() {
+    const lid = this.data.currentSet?.listeningId
+    if (!lid) { wx.showToast({ title: '暂无听力题', icon: 'none' }); return }
+    const passage = (listeningData as IListeningPassage[]).find(l => l.id === lid)
+    if (!passage) return
+    const app = getApp<IAppOption>()
+    const saved = app.globalData.studyData.listeningAnswers?.[lid] || {}
+    this.setData({ currentSection: 'listening', listeningPassage: passage, listeningSel: saved })
+  },
+
+  goReading() {
+    const rData = readingsData as IReadingPassage[]
+    const ids = this.data.currentSet?.readingIds || []
+    const passages = ids.map(id => rData.find(r => r.id === id)).filter(Boolean) as IReadingPassage[]
+    this.setData({ currentSection: 'reading', readingPassages: passages, readingIdx: 0 })
+  },
+
   goTranslation() {
-    wx.navigateTo({ url: '/pages/translation/translation?examMode=1' })
+    const translations = translationsData as ITranslationItem[]
+    const item = this.data.currentSet?.translationId
+      ? translations.find(t => t.id === this.data.currentSet!.translationId) || translations[0]
+      : translations[0]
+    this.setData({ currentSection: 'translation', translationItem: item, translationAnswer: '' })
   },
+
+  // ========== Writing ==========
+
+  onWritingInput(e: WechatMiniprogram.Input) {
+    this.setData({ writingAnswer: e.detail.value })
+  },
+
+  saveWriting() {
+    if (!this.data.writingPrompt || !this.data.writingAnswer.trim()) {
+      wx.showToast({ title: '请先写内容', icon: 'none' }); return
+    }
+    const app = getApp<IAppOption>()
+    const records = app.globalData.studyData.writingRecords || []
+    records.push({ id: this.data.writingPrompt.id, score: 0, date: new Date().toISOString() })
+    app.globalData.studyData.writingRecords = records
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    wx.showToast({ title: '已保存', icon: 'success' })
+    this.goDashboard()
+  },
+
+  // ========== Listening ==========
+
+  onListeningSelect(e: WechatMiniprogram.TouchEvent) {
+    const qi = Number(e.currentTarget.dataset.qi)
+    const oi = Number(e.currentTarget.dataset.oi)
+    const sel = { ...this.data.listeningSel }
+    if (sel[qi] === oi) delete sel[qi]
+    else sel[qi] = oi
+    this.setData({ listeningSel: sel })
+    const pid = this.data.listeningPassage?.id
+    if (pid) {
+      const app = getApp<IAppOption>()
+      if (!app.globalData.studyData.listeningAnswers) app.globalData.studyData.listeningAnswers = {}
+      app.globalData.studyData.listeningAnswers[pid] = sel
+      wx.setStorageSync('studyData', app.globalData.studyData)
+    }
+  },
+
+  toggleAudio() {
+    const passage = this.data.listeningPassage
+    if (!passage?.audioUrl) return
+    if (audioCtx && this.data.isAudioPlaying) {
+      audioCtx.pause()
+      this.setData({ isAudioPlaying: false })
+    } else if (audioCtx) {
+      audioCtx.play()
+      this.setData({ isAudioPlaying: true })
+    } else {
+      audioCtx = wx.createInnerAudioContext()
+      audioCtx.src = passage.audioUrl
+      audioCtx.onEnded(() => { this.setData({ isAudioPlaying: false }) })
+      audioCtx.onError(() => { wx.showToast({ title: '音频加载失败', icon: 'none' }) })
+      audioCtx.play()
+      this.setData({ isAudioPlaying: true })
+    }
+  },
+
+  // ========== Reading ==========
+
+  onReadingSelect(e: WechatMiniprogram.TouchEvent) {
+    const qi = Number(e.currentTarget.dataset.qi)
+    const val = e.currentTarget.dataset.val as string
+    const passage = this.data.readingPassages[this.data.readingIdx]
+    if (!passage) return
+    const app = getApp<IAppOption>()
+    let ans = app.globalData.studyData.readingAnswers[passage.id] || { blankAnswers: {}, usedFlags: [] }
+    if (passage.sectionType === 'C') {
+      const ca = { ...(ans.cAnswers || {}) }
+      if (ca[qi] === val) delete ca[qi]
+      else ca[qi] = val
+      ans = { ...ans, cAnswers: ca }
+    } else if (passage.sectionType === 'B') {
+      const ma = { ...(ans.matchAnswers || {}) }
+      if (ma[qi] === val) delete ma[qi]
+      else ma[qi] = val
+      ans = { ...ans, matchAnswers: ma }
+    }
+    app.globalData.studyData.readingAnswers[passage.id] = ans
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.setData({ readingPassages: [...this.data.readingPassages] })
+  },
+
+  onReadingBlank(e: WechatMiniprogram.TouchEvent) {
+    const blankKey = e.currentTarget.dataset.key as string
+    const word = e.currentTarget.dataset.word as string
+    const passage = this.data.readingPassages[this.data.readingIdx]
+    if (!passage) return
+    const app = getApp<IAppOption>()
+    let ans = app.globalData.studyData.readingAnswers[passage.id] || { blankAnswers: {}, usedFlags: [] }
+    const ba = { ...ans.blankAnswers }
+    const used = [...(ans.usedFlags || [])]
+    const options = passage.options || []
+    const prevWord = ba[blankKey]
+    if (prevWord === word) {
+      delete ba[blankKey]
+      const oi = options.indexOf(word)
+      if (oi >= 0) used[oi] = false
+    } else {
+      if (prevWord) {
+        const prevOi = options.indexOf(prevWord)
+        if (prevOi >= 0) used[prevOi] = false
+      }
+      ba[blankKey] = word
+      const oi = options.indexOf(word)
+      if (oi >= 0) used[oi] = true
+    }
+    ans = { ...ans, blankAnswers: ba, usedFlags: used }
+    app.globalData.studyData.readingAnswers[passage.id] = ans
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.setData({ readingPassages: [...this.data.readingPassages] })
+  },
+
+  readingNext() {
+    if (this.data.readingIdx < this.data.readingPassages.length - 1) {
+      this.setData({ readingIdx: this.data.readingIdx + 1 })
+    }
+  },
+
+  readingPrev() {
+    if (this.data.readingIdx > 0) {
+      this.setData({ readingIdx: this.data.readingIdx - 1 })
+    }
+  },
+
+  // ========== Translation ==========
+
+  onTranslationInput(e: WechatMiniprogram.Input) {
+    this.setData({ translationAnswer: e.detail.value })
+  },
+
+  saveTranslation() {
+    if (!this.data.translationItem || !this.data.translationAnswer.trim()) {
+      wx.showToast({ title: '请先翻译', icon: 'none' }); return
+    }
+    const app = getApp<IAppOption>()
+    const records = app.globalData.studyData.translationRecords || []
+    records.push({ id: this.data.translationItem.id, userAnswer: this.data.translationAnswer, score: 0, date: new Date().toISOString() })
+    app.globalData.studyData.translationRecords = records
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    wx.showToast({ title: '已保存', icon: 'success' })
+    this.goDashboard()
+  },
+
+  // ========== Submit ==========
 
   submitExam() {
     if (timerInterval) clearInterval(timerInterval)
+    if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
     const app = getApp<IAppOption>()
     app.globalData.examDeadline = 0
     app.globalData.examSet = ''
     this.recalcProgress()
     wx.showToast({ title: '已交卷', icon: 'success' })
-  },
-
-  goBack() {
-    if (timerInterval) clearInterval(timerInterval)
-    getApp<IAppOption>().globalData.examDeadline = 0
-    this.setData({ phase: 'list', currentSet: null })
   },
 })
 
