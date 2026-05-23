@@ -60,7 +60,7 @@
           <view class="para-tl-bar" wx:if="{{fullTranslation}}" catchtap="toggleTrans">
             <text>{{showTrans ? '🔼 收起翻译' : '🌐 全文翻译'}}</text>
           </view>
-          <view class="para-tl-body" wx:if="{{showTrans && fullTranslation}}">
+          <view class="para-tl-body {{showTrans ? 'open' : ''}}">
             <text class="para-tl-cn">{{fullTranslation}}</text>
           </view>
         </scroll-view>
