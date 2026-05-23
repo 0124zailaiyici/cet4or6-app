@@ -52,7 +52,7 @@
           <view class="sc-num">{{index + 1}}</view>
           <view class="sc-body">
             <view class="sc-english">
-              <rich-text nodes="{{highlightText(item.english, item.keywords)}}"></rich-text>
+              <text>{{item.english}}</text>
             </view>
             <view class="sc-chinese">{{item.chinese}}</view>
             <view class="sc-bottom">
@@ -72,7 +72,7 @@
     <view class="imm-card">
       <view class="imm-num">{{immersionIndex + 1}} / {{filteredSentences.length}}</view>
       <view class="imm-english">
-        <rich-text nodes="{{highlightText(filteredSentences[immersionIndex].english, filteredSentences[immersionIndex].keywords)}}"></rich-text>
+        <text>{{filteredSentences[immersionIndex].english}}</text>
       </view>
       <view class="imm-chinese">{{filteredSentences[immersionIndex].chinese}}</view>
       <view class="imm-actions">
