@@ -121,7 +121,13 @@ Page<IExamData, IExamMethods>({
       const passage = (readingsData as any[]).find((r: any) => r.id === rid)
       if (!passage) continue
       const ans = ra[rid]
-      if (passage.sectionType === 'C' && passage.questions) {
+      if (passage.sectionType === 'A') {
+        rt += Object.keys(passage.correctAnswers || {}).length
+        rd += ans ? Object.keys(ans.blankAnswers || {}).length : 0
+      } else if (passage.sectionType === 'B') {
+        rt += (passage.questions || []).length
+        rd += ans ? Object.keys(ans.matchAnswers || {}).length : 0
+      } else if (passage.sectionType === 'C' && passage.questions) {
         for (let qi = 0; qi < passage.questions.length; qi++) {
           if (ans?.cAnswers?.[qi]) rd++
           rt++
@@ -137,13 +143,8 @@ Page<IExamData, IExamMethods>({
       if (passage?.correctAnswers) {
         lt = Object.keys(passage.correctAnswers).length
         if (lans) {
-          for (const qi of Object.keys(passage.correctAnswers)) {
-            for (const piStr of Object.keys(lans)) {
-              const pi = Number(piStr)
-              const sentText = passage.sentences[pi]?.text || ''
-              const qm = sentText.match(/^Q(\d+)\./)
-              if (qm && qm[1] === qi) { ld++; break }
-            }
+          for (const k of Object.keys(passage.correctAnswers)) {
+            if (lans[Number(k)] !== undefined) ld++
           }
         }
       }
