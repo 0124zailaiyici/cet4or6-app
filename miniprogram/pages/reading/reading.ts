@@ -183,6 +183,7 @@ Page<IReadingData, IReadingMethods>({
       const formatted = item.sectionType !== 'B'
         ? pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.annotatePage(p, vocab)}</p>`)
         : []
+      const paras = item.sectionType === 'B' ? [] : this.getPassageParas(item.passage)
       const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
@@ -216,14 +217,17 @@ Page<IReadingData, IReadingMethods>({
         showResult: false,
         resultItems: [],
         showVocab: false,
-        vocabList
+        vocabList,
+        scrollTop: 0,
+        passageParas: paras,
+        highlightedPara: -1
       })
       this.updateCompact()
     }
   },
 
   back() {
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [] })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1 })
   },
 
   toggleVocab() {
@@ -239,6 +243,45 @@ Page<IReadingData, IReadingMethods>({
       annotated = annotated.replace(pattern, '<span style="color:#e65100;border-bottom:1px dashed #e65100">$1</span>')
     }
     return annotated
+  },
+
+  getPassageParas(text: string): string[] {
+    if (!text) return ['']
+    const clean = text.replace(/\s+/g, ' ').trim()
+    const sentences = clean.split(/[.?!]\s*/).filter(s => s.trim().length > 5)
+    const paras: string[] = []
+    let currentPara = ''
+    let count = 0
+    const starters = ['however','but','while','in','the','although','according','as','despite','during','if','when','because','since','after','before','until','this','these','that','those','one','two','some','many','most','all','each','every','both','no','there','what','which','who','how','why','where']
+    for (const s of sentences) {
+      const first = s.trim().toLowerCase().split(/\s+/)[0] || ''
+      const isNew = count > 0 && (starters.includes(first) || /^["""''']/.test(s.trim()))
+      if (isNew || count >= 3) {
+        if (currentPara) { paras.push(currentPara.trim() + '.'); currentPara = ''; count = 0 }
+      }
+      currentPara += (currentPara ? '. ' : '') + s.trim(); count++
+    }
+    if (currentPara) paras.push(currentPara.trim() + '.')
+    return paras.length > 0 ? paras : [text]
+  },
+
+  rebuildFormatted(vocab: Record<string, string>, highlightIdx: number) {
+    const paras = this.data.passageParas
+    if (!paras.length) return
+    const pages: string[] = []
+    for (let i = 0; i < paras.length; i += 2) {
+      const slice = paras.slice(i, i + 2)
+      const html = slice.map((p, j) => {
+        const idx = i + j
+        const inner = this.annotatePage(p, vocab)
+        if (idx === highlightIdx) {
+          return `<span style="display:block;background:rgba(56,142,60,0.12);border-left:3px solid #388e3c;padding:4px 8px;border-radius:4px;margin:0 0 0.6em 0">${inner}</span>`
+        }
+        return inner
+      }).join('\n\n')
+      pages.push(`<p style="margin:0 0 0.6em 0;line-height:1.9">${html}</p>`)
+    }
+    this.setData({ formattedPages: pages, highlightedPara: highlightIdx })
   },
 
   // ===== Submission & Scoring =====
@@ -387,6 +430,9 @@ Page<IReadingData, IReadingMethods>({
     if (isNaN(num)) return
     const st = this.data.current?.sectionType
     const page = st === 'B' ? num - 1 : Math.floor((num - 1) / 2)
+    const annot = readingAnnotations[this.data.current?.id || 0]
+    const vocab = annot?.vocab || {}
+    this.rebuildFormatted(vocab, num - 1)
     this.setData({
       passagePage: page,
       bStmtPage: 0,
@@ -416,6 +462,7 @@ Page<IReadingData, IReadingMethods>({
           matchAnswers: {}, matchCount: 0, activeStmt: null,
           availLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
           cAnswers: {}, cSelIdx: -1,
+          highlightedPara: -1
         })
       }
     })

@@ -1,6 +1,6 @@
 .page {
   width: 100vw; height: 100vh; display: flex; flex-direction: column;
-  background: #fff5f7; position: relative; overflow: hidden;
+  align-items: center; background: #fff5f7; position: relative; overflow: hidden;
 }
 .skip {
   position: absolute; top: 60rpx; right: 32rpx; font-size: 26rpx; color: #8a7a9a; z-index: 10;
@@ -15,7 +15,7 @@
 .emoji { font-size: 120rpx; margin-bottom: 40rpx; }
 .title { font-size: 48rpx; font-weight: 800; color: #2d2d4e; line-height: 1.4; white-space: pre-line; margin-bottom: 20rpx; }
 .desc { font-size: 28rpx; color: #8a7a9a; line-height: 1.7; white-space: pre-line; }
-.dots { display: flex; gap: 12rpx; margin-bottom: 60rpx; }
+.dots { display: flex; justify-content: center; gap: 12rpx; margin-bottom: 60rpx; }
 .dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #d0c8d0; transition: 0.2s; }
 .dot.on { width: 40rpx; border-radius: 6rpx; background: #ff6b8a; }
 .btn {

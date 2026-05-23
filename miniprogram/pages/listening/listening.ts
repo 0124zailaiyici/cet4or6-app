@@ -581,6 +581,8 @@ Page<IListeningData, IListeningMethods>({
         loopSentence: true,
         speed: 0.8,
         isPlaying: false,
+        showTranscript: true,
+        dictationMode: false,
         focusSentences: filtered,
         focusSentenceMap: map,
         currentIndex: 0,
