@@ -47,7 +47,7 @@
   background: #fff0f3; border: 2rpx solid transparent;
 }
 .speed-btn.active, .ctrl-btn.active {
-  color: #2196f3; background: rgba(33,150,243,0.08); border-color: rgba(33,150,243,0.2);
+  color: #2196f3; background: rgba(33,150,243,0.1); border-color: rgba(33,150,243,0.25); font-weight: 600;
 }
 
 /* Sentence list */

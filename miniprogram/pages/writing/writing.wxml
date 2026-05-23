@@ -112,6 +112,7 @@
         <view style="padding:12px;background:#f9f5fc;border-radius:10px;font-size:12px;line-height:1.7;color:#504060">
           <view style="font-weight:600;margin-bottom:6px">📝 当前主题句</view>
           <view style="color:#3a2a4a">{{currentTopic.text}}</view>
+          <view style="color:#b09bc0;margin-top:4px;font-size:11px">{{currentTopic.chinese}}</view>
         </view>
 
         <!-- 引导问题 -->
@@ -244,6 +245,7 @@
     <view class="bubble">
       <view class="bubble-icon">💬</view>
       <view class="bubble-text">{{currentTopic.text}}</view>
+      <view style="color:#b09bc0;margin-top:6rpx;font-size:22rpx">{{currentTopic.chinese}}</view>
     </view>
   </scroll-view>
 

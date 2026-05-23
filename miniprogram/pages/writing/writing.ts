@@ -13,16 +13,16 @@ interface IWriting {
 }
 
 interface ITopic {
-  label: string; text: string
+  label: string; text: string; chinese: string
 }
 
 const PARAGRAPH_TOPICS: ITopic[] = [
-  { label: '🌿 环保', text: 'Environmental protection is everyone\'s responsibility.' },
-  { label: '💻 科技', text: 'The rapid development of technology has brought great changes to our daily life.' },
-  { label: '📚 教育', text: 'Education plays a vital role in shaping a person\'s future.' },
-  { label: '💪 健康', text: 'Health is the foundation of a happy and successful life.' },
-  { label: '🤝 社会', text: 'In modern society, people are facing increasing pressure from work and life.' },
-  { label: '🏫 校园', text: 'College life is a wonderful journey full of challenges and opportunities.' },
+  { label: '🌿 环保', text: 'Environmental protection is everyone\'s responsibility.', chinese: '环境保护是每个人的责任。' },
+  { label: '💻 科技', text: 'The rapid development of technology has brought great changes to our daily life.', chinese: '科技的快速发展给我们的日常生活带来了巨大变化。' },
+  { label: '📚 教育', text: 'Education plays a vital role in shaping a person\'s future.', chinese: '教育在塑造一个人的未来中起着至关重要的作用。' },
+  { label: '💪 健康', text: 'Health is the foundation of a happy and successful life.', chinese: '健康是幸福成功生活的基础。' },
+  { label: '🤝 社会', text: 'In modern society, people are facing increasing pressure from work and life.', chinese: '在现代社会，人们面临着来自工作和生活的日益增长的压力。' },
+  { label: '🏫 校园', text: 'College life is a wonderful journey full of challenges and opportunities.', chinese: '大学生活是一段充满挑战和机遇的精彩旅程。' },
 ]
 
 const PATTERN_CATEGORIES: Record<number, string> = {

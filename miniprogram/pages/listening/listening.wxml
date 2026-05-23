@@ -142,7 +142,7 @@
       <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
       <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
       <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
-      <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">单句</view>
+      <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 单句循环中' : '单句'}}</view>
     </view>
 
     <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}">
