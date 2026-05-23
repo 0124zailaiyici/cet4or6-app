@@ -214,6 +214,7 @@ class AudioManager {
             if (d.loopSentence && this.ctx) {
               this.ctx.seek(0)
               this.ctx.play()
+              this.pageRef.setData({ isPlaying: true })
             } else {
               this.pageRef.setData({ isPlaying: false })
             }
@@ -553,9 +554,9 @@ Page<IListeningData, IListeningMethods>({
       this.setData({ focusMode: true, loopSentence: true, speed: 0.8, isPlaying: false })
       audio.setRate(0.8)
     } else {
-      audio.pause()
+      audio.stop()
       audio.setRate(1)
-      this.setData({ focusMode: false, speed: 1, isPlaying: false })
+      this.setData({ focusMode: false, loopSentence: false, speed: 1, isPlaying: false })
     }
   },
 
