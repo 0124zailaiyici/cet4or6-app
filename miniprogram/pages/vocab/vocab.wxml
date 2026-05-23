@@ -42,15 +42,22 @@
 
   <view class="goverlay {{gameWord ? 'show' : ''}}" catchtap="closeGame">
     <view class="gcard {{gameWord ? 'show' : ''}}" catchtap="">
-      <view class="gsrc">{{gameWord.source}}</view>
-      <view class="gw">{{gameWord.word}}</view>
-      <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
+      <view class="gbar">
+        <view class="gsrc">{{gameWord.source}}</view>
+        <text class="gprog" wx:if="{{gameTotal > 1}}">{{gameWordIdx + 1}}/{{gameTotal}}</text>
+      </view>
+      <view class="gq">请选出与以下释义对应的单词</view>
+      <view class="gw">{{gameWord.definition}}</view>
+      <view class="gp" wx:if="{{gameWord.phonetic}}">音标：{{gameWord.phonetic}}</view>
+      <view class="gresult {{gameIndex >= 0 ? (gameIndex === gameCorrect ? 'ok' : 'fail') : ''}}" wx:if="{{gameIndex >= 0}}">
+        {{gameIndex === gameCorrect ? '✓ 回答正确' : '✗ 回答错误'}}
+      </view>
       <view class="gopts">
         <view class="go {{gameIndex === oi ? (gameCorrect === oi ? 'right' : 'wrong') : ''}} {{gameCorrect >= 0 && gameCorrect === oi ? 'right' : ''}}" wx:for="{{gameOptions}}" wx:key="*this" wx:for-index="oi" data-oi="{{oi}}" catchtap="pickOption">{{item}}</view>
       </view>
       <view class="gf">
-        <view class="gb skip" catchtap="closeGame">关闭</view>
-        <view class="gb next" catchtap="closeGame" wx:if="{{gameCorrect >= 0}}">下一词 →</view>
+        <view class="gb skip" catchtap="closeGame">退出</view>
+        <view class="gb next" catchtap="nextGame" wx:if="{{gameCorrect >= 0}}">下一词 →</view>
       </view>
     </view>
   </view>

@@ -116,8 +116,7 @@
 
 /* Tappable words in passage */
 .pz-word {
-  color: inherit; border-bottom: 1px solid transparent; cursor: pointer;
-  transition: all 0.15s;
+  color: inherit; cursor: pointer; transition: all 0.15s;
 }
 .pz-word:active { background: rgba(84,110,122,0.08); border-radius: 4rpx; }
 .pz-vocab {

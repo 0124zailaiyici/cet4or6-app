@@ -111,6 +111,7 @@ interface IReadingMethods {
   toggleTrans(): void
   onWordTap(e: WechatMiniprogram.TouchEvent): void
   updatePageParas(): void
+  tokenizeToSegments(text: string, segs: Array<{ type: string; text: string; word?: string; zh?: string; num?: string }>, vocab: Record<string, string>): void
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -240,17 +241,19 @@ Page<IReadingData, IReadingMethods>({
           return paras.slice(0, step).map((t: string, i: number) => ({ text: t, paraIdx: i }))
         })(),
         pageWordSegments: (() => {
-          const segs: Array<{ type: string; text: string; word?: string; zh?: string }> = []
+          const segs: Array<{ type: string; text: string; word?: string; zh?: string; num?: string }> = []
           for (const p of paras.slice(0, st === 'B' ? 1 : 2)) {
-            const tokens = p.split(/(\s+)/).filter((t: string) => t)
-            for (const token of tokens) {
-              const clean = token.replace(/[^a-zA-Z'-]+/g, '')
-              if (clean.length >= 2 && /^[a-zA-Z]/.test(clean)) {
-                const key = clean.toLowerCase()
-                segs.push({ type: 'word', text: token, word: clean, zh: vocab[key] || '' })
-              } else {
-                segs.push({ type: 'sep', text: token })
+            if (st === 'A') {
+              const re = /\b(\d{2})\b/g
+              let last = 0, m: RegExpExecArray | null
+              while ((m = re.exec(p)) !== null) {
+                if (m.index > last) this.tokenizeToSegments(p.slice(last, m.index), segs, vocab)
+                segs.push({ type: 'blank', text: m[1], num: m[1], word: m[1] })
+                last = re.lastIndex
               }
+              if (last < p.length) this.tokenizeToSegments(p.slice(last), segs, vocab)
+            } else {
+              this.tokenizeToSegments(p, segs, vocab)
             }
           }
           return segs
@@ -273,22 +276,20 @@ Page<IReadingData, IReadingMethods>({
   },
 
   onWordTap(e: WechatMiniprogram.TouchEvent) {
-    const word = (e.currentTarget.dataset.word as string || '').toLowerCase().trim()
-    const zh = e.currentTarget.dataset.zh as string || ''
-    if (!word) return
+    const ds = e.currentTarget.dataset
+    const word = (ds.word as string || '').toLowerCase().trim()
+    const zh = ds.zh as string || ''
+    if (!word || word.length < 2) return
     const app = getApp<IAppOption>()
     const existing = app.globalData.studyData.vocabWords || []
-    if (existing.some((w: any) => w.word === word)) {
-      wx.showToast({ title: '已在单词本中', icon: 'none' })
-      return
-    }
+    const already = existing.some((w: any) => w.word === word)
     wx.showModal({
       title: word,
-      content: zh || '暂无释义',
-      confirmText: '加入单词本',
-      cancelText: '取消',
+      content: already ? '已在单词本中' : (zh || '暂无释义'),
+      confirmText: already ? '知道了' : '加入单词本',
+      cancelText: already ? '' : '取消',
       success: (res) => {
-        if (!res.confirm) return
+        if (!res.confirm || already) return
         const vw = app.globalData.studyData.vocabWords || []
         vw.push({
           word,
@@ -314,21 +315,39 @@ Page<IReadingData, IReadingMethods>({
     const slice = paras.slice(start, start + step)
     const result = slice.map((text, i) => ({ text, paraIdx: start + i }))
     const vocab = readingAnnotations[this.data.current?.id || 0]?.vocab || {}
-    const segments: Array<{ type: string; text: string; word?: string; zh?: string }> = []
+    const segments: Array<{ type: string; text: string; word?: string; zh?: string; num?: string }> = []
     for (const para of slice) {
-      const tokens = para.split(/(\s+)/).filter(t => t)
-      for (const token of tokens) {
-        const clean = token.replace(/[^a-zA-Z'-]+/g, '')
-        if (clean.length >= 2 && /^[a-zA-Z]/.test(clean)) {
-          const key = clean.toLowerCase()
-          const zh = vocab[key] || ''
-          segments.push({ type: 'word', text: token, word: clean, zh })
-        } else {
-          segments.push({ type: 'sep', text: token })
+      // Section A: split passageSeg-style to preserve blanks
+      if (st === 'A') {
+        const re = /\b(\d{2})\b/g
+        let last = 0, m: RegExpExecArray | null
+        while ((m = re.exec(para)) !== null) {
+          if (m.index > last) {
+            const textSeg = para.slice(last, m.index)
+            this.tokenizeToSegments(textSeg, segments, vocab)
+          }
+          segments.push({ type: 'blank', text: m[1], num: m[1], word: m[1] })
+          last = re.lastIndex
         }
+        if (last < para.length) this.tokenizeToSegments(para.slice(last), segments, vocab)
+      } else {
+        this.tokenizeToSegments(para, segments, vocab)
       }
     }
     this.setData({ pageParas: result, pageWordSegments: segments })
+  },
+
+  tokenizeToSegments(text: string, segs: Array<{ type: string; text: string; word?: string; zh?: string; num?: string }>, vocab: Record<string, string>) {
+    const tokens = text.split(/(\s+)/).filter((t: string) => t)
+    for (const token of tokens) {
+      const clean = token.replace(/[^a-zA-Z'-]+/g, '')
+      if (clean.length >= 2 && /^[a-zA-Z]/.test(clean)) {
+        const key = clean.toLowerCase()
+        segs.push({ type: 'word', text: token, word: clean, zh: vocab[key] || '' })
+      } else {
+        segs.push({ type: 'sep', text: token })
+      }
+    }
   },
 
   annotatePage(text: string, vocab: Record<string, string>): string {
