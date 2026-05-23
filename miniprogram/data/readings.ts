@@ -21,7 +21,8 @@ const readingsData = [
       "legislation",
       "transmitted",
       "migrated"
-    ]
+    ],
+    "correctAnswers": {"26":"migrated","27":"bid","28":"legislation","29":"dominance","30":"replace","31":"sponsor","32":"represent","33":"fleets","34":"contrast","35":"restrictive"}
   },
   {
     "id": 1779441964374,
@@ -41,7 +42,8 @@ const readingsData = [
       "45. People living a longer and healthier life will have to rearrange their work and life."
     ],
     "options": [],
-    "choices": []
+    "choices": [],
+    "correctAnswers": {"0":"I","1":"E","2":"D","3":"G","4":"A","5":"C","6":"J","7":"F","8":"H","9":"K"}
   },
   {
     "id": 1779441964376,
@@ -87,7 +89,8 @@ const readingsData = [
         "C) Providing extra care for divorced women.",
         "D) Making men pay for their wives' health costs."
       ]
-    ]
+    ],
+    "correctAnswers": {"0":"A","1":"D","2":"B","3":"A","4":"C"}
   },
   {
     "id": 1779441964377,
@@ -133,7 +136,8 @@ const readingsData = [
         "C) They communicate more with their children.",
         "D) They generally take on more work at home."
       ]
-    ]
+    ],
+    "correctAnswers": {"0":"B","1":"A","2":"D","3":"D","4":"C"}
   },
   {
     "id": 1779441964430,
@@ -154,9 +158,11 @@ const readingsData = [
       "speculate",
       "extends",
       "structure",
-      "habitats0) thrive",
+      "habitats",
+      "thrive",
       "humble"
-    ]
+    ],
+    "correctAnswers": {"26":"brutal","27":"image","28":"refined","29":"literally","30":"acquired","31":"adaptations","32":"thrive","33":"habitats","34":"extends","35":"speculate"}
   },
   {
     "id": 1779441964431,
@@ -176,7 +182,8 @@ const readingsData = [
       "45. One reason for young adults to live with their parents is that they get married late or"
     ],
     "options": [],
-    "choices": []
+    "choices": [],
+    "correctAnswers": {"0":"I","1":"F","2":"B","3":"E","4":"J","5":"C","6":"K","7":"H","8":"D","9":"G"}
   },
   {
     "id": 1779441964433,
@@ -222,7 +229,8 @@ const readingsData = [
         "C) A majority of women voting for a female president.",
         "D) As many women in top government positions as men."
       ]
-    ]
+    ],
+    "correctAnswers": {"0":"D","1":"C","2":"B","3":"D","4":"A"}
   },
   {
     "id": 1779441964434,
@@ -268,10 +276,10 @@ const readingsData = [
         "C) Try every means possible to improve our environment.",
         "D) Ensure our children grow up in an ideal environment."
       ]
-    ]
-  },
-  {
-    "id": 1779442949774,
+    ],
+    "correctAnswers": {"0":"B","1":"C","2":"A","3":"B","4":"D"}
+  }
+]
     "title": "选词填空 2019061",
     "sectionType": "A",
     "passage": ". The center of American automobile innovation has in the past decade moved 2,000 miles away. It has 26 from Detroit to Silicon Valley, where self-driving vehicles are coming into life. In a 27 to take production back to Detroit, Michigan lawmakers have introduced 28 that could make their state the best place in the country, if not the world, to develop self-driving vehicles and put them on the road. “Michigan's 29 in auto research and development is under attack from several states and countries which desire to 30 our leadership in transportation. We can't let that happen,\" says Senator Mike Kowall, the lead 31 of four bills recently introduced. If all four bills pass as written, they would 32 a substantial update of Michigan's 2013 law that allowed the testing of self-driving vehicles in limited conditions. Manufacturer would have nearly total freedom to test their self-driving technology on public roads. They would be allowed to send groups of self-driving cars on cross-state road trips, and even set up on-demand 33 of self-driving cars, like the one General Motors and Lyft are building. Lawmakers in Michigan clearly want to make the state ready for the commercial application of self^driving technology. In 34 California, home of Silicon Valley, recently proposed far more 35 rules that would require human drivers be ready to take the wheel, and ban commercial use of self driving technology.",
@@ -539,7 +547,8 @@ const readingsData = [
         "C) Try every means possible to improve our environment.",
         "D) Ensure our children grow up in an ideal environment."
       ]
-    ]
+    ],
+    "correctAnswers": {"0":"B","1":"C","2":"A","3":"B","4":"D"}
   }
 ]
 export default readingsData

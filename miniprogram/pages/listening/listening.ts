@@ -229,8 +229,7 @@ Page<IListeningData, IListeningMethods>({
     currentIndex: 0,
     isPlaying: false,
     speed: 1,
-    speedOptions: [0.5, 0.75, 1, 1.25, 1.5],
-    showTranscript: true,
+    speedOptions: [0.6, 0.8, 1, 1.15, 1.3],    showTranscript: true,
     dictationMode: false,
     loopSentence: false,
     hardSentences: [],
@@ -318,9 +317,9 @@ Page<IListeningData, IListeningMethods>({
           markedPages: [],
           markedFlags: new Array(pages.length).fill(false),
           loopSentence: fm,
-          speed: fm ? 0.75 : 1,
+          speed: fm ? 0.8 : 1,
         })
-        if (audioCtx) audioCtx.playbackRate = fm ? 0.75 : 1
+        if (audioCtx) audioCtx.playbackRate = fm ? 0.8 : 1
       } else {
         this.setData({
           mode: 'detail', currentPassage: passage, currentIndex: 0, isPlaying: false,
@@ -392,8 +391,8 @@ Page<IListeningData, IListeningMethods>({
     const on = !this.data.focusMode
     if (on) {
       if (audioCtx) audioCtx.pause()
-      this.setData({ focusMode: true, loopSentence: true, speed: 0.75, isPlaying: false })
-      if (audioCtx) audioCtx.playbackRate = 0.75
+      this.setData({ focusMode: true, loopSentence: true, speed: 0.8, isPlaying: false })
+      if (audioCtx) audioCtx.playbackRate = 0.8
     } else {
       if (audioCtx) {
         audioCtx.pause()
