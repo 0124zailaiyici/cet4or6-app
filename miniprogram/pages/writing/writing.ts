@@ -263,9 +263,6 @@ Page<IWritingData>({
     wx.setStorageSync('writingRecentPatterns', recent)
     wx.showToast({ title: '已选用 ' + pat.pattern, icon: 'none' })
   },
-  toggleToolkit() {
-    this.setData({ toolkitVisible: !this.data.toolkitVisible })
-  },
   async submitSentence() {
     const text = this.data.userSentence.trim()
     const pattern = this.data.selectedPattern
@@ -458,11 +455,6 @@ Page<IWritingData>({
       this.startTimer()
     }
   },
-  stopTimer() {
-    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
-    this.setData({ timerRunning: false })
-  },
-
   async submitWriting() {
     const text = this.data.writingAnswer.trim()
     const prompt = this.data.currentWriting?.prompt || ''
@@ -508,7 +500,4 @@ Page<IWritingData>({
   },
 })
 
-function formatTime(s: number): string {
-  const m = Math.floor(s / 60), sec = s % 60
-  return `${m}:${sec < 10 ? '0' : ''}${sec}`
-}
+
