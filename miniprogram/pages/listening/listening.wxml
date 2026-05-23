@@ -59,7 +59,7 @@
                 <view class="p-dir-text">{{item.stem}}</view>
               </view>
               <view wx:else class="p-q">
-                <view class="p-section">{{item.section}}</view>
+                <view class="p-section">{{item.section}}<text wx:if="{{focusMode && markedPages.indexOf(pi) >= 0}}" style="color:#ff6b8a;font-size:20rpx;margin-left:8rpx"> 📌 标记</text></view>
                 <view class="p-stem">{{item.stem}}</view>
                 <view class="p-opts">
                   <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
@@ -74,7 +74,7 @@
       </view>
       <view class="f-bar">
         <view class="f-nav" catchtap="prevPage">⬅ 上题</view>
-        <view class="f-mark" catchtap="markForReview">❗ 标记</view>
+        <view class="f-mark {{markedPages.indexOf(currentPage) >= 0 ? 'on' : ''}}" catchtap="markForReview">{{markedPages.indexOf(currentPage) >= 0 ? '✅ 已标记' : '❗ 标记'}}</view>
         <view class="f-dots">
           <view class="fd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
         </view>
@@ -115,7 +115,7 @@
               </view>
               <!-- Question page -->
               <view wx:else class="p-q">
-                <view class="p-section">{{item.section}}</view>
+                <view class="p-section">{{item.section}}<text wx:if="{{focusMode && markedPages.indexOf(pi) >= 0}}" style="color:#ff6b8a;font-size:20rpx;margin-left:8rpx"> 📌 标记</text></view>
                 <view class="p-stem">{{item.stem}}</view>
                 <view class="p-opts">
                   <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">

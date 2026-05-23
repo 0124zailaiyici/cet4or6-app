@@ -53,6 +53,7 @@ interface IListeningData {
   dataWarning: string
   focusMode: boolean
   currentSectionLabel: string
+  markedPages: number[]
 }
 
 interface IListeningMethods {
@@ -247,6 +248,7 @@ Page<IListeningData, IListeningMethods>({
     dataWarning: '',
     focusMode: true,
     currentSectionLabel: '',
+    markedPages: [],
   },
 
   onLoad(options: { passageId?: string }) {
@@ -309,6 +311,7 @@ Page<IListeningData, IListeningMethods>({
           dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
           focusMode: true,
           currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
+          markedPages: [],
         })
       } else {
         this.setData({
@@ -384,10 +387,17 @@ Page<IListeningData, IListeningMethods>({
   },
 
   markForReview() {
-    const p = this.data.pages[this.data.currentPage]
-    if (!p || p.type !== 'q') return
-    wx.showToast({ title: `已标记「${p.stem}」`, icon: 'none' })
-    // 暂时用 toast 提示，后续可持久化到 studyData
+    const cp = this.data.currentPage
+    const m = [...this.data.markedPages]
+    const idx = m.indexOf(cp)
+    if (idx >= 0) {
+      m.splice(idx, 1)
+      wx.showToast({ title: '已取消标记', icon: 'none' })
+    } else {
+      m.push(cp)
+      wx.showToast({ title: '已标记需重听', icon: 'none' })
+    }
+    this.setData({ markedPages: m })
   },
 
   // ===== Audio controls =====
