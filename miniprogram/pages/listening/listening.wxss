@@ -117,7 +117,7 @@
   background: #fff0f3; border: 2rpx solid transparent;
 }
 .controls .spd.on, .controls .ctl.on {
-  color: #2196f3; background: rgba(33,150,243,0.08); border-color: rgba(33,150,243,0.2);
+  color: #fff; background: #2196f3; border-color: #2196f3; font-weight: 700;
 }
 
 /* Data warning banner */
@@ -247,3 +247,7 @@
 .dark-theme .f-mark { background: rgba(255,143,171,0.06) !important; border-color: rgba(255,143,171,0.15) !important; color: #ff8fab !important; }
 .dark-theme .fd { background: #3a3a5a !important; }
 .dark-theme .fd.on { background: #a090b0 !important; }
+.dark-theme .speed-btn.active, .dark-theme .ctrl-btn.active,
+.dark-theme .spd.on, .dark-theme .ctl.on {
+  color: #fff !important; background: #4fc3f7 !important; border-color: #4fc3f7 !important;
+}
