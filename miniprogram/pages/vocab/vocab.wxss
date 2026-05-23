@@ -58,6 +58,7 @@
 .gw { display: block; font-size: 38rpx; font-weight: 800; color: #2d2d4e; margin-bottom: 6rpx; line-height: 1.4; }
 .gp { display: block; font-size: 22rpx; color: #8a7a9a; margin-bottom: 24rpx; }
 .gloading { display: block; font-size: 22rpx; color: #1e88e5; margin-bottom: 16rpx; }
+.gachn { font-weight: 400; font-size: 22rpx; }
 .gresult {
   display: block; font-size: 24rpx; font-weight: 700; margin-bottom: 16rpx; padding: 6rpx 0;
   transition: 0.2s; opacity: 0;
@@ -90,6 +91,7 @@
 .dark-theme .gprog { color: #6a6a8a; }
 .dark-theme .gresult.ok { color: #66bb6a; }
 .dark-theme .gresult.fail { color: #ef5350; }
+.dark-theme .gachn { color: #a090b0; }
 .dark-theme .gq { color: #6a6a8a; }
 .dark-theme .gw { color: #e0d0e8; }
 .dark-theme .go { background: #2a2a4a; border-color: #3a3a5a; color: #a090b0; }

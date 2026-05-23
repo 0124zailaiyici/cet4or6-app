@@ -52,6 +52,7 @@ interface IListeningData {
   optionLetters: string[]
   dataWarning: string
   focusMode: boolean
+  examMode: boolean
   currentSectionLabel: string
   markedPages: number[]
   markedFlags: boolean[]
@@ -352,6 +353,7 @@ Page<IListeningData, IListeningMethods>({
     markedPages: [],
     markedFlags: [],
     isCurrentMarked: false,
+    examMode: false,
     summaryTotal: 0,
     summaryAnswered: 0,
     summaryMarked: 0,
@@ -360,7 +362,8 @@ Page<IListeningData, IListeningMethods>({
     focusPageIndices: [],
   },
 
-  onLoad(options: { passageId?: string }) {
+  onLoad(options: { passageId?: string; examMode?: string }) {
+    if (options?.examMode === '1') this.setData({ examMode: true })
     audio.attach(this)
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
@@ -461,6 +464,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   backToList() {
+    if (this.data.examMode) { wx.navigateBack(); return }
     audio.stop()
     this.setData({
       mode: 'list',

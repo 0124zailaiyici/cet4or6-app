@@ -70,6 +70,7 @@ interface IReadingData {
   showTrans: boolean
   pageParas: Array<{ text: string; paraIdx: number }>
   pageWordSegments: Array<{ type: string; text: string; word?: string; zh?: string }>
+  examMode: boolean
 }
 
 interface IReadingMethods {
@@ -152,10 +153,12 @@ Page<IReadingData, IReadingMethods>({
     fullTranslation: '',
     showTrans: false,
     pageParas: [],
-    pageWordSegments: []
+    pageWordSegments: [],
+    examMode: false
   },
 
-  onLoad() {
+  onLoad(options?: { examMode?: string }) {
+    if (options?.examMode === '1') this.setData({ examMode: true })
     const readings = readingsData as unknown as IReadingItem[]
     this.setData({ readings })
     this.refreshCompletionMap()
@@ -264,6 +267,7 @@ Page<IReadingData, IReadingMethods>({
   },
 
   back() {
+    if (this.data.examMode) { wx.navigateBack(); return }
     this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [] })
   },
 

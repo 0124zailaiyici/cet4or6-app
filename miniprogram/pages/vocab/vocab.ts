@@ -6,6 +6,7 @@ interface IVocabWord {
   word: string
   phonetic: string
   definition: string
+  chn: string
   source: string
   status: 'new' | 'learning' | 'review' | 'master'
   correctStreak: number
@@ -27,6 +28,7 @@ interface IVocabData {
   gameCorrect: number
   lookingUp: boolean
   gameLoading: boolean
+  gameAnswer: string
 }
 
 interface IVocabMethods {
@@ -602,7 +604,8 @@ function extractWords(): IVocabWord[] {
       wordMap[t] = {
         word: t,
         phonetic: known?.phonetic || '',
-        definition: known?.definition || '',
+        definition: '',
+        chn: known?.definition || '',
         source,
         status: 'new',
         correctStreak: 0,
@@ -615,7 +618,6 @@ function extractWords(): IVocabWord[] {
 }
 
 function trimDef(d: string): string {
-  if (/[\u4e00-\u9fff]/.test(d)) return d.length > 50 ? d.slice(0, 50) + '…' : d
   const s = d.split('. ')[0].trim()
   return s.length > 50 ? s.slice(0, 50) + '…' : s
 }
@@ -645,6 +647,7 @@ Page<IVocabData, IVocabMethods>({
     gameCorrect: -1,
     lookingUp: false,
     gameLoading: false,
+    gameAnswer: '',
   },
 
   onShow() {
@@ -701,27 +704,31 @@ Page<IVocabData, IVocabMethods>({
 
   async showGameForIdx(idx: number) {
     const word = this.data.filteredWords[idx]
-    if (!word?.definition) return this.closeGame()
+    if (!word?.chn && !word?.definition) return this.closeGame()
     this.setData({
       gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
-      gameOptions: [], gameIndex: -1, gameCorrect: -1,
+      gameOptions: [], gameIndex: -1, gameCorrect: -1, gameAnswer: '',
     })
-    if (!/[\u4e00-\u9fff]/.test(word.definition)) {
+    const needFetch = !word.definition || !word.chn
+    if (needFetch) {
       this.setData({ gameLoading: true })
       try {
         const result = await lookupWord(word.word)
         const entry = Array.isArray(result) ? result[0] : result
-        const chinese = entry.chinese || ''
-        if (chinese) {
-          word.definition = chinese
+        const engDef = entry.meanings?.[0]?.definitions?.[0]?.definition || ''
+        const chn = entry.chinese || ''
+        if (engDef || chn) {
+          if (engDef) word.definition = engDef
+          if (chn) word.chn = chn
           const app = getApp<IAppOption>()
           const stored = app.globalData.studyData.vocabWords as IVocabWord[]
           const sw = stored.find(v => v.word === word.word)
-          if (sw) { sw.definition = chinese; wx.setStorageSync('studyData', app.globalData.studyData) }
+          if (sw) { sw.definition = word.definition; sw.chn = word.chn; wx.setStorageSync('studyData', app.globalData.studyData) }
         }
       } catch {}
       this.setData({ gameLoading: false })
     }
+    if (!word.definition) return this.closeGame()
     const others = this.data.words.filter(w => w.word !== word.word && w.definition)
     const pick = shuffleInPlace(others).slice(0, 3)
     const options = shuffleInPlace([word, ...pick])
@@ -733,7 +740,8 @@ Page<IVocabData, IVocabMethods>({
     const oi = Number(e.currentTarget.dataset.oi)
     const correctDef = trimDef(this.data.gameWord?.definition || '')
     const isCorrect = this.data.gameOptions[oi] === correctDef
-    this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctDef) })
+    const answer = this.data.gameWord?.chn || ''
+    this.setData({ gameIndex: oi, gameCorrect: this.data.gameOptions.indexOf(correctDef), gameAnswer: answer })
 
     const app = getApp<IAppOption>()
     const words = app.globalData.studyData.vocabWords as IVocabWord[]
@@ -772,7 +780,7 @@ Page<IVocabData, IVocabMethods>({
   },
 
   closeGame() {
-    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameOptions: [], gameIndex: -1, gameCorrect: -1 })
+    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameOptions: [], gameIndex: -1, gameCorrect: -1, gameAnswer: '' })
   },
 
   async lookupWord(e: WechatMiniprogram.TouchEvent) {
@@ -784,8 +792,9 @@ Page<IVocabData, IVocabMethods>({
       const result = await lookupWord(word.word)
       const entry = Array.isArray(result) ? result[0] : result
       const phonetic = entry.phonetic || entry.phonetics?.[0]?.text || ''
-      const definition = entry.chinese || entry.meanings?.[0]?.definitions?.[0]?.definition || ''
-      if (!definition) {
+      const engDef = entry.meanings?.[0]?.definitions?.[0]?.definition || ''
+      const chn = entry.chinese || ''
+      if (!engDef && !chn) {
         wx.showToast({ title: '未找到释义', icon: 'none' })
         return
       }
@@ -794,7 +803,8 @@ Page<IVocabData, IVocabMethods>({
       const w = words.find(v => v.word === word.word)
       if (w) {
         w.phonetic = phonetic
-        w.definition = definition
+        w.definition = engDef
+        w.chn = chn
         wx.setStorageSync('studyData', app.globalData.studyData)
         this.loadWords()
         wx.showToast({ title: `已查到「${word.word}」`, icon: 'success' })
@@ -830,7 +840,8 @@ Page<IVocabData, IVocabMethods>({
         words.push({
           word: w,
           phonetic: known?.phonetic || '',
-          definition: known?.definition || '',
+          definition: '',
+          chn: known?.definition || '',
           source: '手动添加',
           status: 'new',
           correctStreak: 0,

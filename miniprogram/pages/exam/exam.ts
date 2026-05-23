@@ -157,16 +157,16 @@ Page<IExamData, IExamMethods>({
   },
 
   goReading() {
-    wx.navigateTo({ url: '/pages/reading/reading' })
+    wx.navigateTo({ url: '/pages/reading/reading?examMode=1' })
   },
   goListening() {
-    wx.navigateTo({ url: '/pages/listening/listening' })
+    wx.navigateTo({ url: '/pages/listening/listening?examMode=1' })
   },
   goWriting() {
-    wx.navigateTo({ url: '/pages/writing/writing' })
+    wx.navigateTo({ url: '/pages/writing/writing?examMode=1' })
   },
   goTranslation() {
-    wx.navigateTo({ url: '/pages/translation/translation' })
+    wx.navigateTo({ url: '/pages/translation/translation?examMode=1' })
   },
 
   submitExam() {

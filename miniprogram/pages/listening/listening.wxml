@@ -28,7 +28,7 @@
 
   <block wx:elif="{{mode === 'summary'}}">
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">返回</view>
+      <view class="back-btn" catchtap="backToList">{{examMode ? '返回考试' : '返回'}}</view>
       <text class="detail-title">{{currentPassage.title}}</text>
       <view class="detail-complete" catchtap="markCompleted">✓</view>
     </view>
@@ -73,7 +73,7 @@
 
   <block wx:else>
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">返回</view>
+      <view class="back-btn" catchtap="backToList">{{examMode ? '返回考试' : '返回'}}</view>
       <text class="detail-title">{{currentPassage.title}}</text>
       <view wx:if="{{audioMode}}" class="focus-toggle {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">精听</view>
       <view wx:if="{{pages.length > 0}}" class="focus-toggle" catchtap="viewSummary">总结</view>

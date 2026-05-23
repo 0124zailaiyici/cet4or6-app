@@ -30,7 +30,7 @@
 
       <!-- 顶栏 -->
       <view class="topbar">
-        <view class="tb-back" catchtap="back">返回</view>
+        <view class="tb-back" catchtap="back">{{examMode ? '返回考试' : '返回'}}</view>
         <text class="tb-title">{{current.sectionType === 'A' ? '选词填空' : current.sectionType === 'B' ? '长篇阅读匹配' : '仔细阅读'}}</text>
         <view class="tb-badge {{'tag-' + current.sectionType}}">{{current.sectionType === 'A' ? '选词' : current.sectionType === 'B' ? '匹配' : '精读'}}</view>
         <view class="tb-submit" wx:if="{{!submitted}}" catchtap="submit">提交</view>
