@@ -85,7 +85,11 @@ Page<IHomeData, IHomeMethods>({
 
   goTo(e: WechatMiniprogram.TouchEvent) {
     const url = e.currentTarget.dataset.url as string
-    wx.navigateTo({ url })
+    if (url.includes('vocab') || url.includes('settings')) {
+      wx.switchTab({ url })
+    } else {
+      wx.navigateTo({ url })
+    }
   },
 
   handleCheckIn() {

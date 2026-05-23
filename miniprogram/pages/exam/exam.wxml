@@ -119,9 +119,6 @@
             <!-- Section A: 选词填空 -->
             <block wx:if="{{p.sectionType === 'A'}}">
               <view class="sec-label">选词填空</view>
-              <view class="word-bank">
-                <view wx:for="{{p.options}}" wx:for-index="wi" wx:for-item="w" wx:key="*this" class="wb-word {{p._usedFlags[wi] ? 'used' : ''}}" data-key="{{p._blankKeys[0]}}" data-word="{{w}}" catchtap="onReadingBlank">{{w}}</view>
-              </view>
               <view class="rd-passage">{{p.passage}}</view>
               <view wx:for="{{p._blankList}}" wx:for-index="bi" wx:for-item="bk" wx:key="key" class="blank-row">
                 <text class="blank-label">第{{bk.key}}空</text>

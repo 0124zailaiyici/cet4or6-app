@@ -562,14 +562,16 @@ Page<IListeningData, IListeningMethods>({
     const on = !this.data.focusMode
     if (on) {
       audio.pause()
+      const passage = this.data.currentPassage
       const lines: string[] = []
       const pageIdx: number[] = []
+      const sentMap: number[] = []
       const pages = this.data.pages
       for (let i = 0; i < pages.length; i++) {
         const p = pages[i]
         if (p.type === 'dir') {
           const short = p.stem && p.stem.length > 60 ? p.stem.slice(0, 60) + '...' : (p.stem || '')
-          if (short) { lines.push(short); pageIdx.push(i) }
+          if (short) { lines.push(short); pageIdx.push(i); sentMap.push(0) }
         } else if (p.type === 'q' && p.opts && p.opts.length > 0) {
           const parts = [p.stem || '']
           for (let oi = 0; oi < p.opts.length; oi++) {
@@ -577,6 +579,12 @@ Page<IListeningData, IListeningMethods>({
           }
           lines.push(parts.join('\n'))
           pageIdx.push(i)
+          const qNum = parseInt((p.stem || '').replace(/^Q/i, ''))
+          const sentIdx = passage ? passage.sentences.findIndex(s => {
+            const m = s.text.match(/^(?:Q)?(\d+)\./)
+            return m && parseInt(m[1]) === qNum
+          }) : -1
+          sentMap.push(sentIdx >= 0 ? sentIdx : 0)
         }
       }
       this.setData({
@@ -587,7 +595,7 @@ Page<IListeningData, IListeningMethods>({
         showTranscript: true,
         dictationMode: false,
         focusSentences: lines,
-        focusSentenceMap: [],
+        focusSentenceMap: sentMap,
         focusPageIndices: pageIdx,
         currentIndex: 0,
         currentPage: 0,
