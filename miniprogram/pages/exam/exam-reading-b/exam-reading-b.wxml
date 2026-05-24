@@ -1,0 +1,26 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <view class="header">
+    <text catchtap="goBack" class="hd-back">← 返回</text>
+    <text class="hd-title">长篇阅读匹配</text>
+    <text class="hd-badge b-B">匹配</text>
+  </view>
+  <view class="pass-zone">
+    <scroll-view class="pass-scroll" scroll-y>
+      <text class="pass-text">{{passage.passage}}</text>
+    </scroll-view>
+  </view>
+  <view class="divider"></view>
+  <view class="quest-zone">
+    <view class="qz-label">匹配陈述（先点陈述，再点字母）</view>
+    <scroll-view class="qz-scroll" scroll-y>
+      <view wx:for="{{passage.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" data-qi="{{qi}}" catchtap="onSelectStmt" class="match-row {{activeStmt === qi ? 'active' : ''}}">
+        <text class="match-num">{{qi + 36}}</text>
+        <text class="match-text">{{q}}</text>
+        <text class="match-ans" wx:if="{{passage._ma[qi]}}">{{passage._ma[qi]}}</text>
+      </view>
+    </scroll-view>
+    <view class="letter-bar">
+      <text wx:for="{{letters}}" wx:for-item="l" wx:key="*this" class="letter" catchtap="onMatchLetter" data-val="{{l}}">{{l}}</text>
+    </view>
+  </view>
+</view>

@@ -19,7 +19,10 @@
     "pages/exam/exam-writing/exam-writing",
     "pages/exam/exam-listening/exam-listening",
     "pages/exam/exam-reading/exam-reading",
-    "pages/exam/exam-translation/exam-translation"
+    "pages/exam/exam-translation/exam-translation",
+    "pages/exam/exam-reading-a/exam-reading-a",
+    "pages/exam/exam-reading-b/exam-reading-b",
+    "pages/exam/exam-reading-c/exam-reading-c"
   ],
   "window": {
     "navigationBarTextStyle": "black",

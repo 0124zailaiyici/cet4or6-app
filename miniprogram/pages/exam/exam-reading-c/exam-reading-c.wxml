@@ -1,0 +1,27 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <view class="header">
+    <text catchtap="goBack" class="hd-back">← 返回</text>
+    <text class="hd-title">仔细阅读</text>
+    <text class="hd-badge b-C">精读</text>
+  </view>
+  <view class="pass-zone">
+    <scroll-view class="pass-scroll" scroll-y>
+      <text class="pass-text">{{passage.passage}}</text>
+    </scroll-view>
+  </view>
+  <view class="divider"></view>
+  <view class="quest-zone">
+    <view class="qz-label">第 {{currentQ + 1}} / {{passage._choices.length}} 题</view>
+    <scroll-view class="qz-scroll" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd" scroll-y>
+      <view class="cq-card">
+        <view class="cq-stem">{{passage.questions[currentQ]}}</view>
+        <view class="cq-opts">
+          <view wx:for="{{passage._choices[currentQ]}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{passage._ca[currentQ] === ch ? 'sel' : ''}}" data-qi="{{currentQ}}" data-val="{{ch}}" catchtap="onSelect">{{ch}}</view>
+        </view>
+      </view>
+    </scroll-view>
+    <view wx:if="{{passage._choices.length > 1}}" class="dots">
+      <view wx:for="{{passage._choices}}" wx:for-index="i" wx:key="*this" class="dot {{i === currentQ ? 'on' : ''}}"></view>
+    </view>
+  </view>
+</view>
