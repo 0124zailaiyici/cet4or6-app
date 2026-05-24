@@ -5,9 +5,9 @@ Page({
   data: {
     passage: null as any,
     currentQ: 0,
-    _paraPages: [] as string[],
+    _paraPages: [] as string[][],
     _paraPageIdx: 0,
-    _curPara: '',
+    _curParas: [] as string[],
     _touchParaX: 0,
     darkMode: false,
     touchX: 0,
@@ -24,8 +24,9 @@ Page({
     const ans = app.globalData.studyData.readingAnswers[id] || {}
     const ca = ans.cAnswers || {}
     const choices = (p.questions || []).map((_: string, qi: number) => (p.choices && p.choices[qi]) ? p.choices[qi] : ['A','B','C','D'])
-    const paraPages = splitCPages(p.passage || '')
-    this.setData({ passage: { ...p, _ans: ans, _ca: ca, _choices: choices }, _paraPages: paraPages, _paraPageIdx: 0, _curPara: paraPages[0] || '' })
+    const paras = splitIntoParas(p.passage || '')
+    const paraPages = groupPages(paras, 2)
+    this.setData({ passage: { ...p, _ans: ans, _ca: ca, _choices: choices }, _paraPages: paraPages, _paraPageIdx: 0, _curParas: paraPages[0] || [] })
   },
 
   onParaTouchStart(e: any) { this.data._touchParaX = e.touches[0].clientX },
@@ -34,10 +35,10 @@ Page({
     const pp = this.data._paraPages
     if (dx < -50 && this.data._paraPageIdx < pp.length - 1) {
       const idx = this.data._paraPageIdx + 1
-      this.setData({ _paraPageIdx: idx, _curPara: pp[idx] || '' })
+      this.setData({ _paraPageIdx: idx, _curParas: pp[idx] || [] })
     } else if (dx > 50 && this.data._paraPageIdx > 0) {
       const idx = this.data._paraPageIdx - 1
-      this.setData({ _paraPageIdx: idx, _curPara: pp[idx] || '' })
+      this.setData({ _paraPageIdx: idx, _curParas: pp[idx] || [] })
     }
   },
 
@@ -76,9 +77,15 @@ Page({
   goBack() { wx.navigateBack() },
 })
 
-function splitCPages(text: string): string[] {
-  const mid = Math.ceil(text.length / 2)
-  const idx = text.indexOf('. ', mid)
-  if (idx < 0 || idx >= text.length - 2) return [text]
-  return [text.slice(0, idx + 1), text.slice(idx + 2)]
+function splitIntoParas(text: string): string[] {
+  const sents = text.match(/[^.!?]+[.!?]+/g) || [text]
+  const paras: string[] = []
+  for (let i = 0; i < sents.length; i += 2) paras.push(sents.slice(i, i + 2).join('').trim())
+  return paras.filter(Boolean)
+}
+
+function groupPages(items: string[], maxPerPage: number): string[][] {
+  const pages: string[][] = []
+  for (let i = 0; i < items.length; i += maxPerPage) pages.push(items.slice(i, i + maxPerPage))
+  return pages
 }

@@ -110,8 +110,9 @@ function fmtBPassage(text: string): { letter: string; text: string }[] {
 }
 
 function splitBParas(paras: { letter: string; text: string }[]): any[][] {
-  const mid = Math.ceil(paras.length / 2)
-  return [paras.slice(0, mid), paras.slice(mid)]
+  const pages: any[][] = []
+  for (let i = 0; i < paras.length; i += 2) pages.push(paras.slice(i, i + 2))
+  return pages
 }
 
 function splitBStmts(questions: string[]): { qi: number; q: string }[][] {

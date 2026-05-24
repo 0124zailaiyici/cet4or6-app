@@ -9,6 +9,7 @@
 .pass-zone { flex: 1; display: flex; flex-direction: column; padding: 0 20rpx; min-height: 0; overflow: hidden; }
 .pz-scroll { flex: 1; overflow: hidden; background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx; }
 .pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; word-break: break-word; }
+.pass-para { margin-bottom: 14rpx; }
 
 .divider { height: 2rpx; background: #dad0ca; flex-shrink: 0; }
 
@@ -20,6 +21,10 @@
 .qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .qzo { width: calc(50% - 6rpx); font-size: 26rpx; color: #4a4a6a; line-height: 1.5; padding: 20rpx 24rpx; border-radius: 16rpx; background: #f8f5f4; border: 2rpx solid #ece4e2; transition: 0.15s; word-break: break-word; }
 .qzo.on { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.06); box-shadow: 0 2rpx 12rpx rgba(30,136,229,0.1); }
+
+.dots { display: flex; justify-content: center; gap: 6rpx; padding: 6rpx 0 4rpx; flex-shrink: 0; }
+.dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }
+.dot.on { background: #546e7a; width: 22rpx; border-radius: 5rpx; }
 
 .qz-dots { display: flex; justify-content: center; gap: 6rpx; padding: 8rpx 0 0; flex-shrink: 0; }
 .qzd { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }

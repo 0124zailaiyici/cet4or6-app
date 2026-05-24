@@ -6,7 +6,9 @@
   </view>
   <view class="pass-zone" bindtouchstart="onParaTouchStart" bindtouchend="onParaTouchEnd">
     <scroll-view class="pz-scroll" scroll-y>
-      <text class="pz-text">{{_curPara}}</text>
+      <view class="pz-text">
+        <view class="pass-para" wx:for="{{_curParas}}" wx:key="*this" wx:for-item="para">{{para}}</view>
+      </view>
     </scroll-view>
     <view class="dots" wx:if="{{_paraPages.length > 1}}">
       <view wx:for="{{_paraPages}}" wx:key="*this" wx:for-index="idx" class="dot {{idx === _paraPageIdx ? 'on' : ''}}"></view>
