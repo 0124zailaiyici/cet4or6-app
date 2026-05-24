@@ -228,7 +228,7 @@ app.get('/dictionary', async (req, res) => {
               }
             }
           }
-        } catch {}
+        } catch(e) { console.log('[dict] 批量翻译失败:', e.message) }
       }
     }
 
