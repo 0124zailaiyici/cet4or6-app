@@ -7,20 +7,26 @@
   </view>
   <block wx:for="{{passages}}" wx:for-index="pi" wx:for-item="p" wx:key="id">
     <block wx:if="{{pi === idx}}">
-      <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+
+      <view class="pass-zone" bindtouchstart="onPassTouchStart" bindtouchend="onPassTouchEnd">
         <scroll-view class="pass-scroll" scroll-y>
-          <text class="pass-text" wx:if="{{p.sectionType !== 'A' || !p._segments}}">{{p.passage}}</text>
+          <text class="pass-text" wx:if="{{p.sectionType !== 'A' || !p._segPages[passagePage]}}">{{p._passagePages[passagePage]}}</text>
           <text class="pass-text" wx:else>
-            <block wx:for="{{p._segments}}" wx:key="*this" wx:for-item="seg">
+            <block wx:for="{{p._segPages[passagePage]}}" wx:key="*this" wx:for-item="seg">
               <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
               <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{p._ans.blankAnswers[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}}" data-key="{{seg.num}}" catchtap="onBlankTap">{{p._ans.blankAnswers[seg.num] || seg.num}}</text>
             </block>
           </text>
         </scroll-view>
-        <view class="pass-dots"><view class="pass-dot on"></view><view class="pass-dot"></view></view>
+        <view wx:if="{{p._passagePages.length > 1}}" class="dots">
+          <view wx:for="{{p._passagePages}}" wx:for-index="i" wx:key="*this" class="dot {{i === passagePage ? 'on' : ''}}"></view>
+        </view>
       </view>
+
       <view class="divider"></view>
+
       <view class="quest-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+
         <block wx:if="{{p.sectionType === 'A'}}">
           <view class="qz-label">选词（15选10）<text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 请选词填入第{{activeBlank}}空</text></view>
           <scroll-view class="qz-scroll" scroll-y>
@@ -29,30 +35,41 @@
             </view>
           </scroll-view>
         </block>
+
         <block wx:elif="{{p.sectionType === 'B'}}">
           <view class="qz-label">匹配陈述（先点陈述，再点字母）</view>
-          <scroll-view class="qz-scroll" scroll-y>
-            <view wx:for="{{p.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" data-qi="{{qi}}" catchtap="onSelectStmt" class="match-row {{activeStmt === qi ? 'active' : ''}}">
-              <text class="match-num">{{qi + 36}}</text>
+          <scroll-view class="qz-scroll" bindtouchstart="onBStmtTouchStart" bindtouchend="onBStmtTouchEnd" scroll-y>
+            <view wx:for="{{p._bStmtPages[bStmtPage]}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" data-qi="{{qi + bStmtPage * 5}}" catchtap="onSelectStmt" class="match-row {{activeStmt === qi + bStmtPage * 5 ? 'active' : ''}}">
+              <text class="match-num">{{qi + bStmtPage * 5 + 36}}</text>
               <text class="match-text">{{q}}</text>
-              <text class="match-ans" wx:if="{{p._matchAns[qi]}}">{{p._matchAns[qi]}}</text>
+              <text class="match-ans" wx:if="{{p._matchAns[qi + bStmtPage * 5]}}">{{p._matchAns[qi + bStmtPage * 5]}}</text>
             </view>
           </scroll-view>
+          <view wx:if="{{p._bStmtPages.length > 1}}" class="dots">
+            <view wx:for="{{p._bStmtPages}}" wx:for-index="i" wx:key="*this" class="dot {{i === bStmtPage ? 'on' : ''}}"></view>
+          </view>
           <view class="letter-bar">
             <text wx:for="{{letters}}" wx:for-item="l" wx:key="*this" class="letter" catchtap="onMatchLetter" data-val="{{l}}">{{l}}</text>
           </view>
         </block>
+
         <block wx:elif="{{p.sectionType === 'C'}}">
-          <scroll-view class="qz-scroll" scroll-y>
-            <view wx:for="{{p.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="cq-card">
-              <view class="cq-stem">{{q}}</view>
+          <view class="qz-label">第 {{currentCQ + 1}} / {{p._cqChoices.length}} 题</view>
+          <scroll-view class="qz-scroll" bindtouchstart="onCQTouchStart" bindtouchend="onCQTouchEnd" scroll-y>
+            <view class="cq-card">
+              <view class="cq-stem">{{p.questions[currentCQ]}}</view>
               <view class="cq-opts">
-                <view wx:for="{{p._cqChoices[qi]}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{p._cAns[qi] === ch ? 'sel' : ''}}" data-qi="{{qi}}" data-val="{{ch}}" catchtap="onSelectC">{{ch}}</view>
+                <view wx:for="{{p._cqChoices[currentCQ]}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{p._cAns[currentCQ] === ch ? 'sel' : ''}}" data-qi="{{currentCQ}}" data-val="{{ch}}" catchtap="onSelectC">{{ch}}</view>
               </view>
             </view>
           </scroll-view>
+          <view wx:if="{{p._cqChoices.length > 1}}" class="dots">
+            <view wx:for="{{p._cqChoices}}" wx:for-index="i" wx:key="*this" class="dot {{i === currentCQ ? 'on' : ''}}"></view>
+          </view>
         </block>
+
       </view>
+
     </block>
   </block>
 </view>
