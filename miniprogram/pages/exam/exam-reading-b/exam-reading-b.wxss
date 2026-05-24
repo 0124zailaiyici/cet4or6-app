@@ -9,12 +9,14 @@
 .pass-zone { flex: 1; display: flex; flex-direction: column; padding: 0 20rpx; min-height: 0; overflow: hidden; }
 .pz-scroll { flex: 1; overflow: hidden; background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx; }
 .pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; word-break: break-word; }
+.pass-para { margin-bottom: 14rpx; }
 
 .divider { height: 2rpx; background: #dad0ca; flex-shrink: 0; }
 
 .quest-zone { flex: 1; display: flex; flex-direction: column; padding: 0 20rpx 24rpx; min-height: 0; overflow: hidden; background: #f7f0ef; }
 .qz-label { font-size: 20rpx; font-weight: 600; color: #546e7a; padding: 8rpx 0 4rpx; flex-shrink: 0; }
-.qz-scroll { flex: 1; min-height: 0; }
+.qb-scroll { flex: 1; min-height: 0; }
+.qb-scroll::-webkit-scrollbar { width: 0; }
 
 .qb-item { display: flex; align-items: center; gap: 8rpx; padding: 6rpx 20rpx; border-bottom: 1rpx solid #f5f0f0; background: #fff; }
 .qb-item:last-child { border-bottom: none; }
@@ -37,3 +39,7 @@
 .dark-theme .qz-label { color: #a090b0 !important; }
 .dark-theme .qb-item { background: #1e1e38 !important; border-color: #2a2a4a !important; }
 .dark-theme .qbi-txt { color: #e0d0e8 !important; }
+
+.dots { display: flex; justify-content: center; gap: 6rpx; padding: 6rpx 0 4rpx; flex-shrink: 0; }
+.dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }
+.dot.on { background: #546e7a; width: 22rpx; border-radius: 5rpx; }

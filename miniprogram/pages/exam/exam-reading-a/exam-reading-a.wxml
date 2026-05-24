@@ -4,15 +4,18 @@
     <text class="tb-title">选词填空</text>
     <view class="tb-badge tag-A">选词</view>
   </view>
-  <view class="pass-zone">
+  <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
     <scroll-view class="pz-scroll" scroll-y>
       <text class="pz-text">
-        <block wx:for="{{_segments}}" wx:key="*this" wx:for-item="seg">
+        <block wx:for="{{_curSegs}}" wx:key="*this" wx:for-item="seg">
           <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
           <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{_sel[seg.num] ? 'filled' : ''}} {{_active === seg.num ? 'active' : ''}}" data-key="{{seg.num}}" catchtap="onBlankTap">{{_sel[seg.num] || seg.num}}</text>
         </block>
       </text>
     </scroll-view>
+    <view class="dots" wx:if="{{_pages.length > 1}}">
+      <view wx:for="{{_pages}}" wx:key="*this" wx:for-index="idx" class="dot {{idx === _pageIdx ? 'on' : ''}}"></view>
+    </view>
   </view>
   <view class="divider"></view>
   <view class="quest-zone">

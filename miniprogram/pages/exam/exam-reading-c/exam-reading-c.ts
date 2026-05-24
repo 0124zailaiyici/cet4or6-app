@@ -5,6 +5,10 @@ Page({
   data: {
     passage: null as any,
     currentQ: 0,
+    _paraPages: [] as string[],
+    _paraPageIdx: 0,
+    _curPara: '',
+    _touchParaX: 0,
     darkMode: false,
     touchX: 0,
   },
@@ -20,7 +24,21 @@ Page({
     const ans = app.globalData.studyData.readingAnswers[id] || {}
     const ca = ans.cAnswers || {}
     const choices = (p.questions || []).map((_: string, qi: number) => (p.choices && p.choices[qi]) ? p.choices[qi] : ['A','B','C','D'])
-    this.setData({ passage: { ...p, _ans: ans, _ca: ca, _choices: choices } })
+    const paraPages = splitCPages(p.passage || '')
+    this.setData({ passage: { ...p, _ans: ans, _ca: ca, _choices: choices }, _paraPages: paraPages, _paraPageIdx: 0, _curPara: paraPages[0] || '' })
+  },
+
+  onParaTouchStart(e: any) { this.data._touchParaX = e.touches[0].clientX },
+  onParaTouchEnd(e: any) {
+    const dx = e.changedTouches[0].clientX - this.data._touchParaX
+    const pp = this.data._paraPages
+    if (dx < -50 && this.data._paraPageIdx < pp.length - 1) {
+      const idx = this.data._paraPageIdx + 1
+      this.setData({ _paraPageIdx: idx, _curPara: pp[idx] || '' })
+    } else if (dx > 50 && this.data._paraPageIdx > 0) {
+      const idx = this.data._paraPageIdx - 1
+      this.setData({ _paraPageIdx: idx, _curPara: pp[idx] || '' })
+    }
   },
 
   refresh(id: number) {
@@ -57,3 +75,10 @@ Page({
 
   goBack() { wx.navigateBack() },
 })
+
+function splitCPages(text: string): string[] {
+  const mid = Math.ceil(text.length / 2)
+  const idx = text.indexOf('. ', mid)
+  if (idx < 0 || idx >= text.length - 2) return [text]
+  return [text.slice(0, idx + 1), text.slice(idx + 2)]
+}

@@ -23,6 +23,10 @@
 .qzc { font-size: 26rpx; color: #4a4a6a; line-height: 1.5; padding: 14rpx 20rpx; border-radius: 14rpx; background: rgba(84,110,122,0.04); border: 2rpx solid rgba(84,110,122,0.06); transition: 0.2s; text-align: center; word-break: break-word; }
 .qzc.used { opacity: 0.3; border-color: #ccc; background: #f0f0f0; }
 
+.dots { display: flex; justify-content: center; gap: 6rpx; padding: 6rpx 0 4rpx; flex-shrink: 0; }
+.dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }
+.dot.on { background: #546e7a; width: 22rpx; border-radius: 5rpx; }
+
 .dark-theme.page { background: #12121f !important; }
 .dark-theme .tb-title { color: #e0d0e8 !important; }
 .dark-theme .pz-scroll { background: #1a1a30 !important; }

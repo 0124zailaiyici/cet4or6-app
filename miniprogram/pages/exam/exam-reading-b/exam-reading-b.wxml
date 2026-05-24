@@ -4,21 +4,31 @@
     <text class="tb-title">长篇阅读匹配</text>
     <view class="tb-badge tag-B">匹配</view>
   </view>
-  <view class="pass-zone">
+  <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
     <scroll-view class="pz-scroll" scroll-y>
-      <text class="pz-text">{{passage.passage}}</text>
+      <view class="pz-text">
+        <view class="pass-para" wx:for="{{_curParas}}" wx:key="letter" wx:for-item="para">
+          <text><text style="color:#546e7a;font-weight:700">{{para.letter}})</text> {{para.text}}</text>
+        </view>
+      </view>
     </scroll-view>
+    <view class="dots" wx:if="{{_paraPages.length > 1}}">
+      <view wx:for="{{_paraPages}}" wx:key="*this" wx:for-index="idx" class="dot {{idx === _paraPageIdx ? 'on' : ''}}"></view>
+    </view>
   </view>
   <view class="divider"></view>
   <view class="quest-zone">
-    <view class="qz-label">📋 匹配陈述（先点陈述，再点字母）</view>
-    <scroll-view class="qz-scroll" scroll-y>
-      <view wx:for="{{passage.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="qb-item {{activeStmt === qi ? 'active' : ''}}" data-qi="{{qi}}" catchtap="onSelectStmt">
-        <text class="qbi-num">{{qi + 36}}</text>
-        <text class="qbi-txt">{{q}}</text>
-        <view class="qbi-ans" wx:if="{{passage._ma[qi]}}" data-qi="{{qi}}" catchtap="onRemoveMatch"><text>{{passage._ma[qi]}}</text></view>
+    <view class="qz-label">📋 匹配陈述 · 第 <text>{{_stmtPageIdx + 1}}</text>/<text>{{_stmtMax}}</text> 页（先点陈述，再点字母）</view>
+    <scroll-view class="qb-scroll" scroll-y bindtouchstart="onStmtTouchStart" bindtouchend="onStmtTouchEnd">
+      <view wx:for="{{_curStmts}}" wx:key="qi" wx:for-index="qi" class="qb-item {{activeStmt === item.qi ? 'active' : ''}}" data-qi="{{item.qi}}" catchtap="onSelectStmt">
+        <text class="qbi-num">{{item.qi + 36}}</text>
+        <text class="qbi-txt">{{item.q}}</text>
+        <view class="qbi-ans" wx:if="{{passage._ma[item.qi]}}">{{passage._ma[item.qi]}}</view>
       </view>
     </scroll-view>
+    <view class="dots" wx:if="{{_stmtPages.length > 1}}">
+      <view wx:for="{{_stmtPages}}" wx:key="*this" wx:for-index="si" class="dot {{si === _stmtPageIdx ? 'on' : ''}}"></view>
+    </view>
     <view class="qb-bar">
       <view class="qb-bar-letters">
         <text class="qb-l" wx:for="{{letters}}" wx:key="*this" wx:for-item="l" catchtap="onMatchLetter" data-val="{{l}}">{{l}}</text>

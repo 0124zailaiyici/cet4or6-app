@@ -4,10 +4,13 @@
     <text class="tb-title">仔细阅读</text>
     <view class="tb-badge tag-C">精读</view>
   </view>
-  <view class="pass-zone">
+  <view class="pass-zone" bindtouchstart="onParaTouchStart" bindtouchend="onParaTouchEnd">
     <scroll-view class="pz-scroll" scroll-y>
-      <text class="pz-text">{{passage.passage}}</text>
+      <text class="pz-text">{{_curPara}}</text>
     </scroll-view>
+    <view class="dots" wx:if="{{_paraPages.length > 1}}">
+      <view wx:for="{{_paraPages}}" wx:key="*this" wx:for-index="idx" class="dot {{idx === _paraPageIdx ? 'on' : ''}}"></view>
+    </view>
   </view>
   <view class="divider"></view>
   <view class="quest-zone">
