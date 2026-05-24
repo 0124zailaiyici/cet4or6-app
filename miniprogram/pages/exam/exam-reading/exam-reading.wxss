@@ -1,15 +1,22 @@
 .page { min-height: 100vh; background: #f3eeed; display: flex; flex-direction: column; }
-.topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; display: flex; align-items: center; }
 
-.pass-zone { flex: 1; display: flex; flex-direction: column; padding: 0 20rpx; min-height: 0; overflow: hidden; }
+.header { display: flex; align-items: center; gap: 16rpx; padding: 8rpx 20rpx 4rpx; flex-shrink: 0; }
+.hd-back { padding: 6rpx 20rpx; height: 52rpx; border-radius: 12rpx; background: rgba(84,110,122,0.08); font-size: 24rpx; color: #546e7a; display: flex; align-items: center; flex-shrink: 0; }
+.hd-title { flex: 1; font-size: 30rpx; font-weight: 700; color: #2d2d4e; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.hd-badge { font-size: 20rpx; color: #fff; padding: 4rpx 16rpx; border-radius: 10rpx; flex-shrink: 0; margin-right: 8rpx; }
+.b-A { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+.b-B { background: linear-gradient(135deg, #64b5f6, #1e88e5); }
+.b-C { background: linear-gradient(135deg, #81c784, #388e3c); }
+
+.pass-zone { flex: 1; display: flex; flex-direction: column; padding: 2rpx 20rpx 0; min-height: 0; overflow: hidden; }
 .pass-scroll { flex: 1; overflow: hidden; background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx; }
 .pass-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; word-break: break-word; }
 
-.bk-tag { display: inline; color: #ff6b8a; font-weight: 700; border-bottom: 2px solid #ff6b8a; padding: 0 3px; }
-.bk-tag.filled { color: #2d2d4e; border-color: #81c784; background: rgba(129,199,132,0.12); }
-.bk-tag.active { color: #fff; background: #ff6b8a; border-color: #ff6b8a; border-radius: 4px; padding: 0 6px; }
+.bk-tag { display: inline; color: #ff6b8a; font-weight: 700; border-bottom: 3rpx solid #ff6b8a; padding: 0 4rpx; }
+.bk-tag.filled { color: #2d2d4e; border-color: #81c784; background: rgba(129,199,132,0.1); }
+.bk-tag.active { color: #fff; background: #ff6b8a; border-color: #ff6b8a; border-radius: 6rpx; padding: 0 8rpx; }
 
-.pass-dots { display: flex; justify-content: center; gap: 4px; padding: 4px 0 0; }
+.pass-dots { display: flex; justify-content: center; gap: 8rpx; padding: 6rpx 0 2rpx; }
 .pass-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #d0c8d0; }
 .pass-dot.on { background: #546e7a; width: 28rpx; border-radius: 6rpx; }
 
@@ -17,18 +24,11 @@
 
 .quest-zone { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 0 20rpx 16rpx; background: #faf5f7; }
 .quest-scroll { flex: 1; min-height: 0; }
-.label { font-size: 22rpx; font-weight: 600; color: #546e7a; padding: 8rpx 0 4rpx; }
+.label { font-size: 22rpx; font-weight: 600; color: #546e7a; padding: 10rpx 0 6rpx; }
 
 .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10rpx; padding: 4rpx 0; }
 .chip { font-size: 26rpx; color: #4a4a6a; padding: 14rpx 20rpx; border-radius: 14rpx; background: rgba(84,110,122,0.04); border: 2rpx solid rgba(84,110,122,0.06); text-align: center; word-break: break-word; }
 .chip.used { opacity: 0.3; border-color: #ccc; background: #f0f0f0; }
-
-.blank-row { display: flex; align-items: center; gap: 10rpx; padding: 8rpx 0; border-bottom: 1rpx solid #e8e0e0; }
-.blank-row:last-child { border-bottom: none; }
-.blank-label { font-size: 24rpx; font-weight: 700; color: #2d2d4e; width: 90rpx; flex-shrink: 0; }
-.blank-val { font-size: 22rpx; color: #999; padding: 4rpx 16rpx; border-radius: 8rpx; background: #fff; min-width: 80rpx; text-align: center; }
-.blank-val.filled { color: #d81b60; background: #fce4ec; font-weight: 600; }
-.blank-clr { font-size: 22rpx; color: #ccc; padding: 4rpx; flex-shrink: 0; }
 
 .match-row { display: flex; align-items: center; gap: 8rpx; padding: 10rpx 16rpx; background: #fff; border-radius: 12rpx; margin-bottom: 6rpx; border-left: 3px solid transparent; }
 .match-row.active { background: rgba(30,136,229,0.06); border-left-color: #1e88e5; }
@@ -36,7 +36,7 @@
 .match-text { flex: 1; font-size: 24rpx; line-height: 1.5; color: #2d2d4e; word-break: break-word; min-width: 0; }
 .match-ans { width: 40rpx; height: 40rpx; border-radius: 10rpx; background: linear-gradient(135deg,#64b5f6,#1e88e5); display: flex; align-items: center; justify-content: center; font-size: 22rpx; font-weight: 700; color: #fff; flex-shrink: 0; }
 
-.letter-bar { display: flex; gap: 6rpx; justify-content: center; flex-wrap: wrap; padding: 8rpx 0; }
+.letter-bar { display: flex; gap: 6rpx; justify-content: center; flex-wrap: wrap; padding: 10rpx 0 4rpx; }
 .letter { width: 52rpx; height: 52rpx; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; font-size: 26rpx; font-weight: 700; color: #fff; background: linear-gradient(135deg,#64b5f6,#1e88e5); box-shadow: 0 3rpx 10rpx rgba(30,136,229,0.3); }
 .letter:active { transform: scale(0.9); }
 
@@ -47,7 +47,7 @@
 .cq-opt.sel { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.06); box-shadow: 0 2rpx 10rpx rgba(30,136,229,0.1); }
 
 .dark-theme.page { background: #12121f !important; }
-.dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
+.dark-theme .hd-title { color: #e0d0e8 !important; }
 .dark-theme .pass-scroll { background: #1a1a30 !important; }
 .dark-theme .pass-text { color: #c0b8d0 !important; }
 .dark-theme .bk-tag { color: #ff8fab !important; border-color: #ff8fab !important; }
@@ -58,9 +58,6 @@
 .dark-theme .label { color: #a090b0 !important; }
 .dark-theme .chip { background: #2a2a4a !important; color: #c0b0d0 !important; border-color: #3a3a5a !important; }
 .dark-theme .chip.used { opacity: 0.3; background: #1a1a30 !important; }
-.dark-theme .blank-label { color: #e0d0e8 !important; }
-.dark-theme .blank-val { background: #2a2a4a !important; color: #9080a0 !important; }
-.dark-theme .blank-val.filled { background: #3a1a2a !important; color: #ff8fab !important; }
 .dark-theme .match-row { background: #1e1e38 !important; }
 .dark-theme .match-text { color: #e0d0e8 !important; }
 .dark-theme .cq-card { background: #1e1e38 !important; }

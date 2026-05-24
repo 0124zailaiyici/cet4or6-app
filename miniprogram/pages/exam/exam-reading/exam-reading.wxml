@@ -1,12 +1,12 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="topbar">
-    <text catchtap="goBack">← 返回</text>
-    <text style="flex:1;text-align:center">{{passages[idx].sectionType === 'A' ? '选词填空' : passages[idx].sectionType === 'B' ? '长篇阅读匹配' : '仔细阅读'}}</text>
+  <view class="header">
+    <text catchtap="goBack" class="hd-back">← 返回</text>
+    <text class="hd-title">{{passages[idx].sectionType === 'A' ? '选词填空' : passages[idx].sectionType === 'B' ? '长篇阅读匹配' : '仔细阅读'}}</text>
+    <text class="hd-badge {{passages[idx].sectionType === 'A' ? 'b-A' : passages[idx].sectionType === 'B' ? 'b-B' : 'b-C'}}">{{passages[idx].sectionType === 'A' ? '选词' : passages[idx].sectionType === 'B' ? '匹配' : '精读'}}</text>
     <text>{{idx + 1}}/{{passages.length}}</text>
   </view>
   <block wx:for="{{passages}}" wx:for-index="pi" wx:for-item="p" wx:key="id">
     <block wx:if="{{pi === idx}}">
-
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
         <scroll-view class="pass-scroll" scroll-y>
           <text class="pass-text" wx:if="{{p.sectionType !== 'A' || !p._segments}}">{{p.passage}}</text>
@@ -19,9 +19,7 @@
         </scroll-view>
         <view class="pass-dots"><view class="pass-dot on"></view><view class="pass-dot"></view></view>
       </view>
-
       <view class="divider"></view>
-
       <view class="quest-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
         <scroll-view class="quest-scroll" scroll-y>
           <block wx:if="{{p.sectionType === 'A'}}">
@@ -45,13 +43,12 @@
             <view wx:for="{{p.questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="cq-card">
               <view class="cq-stem">{{q}}</view>
               <view class="cq-opts">
-                <view wx:for="{{p._cqChoices[qi] || ['A','B','C','D']}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{p._cAns[qi] === ch ? 'sel' : ''}}" data-qi="{{qi}}" data-val="{{ch}}" catchtap="onSelectC">{{ch}}</view>
+                <view wx:for="{{p._cqChoices[qi]}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{p._cAns[qi] === ch ? 'sel' : ''}}" data-qi="{{qi}}" data-val="{{ch}}" catchtap="onSelectC">{{ch}}</view>
               </view>
             </view>
           </block>
         </scroll-view>
       </view>
-
     </block>
   </block>
 </view>

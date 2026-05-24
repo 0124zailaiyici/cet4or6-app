@@ -8,6 +8,8 @@ interface IListeningQ {
   options: string[]
 }
 
+let audioCtx: WechatMiniprogram.InnerAudioContext | null = null
+
 Page({
   data: {
     passage: null as any,
@@ -37,26 +39,35 @@ Page({
     }
 
     const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
-
     this.setData({ passage, questions, sel: saved })
   },
 
   onUnload() {
-    if (this.data._audio) { this.data._audio.destroy() }
+    if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
   },
 
   toggleAudio() {
-    if (!this.data.passage?.audioUrl) return
-    const audio = this.data._audio || wx.createInnerAudioContext()
-    if (this.data.isPlaying) { audio.pause(); this.setData({ isPlaying: false, _audio: audio }) }
-    else {
-      const src = this.data.passage.audioUrl.startsWith('http') ? this.data.passage.audioUrl : API_BASE + encodeURI(this.data.passage.audioUrl)
-      audio.src = src
-      audio.onEnded(() => this.setData({ isPlaying: false }))
-      audio.onError(() => wx.showToast({ title: '音频加载失败', icon: 'none' }))
-      audio.play()
-      this.setData({ isPlaying: true, _audio: audio })
+    if (!this.data.passage?.audioUrl) { wx.showToast({ title: '暂无音频', icon: 'none' }); return }
+    if (audioCtx && this.data.isPlaying) {
+      audioCtx.pause()
+      this.setData({ isPlaying: false })
+      return
     }
+    if (audioCtx) {
+      audioCtx.play()
+      this.setData({ isPlaying: true })
+      return
+    }
+    const src = this.data.passage.audioUrl.startsWith('http') ? this.data.passage.audioUrl : API_BASE + encodeURI(this.data.passage.audioUrl)
+    audioCtx = wx.createInnerAudioContext()
+    audioCtx.src = src
+    audioCtx.onPlay(() => this.setData({ isPlaying: true }))
+    audioCtx.onEnded(() => { this.setData({ isPlaying: false }) })
+    audioCtx.onError(() => {
+      wx.showToast({ title: '音频加载失败', icon: 'none' })
+      this.setData({ isPlaying: false })
+    })
+    audioCtx.play()
   },
 
   select(e: any) {
@@ -66,7 +77,6 @@ Page({
     if (sel[qi] === oi) delete sel[qi]
     else sel[qi] = oi
     this.setData({ sel })
-
     if (this.data.passage?.id) {
       const app = getApp<IAppOption>()
       if (!app.globalData.studyData.listeningAnswers) app.globalData.studyData.listeningAnswers = {}
@@ -76,7 +86,7 @@ Page({
   },
 
   goBack() {
-    if (this.data._audio) this.data._audio.destroy()
+    if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
     wx.navigateBack()
   },
 })
