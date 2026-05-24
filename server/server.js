@@ -308,6 +308,59 @@ app.get('/dictionary/ai', async (req, res) => {
   }
 });
 
+app.get('/translate', async (req, res) => {
+  const { text } = req.query;
+  if (!text) return res.status(400).json({ error: '缺少 text' });
+  try {
+    let chinese = '';
+    if (API_KEY) {
+      chinese = await callDeepSeek([
+        { role: 'system', content: '将英文翻译成中文。只返回中文翻译，不要多余内容。' },
+        { role: 'user', content: text },
+      ], 0.1, 15000);
+    } else {
+      const trans = await axios.get(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-CN`, { timeout: 8000 });
+      chinese = trans.data?.responseData?.translatedText || '';
+    }
+    res.json({ chinese });
+  } catch {
+    res.status(500).json({ error: '翻译失败' });
+  }
+});
+
+app.post('/translate_batch', async (req, res) => {
+  const { texts } = req.body;
+  if (!texts || !Array.isArray(texts) || texts.length === 0) return res.status(400).json({ error: '缺少 texts 数组' });
+  if (!API_KEY) {
+    try {
+      const results = await Promise.all(texts.map(t =>
+        axios.get(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=en|zh-CN`, { timeout: 8000 })
+          .then(r => r.data?.responseData?.translatedText || '')
+      ));
+      return res.json({ results });
+    } catch { return res.status(500).json({ error: '翻译失败' }); }
+  }
+  try {
+    const numbered = texts.map((t, i) => `${i + 1}. ${t}`).join('\n');
+    const result = await callDeepSeek([
+      { role: 'system', content: '将以下英文句子逐句翻译成中文。只返回一个 JSON 数组，数组元素按顺序对应每句的中文翻译。不要多余内容。示例格式：["第一句翻译","第二句翻译"]' },
+      { role: 'user', content: numbered },
+    ], 0.1, 60000);
+    const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const results = JSON.parse(cleaned);
+    if (!Array.isArray(results) || results.length !== texts.length) throw new Error('结果数量不匹配');
+    res.json({ results });
+  } catch {
+    try {
+      const results = await Promise.all(texts.map(t =>
+        axios.get(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=en|zh-CN`, { timeout: 8000 })
+          .then(r => r.data?.responseData?.translatedText || '')
+      ));
+      res.json({ results });
+    } catch { res.status(500).json({ error: '翻译失败' }); }
+  }
+});
+
 app.post('/generate_sentence', async (req, res) => {
   const { word, topic, count = 1 } = req.body;
   if (!word && !topic) {

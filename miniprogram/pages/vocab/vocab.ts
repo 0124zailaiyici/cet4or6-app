@@ -1,6 +1,6 @@
 import readingsData from '../../data/readings'
 import { applyTheme, getDarkMode } from '../../utils/theme'
-import { lookupWord, aiTranslateWord } from '../../utils/api'
+import { lookupWord, aiTranslateWord, translateTextBatch, translateText } from '../../utils/api'
 
 interface IVocabWord {
   word: string
@@ -9,6 +9,7 @@ interface IVocabWord {
   chn: string
   source: string
   context: string
+  contextCn: string
   status: 'new' | 'learning' | 'review' | 'master'
   correctStreak: number
 }
@@ -29,6 +30,7 @@ interface IVocabData {
   gameFlipped: boolean
   lookingUp: boolean
   gameLoading: boolean
+  _tick: number
 }
 
 interface IVocabMethods {
@@ -37,18 +39,15 @@ interface IVocabMethods {
   showGameForIdx(idx: number, skipFrom?: number): Promise<void>
   fetchChinese(w: IVocabWord): Promise<boolean>
   persistChn(w: IVocabWord): Promise<void>
+  preTranslateContexts(): Promise<void>
   flipCard(): void
   nextGame(skipFrom?: number): void
   closeGame(): void
   addWord(): void
+  _doAddWord(w: string): Promise<void>
   loadWords(): void
   lookupWord(e: WechatMiniprogram.TouchEvent): void
 }
-
-const ALNUM_RE = /[^a-zA-Z]/g
-const STOP_WORDS = new Set([
-  'the','and','for','that','this','with','from','have','were','their','they','about','which','been','would','there','could','these','those','also','between','other','through','during','after','before','people','first','many','years','more','because','into','over','only','each','every','some','such','just','like','most','very','well','than','then','when','where','what','both','few','while','high','late','long','near','next','once','over','same','able','much','face','name','part'
-])
 
 const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
   abandon: { phonetic: '/əˈbændən/', definition: 'v. 抛弃，放弃' },
@@ -586,15 +585,18 @@ const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
   witness: { phonetic: '/ˈwɪtnəs/', definition: 'n. 目击者；v. 目击' },
 }
 
+const EXTRACTED_CACHE_KEY = 'vocab_extracted_words'
+const EXTRACTED_VER_KEY = 'vocab_extracted_ver'
+const EXTRACTED_VER = 7
+
+const TRANSLATION_VER_KEY = 'vocab_translation_ver'
+const TRANSLATION_VER = 1
+
 function stem(w: string): string {
   const stems = [w, w.replace(/s$/, ''), w.replace(/es$/, ''), w.replace(/ied$/, 'y'), w.replace(/ed$/, ''), w.replace(/ing$/, ''), w.replace(/ings$/, ''), w.replace(/ly$/, '')]
   for (const s of stems) { if (WORD_BANK[s]) return s }
   return w
 }
-
-const EXTRACTED_CACHE_KEY = 'vocab_extracted_words'
-const EXTRACTED_VER_KEY = 'vocab_extracted_ver'
-const EXTRACTED_VER = 4
 
 function extractWords(): IVocabWord[] {
   const ver = wx.getStorageSync(EXTRACTED_VER_KEY) as number | undefined
@@ -607,22 +609,24 @@ function extractWords(): IVocabWord[] {
     const passage = r.passage || ''
     const source = r.title || ''
     const sentences = passage.split(/(?<=[.?!])\s+/)
-    const clean = passage.replace(ALNUM_RE, ' ')
-    const tokens = [...new Set(clean.toLowerCase().split(/\s+/).filter((w: string) => w.length >= 4 && !STOP_WORDS.has(w)))]
+    const clean = passage.replace(/[^a-zA-Z]/g, ' ')
+    const tokens = [...new Set(clean.toLowerCase().split(/\s+/).filter(w => w.length >= 3))]
     for (const t of tokens) {
+      const known = WORD_BANK[t] || WORD_BANK[stem(t)]
+      if (!known) continue
       if (wordMap[t]) {
         if (wordMap[t].source.indexOf(source) === -1) wordMap[t].source += ' / ' + source
         continue
       }
-      const known = WORD_BANK[t] || WORD_BANK[stem(t)]
-      const ctx = sentences.find(s => s.toLowerCase().includes(t)) || ''
+      const ctx = (sentences.find(s => s.toLowerCase().includes(t)) || '').replace(/[\s\u00A0]+/g, ' ').trim()
       wordMap[t] = {
         word: t,
-        phonetic: known?.phonetic || '',
+        phonetic: known.phonetic || '',
         definition: '',
-        chn: known?.definition || '',
+        chn: known.definition || '',
         source,
         context: ctx.trim(),
+        contextCn: '',
         status: 'new',
         correctStreak: 0,
       }
@@ -653,6 +657,7 @@ Page<IVocabData, IVocabMethods>({
     gameFlipped: false,
     lookingUp: false,
     gameLoading: false,
+    _tick: 0,
   },
 
   onShow() {
@@ -663,9 +668,19 @@ Page<IVocabData, IVocabMethods>({
 
   loadWords() {
     const app = getApp<IAppOption>()
+    const ver = wx.getStorageSync(EXTRACTED_VER_KEY) as number | undefined
     let stored = app.globalData.studyData.vocabWords as IVocabWord[]
-    if (!stored || stored.length === 0) {
-      stored = extractWords()
+    if (!stored || stored.length === 0 || ver !== EXTRACTED_VER) {
+      const fresh = extractWords()
+      if (stored && stored.length > 0) {
+        for (const f of fresh) {
+          const old = stored.find(v => v.word === f.word)
+          if (old) { Object.assign(f, { status: old.status, correctStreak: old.correctStreak, chn: old.chn || f.chn, contextCn: old.contextCn || f.contextCn }) }
+        }
+        const manual = stored.filter(v => v.source === '手动添加' || !fresh.find(f => f.word === v.word))
+        for (const m of manual) { if (!fresh.find(f => f.word === m.word)) fresh.push(m) }
+      }
+      stored = fresh
       app.globalData.studyData.vocabWords = stored
       wx.setStorageSync('studyData', app.globalData.studyData)
     }
@@ -686,6 +701,7 @@ Page<IVocabData, IVocabMethods>({
       filteredWords: filtered,
       ...stats,
     })
+    this.preTranslateContexts()
   },
 
   switchTab(e: WechatMiniprogram.TouchEvent) {
@@ -731,10 +747,65 @@ Page<IVocabData, IVocabMethods>({
     if (sw) { sw.chn = w.chn; wx.setStorageSync('studyData', app.globalData.studyData) }
   },
 
+  async fetchContextCn(w: IVocabWord) {
+    if (!w.context || w.contextCn) return
+    try {
+      const r = await translateText(w.context)
+      if (r?.chinese && !/^[a-zA-Z\s,.'"!?;:-]+$/.test(r.chinese)) {
+        w.contextCn = r.chinese
+        const app = getApp<IAppOption>()
+        const stored = app.globalData.studyData.vocabWords as IVocabWord[]
+        const sw = stored.find(v => v.word === w.word)
+        if (sw) sw.contextCn = r.chinese
+        wx.setStorageSync('studyData', app.globalData.studyData)
+        if (this.data.gameWord?.word === w.word) {
+          this.setData({ 'gameWord.contextCn': r.chinese })
+        }
+      }
+    } catch {}
+  },
+
+  async preTranslateContexts() {
+    const words = this.data.words
+    if (!words || words.length === 0) return
+    const tver = wx.getStorageSync(TRANSLATION_VER_KEY) as number | undefined
+    if (tver !== TRANSLATION_VER) {
+      for (const w of words) w.contextCn = ''
+      wx.setStorageSync(TRANSLATION_VER_KEY, TRANSLATION_VER)
+    }
+    const needTrans = words.filter(w => w.context && !w.contextCn)
+    if (needTrans.length === 0) return
+    const ctxSet = new Set<string>()
+    for (const w of needTrans) ctxSet.add(w.context)
+    const uniqueCtxs = [...ctxSet]
+    try {
+      const result = await translateTextBatch(uniqueCtxs)
+      if (result?.results && result.results.length === uniqueCtxs.length) {
+        const ctxMap = new Map<string, string>()
+        for (let i = 0; i < uniqueCtxs.length; i++) ctxMap.set(uniqueCtxs[i], result.results[i])
+        for (const w of needTrans) {
+          const cn = ctxMap.get(w.context)
+          if (cn) w.contextCn = cn
+        }
+        const app = getApp<IAppOption>()
+        const stored = app.globalData.studyData.vocabWords as IVocabWord[]
+        for (const w of needTrans) {
+          const sw = stored.find(v => v.word === w.word)
+          if (sw && w.contextCn) sw.contextCn = w.contextCn
+        }
+        wx.setStorageSync('studyData', app.globalData.studyData)
+        if (this.data.gameWord) {
+          const gwCn = needTrans.find(w => w.word === this.data.gameWord!.word)?.contextCn
+          if (gwCn) this.setData({ 'gameWord.contextCn': gwCn })
+        }
+      }
+    } catch {}
+  },
+
   async showGameForIdx(idx: number, skipFrom?: number) {
     const word = this.data.filteredWords[idx]
     if (!word) { this.closeGame(); return }
-    this.setData({ gameLoading: true, gameWord: null })
+    this.setData({ gameLoading: true })
 
     if (!word.chn && hasCJK(word.definition)) {
       word.chn = word.definition; word.definition = ''
@@ -755,6 +826,7 @@ Page<IVocabData, IVocabMethods>({
       gameWord: word, gameWordIdx: idx, gameTotal: this.data.filteredWords.length,
       gameFlipped: false, gameLoading: false,
     })
+    if (!word.contextCn && word.context) this.fetchContextCn(word)
   },
 
   flipCard() {
@@ -825,28 +897,41 @@ Page<IVocabData, IVocabMethods>({
       placeholderText: '输入英文单词',
       success: (res) => {
         if (!res.confirm || !res.content) return
-        const w = res.content.trim().toLowerCase()
-        const app = getApp<IAppOption>()
-        const words = app.globalData.studyData.vocabWords as IVocabWord[]
-        if (words.find(v => v.word === w)) {
-          wx.showToast({ title: '单词已存在', icon: 'none' })
-          return
-        }
-        const known = WORD_BANK[w]
-        words.push({
-          word: w,
-          phonetic: known?.phonetic || '',
-          definition: '',
-          chn: known?.definition || '',
-          source: '手动添加',
-          context: '',
-          status: 'new',
-          correctStreak: 0,
-        })
-        wx.setStorageSync('studyData', app.globalData.studyData)
-        this.loadWords()
-        wx.showToast({ title: '已添加 ' + w, icon: 'success' })
+        this._doAddWord(res.content.trim().toLowerCase())
       },
     })
+  },
+
+  async _doAddWord(w: string) {
+    const app = getApp<IAppOption>()
+    const words = app.globalData.studyData.vocabWords as IVocabWord[]
+    if (words.find(v => v.word === w)) {
+      wx.showToast({ title: '单词已存在', icon: 'none' })
+      return
+    }
+    const known = WORD_BANK[w]
+    const newWord: IVocabWord = {
+      word: w,
+      phonetic: known?.phonetic || '',
+      definition: '',
+      chn: known?.definition || '',
+      source: '手动添加',
+      context: '',
+      contextCn: '',
+      status: 'new',
+      correctStreak: 0,
+    }
+    words.unshift(newWord)
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.loadWords()
+    if (!newWord.chn) {
+      wx.showToast({ title: '正在查词…', icon: 'loading' })
+      const ok = await this.fetchChinese(newWord)
+      if (ok) {
+        await this.persistChn(newWord)
+        this.loadWords()
+      }
+    }
+    wx.showToast({ title: '已添加 ' + w, icon: 'success' })
   },
 })

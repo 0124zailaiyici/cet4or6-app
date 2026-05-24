@@ -117,6 +117,30 @@ export function parseSentences(text: string) {
   return request<GeneratedSentence[]>('/parse_sentences', { text })
 }
 
+export function translateText(text: string): Promise<{ chinese: string }> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}/translate?text=${encodeURIComponent(text)}`,
+      method: 'GET',
+      success: (res) => { if (res.statusCode === 200) resolve(res.data as { chinese: string }); else reject(new Error(`翻译失败 ${res.statusCode}`)) },
+      fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
+    })
+  })
+}
+
+export function translateTextBatch(texts: string[]): Promise<{ results: string[] }> {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${API_BASE}/translate_batch`,
+      method: 'POST',
+      data: { texts },
+      header: { 'Content-Type': 'application/json' },
+      success: (res) => { if (res.statusCode === 200) resolve(res.data as { results: string[] }); else reject(new Error(`批量翻译失败 ${res.statusCode}`)) },
+      fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
+    })
+  })
+}
+
 export function checkHealth(): Promise<{ status: string; apiKey: boolean }> {
   return new Promise((resolve, reject) => {
     wx.request({
