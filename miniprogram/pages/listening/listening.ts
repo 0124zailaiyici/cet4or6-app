@@ -116,6 +116,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
   const dirs: string[] = []
   let currentQ: { section: string; stem: string; opts: Array<{ l: string; t: string }> } | null = null
   let hasContent = false
+  let skipTillQ1 = false
 
   function pushDir() {
     if (dirs.length > 0) {
@@ -151,18 +152,29 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
   }
 
   for (const line of lines) {
-    if (/\d{4}年\d+月/.test(line) && /第\d+页/.test(line)) continue
+    if (/^\d{4}年\d+月/.test(line.trim()) && /第\d+页/.test(line)) continue
+
+    if (/Part\s+(?:III|Three)\b/i.test(line) || /Reading\s+Comprehension\b/i.test(line)) {
+      skipTillQ1 = true
+      continue
+    }
 
     const qMatch = line.match(/^(?:Q)?(\d+)\.\s*(.*)/)
     if (qMatch) {
-      finalizeQ()
       const qNum = parseInt(qMatch[1])
+      if (skipTillQ1) {
+        if (qNum === 1) skipTillQ1 = false
+        else continue
+      }
+      finalizeQ()
       const rest = qMatch[2].trim()
       currentQ = { section: sectionLabel(qNum), stem: `Q${qNum}.`, opts: [] }
       hasContent = true
       addOpts(rest)
       continue
     }
+
+    if (skipTillQ1) continue
 
     if (/^[A-D]\)/.test(line) && currentQ) {
       addOpts(line)
@@ -443,7 +455,7 @@ Page<IListeningData, IListeningMethods>({
         pages,
         currentPage: 0,
         selectedAnswers: saved,
-        dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') : '',
+        dataWarning: warns.length > 0 ? '⚠️ ' + warns.join('；') + '（PDF 提取缺陷，可手动编辑 listening_generated.ts）' : '',
         currentSectionLabel: pages.length > 0 && pages[0].type === 'q' ? pages[0].section : '',
         markedPages: [],
         markedFlags: new Array(pages.length).fill(false),
@@ -608,7 +620,7 @@ Page<IListeningData, IListeningMethods>({
       })
       audio.setRate(0.8)
     } else {
-      audio.stop()
+      audio.pause()
       audio.setRate(1)
       this.setData({
         focusMode: false,
@@ -729,17 +741,15 @@ Page<IListeningData, IListeningMethods>({
       const passage = this.data.currentPassage
       if (passage && passage.audioUrl) {
         const sent = passage.sentences[origIndex]
-        if (sent) {
-          audio.seek(sent.start || 0)
+        if (sent && sent.start >= 0) {
+          audio.seek(sent.start)
           if (!this.data.isPlaying) {
             audio.resume(this.data.speed)
             this.setData({ isPlaying: true })
           }
-          return
-        }
-        if (!this.data.isPlaying) {
-          audio.resume(this.data.speed)
-          this.setData({ isPlaying: true })
+        } else {
+          const text = this.data.focusSentences[rawIndex]
+          if (text) this.playText(text)
         }
         return
       }

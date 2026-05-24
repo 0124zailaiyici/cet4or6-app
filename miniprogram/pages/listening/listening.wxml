@@ -91,7 +91,7 @@
 
       <scroll-view class="sentence-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
         <view class="sentence-list">
-          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
+          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="*this" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
               <text class="se-en">{{dictationMode ? getBlankText(item) : item}}</text>
@@ -131,7 +131,7 @@
       </view>
 
       <view class="dwarn" wx:if="{{dataWarning}}">
-        <text>{{dataWarning}} — 编辑 listening.ts 补全</text>
+        <text>{{dataWarning}}</text>
       </view>
 
       <view class="page-area">
