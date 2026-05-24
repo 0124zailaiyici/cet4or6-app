@@ -1,10 +1,15 @@
 import readingsData from '../../../data/readings'
 import { applyTheme, getDarkMode } from '../../../utils/theme'
 
+const OPT = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O']
+
 Page({
   data: {
     passage: null as any,
-    activeBlank: '',
+    _segments: [] as any[],
+    _sel: {} as Record<string, string>,
+    _used: [] as boolean[],
+    _active: '',
     darkMode: false,
   },
 
@@ -18,50 +23,20 @@ Page({
     const app = getApp<IAppOption>()
     const ans = app.globalData.studyData.readingAnswers[id] || {}
     const ba = ans.blankAnswers || {}
-    const blankKeys = Object.keys(p.correctAnswers)
-    const usedFlags = (p.options || []).map((w: string) => Object.values(ba).includes(w))
-    const text = p.passage || ''
-    const pat = new RegExp('\\b(' + blankKeys.join('|') + ')\\b', 'g')
-    const segs: any[] = []
-    let lastIdx = 0, m: RegExpExecArray | null
-    while ((m = pat.exec(text)) !== null) {
-      if (m.index > lastIdx) segs.push({ type: 'sep', text: text.slice(lastIdx, m.index) })
-      segs.push({ type: 'blank', num: m[1] })
-      lastIdx = m.index + m[0].length
-    }
-    if (lastIdx < text.length) segs.push({ type: 'sep', text: text.slice(lastIdx) })
-    this.setData({ passage: { ...p, _ans: ans, _ba: ba, _usedFlags: usedFlags, _segments: segs } })
-  },
-
-  refresh(id: number) {
-    const app = getApp<IAppOption>()
-    const ans = app.globalData.studyData.readingAnswers[id] || {}
-    const p: any = { ...this.data.passage, _ans: ans, _ba: ans.blankAnswers || {} }
-    p._usedFlags = (p.options || []).map((w: string) => Object.values(p._ba).includes(w))
-    const text = p.passage || ''
-    const blankKeys = Object.keys(p.correctAnswers)
-    const pat = new RegExp('\\b(' + blankKeys.join('|') + ')\\b', 'g')
-    const segs: any[] = []
-    let lastIdx = 0, m: RegExpExecArray | null
-    while ((m = pat.exec(text)) !== null) {
-      if (m.index > lastIdx) segs.push({ type: 'sep', text: text.slice(lastIdx, m.index) })
-      segs.push({ type: 'blank', num: m[1] })
-      lastIdx = m.index + m[0].length
-    }
-    if (lastIdx < text.length) segs.push({ type: 'sep', text: text.slice(lastIdx) })
-    p._segments = segs
-    this.setData({ passage: p })
+    const used = (p.options || []).map((w: string) => Object.values(ba).includes(w))
+    const segs = parseSegments(p.passage || '', Object.keys(p.correctAnswers), ba)
+    this.setData({ passage: p, _segments: segs, _sel: ba, _used: used, _active: '' })
   },
 
   onBlankTap(e: any) {
     const key = e.currentTarget.dataset.key
-    this.setData({ activeBlank: this.data.activeBlank === key ? '' : key })
+    this.setData({ _active: this.data._active === key ? '' : key })
   },
 
   onChipTap(e: any) {
-    if (!this.data.activeBlank) { wx.showToast({ title: '请先在文章中点击一个空', icon: 'none' }); return }
+    if (!this.data._active) { wx.showToast({ title: '请先在文章中点击一个空', icon: 'none' }); return }
     const word = e.currentTarget.dataset.word
-    const key = this.data.activeBlank
+    const key = this.data._active
     const p: any = this.data.passage
     if (!p) return
     const app = getApp<IAppOption>()
@@ -77,9 +52,23 @@ Page({
     ans = { ...ans, blankAnswers: ba, usedFlags: used }
     app.globalData.studyData.readingAnswers[p.id] = ans
     wx.setStorageSync('studyData', app.globalData.studyData)
-    this.setData({ activeBlank: '' })
-    this.refresh(p.id)
+    const newFlags = (opts || []).map((w: string) => Object.values(ba).includes(w))
+    const segs = parseSegments(p.passage || '', Object.keys(p.correctAnswers), ba)
+    this.setData({ _active: '', _sel: ba, _used: newFlags, _segments: segs })
   },
 
   goBack() { wx.navigateBack() },
 })
+
+function parseSegments(text: string, keys: string[], sel: Record<string, string>): any[] {
+  const pat = new RegExp('\\b(' + keys.join('|') + ')\\b', 'g')
+  const segs: any[] = []
+  let last = 0, m: RegExpExecArray | null
+  while ((m = pat.exec(text)) !== null) {
+    if (m.index > last) segs.push({ type: 'sep', text: text.slice(last, m.index) })
+    segs.push({ type: 'blank', num: m[1] })
+    last = m.index + m[0].length
+  }
+  if (last < text.length) segs.push({ type: 'sep', text: text.slice(last) })
+  return segs
+}

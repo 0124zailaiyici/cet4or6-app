@@ -1,27 +1,25 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="header">
-    <text catchtap="goBack" class="hd-back">← 返回</text>
-    <text class="hd-title">仔细阅读</text>
-    <text class="hd-badge b-C">精读</text>
+  <view class="topbar">
+    <view class="tb-back" catchtap="goBack">返回</view>
+    <text class="tb-title">仔细阅读</text>
+    <view class="tb-badge tag-C">精读</view>
   </view>
   <view class="pass-zone">
-    <scroll-view class="pass-scroll" scroll-y>
-      <text class="pass-text">{{passage.passage}}</text>
+    <scroll-view class="pz-scroll" scroll-y>
+      <text class="pz-text">{{passage.passage}}</text>
     </scroll-view>
   </view>
   <view class="divider"></view>
   <view class="quest-zone">
-    <view class="qz-label">第 {{currentQ + 1}} / {{passage._choices.length}} 题</view>
-    <scroll-view class="qz-scroll" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd" scroll-y>
-      <view class="cq-card">
-        <view class="cq-stem">{{passage.questions[currentQ]}}</view>
-        <view class="cq-opts">
-          <view wx:for="{{passage._choices[currentQ]}}" wx:for-index="oi" wx:for-item="ch" wx:key="*this" class="cq-opt {{passage._ca[currentQ] === ch ? 'sel' : ''}}" data-qi="{{currentQ}}" data-val="{{ch}}" catchtap="onSelect">{{ch}}</view>
-        </view>
+    <view class="qz-label">❓ 第{{currentQ + 1}}/{{passage.questions.length}}题</view>
+    <view class="qz-c-card" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+      <view class="qz-c-question">{{passage.questions[currentQ]}}</view>
+      <view class="qz-opts" wx:if="{{passage._choices[currentQ].length > 0}}">
+        <view wx:for="{{passage._choices[currentQ]}}" wx:key="*this" wx:for-index="oi" wx:for-item="ch" class="qzo {{passage._ca[currentQ] === ch ? 'on' : ''}}" data-qi="{{currentQ}}" data-val="{{ch}}" catchtap="onSelect">{{ch}}</view>
       </view>
-    </scroll-view>
-    <view wx:if="{{passage._choices.length > 1}}" class="dots">
-      <view wx:for="{{passage._choices}}" wx:for-index="i" wx:key="*this" class="dot {{i === currentQ ? 'on' : ''}}"></view>
+    </view>
+    <view class="qz-dots" wx:if="{{passage.questions.length > 1}}">
+      <view wx:for="{{passage.questions}}" wx:key="*this" wx:for-index="i" class="qzd {{i === currentQ ? 'on' : ''}}"></view>
     </view>
   </view>
 </view>

@@ -1,25 +1,25 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="header">
-    <text catchtap="goBack" class="hd-back">← 返回</text>
-    <text class="hd-title">选词填空</text>
-    <text class="hd-badge b-A">选词</text>
+  <view class="topbar">
+    <view class="tb-back" catchtap="goBack">返回</view>
+    <text class="tb-title">选词填空</text>
+    <view class="tb-badge tag-A">选词</view>
   </view>
   <view class="pass-zone">
-    <scroll-view class="pass-scroll" scroll-y>
-      <text class="pass-text">
-        <block wx:for="{{passage._segments}}" wx:key="*this" wx:for-item="seg">
+    <scroll-view class="pz-scroll" scroll-y>
+      <text class="pz-text">
+        <block wx:for="{{_segments}}" wx:key="*this" wx:for-item="seg">
           <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
-          <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{passage._ba[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}}" data-key="{{seg.num}}" catchtap="onBlankTap">{{passage._ba[seg.num] || seg.num}}</text>
+          <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{_sel[seg.num] ? 'filled' : ''}} {{_active === seg.num ? 'active' : ''}}" data-key="{{seg.num}}" catchtap="onBlankTap">{{_sel[seg.num] || seg.num}}</text>
         </block>
       </text>
     </scroll-view>
   </view>
   <view class="divider"></view>
   <view class="quest-zone">
-    <view class="qz-label">选词（15选10）<text wx:if="{{activeBlank}}" class="qz-hint"> · 请选词填入第{{activeBlank}}空</text></view>
-    <scroll-view class="qz-scroll" scroll-y>
-      <view class="chips">
-        <text wx:for="{{passage.options}}" wx:for-index="wi" wx:for-item="w" wx:key="*this" class="chip {{passage._usedFlags[wi] ? 'used' : ''}}" data-word="{{w}}" catchtap="onChipTap">{{['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'][wi]}}. {{w}}</text>
+    <view class="qz-label">📋 选词（15选10）<text wx:if="{{_active}}" style="color:#ff6b8a"> · 请选词填入第{{_active}}空</text></view>
+    <scroll-view class="qz-chip-scroll" scroll-y>
+      <view class="qz-chips">
+        <text class="qzc {{_used[wi] ? 'used' : ''}}" wx:for="{{passage.options}}" wx:key="*this" wx:for-index="wi" wx:for-item="w" data-key="{{_active}}" data-word="{{w}}" catchtap="onChipTap">{{['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'][wi]}}. {{w}}</text>
       </view>
     </scroll-view>
   </view>
