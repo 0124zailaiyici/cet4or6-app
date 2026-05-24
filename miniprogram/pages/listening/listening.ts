@@ -729,8 +729,8 @@ Page<IListeningData, IListeningMethods>({
       const passage = this.data.currentPassage
       if (passage && passage.audioUrl) {
         const sent = passage.sentences[origIndex]
-        if (sent && sent.start > 0) {
-          audio.seek(sent.start)
+        if (sent) {
+          audio.seek(sent.start || 0)
           if (!this.data.isPlaying) {
             audio.resume(this.data.speed)
             this.setData({ isPlaying: true })
@@ -789,8 +789,8 @@ Page<IListeningData, IListeningMethods>({
   seekFocusCurrent() {
     const origIndex = this.data.focusSentenceMap[this.data.currentIndex] ?? 0
     const sent = this.data.currentPassage?.sentences[origIndex]
-    if (sent && sent.start > 0) {
-      audio.seek(sent.start)
+    if (sent) {
+      audio.seek(sent.start || 0)
     }
     if (!this.data.isPlaying) {
       audio.resume(this.data.speed)
