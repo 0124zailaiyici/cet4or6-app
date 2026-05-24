@@ -20,15 +20,16 @@ Page({
     const ba = ans.blankAnswers || {}
     const blankKeys = Object.keys(p.correctAnswers)
     const usedFlags = (p.options || []).map((w: string) => Object.values(ba).includes(w))
+    const text = p.passage || ''
     const pat = new RegExp('\\b(' + blankKeys.join('|') + ')\\b', 'g')
     const segs: any[] = []
     let lastIdx = 0, m: RegExpExecArray | null
-    while ((m = pat.exec(p.passage)) !== null) {
-      if (m.index > lastIdx) segs.push({ type: 'sep', text: p.passage.slice(lastIdx, m.index) })
+    while ((m = pat.exec(text)) !== null) {
+      if (m.index > lastIdx) segs.push({ type: 'sep', text: text.slice(lastIdx, m.index) })
       segs.push({ type: 'blank', num: m[1] })
       lastIdx = m.index + m[0].length
     }
-    if (lastIdx < p.passage.length) segs.push({ type: 'sep', text: p.passage.slice(lastIdx) })
+    if (lastIdx < text.length) segs.push({ type: 'sep', text: text.slice(lastIdx) })
     this.setData({ passage: { ...p, _ans: ans, _ba: ba, _usedFlags: usedFlags, _segments: segs } })
   },
 
@@ -37,16 +38,17 @@ Page({
     const ans = app.globalData.studyData.readingAnswers[id] || {}
     const p: any = { ...this.data.passage, _ans: ans, _ba: ans.blankAnswers || {} }
     p._usedFlags = (p.options || []).map((w: string) => Object.values(p._ba).includes(w))
+    const text = p.passage || ''
     const blankKeys = Object.keys(p.correctAnswers)
     const pat = new RegExp('\\b(' + blankKeys.join('|') + ')\\b', 'g')
     const segs: any[] = []
     let lastIdx = 0, m: RegExpExecArray | null
-    while ((m = pat.exec(p.passage)) !== null) {
-      if (m.index > lastIdx) segs.push({ type: 'sep', text: p.passage.slice(lastIdx, m.index) })
+    while ((m = pat.exec(text)) !== null) {
+      if (m.index > lastIdx) segs.push({ type: 'sep', text: text.slice(lastIdx, m.index) })
       segs.push({ type: 'blank', num: m[1] })
       lastIdx = m.index + m[0].length
     }
-    if (lastIdx < p.passage.length) segs.push({ type: 'sep', text: p.passage.slice(lastIdx) })
+    if (lastIdx < text.length) segs.push({ type: 'sep', text: text.slice(lastIdx) })
     p._segments = segs
     this.setData({ passage: p })
   },

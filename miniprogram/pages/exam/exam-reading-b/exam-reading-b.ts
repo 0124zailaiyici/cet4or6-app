@@ -18,13 +18,15 @@ Page({
     if (!p) return
     const app = getApp<IAppOption>()
     const ans = app.globalData.studyData.readingAnswers[id] || {}
-    this.setData({ passage: { ...p, _ans: ans, _ma: ans.matchAnswers || {} } })
+    const paras = fmtBPassage(p.passage || '')
+    this.setData({ passage: { ...p, _ans: ans, _ma: ans.matchAnswers || {}, _paras: paras } })
   },
 
   refresh(id: number) {
     const app = getApp<IAppOption>()
     const ans = app.globalData.studyData.readingAnswers[id] || {}
-    this.setData({ passage: { ...this.data.passage, _ans: ans, _ma: ans.matchAnswers || {} } })
+    const p: any = { ...this.data.passage, _ans: ans, _ma: ans.matchAnswers || {} }
+    this.setData({ passage: p })
   },
 
   onSelectStmt(e: any) {
@@ -52,3 +54,11 @@ Page({
 
   goBack() { wx.navigateBack() },
 })
+
+function fmtBPassage(text: string): { letter: string; text: string }[] {
+  const parts = text.split(/(?=[A-N]）)/g)
+  return parts.filter(Boolean).map(p => {
+    const m = p.match(/^([A-N]）)/)
+    return m ? { letter: m[1].replace('）', ''), text: p.slice(m[0].length).trim() } : { letter: '', text: p.trim() }
+  })
+}

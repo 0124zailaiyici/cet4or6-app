@@ -6,7 +6,11 @@
   </view>
   <view class="pass-zone">
     <scroll-view class="pass-scroll" scroll-y>
-      <text class="pass-text">{{passage.passage}}</text>
+      <view wx:for="{{passage._paras}}" wx:key="letter" class="b-para">
+        <text class="b-para-label" wx:if="{{item.letter}}">{{item.letter}})</text>
+        <text class="pass-text p-inline">{{item.text}}</text>
+      </view>
+      <text class="pass-text" wx:if="{{passage._paras.length === 0}}">{{passage.passage}}</text>
     </scroll-view>
   </view>
   <view class="divider"></view>

@@ -8,6 +8,10 @@
 .pass-zone { flex: 1; display: flex; flex-direction: column; padding: 4rpx 20rpx 0; min-height: 0; overflow: hidden; }
 .pass-scroll { flex: 1; overflow-y: auto; background: #eef1f3; border-radius: 14rpx; padding: 20rpx 24rpx; }
 .pass-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; word-break: break-word; }
+.p-inline { display: inline; }
+
+.b-para { margin-bottom: 16rpx; }
+.b-para-label { font-weight: 700; color: #546e7a; margin-right: 4rpx; font-size: 28rpx; }
 
 .divider { height: 2rpx; background: #dad0ca; flex-shrink: 0; }
 
@@ -29,6 +33,7 @@
 .dark-theme .hd-title { color: #e0d0e8 !important; }
 .dark-theme .pass-scroll { background: #1a1a30 !important; }
 .dark-theme .pass-text { color: #c0b8d0 !important; }
+.dark-theme .b-para-label { color: #a090b0 !important; }
 .dark-theme .divider { background: #2a2a4a !important; }
 .dark-theme .quest-zone { background: #161625 !important; }
 .dark-theme .qz-label { color: #a090b0 !important; }
