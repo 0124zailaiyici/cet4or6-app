@@ -202,6 +202,36 @@ app.get('/dictionary', async (req, res) => {
     }
     entry.chinese = chinese;
 
+    if (API_KEY && entry.meanings) {
+      const items = []
+      for (const m of entry.meanings || []) {
+        if (m.definitions) {
+          for (const d of m.definitions) {
+            if (d.definition) items.push(d.definition)
+            if (d.example) items.push(d.example)
+          }
+        }
+      }
+      if (items.length > 0) {
+        try {
+          const result = await callDeepSeek([
+            { role: 'system', content: '将以下英文逐行翻译成中文，每行输出对应中文，保持顺序不变。只输出中文行，不要任何多余文字。' },
+            { role: 'user', content: items.join('\n') },
+          ], 0.1, 15000);
+          const lines = result.split('\n').map(l => l.trim()).filter(Boolean);
+          let idx = 0;
+          for (const m of entry.meanings || []) {
+            if (m.definitions) {
+              for (const d of m.definitions) {
+                if (d.definition && idx < lines.length) d.definitionCn = lines[idx++];
+                if (d.example && idx < lines.length) d.exampleCn = lines[idx++];
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+
     dictCache.set(word.toLowerCase(), { data, ts: Date.now() }); cacheDirty = true
     res.json(data);
   } catch (err) {
