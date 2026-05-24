@@ -1,5 +1,5 @@
-import readingsData from '../../../../data/readings'
-import { applyTheme, getDarkMode } from '../../../../utils/theme'
+import readingsData from '../../../data/readings'
+import { applyTheme, getDarkMode } from '../../../utils/theme'
 
 Page({
   data: {
