@@ -283,3 +283,32 @@
 .pt { padding: 4rpx 12rpx; border-radius: 8rpx; white-space: nowrap; }
 .pt.on { background: rgba(156,39,176,0.06); color: #9c27b0; font-weight: 600; }
 .pt-arr { color: #e0d0e8; font-size: 14rpx; }
+
+/* ══ Dark Theme ══ */
+.dark-theme.page { background: #12121f !important; }
+.dark-theme .header, .dark-theme .detail-header { background: linear-gradient(135deg, #3a2050, #2a1040) !important; }
+.dark-theme .header-t1 { color: rgba(255,255,255,0.45) !important; }
+.dark-theme .tabs { background: #2a2a4a !important; }
+.dark-theme .tab { color: #a090b0 !important; }
+.dark-theme .tab.active { background: #1e1e38 !important; color: #ce93d8 !important; }
+.dark-theme .practice-area { background: #1e1e38 !important; border-color: #3a3a5a !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .pa-label { color: #ce93d8 !important; }
+.dark-theme .pa-input, .dark-theme .pa-edit { background: #2a2a4a !important; color: #e0d0e8 !important; border-color: #3a3a5a !important; }
+.dark-theme .pa-btn, .dark-theme .tb-item, .dark-theme .wt-item, .dark-theme .timer-btn { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .pa-btn.sub { background: linear-gradient(135deg, #4a4a7a, #3a3a6a) !important; color: #fff !important; }
+.dark-theme .result-box { background: #1e1e38 !important; border-color: #3a3a5a !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .rb-score, .dark-theme .rb-dim-label { color: #e0d0e8 !important; }
+.dark-theme .prompt-card { background: #1e1e38 !important; }
+.dark-theme .pc-label { color: #ce93d8 !important; }
+.dark-theme .pc-text { color: #e0d0e8 !important; }
+.dark-theme .timer { background: #2a2a4a !important; border-color: #3a3a5a !important; }
+.dark-theme .timer-num { color: #e0d0e8 !important; }
+.dark-theme .timer-bar { background: #1e1e38 !important; }
+.dark-theme .w-header { background: linear-gradient(135deg, #3a2050, #2a1040) !important; }
+.dark-theme .wh-title { color: #e0d0e8 !important; }
+.dark-theme .wcard { background: #1e1e38 !important; }
+.dark-theme .wcard-pat { color: #e0d0e8 !important; }
+.dark-theme .wb-desc { color: #a090b0 !important; }
+.dark-theme .phase-tips { color: #a090b0 !important; }
+.dark-theme .pt.on { background: rgba(206,147,216,0.08) !important; color: #ce93d8 !important; }
+.dark-theme .pt-arr { color: #6a6a8a !important; }
