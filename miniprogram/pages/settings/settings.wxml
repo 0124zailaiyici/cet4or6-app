@@ -84,6 +84,23 @@
   </view>
 
   <view class="goal-card" style="margin-top: 24rpx;">
+    <view class="goal-item" catchtap="exportData">
+      <view class="goal-info">
+        <text class="goal-icon">📤</text>
+        <text class="goal-label">导出学习数据</text>
+      </view>
+      <text class="info-text">备份 ›</text>
+    </view>
+    <view class="goal-item" catchtap="importData">
+      <view class="goal-info">
+        <text class="goal-icon">📥</text>
+        <text class="goal-label">导入学习数据</text>
+      </view>
+      <text class="info-text">恢复 ›</text>
+    </view>
+  </view>
+
+  <view class="goal-card" style="margin-top: 24rpx;">
     <view class="goal-item">
       <view class="goal-info" style="flex:1">
         <text class="goal-icon">📚</text>

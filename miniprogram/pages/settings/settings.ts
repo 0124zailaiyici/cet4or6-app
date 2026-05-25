@@ -18,6 +18,8 @@ interface ISettingsMethods {
   goReminder(): void
   goFeedback(): void
   goGuide(): void
+  exportData(): void
+  importData(): void
 }
 
 Page<ISettingsData, ISettingsMethods>({
@@ -117,5 +119,37 @@ Page<ISettingsData, ISettingsMethods>({
 
   goGuide() {
     wx.navigateTo({ url: '/pages/guide/guide' })
+  },
+
+  exportData() {
+    const app = getApp<IAppOption>()
+    const json = JSON.stringify(app.globalData.studyData, null, 2)
+    wx.setClipboardData({
+      data: json,
+      success: () => wx.showToast({ title: '学习数据已复制到剪贴板', icon: 'success' }),
+      fail: () => wx.showToast({ title: '复制失败', icon: 'none' }),
+    })
+  },
+
+  importData() {
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      success: (res) => {
+        const file = res.tempFiles[0]
+        if (!file.name.endsWith('.json')) { wx.showToast({ title: '请选择 .json 文件', icon: 'none' }); return }
+        try {
+          const fs = wx.getFileSystemManager()
+          const content = fs.readFileSync(file.path, 'utf-8')
+          const data = JSON.parse(content as string)
+          const app = getApp<IAppOption>()
+          app.globalData.studyData = { ...app.globalData.studyData, ...data }
+          wx.setStorageSync('studyData', app.globalData.studyData)
+          wx.showToast({ title: '数据已恢复！', icon: 'success' })
+        } catch (_) {
+          wx.showToast({ title: '文件格式错误', icon: 'none' })
+        }
+      },
+    })
   },
 })
