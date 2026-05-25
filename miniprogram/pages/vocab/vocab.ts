@@ -1147,10 +1147,6 @@ Page<IVocabData, IVocabMethods>({
   },
 
   toggleSaveSent(e: WechatMiniprogram.TouchEvent) {
-    const en = e.currentTarget.dataset.en
-    const cn = e.currentTarget.dataset.cn
-    const src = e.currentTarget.dataset.src || ''
-    if (!en) return
     const idx = e.currentTarget.dataset.idx
     if (idx !== undefined) {
       // Remove from saved
@@ -1161,6 +1157,10 @@ Page<IVocabData, IVocabMethods>({
       wx.showToast({ title: '已移除', icon: 'none' })
       return
     }
+    const en = e.currentTarget.dataset.en
+    const cn = e.currentTarget.dataset.cn
+    const src = e.currentTarget.dataset.src || ''
+    if (!en) return
     // Save
     const saved = wx.getStorageSync('saved_sentences') || []
     if (saved.find((s: any) => s.en === en)) { wx.showToast({ title: '已收藏过', icon: 'none' }); return }
