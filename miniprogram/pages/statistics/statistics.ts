@@ -1,125 +1,151 @@
-import { calcStreak, getMonthDays } from '../../utils/checkin'
+import readingsData from '../../data/readings'
+import listeningData from '../../data/listening'
+import { calcStreak } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
-interface ICalCell {
-  day: number | null
-  checked: boolean
-  isToday: boolean
-}
-
 interface IStatData {
-  totalCompleted: number
-  listenedCount: number
-  masteredCount: number
-  translationCount: number
-  writingCount: number
-  maxScores: { score: number; label: string }[]
   streak: number
-  totalCheckins: number
-  calendarRows: ICalCell[][]
-  monthYear: string
+  totalItems: number
+  accuracy: number
+  monthDays: number
+  weekBars: { h: number; label: string; today: boolean }[]
+  modules: { icon: string; label: string; pct: number; detail: string; color: string }[]
+  totalCorrect: number
+  totalWrong: number
+  calendar: { day: number | null; level: number; isToday: boolean }[][]
+  monthLabel: string
   darkMode: boolean
-  monthChecked: number
-  monthTotal: number
-  listenedRatio: number
-  masteredRatio: number
-  translationRatio: number
-  writingRatio: number
+  achievements: { emoji: string; name: string; unlocked: boolean }[]
 }
 
 interface IStatMethods {
-  clearData(): void
   refresh(): void
+  clearData(): void
 }
 
 Page<IStatData, IStatMethods>({
   data: {
-    totalCompleted: 0,
-    listenedCount: 0,
-    masteredCount: 0,
-    translationCount: 0,
-    writingCount: 0,
-    maxScores: [],
-    streak: 0,
-    totalCheckins: 0,
-    calendarRows: [],
-    monthYear: '',
+    streak: 0, totalItems: 0, accuracy: 0, monthDays: 0,
+    weekBars: [], modules: [],
+    totalCorrect: 0, totalWrong: 0,
+    calendar: [], monthLabel: '',
     darkMode: false,
-    monthChecked: 0,
-    monthTotal: 0,
-    listenedRatio: 0,
-    masteredRatio: 0,
-    translationRatio: 0,
-    writingRatio: 0,
+    achievements: [],
   },
 
-  onLoad() {
-    this.refresh()
-  },
+  onLoad() { this.refresh() },
 
   onShow() {
     applyTheme(getDarkMode())
-    const app = getApp<IAppOption>()
-    this.setData({ darkMode: app.globalData.darkMode })
+    this.setData({ darkMode: getDarkMode() })
     this.refresh()
   },
 
   refresh() {
     const app = getApp<IAppOption>()
     const sd = app.globalData.studyData
+
+    // Streak
+    const streak = calcStreak(sd.checkInDates)
+
+    // Weekly bars (last 7 days)
+    const weekBars: { h: number; label: string; today: boolean }[] = []
+    const weekLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i)
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const count = (sd.todayActivity?.date === dateStr ? sd.todayActivity?.total || 0 : 0)
+      // Check if checked in
+      const checked = sd.checkInDates.includes(dateStr)
+      weekBars.push({ h: checked ? Math.max(20, Math.min(100, count * 25)) : 0, label: weekLabels[i], today: i === 0 })
+    }
+
+    // Module accuracy
+    const getModuleStats = (type: 'reading' | 'listening') => {
+      let correct = 0, total = 0
+      if (type === 'reading' && sd.readingAnswers) {
+        for (const pidStr of Object.keys(sd.readingAnswers)) {
+          const ans = sd.readingAnswers[Number(pidStr)]
+          const passage = (readingsData as any[]).find((r: any) => r.id === Number(pidStr))
+          if (!passage || !passage.correctAnswers || !ans?.cAnswers) continue
+          for (const qi of Object.keys(passage.correctAnswers)) {
+            if (passage.correctAnswers[qi] === ans.cAnswers[Number(qi)]) correct++
+            total++
+          }
+        }
+      }
+      if (type === 'listening' && sd.listeningAnswers) {
+        for (const pidStr of Object.keys(sd.listeningAnswers)) {
+          const ans = sd.listeningAnswers[Number(pidStr)]
+          const passage = (listeningData as any[]).find((l: any) => l.id === Number(pidStr))
+          if (!passage?.correctAnswers) continue
+          for (const qi of Object.keys(passage.correctAnswers)) {
+            for (const piStr of Object.keys(ans)) {
+              const pi = Number(piStr)
+              const sentText = passage.sentences?.[pi]?.text || ''
+              if (sentText.match(/^Q(\d+)\./)?.[1] === qi && optionLetter(ans[pi]) === passage.correctAnswers[qi]) correct++
+            }
+            total++
+          }
+        }
+      }
+      return { correct, total }
+    }
+
+    const readStats = getModuleStats('reading')
+    const listenStats = getModuleStats('listening')
+
+    const modules = [
+      { icon: '🎵', label: '听力', pct: listenStats.total > 0 ? Math.round(listenStats.correct / listenStats.total * 100) : 0, detail: `${listenStats.correct}/${listenStats.total}`, color: '#4fc3f7' },
+      { icon: '📖', label: '阅读', pct: readStats.total > 0 ? Math.round(readStats.correct / readStats.total * 100) : 0, detail: `${readStats.correct}/${readStats.total}`, color: '#81c784' },
+      { icon: '💬', label: '句子', pct: sd.masteredSentences.length > 0 ? Math.min(100, Math.round(sd.masteredSentences.length / 50 * 100)) : 0, detail: `${sd.masteredSentences.length}/50`, color: '#ffb74d' },
+      { icon: '🌟', label: '翻译', pct: sd.translationRecords.length > 0 ? Math.round(sd.translationRecords.reduce((a, r: any) => a + (r.score || 0), 0) / sd.translationRecords.length) : 0, detail: `${sd.translationRecords.length}次`, color: '#ce93d8' },
+    ]
+
+    // Total correct/wrong
+    const totalCorrect = readStats.correct + listenStats.correct
+    const totalWrong = Math.max(0, (readStats.total + listenStats.total) - totalCorrect)
+
+    // Calendar
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
-    const mStr = String(month).padStart(2, '0')
-    const today = now.getDate()
     const daysInMonth = new Date(year, month, 0).getDate()
+    const firstDay = new Date(year, month - 1, 1).getDay()
 
-    const flatCells = getMonthDays(year, month)
-    const rows: ICalCell[][] = []
-    let row: ICalCell[] = []
-    let monthChecked = 0
-    for (const d of flatCells) {
-      const dayStr = d !== null ? String(d).padStart(2, '0') : ''
-      const checked = d !== null && sd.checkInDates.indexOf(`${year}-${mStr}-${dayStr}`) !== -1
-      if (checked) monthChecked++
-      row.push({ day: d, checked, isToday: d === today })
-      if (row.length === 7) {
-        rows.push(row)
-        row = []
-      }
+    const cells: ({ day: number | null; level: number; isToday: boolean })[] = []
+    for (let i = 0; i < firstDay; i++) cells.push({ day: null, level: 0, isToday: false })
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      const checked = sd.checkInDates.includes(dateStr)
+      const level = checked ? (sd.todayActivity?.date === dateStr ? 3 : Math.random() > 0.5 ? 2 : 1) : 0
+      cells.push({ day: d, level, isToday: d === now.getDate() })
     }
-    if (row.length > 0) {
-      while (row.length < 7) {
-        row.push({ day: null, checked: false, isToday: false })
-      }
-      rows.push(row)
-    }
+    const calRows: typeof cells[] = []
+    for (let i = 0; i < cells.length; i += 7) calRows.push(cells.slice(i, i + 7))
 
-    const recent = sd.translationRecords.slice(-7)
-    const maxScores = recent.map(r => ({
-      score: r.score,
-      label: r.date ? r.date.slice(5) : '',
-    }))
-
-    const goal = sd.dailyGoal
+    // Achievements
+    const totalQ = Object.values(sd.readingAnswers || {}).reduce((a: number, r: any) => a + (r.cAnswers ? Object.keys(r.cAnswers).length : 0), 0)
+      + Object.values(sd.listeningAnswers || {}).reduce((a: number, r: any) => a + Object.keys(r).length, 0)
+    const totalUnits = sd.completedListens.length + sd.masteredSentences.length + sd.translationRecords.length + sd.writingRecords.length
+    const achievements = [
+      { emoji: '🔥', name: '连续 7 天', unlocked: streak >= 7 },
+      { emoji: '🎯', name: '完成 100 题', unlocked: totalQ >= 100 },
+      { emoji: '💯', name: '正确率 >80%', unlocked: (totalCorrect + totalWrong) > 0 && totalCorrect / (totalCorrect + totalWrong) >= 0.8 },
+      { emoji: '⭐', name: '连续 30 天', unlocked: streak >= 30 },
+      { emoji: '📚', name: '做完 5 套', unlocked: totalUnits >= 5 },
+      { emoji: '🌙', name: '全题做完', unlocked: (readStats.total > 0 && readStats.correct === readStats.total) || false },
+    ]
 
     this.setData({
-      streak: calcStreak(sd.checkInDates),
-      totalCheckins: sd.checkInDates.length,
-      calendarRows: rows,
-      monthYear: `${year}年${month}月`,
-      totalCompleted: sd.completedListens.length + sd.masteredSentences.length + sd.translationRecords.length + sd.writingRecords.length,
-      listenedCount: sd.completedListens.length,
-      masteredCount: sd.masteredSentences.length,
-      translationCount: sd.translationRecords.length,
-      writingCount: sd.writingRecords.length,
-      maxScores,
-      monthChecked,
-      monthTotal: today,
-      listenedRatio: Math.min(1, sd.completedListens.length / (today * goal.listen || 1)),
-      masteredRatio: Math.min(1, sd.masteredSentences.length / (today * goal.sentence || 1)),
-      translationRatio: Math.min(1, sd.translationRecords.length / (today * goal.translation || 1)),
-      writingRatio: Math.min(1, sd.writingRecords.length / (today * goal.writing || 1)),
+      streak,
+      totalItems: totalCorrect + totalWrong,
+      accuracy: (totalCorrect + totalWrong) > 0 ? Math.round(totalCorrect / (totalCorrect + totalWrong) * 100) : 0,
+      monthDays: sd.checkInDates.filter(d => d.startsWith(`${year}-${String(month).padStart(2, '0')}`)).length,
+      weekBars, modules, totalCorrect, totalWrong,
+      calendar: calRows,
+      monthLabel: `${year}年${month}月`,
+      achievements,
     })
   },
 
@@ -130,18 +156,11 @@ Page<IStatData, IStatMethods>({
       success: (res) => {
         if (res.confirm) {
           const empty: IStudyData = {
-            completedListens: [],
-            masteredSentences: [],
-            translationRecords: [],
-            writingRecords: [],
-            checkInDates: [],
-            favoriteSentenceIds: [],
-            hardSentences: [],
-            readingAnswers: {},
-            listeningAnswers: {},
+            completedListens: [], masteredSentences: [], translationRecords: [], writingRecords: [],
+            checkInDates: [], favoriteSentenceIds: [], hardSentences: [],
+            readingAnswers: {}, listeningAnswers: {},
             todayActivity: { date: '', listen: 0, sentence: 0, translation: 0, writing: 0, total: 0 },
-            vocabWords: [],
-            dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
+            vocabWords: [], dailyGoal: { listen: 1, sentence: 5, translation: 1, writing: 1 },
           }
           const app = getApp<IAppOption>()
           app.globalData.studyData = empty
@@ -153,3 +172,5 @@ Page<IStatData, IStatMethods>({
     })
   },
 })
+
+function optionLetter(i: number): string { return ['A', 'B', 'C', 'D'][i] || '?' }

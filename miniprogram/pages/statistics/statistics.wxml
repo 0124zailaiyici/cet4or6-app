@@ -1,87 +1,69 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="st-header">
-    <view class="sth-bg"></view>
-    <view class="sth-content">
-      <text class="sth-title">学习统计</text>
-    </view>
-  </view>
+  <view class="topbar"><h1>学习统计</h1><p>你的进步，一清二楚</p></view>
 
-  <view class="st-cards">
-    <view class="st-card">
-      <text class="st-num">{{streak}}</text>
-      <text class="st-lbl">连续天数</text>
+  <view class="body" scroll-y scroll-with-animation>
+    <!-- Summary cards -->
+    <view class="sum">
+      <view class="sc"><text class="n">{{streak}}</text><text class="l">🔥 连续学习</text></view>
+      <view class="sc"><text class="n">{{totalItems}}</text><text class="l">📝 累计题数</text></view>
+      <view class="sc"><text class="n">{{accuracy}}%</text><text class="l">✅ 正确率</text></view>
+      <view class="sc"><text class="n">{{monthDays}}</text><text class="l">📅 本月学习</text></view>
     </view>
-    <view class="st-card">
-      <text class="st-num">{{totalCheckins}}</text>
-      <text class="st-lbl">累计打卡</text>
-    </view>
-    <view class="st-card">
-      <text class="st-num">{{totalCompleted}}</text>
-      <text class="st-lbl">完成题数</text>
-    </view>
-  </view>
 
-  <view class="calendar-card">
-    <text class="cal-title">📅 {{monthYear}} 打卡记录</text>
-    <view class="cal-progress">
-      <view class="cal-bar">
-        <view class="cal-fill" style="width: {{monthTotal > 0 ? (monthChecked / monthTotal * 100) : 0}}%;"></view>
-      </view>
-      <text class="cal-stat">{{monthChecked}} / {{monthTotal}} 天</text>
-    </view>
-    <view class="cal-grid">
-      <view class="cal-h-row">
-        <text class="cal-h">日</text><text class="cal-h">一</text><text class="cal-h">二</text><text class="cal-h">三</text>
-        <text class="cal-h">四</text><text class="cal-h">五</text><text class="cal-h">六</text>
-      </view>
-      <view class="cal-row" wx:for="{{calendarRows}}" wx:for-item="row" wx:key="index">
-        <view class="cal-d {{cell.day === null ? 'empty' : ''}} {{cell.isToday ? 'today' : ''}} {{cell.checked ? 'checked' : ''}}" wx:for="{{row}}" wx:for-item="cell" wx:key="day">
-          <text wx:if="{{cell.day !== null}}">{{cell.day}}</text>
+    <!-- Weekly trend -->
+    <view class="card">
+      <view class="st">📈 本周趋势</view>
+      <view class="chart">
+        <view class="bar" wx:for="{{weekBars}}" wx:key="*this">
+          <view class="fill" style="height:{{item.h}}%;background:{{item.today ? 'linear-gradient(180deg,#4fc3f7,#2196f3)' : 'linear-gradient(180deg,#ff8fab,#ff6b8a)'}}"></view>
+          <text class="dl {{item.today ? 'on' : ''}}">{{item.label}}</text>
         </view>
       </view>
     </view>
-  </view>
 
-  <view class="section-card">
-    <text class="sc-title">各模块完成进度</text>
-    <view class="dim-row">
-      <text class="dim-lbl">🎧 听力</text>
-      <view class="dim-bar"><view class="dim-fill" style="width: {{listenedRatio * 100}}%;"></view></view>
-      <text class="dim-num">{{listenedCount}}题</text>
-    </view>
-    <view class="dim-row">
-      <text class="dim-lbl">📝 句子</text>
-      <view class="dim-bar"><view class="dim-fill" style="width: {{masteredRatio * 100}}%;"></view></view>
-      <text class="dim-num">{{masteredCount}}题</text>
-    </view>
-    <view class="dim-row">
-      <text class="dim-lbl">🌐 翻译</text>
-      <view class="dim-bar"><view class="dim-fill" style="width: {{translationRatio * 100}}%;"></view></view>
-      <text class="dim-num">{{translationCount}}题</text>
-    </view>
-    <view class="dim-row">
-      <text class="dim-lbl">✍️ 写作</text>
-      <view class="dim-bar"><view class="dim-fill" style="width: {{writingRatio * 100}}%;"></view></view>
-      <text class="dim-num">{{writingCount}}题</text>
-    </view>
-  </view>
-
-  <view class="section-card" wx:if="{{maxScores.length > 0}}">
-    <text class="sc-title">翻译成绩趋势</text>
-    <view class="chart">
-      <view class="chart-bar" wx:for="{{maxScores}}" wx:key="index">
-        <view class="cb-fill" style="height: {{item.score * 2.5}}rpx;"></view>
-        <text class="cb-val">{{item.score}}分</text>
-        <text class="cb-label">{{item.label}}</text>
+    <!-- Module accuracy -->
+    <view class="card">
+      <view class="st">📊 各模块正确率</view>
+      <view class="row" wx:for="{{modules}}" wx:key="label">
+        <text class="mi">{{item.icon}}</text>
+        <view class="mb">
+          <view class="mn"><text>{{item.label}}</text><text class="mr">{{item.detail}}</text></view>
+          <view class="mm"><view class="mf" style="width:{{item.pct}}%;background:{{item.color}}"></view></view>
+        </view>
       </view>
     </view>
-  </view>
 
-  <view class="section-card" wx:else>
-    <text class="sc-title">学习建议</text>
-    <text class="tip-text">开始学习后，这里将展示成绩趋势和分析报告。</text>
-    <text class="tip-text">建议每天完成：1 篇听力 + 5 个句子 + 1 篇翻译 + 1 篇写作</text>
-  </view>
+    <!-- Stats table -->
+    <view class="card">
+      <view class="st">📋 详细数据</view>
+      <view class="srow"><text>累计学习天数</text><text class="sv">{{streak > 0 ? streak > 30 ? streak : streak : 0}} 天</text></view>
+      <view class="srow"><text>总做题数</text><text class="sv">{{totalCorrect + totalWrong}} 题</text></view>
+      <view class="srow"><text>答对题数</text><text class="sv">{{totalCorrect}} 题</text></view>
+      <view class="srow"><text>答错题数</text><text class="sv">{{totalWrong}} 题</text></view>
+      <view class="srow"><text>最长连续</text><text class="sv">{{streak}} 天</text></view>
+    </view>
 
-  <view class="clear-btn" catchtap="clearData">清除所有记录</view>
+    <!-- Calendar -->
+    <view class="card">
+      <view class="st"><text>🔥 学习日历</text><text class="more">{{monthLabel}}</text></view>
+      <view class="cal-h"><text wx:for="{{['日','一','二','三','四','五','六']}}" wx:key="*this">{{item}}</text></view>
+      <view class="cal-row" wx:for="{{calendar}}" wx:key="*this" wx:for-item="row">
+        <view class="cd {{item.day === null ? 'emp' : ''}} {{item.level > 2 ? 'strong' : item.level > 1 ? 'mid' : item.level > 0 ? 'light' : ''}} {{item.isToday ? 'today' : ''}}" wx:for="{{row}}" wx:for-item="item" wx:key="day"><text wx:if="{{item.day !== null}}">{{item.day}}</text></view>
+      </view>
+    </view>
+
+    <!-- Achievements -->
+    <view class="card">
+      <view class="st">🏆 成就</view>
+      <view class="ach-grid">
+        <view class="ach {{item.unlocked ? '' : 'locked'}}" wx:for="{{achievements}}" wx:key="name">
+          <text class="ae">{{item.emoji}}</text>
+          <text class="an">{{item.name}}</text>
+          <view class="al" wx:if="{{!item.unlocked}}">🔒</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="clear-btn" catchtap="clearData">清除所有记录</view>
+  </view>
 </view>
