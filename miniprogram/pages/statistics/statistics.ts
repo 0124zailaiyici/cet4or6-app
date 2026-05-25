@@ -118,11 +118,16 @@ Page<IStatData, IStatMethods>({
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
       const checked = sd.checkInDates.includes(dateStr)
-      const level = checked ? (sd.todayActivity?.date === dateStr ? 3 : Math.random() > 0.5 ? 2 : 1) : 0
-      cells.push({ day: d, level, isToday: d === now.getDate() })
+      const isToday = d === now.getDate()
+      const level = checked ? (isToday ? 3 : (sd.todayActivity?.date === dateStr ? 2 : 1)) : 0
+      cells.push({ day: d, level, isToday })
     }
     const calRows: typeof cells[] = []
-    for (let i = 0; i < cells.length; i += 7) calRows.push(cells.slice(i, i + 7))
+    for (let i = 0; i < cells.length; i += 7) {
+      const row = cells.slice(i, i + 7)
+      while (row.length < 7) row.push({ day: null, level: 0, isToday: false })
+      calRows.push(row)
+    }
 
     // Achievements
     const totalQ = Object.values(sd.readingAnswers || {}).reduce((a: number, r: any) => a + (r.cAnswers ? Object.keys(r.cAnswers).length : 0), 0)
