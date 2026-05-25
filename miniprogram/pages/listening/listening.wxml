@@ -103,7 +103,6 @@
         <view class="focus-ctls">
           <view class="fc-pill {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
           <view class="fc-pill {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '循环'}}</view>
-          <view class="fc-pill dict {{dictationMode ? 'on' : ''}}" catchtap="toggleDictation">{{dictationMode ? '✏️' : '听写'}}</view>
           <text class="fc-time">{{audioTimeStr}} / {{audioDurationStr}}</text>
         </view>
 
@@ -112,7 +111,7 @@
           <view class="sent-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="*this" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
             <view class="sent-num">{{index + 1}}</view>
             <view class="sent-body">
-              <text class="sent-text">{{dictationMode ? getBlankText(item) : item}}</text>
+              <text class="sent-text">{{item}}</text>
             </view>
             <view class="sent-acts">
               <view class="sent-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
@@ -203,7 +202,6 @@
       <view class="controls-bar">
         <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
         <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
-        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
         <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '单句'}}</view>
       </view>
 
@@ -212,7 +210,7 @@
           <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
-              <text class="se-en" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
+              <text class="se-en" wx:if="{{showTranscript}}">{{item.text}}</text>
               <text class="se-en hidden" wx:else>🔇 点击播放收听</text>
             </view>
             <view class="se-actions">

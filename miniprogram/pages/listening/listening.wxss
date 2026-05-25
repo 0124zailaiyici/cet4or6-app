@@ -247,8 +247,6 @@ page { height: 100%; }
   background: #F0E8F0; color: var(--brown-light);
 }
 .fc-pill.on { background: var(--peach); color: var(--rose); }
-.fc-pill.dict { background: var(--mint-light); color: #5CAF80; }
-.fc-pill.dict.on { background: var(--mint); color: #3A8A60; }
 .fc-time {
   margin-left: auto; font-size: 20rpx; font-weight: 700; color: var(--brown-light); white-space: nowrap;
 }
@@ -482,8 +480,6 @@ page { height: 100%; }
 
 .dark-theme .focus-ctls .fc-pill { background: #2A2A4A !important; color: #A090B0 !important; }
 .dark-theme .focus-ctls .fc-pill.on { background: #4A3A2A !important; color: #FFD4B5 !important; }
-.dark-theme .focus-ctls .fc-pill.dict { background: #1A3A2A !important; color: #7ECBA1 !important; }
-.dark-theme .focus-ctls .fc-pill.dict.on { background: #2A4A3A !important; color: #B5EACF !important; }
 .dark-theme .fc-time { color: var(--brown-light) !important; }
 
 .dark-theme .sent-item { background: #1E1E38 !important; }
