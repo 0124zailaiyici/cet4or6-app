@@ -1,5 +1,6 @@
 import sentencesData from '../../data/sentences'
 import { applyTheme, getDarkMode } from '../../utils/theme'
+import { doCheckIn } from '../../utils/checkin'
 import { generateSentence, parseSentences } from '../../utils/api'
 
 interface ISentence {
@@ -198,6 +199,7 @@ Page<ISentencesData, ISentencesMethods>({
     const app = getApp<IAppOption>()
     app.globalData.studyData.masteredSentences = masteredArr
     wx.setStorageSync('studyData', app.globalData.studyData)
+    doCheckIn('sentence')
   },
 
   toggleFavorite(e: WechatMiniprogram.TouchEvent) {
