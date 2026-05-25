@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>单词本 · 故事+挑战+卡包</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3eeed;color:#2d2d4e;min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column;padding-bottom:80px}
+
+.tb{padding:36px 20px 14px;background:linear-gradient(135deg,#ffb3c6,#ff8fab);color:#fff}
+.tb .tt{font-size:20px;font-weight:800}
+.tb .sub{font-size:13px;opacity:.85;margin-top:2px}
+
+/* main nav */
+.nav{display:flex;gap:4px;margin:10px 14px 6px}
+.nav-item{flex:1;text-align:center;padding:10px 0;font-size:13px;color:#8a7a9a;background:#fff;border-radius:10px;cursor:pointer;transition:.2s;border:1px solid transparent}
+.nav-item.on{color:#ff6b8a;font-weight:600;background:rgba(255,107,138,.06);border-color:rgba(255,107,138,.2)}
+
+/* stats */
+.stats{display:flex;gap:6px;margin:0 14px 10px}
+.st{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center}
+.st .n{display:block;font-size:24px;font-weight:800;color:#ff6b8a}
+.st .n.g{color:#388e3c}
+.st .n.b{color:#1e88e5}
+.st .l{display:block;font-size:11px;color:#8a7a9a;margin-top:2px}
+
+/* daily challenge */
+.challenge-card{background:#fff;border-radius:16px;margin:0 14px 12px;padding:20px;box-shadow:0 2px 12px rgba(255,158,181,.04);display:flex;align-items:center;gap:14px}
+.challenge-card .icon{font-size:40px;flex-shrink:0}
+.challenge-card .info{flex:1}
+.challenge-card .info .t{font-size:15px;font-weight:700;color:#2d2d4e}
+.challenge-card .info .s{font-size:12px;color:#8a7a9a;margin-top:2px}
+.challenge-card .btn{padding:8px 24px;border-radius:12px;background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;border:none}
+.challenge-card .btn.done{background:#e0e0e0;color:#999}
+.challenge-card .badge{font-size:36px;flex-shrink:0}
+
+/* content area */
+.content{flex:1;padding:0 14px 20px;overflow-y:auto}
+
+/* pack grid */
+.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pack{background:#fff;border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.15s;box-shadow:0 1px 8px rgba(255,158,181,.04)}
+.pack:active{transform:scale(.96)}
+.pack .emoji{font-size:32px;margin-bottom:4px}
+.pack .name{font-size:14px;font-weight:600;color:#2d2d4e}
+.pack .count{font-size:11px;color:#8a7a9a;margin-top:2px}
+.pack .bar{height:4px;border-radius:2px;background:#f0e8e7;margin-top:8px;overflow:hidden}
+.pack .bar .fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#ff8fab,#ff6b8a);transition:width .3s}
+.pack.complete .bar .fill{background:linear-gradient(90deg,#66bb6a,#43a047)}
+.pack .check{font-size:18px;color:#66bb6a;margin-top:4px;display:block}
+
+/* pack detail */
+.pack-detail{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(255,158,181,.04)}
+.pack-detail .ph{text-align:center;margin-bottom:14px}
+.pack-detail .ph .e{font-size:36px;margin-bottom:4px}
+.pack-detail .ph .n{font-size:16px;font-weight:700;color:#2d2d4e}
+.pack-detail .ph .p{font-size:12px;color:#8a7a9a}
+.pack-word{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0e8e7}
+.pack-word:last-child{border:none}
+.pack-word .w{font-size:14px;font-weight:600;color:#2d2d4e;flex:1}
+.pack-word .s{font-size:11px;color:#8a7a9a}
+.pack-word .status{font-size:16px}
+.pack-detail .back{padding:8px 20px;border-radius:10px;border:none;background:#f3eeed;color:#8a7a9a;font-size:13px;cursor:pointer;margin-bottom:12px}
+
+/* story card */
+.story-card{background:#fff;border-radius:16px;padding:24px;text-align:center;box-shadow:0 2px 12px rgba(255,158,181,.04)}
+.story-card .lock{font-size:48px;margin-bottom:8px}
+.story-card .sub{font-size:12px;color:#8a7a9a;margin-bottom:12px}
+.story-card .text{font-size:16px;line-height:1.8;color:#2d2d4e;padding:16px;background:#f8f5f4;border-radius:12px;font-style:italic}
+.story-card .progress{font-size:12px;color:#8a7a9a;margin-top:12px}
+.story-list{margin-top:12px}
+.story-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:6px;font-size:13px}
+.story-item .icon{font-size:18px}
+.story-item .preview{flex:1;color:#2d2d4e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story-item.locked .preview{color:#bbb}
+.story-item .idx{color:#8a7a9a;font-size:11px}
+
+/* overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:100;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s,background .3s}
+.overlay.show{background:rgba(0,0,0,.5);pointer-events:auto;opacity:1}
+
+/* flip for game (reused) */
+.flip-ctn{width:320px;min-height:420px;perspective:800px}
+.flip-inner{width:100%;min-height:420px;transition:transform .5s cubic-bezier(.4,.0,.2,1);transform-style:preserve-3d}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.fr,.fb{position:absolute;inset:0;backface-visibility:hidden;background:#fff;border-radius:32px;padding:28px 30px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.12)}
+.fb{transform:rotateY(180deg)}
+.gtop{display:flex;justify-content:space-between;width:100%;margin-bottom:10px}
+.gprog{font-size:11px;color:#8a7a9a}
+.gclose{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8a7a9a;background:rgba(0,0,0,.04);cursor:pointer}
+.gw{font-size:32px;font-weight:800;color:#2d2d4e}
+.gp{font-size:12px;color:#8a7a9a;margin:4px 0 8px}
+.gctx{font-size:12px;color:#4a4a6a;padding:10px;background:#f8f5f4;border-radius:10px;width:100%;margin-bottom:6px}
+.gb{padding:8px 24px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;border:none;margin:4px}
+.gb.known{background:#66bb6a;color:#fff}
+.gb.hard{background:rgba(255,107,138,.1);color:#ff6b8a}
+.gacts{margin-top:auto;padding-top:10px}
+.ghint{font-size:11px;color:#ff6b8a;margin-top:6px}
+
+/* story unlock popup */
+.story-popup{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .5s}
+.story-popup.show{opacity:1;pointer-events:auto}
+.story-popup .box{background:#fff;border-radius:24px;padding:32px 28px;text-align:center;max-width:340px;box-shadow:0 20rpx 80rpx rgba(0,0,0,.15);animation:popIn .4s ease-out}
+@keyframes popIn{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.story-popup .icon{font-size:48px;margin-bottom:8px;display:block}
+.story-popup .title{font-size:16px;font-weight:700;color:#2d2d4e;margin-bottom:4px}
+.story-popup .s-text{font-size:15px;line-height:1.8;color:#555;padding:16px;background:#f8f5f4;border-radius:12px;margin:10px 0;font-style:italic}
+.story-popup .s-sub{font-size:11px;color:#8a7a9a}
+.story-popup .btn{margin-top:14px;padding:10px 32px;border-radius:14px;background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer}
+
+/* badge unlock popup */
+.badge-popup{position:fixed;inset:0;z-index:201;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .5s}
+.badge-popup.show{opacity:1;pointer-events:auto}
+.badge-popup .box{background:#fff;border-radius:24px;padding:36px 32px;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.15);animation:popIn .4s ease-out}
+.badge-popup .badge{font-size:64px;margin-bottom:8px;display:block}
+.badge-popup .title{font-size:18px;font-weight:700;color:#2d2d4e}
+.badge-popup .sub{font-size:12px;color:#8a7a9a;margin-top:4px}
+.badge-popup .btn{margin-top:16px;padding:10px 32px;border-radius:14px;background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer}
+
+/* dark mode toggle */
+.dark-toggle{position:fixed;top:12px;right:12px;z-index:50;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.06);color:#8a7a9a;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+body.dark .dark-toggle{background:rgba(255,255,255,.08);color:#a090b0}
+body.dark{background:#12121f;color:#e0d0e8}
+body.dark .tb{background:linear-gradient(135deg,#2a2a4a,#1a1a38)}
+body.dark .nav-item,.dark .pack,.dark .challenge-card,.dark .story-card,.dark .pack-detail,.dark .story-item,.dark .fr,.dark .fb,.dark .story-popup .box,.dark .badge-popup .box{background:#1e1e38}
+body.dark .nav-item.on{color:#ff8fab;background:rgba(255,143,171,.08);border-color:rgba(255,143,171,.2)}
+body.dark .st,.dark .pack .bar{background:#1a1a30}
+body.dark .story-card .text,.dark .story-popup .s-text,.dark .gctx{background:#2a2a4a;color:#c0b0d0}
+body.dark .pack-word{border-color:#2a2a4a}
+body.dark .gclose{background:rgba(255,255,255,.06);color:#6a6a8a}
+body.dark .gw,.dark .pack .name,.dark .pack-word .w{color:#e0d0e8}
+body.dark .gp{color:#a090b0}
+body.dark .story-item.locked .preview{color:#555}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="tb">
+    <div class="tt">📖 单词本</div>
+    <div class="sub" id="subTitle">卡包 · 收集你的 CET-4 词库</div>
+  </div>
+
+  <!-- 导航 -->
+  <div class="nav">
+    <div class="nav-item on" onclick="switchNav('pack')">🎴 卡包</div>
+    <div class="nav-item" onclick="switchNav('challenge')">⚡ 每日挑战</div>
+    <div class="nav-item" onclick="switchNav('story')">💌 故事</div>
+  </div>
+
+  <!-- 统计 -->
+  <div class="stats">
+    <div class="st"><span class="n" id="totalWords">0</span><span class="l">已收集</span></div>
+    <div class="st"><span class="n b" id="packsDone">0</span><span class="l">已集齐</span></div>
+    <div class="st"><span class="n g" id="storiesUnlocked">0</span><span class="l">故事解锁</span></div>
+  </div>
+
+  <!-- 每日挑战条 -->
+  <div class="challenge-card" id="challengeBanner" style="display:none">
+    <div class="icon">⚡</div>
+    <div class="info">
+      <div class="t" id="challengeTitle">今日挑战</div>
+      <div class="s" id="challengeSub">完成 10 个词 · 点亮今日徽章</div>
+    </div>
+    <div id="challengeBtnArea"></div>
+  </div>
+
+  <div class="content" id="content"></div>
+</div>
+
+<!-- 故事弹出 -->
+<div class="story-popup" id="storyPopup">
+  <div class="box">
+    <span class="icon">💌</span>
+    <div class="title" id="storyPopupTitle">故事解锁</div>
+    <div class="s-text" id="storyPopupText">每背完一组词，解锁一段温暖文字。</div>
+    <div class="s-sub" id="storyPopupSub">第 1 章 · 启程</div>
+    <div class="btn" onclick="closeStoryPopup()">继续背词 🚀</div>
+  </div>
+</div>
+
+<!-- 徽章弹出 -->
+<div class="badge-popup" id="badgePopup">
+  <div class="box">
+    <span class="badge" id="badgeEmoji">🏅</span>
+    <div class="title" id="badgeTitle">今日挑战完成！</div>
+    <div class="sub" id="badgeSub">连续 1 天打卡</div>
+    <div class="btn" onclick="closeBadgePopup()">太棒了 🎉</div>
+  </div>
+</div>
+
+<script>
+// ===== 数据 =====
+const STORIES = [
+  {icon:'🌅',title:'启程',text:'不要害怕开始。每一个你背下的单词，都是通向新世界的一扇门。'},
+  {icon:'🌿',title:'生长',text:'语言如同植物，一天一天，不知不觉就长成了一片森林。'},
+  {icon:'🌟',title:'发光',text:'你背的每一个单词，都在悄悄点亮你的世界。'},
+  {icon:'🌈',title:'彩虹',text:'努力不是一蹴而就的，但回头看，每一步都闪着光。'},
+  {icon:'🕊️',title:'自由',text:'当你掌握了语言，你就拥有了走向任何地方的翅膀。'},
+  {icon:'🌊',title:'远航',text:'单词是浪花，句子是潮汐。总有一天，你能乘风破浪。'},
+  {icon:'🌙',title:'陪伴',text:'深夜里背下的每一个单词，都是你对自己最好的承诺。'},
+  {icon:'☀️',title:'黎明',text:'天总会亮的。你所坚持的每一个词，都是破晓前的光。'},
+  {icon:'🌺',title:'绽放',text:'积累不会骗人。时间到了，自然开花。'},
+  {icon:'✨',title:'星河',text:'那些看似微不足道的努力，终将汇成星河。'},
+]
+
+const PACKS = [
+  {id:'school',emoji:'📚',name:'校园生活',color:'#5c6bc0',words:[{w:'abandon',s:'v.抛弃'},{w:'campus',s:'n.校园'},{w:'dormitory',s:'n.宿舍'},{w:'library',s:'n.图书馆'},{w:'scholarship',s:'n.奖学金'},{w:'semester',s:'n.学期'},{w:'curriculum',s:'n.课程'},{w:'graduation',s:'n.毕业'},{w:'professor',s:'n.教授'},{w:'assignment',s:'n.作业'},{w:'exam',s:'n.考试'},{w:'tuition',s:'n.学费'}]},
+  {id:'nature',emoji:'🌿',name:'自然风光',color:'#66bb6a',words:[{w:'abundant',s:'adj.丰富的'},{w:'atmosphere',s:'n.大气'},{w:'climate',s:'n.气候'},{w:'ecology',s:'n.生态'},{w:'environment',s:'n.环境'},{w:'landscape',s:'n.风景'},{w:'phenomenon',s:'n.现象'},{w:'resource',s:'n.资源'},{w:'species',s:'n.物种'},{w:'survive',s:'v.生存'},{w:'pollution',s:'n.污染'},{w:'conservation',s:'n.保护'}]},
+  {id:'tech',emoji:'💻',name:'科技未来',color:'#42a5f5',words:[{w:'access',s:'n.通道'},{w:'digital',s:'adj.数字的'},{w:'innovation',s:'n.创新'},{w:'internet',s:'n.互联网'},{w:'network',s:'n.网络'},{w:'program',s:'n.程序'},{w:'research',s:'n.研究'},{w:'software',s:'n.软件'},{w:'technology',s:'n.技术'},{w:'database',s:'n.数据库'},{w:'device',s:'n.设备'},{w:'artificial',s:'adj.人工的'}]},
+  {id:'life',emoji:'☕',name:'日常生活',color:'#ffa726',words:[{w:'budget',s:'n.预算'},{w:'convenience',s:'n.便利'},{w:'delivery',s:'n.递送'},{w:'expense',s:'n.花费'},{w:'household',s:'n.家庭'},{w:'insurance',s:'n.保险'},{w:'leisure',s:'n.休闲'},{w:'nutrition',s:'n.营养'},{w:'schedule',s:'n.日程'},{w:'transport',s:'n.交通'},{w:'volunteer',s:'n.志愿者'},{w:'maintain',s:'v.维持'}]},
+  {id:'emotion',emoji:'💝',name:'情感世界',color:'#ec407a',words:[{w:'affection',s:'n.喜爱'},{w:'ambition',s:'n.抱负'},{w:'anxiety',s:'n.焦虑'},{w:'courage',s:'n.勇气'},{w:'emotion',s:'n.情感'},{w:'inspire',s:'v.激励'},{w:'passion',s:'n.热情'},{w:'patience',s:'n.耐心'},{w:'prejudice',s:'n.偏见'},{w:'sympathy',s:'n.同情'},{w:'gratitude',s:'n.感激'},{w:'confidence',s:'n.自信'}]},
+  {id:'travel',emoji:'✈️',name:'旅行探索',color:'#26c6da',words:[{w:'accommodate',s:'v.容纳'},{w:'adventure',s:'n.冒险'},{w:'attraction',s:'n.景点'},{w:'campus',s:'n.校园'},{w:'destination',s:'n.目的地'},{w:'explore',s:'v.探索'},{w:'journey',s:'n.旅程'},{w:'passenger',s:'n.乘客'},{w:'reserve',s:'v.预订'},{w:'scenery',s:'n.风景'},{w:'tourism',s:'n.旅游'},{w:'voyage',s:'n.航行'}]},
+]
+
+// ===== 游戏词库（迷你） =====
+const GAME_WORDS = [
+  {word:'abandon',phonetic:'/əˈbændən/',definition:'v. 抛弃，放弃',context:'He had to abandon his plan.'},
+  {word:'absorb',phonetic:'/əbˈzɔːb/',definition:'v. 吸收；吸引',context:'Plants absorb CO₂.'},
+  {word:'access',phonetic:'/ˈækses/',definition:'n. 通道；v. 访问',context:'Students have free access.'},
+  {word:'achieve',phonetic:'/əˈtʃiːv/',definition:'v. 达到，取得',context:'He achieved his dream.'},
+  {word:'adapt',phonetic:'/əˈdæpt/',definition:'v. 适应；改编',context:'She adapted quickly.'},
+  {word:'adventure',phonetic:'/ədˈventʃə/',definition:'n. 冒险',context:'Life is an adventure.'},
+  {word:'affect',phonetic:'/əˈfekt/',definition:'v. 影响；感动',context:'It affected many people.'},
+  {word:'afford',phonetic:'/əˈfɔːd/',definition:'v. 负担得起',context:'I cannot afford it.'},
+  {word:'agree',phonetic:'/əˈɡriː/',definition:'v. 同意',context:'They agreed to help.'},
+  {word:'allow',phonetic:'/əˈlaʊ/',definition:'v. 允许',context:'Please allow me.'},
+  {word:'amaze',phonetic:'/əˈmeɪz/',definition:'v. 使惊奇',context:'It amazed everyone.'},
+  {word:'appear',phonetic:'/əˈpɪə/',definition:'v. 出现',context:'A figure appeared.'},
+  {word:'apply',phonetic:'/əˈplaɪ/',definition:'v. 申请；应用',context:'Apply for the job.'},
+  {word:'approach',phonetic:'/əˈprəʊtʃ/',definition:'v. 接近；n. 方法',context:'A new approach.'},
+  {word:'balance',phonetic:'/ˈbæləns/',definition:'n. 平衡',context:'Keep your balance.'},
+  {word:'behave',phonetic:'/bɪˈheɪv/',definition:'v. 表现',context:'Behave yourself.'},
+  {word:'believe',phonetic:'/bɪˈliːv/',definition:'v. 相信',context:'I believe in you.'},
+  {word:'benefit',phonetic:'/ˈbenɪfɪt/',definition:'n. 利益；v. 受益',context:'Exercise benefits health.'},
+  {word:'breathe',phonetic:'/briːð/',definition:'v. 呼吸',context:'Just breathe deeply.'},
+  {word:'bright',phonetic:'/braɪt/',definition:'adj. 明亮的',context:'A bright future.'},
+  {word:'capable',phonetic:'/ˈkeɪpəbl/',definition:'adj. 有能力的',context:'You are capable.'},
+  {word:'capture',phonetic:'/ˈkæptʃə/',definition:'v. 捕获；俘获',context:'Capture the moment.'},
+  {word:'challenge',phonetic:'/ˈtʃælɪndʒ/',definition:'n. 挑战',context:'Face the challenge.'},
+  {word:'change',phonetic:'/tʃeɪndʒ/',definition:'v. 改变',context:'Change is good.'},
+  {word:'choose',phonetic:'/tʃuːz/',definition:'v. 选择',context:'Choose wisely.'},
+  {word:'comfort',phonetic:'/ˈkʌmfət/',definition:'n. 安慰；舒适',context:'Find comfort in words.'},
+  {word:'commit',phonetic:'/kəˈmɪt/',definition:'v. 承诺；犯',context:'Commit to your goal.'},
+  {word:'communicate',phonetic:'/kəˈmjuːnɪkeɪt/',definition:'v. 交流',context:'Communicate with heart.'},
+  {word:'compare',phonetic:'/kəmˈpeə/',definition:'v. 比较',context:'Don\'t compare yourself.'},
+  {word:'compete',phonetic:'/kəmˈpiːt/',definition:'v. 竞争',context:'Compete with yourself.'},
+  {word:'confident',phonetic:'/ˈkɒnfɪdənt/',definition:'adj. 自信的',context:'Be confident.'},
+  {word:'connect',phonetic:'/kəˈnekt/',definition:'v. 连接',context:'Connect with others.'},
+  {word:'consider',phonetic:'/kənˈsɪdə/',definition:'v. 考虑',context:'Consider all options.'},
+  {word:'continue',phonetic:'/kənˈtɪnjuː/',definition:'v. 继续',context:'Continue moving forward.'},
+  {word:'contribute',phonetic:'/kənˈtrɪbjuːt/',definition:'v. 贡献',context:'Contribute to the world.'},
+  {word:'create',phonetic:'/kriˈeɪt/',definition:'v. 创造',context:'Create your future.'},
+  {word:'decide',phonetic:'/dɪˈsaɪd/',definition:'v. 决定',context:'Decide for yourself.'},
+  {word:'defend',phonetic:'/dɪˈfend/',definition:'v. 防御；辩护',context:'Defend your dream.'},
+  {word:'deliver',phonetic:'/dɪˈlɪvə/',definition:'v. 递送；发表',context:'Deliver your speech.'},
+  {word:'demand',phonetic:'/dɪˈmɑːnd/',definition:'v./n. 要求',context:'Demand excellence.'},
+  {word:'deserve',phonetic:'/dɪˈzɜːv/',definition:'v. 值得',context:'You deserve it.'},
+  {word:'discover',phonetic:'/dɪˈskʌvə/',definition:'v. 发现',context:'Discover your potential.'},
+  {word:'encourage',phonetic:'/ɪnˈkʌrɪdʒ/',definition:'v. 鼓励',context:'Encourage each other.'},
+  {word:'embrace',phonetic:'/ɪmˈbreɪs/',definition:'v. 拥抱',context:'Embrace the unknown.'},
+  {word:'explore',phonetic:'/ɪkˈsplɔː/',definition:'v. 探索',context:'Explore new horizons.'},
+  {word:'express',phonetic:'/ɪkˈspres/',definition:'v. 表达',context:'Express yourself freely.'},
+  {word:'forgive',phonetic:'/fəˈɡɪv/',definition:'v. 原谅',context:'Forgive and move on.'},
+  {word:'grateful',phonetic:'/ˈɡreɪtfl/',definition:'adj. 感激的',context:'Be grateful every day.'},
+  {word:'grow',phonetic:'/ɡrəʊ/',definition:'v. 生长',context:'Grow a little each day.'},
+  {word:'honest',phonetic:'/ˈɒnɪst/',definition:'adj. 诚实的',context:'Stay honest.'},
+  {word:'imagine',phonetic:'/ɪˈmædʒɪn/',definition:'v. 想象',context:'Imagine the possibilities.'},
+  {word:'inspire',phonetic:'/ɪnˈspaɪə/',definition:'v. 激励',context:'Inspire those around you.'},
+  {word:'journey',phonetic:'/ˈdʒɜːni/',definition:'n. 旅程',context:'Enjoy the journey.'},
+  {word:'kindness',phonetic:'/ˈkaɪndnəs/',definition:'n. 善良',context:'Spread kindness.'},
+  {word:'learn',phonetic:'/lɜːn/',definition:'v. 学习',context:'Learn something new.'},
+  {word:'listen',phonetic:'/ˈlɪsn/',definition:'v. 听',context:'Listen to your heart.'},
+  {word:'master',phonetic:'/ˈmɑːstə/',definition:'v. 掌握',context:'Master your skills.'},
+  {word:'motivate',phonetic:'/ˈməʊtɪveɪt/',definition:'v. 激发',context:'Motivate yourself daily.'},
+  {word:'nurture',phonetic:'/ˈnɜːtʃə/',definition:'v. 培养',context:'Nurture your dreams.'},
+  {word:'overcome',phonetic:'/ˌəʊvəˈkʌm/',definition:'v. 克服',context:'Overcome every obstacle.'},
+  {word:'patience',phonetic:'/ˈpeɪʃns/',definition:'n. 耐心',context:'Patience is a virtue.'},
+  {word:'persist',phonetic:'/pəˈsɪst/',definition:'v. 坚持',context:'Persist through difficulty.'},
+  {word:'practice',phonetic:'/ˈpræktɪs/',definition:'n./v. 练习',context:'Practice makes progress.'},
+  {word:'protect',phonetic:'/prəˈtekt/',definition:'v. 保护',context:'Protect what matters.'},
+  {word:'pursue',phonetic:'/pəˈsjuː/',definition:'v. 追求',context:'Pursue your passion.'},
+  {word:'reflect',phonetic:'/rɪˈflekt/',definition:'v. 反映；思考',context:'Reflect on your growth.'},
+  {word:'respect',phonetic:'/rɪˈspekt/',definition:'v./n. 尊重',context:'Respect yourself.'},
+  {word:'succeed',phonetic:'/səkˈsiːd/',definition:'v. 成功',context:'You will succeed.'},
+  {word:'support',phonetic:'/səˈpɔːt/',definition:'v./n. 支持',context:'Support each other.'},
+  {word:'treasure',phonetic:'/ˈtreʒə/',definition:'n. 财富；v. 珍惜',context:'Treasure every moment.'},
+  {word:'trust',phonetic:'/trʌst/',definition:'v./n. 信任',context:'Trust the process.'},
+  {word:'understand',phonetic:'/ˌʌndəˈstænd/',definition:'v. 理解',context:'Understand yourself.'},
+  {word:'value',phonetic:'/ˈvæljuː/',definition:'n. 价值；v. 重视',context:'Value every step.'},
+  {word:'wisdom',phonetic:'/ˈwɪzdəm/',definition:'n. 智慧',context:'Wisdom comes from learning.'},
+  {word:'wonder',phonetic:'/ˈwʌndə/',definition:'v. 想知道；n. 奇迹',context:'Wonder at the world.'},
+]
+
+// ===== 状态 =====
+let nav = 'pack'
+// 每个词的掌握状态
+let wordStates = {}
+GAME_WORDS.forEach(w => { wordStates[w.word] = {correctStreak:0, status:'new', growth:0, stars:0, collected: false} })
+// 卡包状态
+let packProgress = {}
+PACKS.forEach(p => { packProgress[p.id] = 0 })
+// 故事
+let unlockedStories = 0
+// 每日挑战
+let challengeDone = false
+let challengeStreak = 0
+
+// ===== 初始化 =====
+// 模拟已有进度
+wordStates['abandon'].collected = true; packProgress['school'] = 1
+wordStates['campus'].collected = true; packProgress['school'] = 2
+wordStates['absorb'].collected = true; packProgress['nature'] = 1
+wordStates['access'].collected = true; packProgress['tech'] = 1
+wordStates['embrace'].collected = true
+wordStates['discover'].collected = true
+wordStates['imagine'].collected = true
+unlockedStories = 1
+
+function render() {
+  // stats
+  const total = Object.values(wordStates).filter((v:any) => v.collected).length
+  document.getElementById('totalWords').textContent = total
+  const packsComplete = PACKS.filter(p => packProgress[p.id] >= p.words.length).length
+  document.getElementById('packsDone').textContent = packsComplete
+  document.getElementById('storiesUnlocked').textContent = unlockedStories
+
+  // 每日挑战
+  const banner = document.getElementById('challengeBanner')
+  const btnArea = document.getElementById('challengeBtnArea')
+  if (nav === 'challenge') {
+    banner.style.display = 'flex'
+    if (challengeDone) {
+      document.getElementById('challengeTitle').textContent = '✅ 今日已完成'
+      document.getElementById('challengeSub').textContent = '连续 ' + challengeStreak + ' 天打卡'
+      btnArea.innerHTML = '<span class="badge">🏅</span>'
+    } else {
+      document.getElementById('challengeTitle').textContent = '⚡ 今日挑战'
+      document.getElementById('challengeSub').textContent = '完成 10 个词 · 点亮今日徽章'
+      btnArea.innerHTML = '<button class="btn" onclick="startChallenge()">开始挑战</button>'
+    }
+  } else { banner.style.display = 'none' }
+
+  if (nav === 'pack') renderPacks()
+  else if (nav === 'challenge') renderChallenge()
+  else if (nav === 'story') renderStories()
+}
+
+// ===== 卡包 =====
+let selectedPack = null
+function renderPacks() {
+  const el = document.getElementById('content')
+  if (selectedPack) { renderPackDetail(selectedPack); return }
+  el.innerHTML = '<div class="pack-grid">' + PACKS.map(p => {
+    const done = packProgress[p.id]
+    const total = p.words.length
+    const complete = done >= total
+    return '<div class="pack ' + (complete?'complete':'') + '" onclick="selectedPack=\''+p.id+'\';render()">'
+      + '<div class="emoji">' + p.emoji + '</div>'
+      + '<div class="name">' + p.name + '</div>'
+      + '<div class="count">' + done + '/' + total + (complete?' ✅':'') + '</div>'
+      + '<div class="bar"><div class="fill" style="width:' + (done/total*100) + '%"></div></div>'
+      + '</div>'
+  }).join('') + '</div>'
+}
+
+function renderPackDetail(id) {
+  const p = PACKS.find(x => x.id === id)
+  if (!p) return
+  const done = packProgress[id]
+  const el = document.getElementById('content')
+  el.innerHTML = '<div class="pack-detail">'
+    + '<button class="back" onclick="selectedPack=null;render()">← 返回卡包</button>'
+    + '<div class="ph"><div class="e">' + p.emoji + '</div><div class="n">' + p.name + '</div><div class="p">' + done + '/' + p.words.length + '</div></div>'
+    + p.words.map(w => {
+      const col = wordStates[w.w]?.collected
+      return '<div class="pack-word">'
+        + '<span class="w">' + w.w + '</span>'
+        + '<span class="s">' + w.s + '</span>'
+        + '<span class="status">' + (col ? '✅' : '🔒') + '</span>'
+        + '</div>'
+    }).join('') + '</div>'
+}
+
+// ===== 每日挑战 =====
+function startChallenge() {
+  const shuffled = [...GAME_WORDS].sort(() => Math.random() - .5).slice(0, 10)
+  startGame(shuffled, () => {
+    challengeDone = true
+    challengeStreak++
+    document.getElementById('badgeEmoji').textContent = '🏅'
+    document.getElementById('badgeTitle').textContent = '🔥 今日挑战完成！'
+    document.getElementById('badgeSub').textContent = '连续 ' + challengeStreak + ' 天打卡'
+    document.getElementById('badgePopup').classList.add('show')
+    render()
+  })
+}
+
+function closeBadgePopup() { document.getElementById('badgePopup').classList.remove('show') }
+
+// ===== 故事 =====
+function renderStories() {
+  const el = document.getElementById('content')
+  el.innerHTML = '<div class="story-card">'
+    + (unlockedStories > 0 ? '<div class="lock">💌</div>' : '<div class="lock">🔒</div>')
+    + '<div class="sub">已解锁 ' + unlockedStories + '/' + STORIES.length + ' 章</div>'
+    + (unlockedStories > 0 ? '<div class="text">"' + STORIES[unlockedStories-1].text + '"</div>' : '<div class="text" style="color:#bbb">完成背词即可解锁故事章节。</div>')
+    + '<div class="progress">' + (unlockedStories > 0 ? '第 ' + unlockedStories + ' 章 · ' + STORIES[unlockedStories-1].title : '') + '</div>'
+    + '</div>'
+    + '<div class="story-list">'
+    + STORIES.map((s,i) => {
+      const unlocked = i < unlockedStories
+      return '<div class="story-item ' + (unlocked?'':'locked') + '">'
+        + '<span class="idx">' + (i+1) + '</span>'
+        + '<span class="icon">' + (unlocked ? s.icon : '🔒') + '</span>'
+        + '<span class="preview">' + (unlocked ? '第 ' + (i+1) + ' 章 · ' + s.title : '??') + '</span>'
+        + '</div>'
+    }).join('') + '</div>'
+}
+
+// ===== 导航 =====
+function switchNav(n) {
+  nav = n
+  selectedPack = null
+  document.querySelectorAll('.nav-item').forEach((el,i) => el.classList.toggle('on', ['pack','challenge','story'][i] === n))
+  document.getElementById('subTitle').textContent = n === 'pack' ? '卡包 · 收集你的 CET-4 词库' : n === 'challenge' ? '每日挑战 · 点亮徽章' : '故事 · 每背完 10 词解锁一章'
+  render()
+}
+
+// ===== 翻卡游戏（简化版，用于每日挑战） =====
+function startGame(words, onComplete) {
+  let idx = 0
+  document.getElementById('overlay').classList.add('show')
+  function show() {
+    const w = words[idx]
+    if (!w) { document.getElementById('overlay').classList.remove('show'); onComplete(); return }
+    document.getElementById('flipInner').classList.remove('flipped')
+    document.getElementById('gw').textContent = w.word
+    document.getElementById('gp').textContent = w.phonetic || ''
+    document.getElementById('gctx').textContent = w.context || ''
+    document.getElementById('gprog').textContent = (idx+1) + '/' + words.length
+  }
+  window._gameNext = () => {
+    idx++
+    // 收集这个词
+    wordStates[words[idx-1]?.word] ? wordStates[words[idx-1].word].collected = true : 0
+    // 更新卡包进度
+    for (const p of PACKS) {
+      const found = p.words.find(x => x.w === words[idx-1]?.word)
+      if (found && wordStates[found.w]?.collected && packProgress[p.id] < p.words.length) {
+        packProgress[p.id]++
+        // 检查卡包是否集齐
+        if (packProgress[p.id] >= p.words.length) {
+          // 集齐一包！解锁一个故事
+          if (unlockedStories < STORIES.length) {
+            unlockedStories++
+            setTimeout(() => {
+              document.getElementById('storyPopupTitle').textContent = '🎉 「' + p.name + '」集齐！'
+              document.getElementById('storyPopupText').textContent = STORIES[unlockedStories-1].text
+              document.getElementById('storyPopupSub').textContent = '第 ' + unlockedStories + ' 章 · ' + STORIES[unlockedStories-1].title
+              document.getElementById('storyPopup').classList.add('show')
+            }, 500)
+          }
+        }
+      }
+    }
+    render()
+    show()
+  }
+  show()
+}
+
+function closeStoryPopup() { document.getElementById('storyPopup').classList.remove('show') }
+
+// ===== 覆写 overlay =====
+document.body.insertAdjacentHTML('beforeend', '<div class="overlay" id="overlay"><div class="flip-ctn"><div class="flip-inner" id="flipInner"><div class="fr"><div class="gtop"><span class="gprog" id="gprog">0/0</span><span class="gclose" onclick="document.getElementById(\'overlay\').classList.remove(\'show\')">✕</span></div><div class="gw" id="gw"></div><div class="gp" id="gp"></div><div class="gctx" id="gctx"></div><div style="margin-top:20px"><button class="gb known" onclick="window._gameNext && window._gameNext()">✅ 认识 →</button></div><div class="ghint">点击认识即可收集</div></div></div></div></div>')
+
+render()
+</script>
+</body>
+</html>

@@ -27,6 +27,8 @@ interface IVocabData {
   mode: string
   combo: number
   darkMode: boolean
+  PACKS: any
+  STORIES: any
   gameWord: IVocabWord | null
   gameWordIdx: number
   gameTotal: number
@@ -43,6 +45,21 @@ interface IVocabData {
   manualModalValue: string
   swipedIdx: number
   celebrateShow: boolean
+  showStory: boolean
+  storyIdx: number
+  showStoryView: boolean
+  showPack: boolean
+  selectedPack: string
+  packEmoji: string
+  packName: string
+  packWords: Array<{word:string;def:string;got:boolean}>
+  unlockedStories: number
+  challengeActive: boolean
+  challengeDone: boolean
+  challengeStreak: number
+  challengeWords: string[]
+  challengeIdx: number
+  packStats: number[]
   _tick: number
 }
 
@@ -76,6 +93,17 @@ interface IVocabMethods {
   startConfetti(): void
   stopConfetti(): void
   closeCelebrate(): void
+  openPacks(): void
+  openStoryView(): void
+  selectPack(e: WechatMiniprogram.TouchEvent): void
+  startChallenge(): void
+  challengeNext(): void
+  _unlockStory(): void
+  closeStory(): void
+  _checkPackCompletion(word: string): void
+  _updatePackStats(): void
+  _showChallengeWord(): void
+  _completeChallenge(): void
   _doAddWord(w: string): Promise<void>
   _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]): void
   loadWords(): void
@@ -618,6 +646,33 @@ const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
   witness: { phonetic: '/ˈwɪtnəs/', definition: 'n. 目击者；v. 目击' },
 }
 
+// ===== 故事 =====
+interface IStory { icon: string; title: string; text: string }
+const STORIES: IStory[] = [
+  { icon: '🌅', title: '启程', text: '不要害怕开始。每一个你背下的单词，都是通向新世界的一扇门。' },
+  { icon: '🌿', title: '生长', text: '语言如同植物，一天一天，不知不觉就长成了一片森林。' },
+  { icon: '🌟', title: '发光', text: '你背的每一个单词，都在悄悄点亮你的世界。' },
+  { icon: '🌈', title: '彩虹', text: '努力不是一蹴而就的，但回头看，每一步都闪着光。' },
+  { icon: '🕊️', title: '自由', text: '当你掌握了语言，你就拥有了走向任何地方的翅膀。' },
+  { icon: '🌊', title: '远航', text: '单词是浪花，句子是潮汐。总有一天，你能乘风破浪。' },
+  { icon: '🌙', title: '陪伴', text: '深夜里背下的每一个单词，都是你对自己最好的承诺。' },
+  { icon: '☀️', title: '黎明', text: '天总会亮的。你所坚持的每一个词，都是破晓前的光。' },
+  { icon: '🌺', title: '绽放', text: '积累不会骗人。时间到了，自然开花。' },
+  { icon: '✨', title: '星河', text: '那些看似微不足道的努力，终将汇成星河。' },
+]
+
+// ===== 卡包 =====
+interface IPackWord { word: string; def: string }
+interface IPack { id: string; emoji: string; name: string; words: IPackWord[] }
+const PACKS: IPack[] = [
+  { id:'school',emoji:'📚',name:'校园生活',words:[{word:'abandon',def:'v.抛弃'},{word:'access',def:'n.通道'},{word:'campus',def:'n.校园'},{word:'library',def:'n.图书馆'},{word:'semester',def:'n.学期'},{word:'graduate',def:'v.毕业'}]},
+  { id:'nature',emoji:'🌿',name:'自然风光',words:[{word:'abundant',def:'adj.丰富'},{word:'atmosphere',def:'n.大气'},{word:'climate',def:'n.气候'},{word:'ecology',def:'n.生态'},{word:'environment',def:'n.环境'},{word:'resource',def:'n.资源'}]},
+  { id:'tech',emoji:'💻',name:'科技未来',words:[{word:'digital',def:'adj.数字'},{word:'innovation',def:'n.创新'},{word:'network',def:'n.网络'},{word:'program',def:'n.程序'},{word:'research',def:'n.研究'},{word:'technology',def:'n.技术'}]},
+  { id:'life',emoji:'☕',name:'日常生活',words:[{word:'budget',def:'n.预算'},{word:'convenience',def:'n.便利'},{word:'expense',def:'n.花费'},{word:'insurance',def:'n.保险'},{word:'leisure',def:'n.休闲'},{word:'transport',def:'n.交通'}]},
+  { id:'emotion',emoji:'💝',name:'情感世界',words:[{word:'ambition',def:'n.抱负'},{word:'courage',def:'n.勇气'},{word:'emotion',def:'n.情感'},{word:'inspire',def:'v.激励'},{word:'passion',def:'n.热情'},{word:'patience',def:'n.耐心'}]},
+  { id:'travel',emoji:'✈️',name:'旅行探索',words:[{word:'adventure',def:'n.冒险'},{word:'destination',def:'n.目的地'},{word:'explore',def:'v.探索'},{word:'journey',def:'n.旅程'},{word:'scenery',def:'n.风景'},{word:'voyage',def:'n.航行'}]},
+]
+
 const EXTRACTED_CACHE_KEY = 'vocab_extracted_words'
 const EXTRACTED_VER_KEY = 'vocab_extracted_ver'
 const EXTRACTED_VER = 7
@@ -705,13 +760,35 @@ Page<IVocabData, IVocabMethods>({
     manualModalValue: '',
     swipedIdx: -1,
     celebrateShow: false,
+    PACKS: PACKS as any,
+    STORIES: STORIES as any,
+    showStory: false,
+    storyIdx: 0,
+    showStoryView: false,
+    showPack: false,
+    selectedPack: '',
+    packEmoji: '',
+    packName: '',
+    packWords: [],
+    unlockedStories: 0,
+    challengeActive: false,
+    challengeDone: false,
+    challengeStreak: 0,
+    challengeWords: [],
+    challengeIdx: 0,
+    packStats: [],
     _tick: 0,
   },
 
   onShow() {
     applyTheme(getDarkMode())
     const mode = wx.getStorageSync('vocab_mode') || 'battle'
-    this.setData({ darkMode: getDarkMode(), mode })
+    const today = new Date().toDateString()
+    const lastChallenge = wx.getStorageSync('challenge_date')
+    const challengeDone = lastChallenge === today
+    const challengeStreak = challengeDone ? (wx.getStorageSync('challenge_streak') || 1) : 0
+    const packStats = PACKS.map(p => (wx.getStorageSync('pack_' + p.id) as number) || 0)
+    this.setData({ darkMode: getDarkMode(), mode, challengeDone, challengeStreak, packStats })
     this.loadWords()
   },
 
@@ -909,6 +986,7 @@ Page<IVocabData, IVocabMethods>({
     }
     this.setData({ streak: this.data.streak + 1, combo })
     wx.setStorageSync('studyData', app.globalData.studyData)
+    this._checkPackCompletion(w.word)
     setTimeout(() => this.nextGame(), 300)
   },
 
@@ -946,6 +1024,107 @@ Page<IVocabData, IVocabMethods>({
     const mode = e.currentTarget.dataset.mode
     wx.setStorageSync('vocab_mode', mode)
     this.setData({ mode })
+  },
+
+  openPacks() {
+    this._updatePackStats()
+    this.setData({ showPack: !this.data.showPack, selectedPack: '', showStoryView: false })
+  },
+
+  openStoryView() {
+    const unlocked = wx.getStorageSync('unlocked_stories') as number || 0
+    this.setData({ showStoryView: !this.data.showStoryView, showPack: false, unlockedStories: unlocked })
+  },
+
+  selectPack(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.pack || ''
+    if (!id) { this.setData({ selectedPack: '' }); return }
+    const p = PACKS.find(x => x.id === id)
+    if (!p) return
+    const got = wx.getStorageSync('pack_' + id) as number || 0
+    const packWords = p.words.map((w, i) => ({ word: w.word, def: w.def, got: i < got }))
+    this.setData({ selectedPack: id, packEmoji: p.emoji, packName: p.name, packWords })
+  },
+
+  startChallenge() {
+    if (this.data.challengeDone) { wx.showToast({ title: '今日已完成', icon: 'none' }); return }
+    const all = Object.keys(WORD_BANK)
+    const shuffled = all.sort(() => Math.random() - 0.5).slice(0, 10)
+    this.setData({ challengeActive: true, challengeWords: shuffled, challengeIdx: 0, gameSessionLimit: 10, gameSessionStart: 0 })
+    this._showChallengeWord()
+  },
+
+  _showChallengeWord() {
+    const words = this.data.challengeWords
+    const idx = this.data.challengeIdx
+    if (idx >= words.length) { this._completeChallenge(); return }
+    const wordStr = words[idx]
+    const known = WORD_BANK[wordStr]
+    const word: IVocabWord = {
+      word: wordStr, phonetic: known?.phonetic || '', definition: '', chn: known?.definition || '',
+      source: '每日挑战', context: '', contextCn: '', audioUrl: '',
+      status: 'new', correctStreak: 0, growth: 0, stars: 0,
+    }
+    this.setData({ gameWord: word, gameWordIdx: idx, gameTotal: words.length, gameFlipped: false, gameLoading: false })
+  },
+
+  _completeChallenge() {
+    const today = new Date().toDateString()
+    const streak = (wx.getStorageSync('challenge_streak') as number || 0) + 1
+    wx.setStorageSync('challenge_date', today)
+    wx.setStorageSync('challenge_streak', streak)
+    this.setData({ challengeDone: true, challengeActive: false, challengeStreak: streak, gameWord: null })
+    wx.showToast({ title: '🔥 今日挑战完成！', icon: 'success' })
+    this._unlockStory()
+  },
+
+  challengeNext() {
+    const w = this.data.gameWord?.word
+    if (w) {
+      const app = getApp<IAppOption>()
+      const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w)
+      if (sw) { sw.correctStreak++; if (sw.correctStreak >= 3) sw.status = 'master'; else sw.status = 'learning'; sw.growth = Math.min(3, (sw.growth||0)+1); sw.stars = Math.min(3, (sw.stars||0)+1) }
+      wx.setStorageSync('studyData', app.globalData.studyData)
+      this._checkPackCompletion(w)
+    }
+    this.setData({ challengeIdx: this.data.challengeIdx + 1, gameWord: null })
+    setTimeout(() => this._showChallengeWord(), 200)
+  },
+
+  _unlockStory() {
+    const unlocked = wx.getStorageSync('unlocked_stories') as number || 0
+    if (unlocked >= STORIES.length) return
+    wx.setStorageSync('unlocked_stories', unlocked + 1)
+    this.setData({ showStory: true, storyIdx: unlocked })
+  },
+
+  closeStory() {
+    this.setData({ showStory: false })
+  },
+
+  _checkPackCompletion(word: string) {
+    for (const p of PACKS) {
+      const wi = p.words.findIndex(w => w.word === word)
+      if (wi === -1) continue
+      const key = 'pack_' + p.id
+      const cur = wx.getStorageSync(key) as number || 0
+      if (wi < cur) continue // already counted
+      const nv = Math.max(cur, wi + 1)
+      wx.setStorageSync(key, nv)
+      this._updatePackStats()
+      if (nv >= p.words.length) {
+        const unlocked = wx.getStorageSync('unlocked_stories') as number || 0
+        if (unlocked < STORIES.length) {
+          wx.setStorageSync('unlocked_stories', unlocked + 1)
+          this.setData({ showStory: true, storyIdx: unlocked })
+        }
+      }
+    }
+  },
+
+  _updatePackStats() {
+    const packStats = PACKS.map(p => (wx.getStorageSync('pack_' + p.id) as number) || 0)
+    this.setData({ packStats })
   },
 
   async _fetchAudioUrl(word: IVocabWord) {

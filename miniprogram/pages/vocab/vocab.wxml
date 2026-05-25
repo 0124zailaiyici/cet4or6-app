@@ -1,14 +1,20 @@
 <view class="page {{darkMode ? 'dark' : ''}} mode-{{mode}}">
   <view class="tb">
     <view class="ttl">单词本</view>
-    <view class="sub" id="modeSub">背词模式 · {{mode === 'battle' ? '战斗' : mode === 'garden' ? '花园' : '集卡'}}</view>
+    <view class="sub">背词模式 · {{mode === 'battle' ? '战斗' : mode === 'garden' ? '花园' : '集卡'}}</view>
   </view>
 
-  <!-- 模式选择 -->
   <view class="msel">
     <view class="mbtn {{mode === 'battle' ? 'on' : ''}}" data-mode="battle" catchtap="setMode">⚔️ 战斗</view>
     <view class="mbtn {{mode === 'garden' ? 'on' : ''}}" data-mode="garden" catchtap="setMode">🌸 花园</view>
     <view class="mbtn {{mode === 'card' ? 'on' : ''}}" data-mode="card" catchtap="setMode">🎴 集卡</view>
+  </view>
+
+  <!-- 卡包+挑战+故事入口 -->
+  <view class="extra-bar">
+    <view class="ex-btn" catchtap="openPacks">🎴 卡包</view>
+    <view class="ex-btn {{challengeDone ? 'done' : ''}}" catchtap="startChallenge">⚡ {{challengeDone ? '今日已挑战' : '每日挑战'}}</view>
+    <view class="ex-btn" catchtap="openStoryView">💌 故事</view>
   </view>
 
   <view class="stats">
@@ -29,7 +35,47 @@
     <view class="addok" catchtap="onAddBtn">添加</view>
   </view>
 
-  <scroll-view class="list" scroll-y catchtap="closeSwipe">
+  <!-- 卡包视图 -->
+  <scroll-view class="list" scroll-y wx:if="{{showPack}}" catchtap="closeSwipe">
+    <view class="pk-detail" wx:if="{{selectedPack}}">
+      <view class="pk-back" catchtap="selectPack" data-pack="">← 返回卡包</view>
+      <view class="pk-hd"><text class="pk-e">{{packEmoji}}</text><text class="pk-n">{{packName}}</text></view>
+      <view class="pk-word" wx:for="{{packWords}}" wx:key="word">
+        <text class="pkw">{{item.word}}</text>
+        <text class="pkd">{{item.def}}</text>
+        <text class="pks">{{item.got ? '✅' : '🔒'}}</text>
+      </view>
+    </view>
+    <view class="pk-grid" wx:else>
+      <view class="pk-card {{packStats[index] >= item.words.length ? 'full' : ''}}" wx:for="{{PACKS}}" wx:key="id" wx:for-index="index" data-pack="{{item.id}}" catchtap="selectPack">
+        <text class="pke">{{item.emoji}}</text>
+        <text class="pkn">{{item.name}}</text>
+        <text class="pkc">{{packStats[index] || 0}}/{{item.words.length}}</text>
+        <view class="pkb"><view class="pkf" style="width:{{((packStats[index] || 0) / item.words.length * 100) + '%'}}"></view></view>
+        <text class="pkch" wx:if="{{packStats[index] >= item.words.length}}">✅ 已集齐</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 故事视图 -->
+  <scroll-view class="list" scroll-y wx:elif="{{showStoryView}}" catchtap="closeSwipe">
+    <view class="story-card">
+      <text class="sce">{{unlockedStories > 0 ? STORIES[unlockedStories - 1].icon : '🔒'}}</text>
+      <text class="scsub">已解锁 {{unlockedStories}}/{{STORIES.length}} 章</text>
+      <text class="sctxt" wx:if="{{unlockedStories > 0}}">「{{STORIES[unlockedStories - 1].text}}」</text>
+      <text class="sctxt" wx:else style="color:#bbb">完成背词或集齐卡包即可解锁故事章节。</text>
+    </view>
+    <view class="story-list">
+      <view class="si {{i < unlockedStories ? '' : 'locked'}}" wx:for="{{STORIES}}" wx:key="title" wx:for-index="i">
+        <text class="sii">{{i + 1}}</text>
+        <text class="sii2">{{i < unlockedStories ? item.icon : '🔒'}}</text>
+        <text class="sit">{{i < unlockedStories ? ('第' + (i+1) + '章 · ' + item.title) : '??'}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 单词列表 -->
+  <scroll-view class="list" scroll-y wx:else catchtap="closeSwipe">
     <view class="empty" wx:if="{{filteredWords.length === 0}}">
       <text>暂无单词</text>
       <text class="hint">从真题阅读自动收集</text>
@@ -68,64 +114,28 @@
     </view>
   </scroll-view>
 
-  <!-- 翻卡 3D -->
+  <!-- 翻卡 -->
   <view class="game-overlay {{gameWord || gameLoading ? 'show' : ''}}" catchtap="closeGame">
     <view class="flip-ctn {{gameWord || gameLoading ? 'show' : ''}}" catchtap="">
-      <view wx:if="{{!gameWord && gameLoading}}">
-        <view class="gloading">加载中，请稍后…</view>
-      </view>
+      <view wx:if="{{!gameWord && gameLoading}}"><view class="gloading">加载中，请稍后…</view></view>
       <view class="flip-inner {{gameFlipped ? 'flipped' : ''}}" wx:elif="{{gameWord}}">
-
-        <!-- 正面 -->
         <view class="flip-front" catchtap="flipCard">
           <view class="gtop">
             <text class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</text>
             <view class="gclose" catchtap="closeGame">✕</view>
           </view>
-          <!-- 战斗模式 -->
           <view wx:if="{{mode === 'battle'}}">
             <text class="gcombo" wx:if="{{combo > 1}}">🔥 {{combo}} 连击</text>
-            <text class="gmonster" id="monster">
-              <text wx:if="{{(gameWordIdx - gameSessionStart) % 5 === 0}}">👹</text>
-              <text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 1}}">🐉</text>
-              <text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 2}}">👾</text>
-              <text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 3}}">🧟</text>
-              <text wx:else>🐺</text>
-            </text>
-            <view class="gmonster-hp">
-              <text wx:for="{{5 - Math.min(4, gameWord.correctStreak)}}" wx:key="*this">❤️</text>
-              <text wx:for="{{Math.min(4, gameWord.correctStreak)}}" wx:key="*this">🖤</text>
-            </view>
+            <text class="gmonster"><text wx:if="{{(gameWordIdx - gameSessionStart) % 5 === 0}}">👹</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 1}}">🐉</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 2}}">👾</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 3}}">🧟</text><text wx:else>🐺</text></text>
+            <view class="gmonster-hp"><text wx:for="{{5 - Math.min(4, gameWord.correctStreak)}}" wx:key="*this">❤️</text><text wx:for="{{Math.min(4, gameWord.correctStreak)}}" wx:key="*this">🖤</text></view>
           </view>
-          <!-- 花园模式 -->
           <view wx:elif="{{mode === 'garden'}}" class="ggarden">
-            <text class="gplant">
-              <text wx:if="{{gameWord.growth <= 0}}">🌱</text>
-              <text wx:elif="{{gameWord.growth <= 1}}">🌿</text>
-              <text wx:elif="{{gameWord.growth <= 2}}">🌹</text>
-              <text wx:else>🌳</text>
-            </text>
-            <text class="gmsg">
-              <text wx:if="{{gameWord.growth <= 0}}">刚种下这颗种子</text>
-              <text wx:elif="{{gameWord.growth <= 1}}">小苗正在生长</text>
-              <text wx:elif="{{gameWord.growth <= 2}}">花开了</text>
-              <text wx:else>已长成大树</text>
-            </text>
+            <text class="gplant"><text wx:if="{{gameWord.growth <= 0}}">🌱</text><text wx:elif="{{gameWord.growth <= 1}}">🌿</text><text wx:elif="{{gameWord.growth <= 2}}">🌹</text><text wx:else>🌳</text></text>
+            <text class="gmsg"><text wx:if="{{gameWord.growth <= 0}}">刚种下这颗种子</text><text wx:elif="{{gameWord.growth <= 1}}">小苗正在生长</text><text wx:elif="{{gameWord.growth <= 2}}">花开了</text><text wx:else>已长成大树</text></text>
           </view>
-          <!-- 集卡模式 -->
           <view wx:elif="{{mode === 'card'}}" class="gcard">
-            <text class="gbadge">
-              <text wx:if="{{gameWord.stars <= 0}}">🃏</text>
-              <text wx:elif="{{gameWord.stars <= 1}}">🎴</text>
-              <text wx:elif="{{gameWord.stars <= 2}}">💎</text>
-              <text wx:else>🌟</text>
-            </text>
-            <text class="grarity {{gameWord.stars <= 0 ? 'N' : gameWord.stars <= 1 ? 'R' : gameWord.stars <= 2 ? 'SR' : 'SSR'}}">
-              <text wx:if="{{gameWord.stars <= 0}}">N</text>
-              <text wx:elif="{{gameWord.stars <= 1}}">R</text>
-              <text wx:elif="{{gameWord.stars <= 2}}">SR</text>
-              <text wx:else>SSR</text>
-            </text>
+            <text class="gbadge"><text wx:if="{{gameWord.stars <= 0}}">🃏</text><text wx:elif="{{gameWord.stars <= 1}}">🎴</text><text wx:elif="{{gameWord.stars <= 2}}">💎</text><text wx:else>🌟</text></text>
+            <text class="grarity {{gameWord.stars <= 0 ? 'N' : gameWord.stars <= 1 ? 'R' : gameWord.stars <= 2 ? 'SR' : 'SSR'}}"><text wx:if="{{gameWord.stars <= 0}}">N</text><text wx:elif="{{gameWord.stars <= 1}}">R</text><text wx:elif="{{gameWord.stars <= 2}}">SR</text><text wx:else>SSR</text></text>
           </view>
           <text class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source.split('/')[0].trim()}}</text>
           <text class="gw">{{gameWord.word}}</text>
@@ -134,8 +144,6 @@
           <view class="speaker" catchtap="speakWord">🔊 听发音</view>
           <text class="ghint">点击翻转</text>
         </view>
-
-        <!-- 背面 -->
         <view class="flip-back" catchtap="flipCard">
           <view class="gtop">
             <text class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</text>
@@ -150,7 +158,6 @@
             <view class="gb known" catchtap="markKnown">✅ 认识</view>
           </view>
         </view>
-
       </view>
     </view>
   </view>
@@ -165,6 +172,16 @@
     </view>
   </view>
   <canvas class="confetti" id="confettiCanvas" type="2d"></canvas>
+
+  <!-- 故事弹窗 -->
+  <view class="spop {{showStory ? 'show' : ''}}">
+    <view class="spox">
+      <text class="spe">{{showStory ? STORIES[storyIdx].icon : ''}}</text>
+      <text class="spt">第 {{storyIdx + 1}} 章 · {{showStory ? STORIES[storyIdx].title : ''}}</text>
+      <text class="sptxt">{{showStory ? STORIES[storyIdx].text : ''}}</text>
+      <view class="spbtn" catchtap="closeStory">继续背词 🚀</view>
+    </view>
+  </view>
 
   <view class="mm-overlay {{showManualModal ? 'show' : ''}}" catchtap="cancelManualModal">
     <view class="mm-box" catchtap="">
