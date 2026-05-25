@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark' : ''}} mode-{{mode}}">
+<view class="page {{darkMode ? 'dark' : ''}} theme-{{theme}} mode-{{mode}}">
   <view class="tb">
     <view class="ttl">单词本</view>
     <view class="sub">背词模式 · {{mode === 'battle' ? '战斗' : mode === 'garden' ? '花园' : '集卡'}}</view>
@@ -23,7 +23,38 @@
     <view class="st"><text class="n">{{streak}}</text><text class="l">🔥 连胜</text></view>
   </view>
 
-  <view class="tabs">
+  <!-- 主题选择 -->
+  <view class="tp">
+    <view class="tp-dot {{theme === '' ? 'on' : ''}}" data-theme="" catchtap="setTheme">
+      <view class="tpc" style="background:linear-gradient(135deg,#ffb3c6,#ff8fab)"></view>
+    </view>
+    <view class="tp-dot {{theme === 'ocean' ? 'on' : ''}}" data-theme="ocean" catchtap="setTheme">
+      <view class="tpc" style="background:linear-gradient(135deg,#00acc1,#00897b)"></view>
+    </view>
+    <view class="tp-dot {{theme === 'sunset' ? 'on' : ''}}" data-theme="sunset" catchtap="setTheme">
+      <view class="tpc" style="background:linear-gradient(135deg,#ff6f00,#e65100)"></view>
+    </view>
+    <view class="tp-dot {{theme === 'forest' ? 'on' : ''}}" data-theme="forest" catchtap="setTheme">
+      <view class="tpc" style="background:linear-gradient(135deg,#558b2f,#2e7d32)"></view>
+    </view>
+    <view class="tp-dot {{theme === 'midnight' ? 'on' : ''}}" data-theme="midnight" catchtap="setTheme">
+      <view class="tpc" style="background:linear-gradient(135deg,#7c4dff,#5c6bc0)"></view>
+    </view>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="sbar">
+    <input class="sinp" placeholder="🔍 搜索单词或释义…" value="{{searchQuery}}" bindinput="onSearchInput" />
+  </view>
+
+  <!-- 导航 -->
+  <view class="sec-nav">
+    <view class="snav {{showAch || showSents ? '' : 'on'}}" catchtap="openWords">📖 单词</view>
+    <view class="snav {{showAch ? 'on' : ''}}" catchtap="openAch">🏆 成就</view>
+    <view class="snav {{showSents ? 'on' : ''}}" catchtap="openSents">📝 例句</view>
+  </view>
+
+  <view class="tabs" wx:if="{{!showAch && !showSents}}">
     <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="0" catchtap="switchTab">📝 学习中</view>
     <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="1" catchtap="switchTab">🔥 待复习</view>
     <view class="tab {{tab === 2 ? 'on' : ''}}" data-tab="2" catchtap="switchTab">✓ 已掌握</view>
@@ -71,6 +102,30 @@
         <text class="sii2">{{i < unlockedStories ? item.icon : '🔒'}}</text>
         <text class="sit">{{i < unlockedStories ? ('第' + (i+1) + '章 · ' + item.title) : '??'}}</text>
       </view>
+    </view>
+  </scroll-view>
+
+  <!-- 成就视图 -->
+  <scroll-view class="list" scroll-y wx:elif="{{showAch}}" catchtap="closeSwipe">
+    <view class="ag">
+      <view class="agc {{achProgress[index] >= item.target ? 'done' : ''}}" wx:for="{{ACHS}}" wx:key="id" wx:for-index="index">
+        <text class="agi">{{item.icon}}</text>
+        <text class="agn">{{item.name}}</text>
+        <text class="agd">{{item.desc}}</text>
+        <view class="agp"><view class="agf" style="width:{{Math.min(100, (achProgress[index] || 0) / item.target * 100) + '%'}}"></view></view>
+        <text class="aglock">{{achProgress[index] >= item.target ? '✅' : '🔒'}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 例句视图 -->
+  <scroll-view class="list" scroll-y wx:elif="{{showSents}}" catchtap="closeSwipe">
+    <view class="empt" wx:if="{{savedSents.length === 0}}"><text class="emt">还没有收藏的例句</text><text class="emh">在翻卡时点击⭐即可收藏</text></view>
+    <view class="sc" wx:for="{{savedSents}}" wx:key="en" wx:for-index="idx">
+      <view class="sc-del" catchtap="toggleSaveSent" data-idx="{{idx}}">🗑️</view>
+      <text class="sce">{{item.en}}</text>
+      <text class="scc">{{item.cn}}</text>
+      <text class="scs">📖 {{item.src || ''}}</text>
     </view>
   </scroll-view>
 
@@ -153,6 +208,7 @@
           <text class="fbp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</text>
           <view class="gc">{{gameWord.chn}}</view>
           <text class="gctxcn" wx:if="{{gameWord.contextCn}}">{{gameWord.contextCn}}</text>
+          <view class="gsave" catchtap="toggleSaveSent" data-en="{{gameWord.context}}" data-cn="{{gameWord.contextCn}}" data-src="{{gameWord.word}}·{{gameWord.source}}">⭐ 收藏例句</view>
           <view class="gacts">
             <view class="gb hard" catchtap="markHard">😵 不认识</view>
             <view class="gb known" catchtap="markKnown">✅ 认识</view>

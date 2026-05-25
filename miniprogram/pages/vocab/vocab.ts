@@ -29,6 +29,28 @@ interface IVocabData {
   darkMode: boolean
   PACKS: any
   STORIES: any
+  ACHS: any
+  theme: string
+  showStory: boolean
+  storyIdx: number
+  showStoryView: boolean
+  showPack: boolean
+  selectedPack: string
+  packEmoji: string
+  packName: string
+  packWords: Array<{word:string;def:string;got:boolean}>
+  unlockedStories: number
+  challengeActive: boolean
+  challengeDone: boolean
+  challengeStreak: number
+  challengeWords: string[]
+  challengeIdx: number
+  packStats: number[]
+  searchQuery: string
+  showAch: boolean
+  showSents: boolean
+  savedSents: any[]
+  achProgress: number[]
   gameWord: IVocabWord | null
   gameWordIdx: number
   gameTotal: number
@@ -45,21 +67,6 @@ interface IVocabData {
   manualModalValue: string
   swipedIdx: number
   celebrateShow: boolean
-  showStory: boolean
-  storyIdx: number
-  showStoryView: boolean
-  showPack: boolean
-  selectedPack: string
-  packEmoji: string
-  packName: string
-  packWords: Array<{word:string;def:string;got:boolean}>
-  unlockedStories: number
-  challengeActive: boolean
-  challengeDone: boolean
-  challengeStreak: number
-  challengeWords: string[]
-  challengeIdx: number
-  packStats: number[]
   _tick: number
 }
 
@@ -86,6 +93,12 @@ interface IVocabMethods {
   deleteWord(e: WechatMiniprogram.TouchEvent): void
   closeSwipe(): void
   setMode(e: WechatMiniprogram.TouchEvent): void
+  setTheme(e: WechatMiniprogram.TouchEvent): void
+  onSearchInput(e: WechatMiniprogram.Input): void
+  openWords(): void
+  openAch(): void
+  openSents(): void
+  toggleSaveSent(e: WechatMiniprogram.TouchEvent): void
   speakWord(): void
   markKnown(): void
   markHard(): void
@@ -716,6 +729,19 @@ const PACKS: IPack[] = [
   { id:'science',emoji:'🔬',name:'科学医疗',words:[{word:'analysis',def:'n.分析'},{word:'biology',def:'n.生物学'},{word:'chemistry',def:'n.化学'},{word:'clinical',def:'adj.临床的'},{word:'diagnose',def:'v.诊断'},{word:'experiment',def:'n.实验'},{word:'laboratory',def:'n.实验室'},{word:'medical',def:'adj.医学的'},{word:'physics',def:'n.物理学'},{word:'psychology',def:'n.心理学'},{word:'surgery',def:'n.外科手术'},{word:'symptom',def:'n.症状'},{word:'therapy',def:'n.治疗'},{word:'vaccine',def:'n.疫苗'},{word:'genetic',def:'adj.基因的'}]},
 ]
 
+// ===== 成就 =====
+interface IAch { id: string; icon: string; name: string; desc: string; target: number; key: string }
+const ACHS: IAch[] = [
+  { id:'first',icon:'🎯',name:'初出茅庐',desc:'完成第 1 次背词',target:1,key:'ach_first' },
+  { id:'combo10',icon:'🔥',name:'连击王者',desc:'达成 10 连击',target:10,key:'ach_combo10' },
+  { id:'words100',icon:'💯',name:'百词斩',desc:'累计掌握 100 个词',target:100,key:'ach_words100' },
+  { id:'week',icon:'🏅',name:'全勤周',desc:'连续 7 天完成挑战',target:7,key:'ach_week' },
+  { id:'stars10',icon:'⭐',name:'三星收藏家',desc:'10 个词达到 3 星',target:10,key:'ach_stars10' },
+  { id:'garden5',icon:'🌺',name:'花园大师',desc:'种出 5 棵大树',target:5,key:'ach_garden5' },
+  { id:'packs3',icon:'📚',name:'学霸',desc:'集齐 3 个卡包',target:3,key:'ach_packs3' },
+  { id:'total50',icon:'💪',name:'坚持不懈',desc:'累计背词 50 轮',target:50,key:'ach_total50' },
+]
+
 const EXTRACTED_CACHE_KEY = 'vocab_extracted_words'
 const EXTRACTED_VER_KEY = 'vocab_extracted_ver'
 const EXTRACTED_VER = 7
@@ -805,6 +831,8 @@ Page<IVocabData, IVocabMethods>({
     celebrateShow: false,
     PACKS: PACKS as any,
     STORIES: STORIES as any,
+    ACHS: ACHS as any,
+    theme: '',
     showStory: false,
     storyIdx: 0,
     showStoryView: false,
@@ -814,6 +842,11 @@ Page<IVocabData, IVocabMethods>({
     packName: '',
     packWords: [],
     unlockedStories: 0,
+    searchQuery: '',
+    showAch: false,
+    showSents: false,
+    savedSents: [],
+    achProgress: [],
     challengeActive: false,
     challengeDone: false,
     challengeStreak: 0,
@@ -826,12 +859,15 @@ Page<IVocabData, IVocabMethods>({
   onShow() {
     applyTheme(getDarkMode())
     const mode = wx.getStorageSync('vocab_mode') || 'battle'
+    const theme = wx.getStorageSync('vocab_theme') || ''
     const today = new Date().toDateString()
     const lastChallenge = wx.getStorageSync('challenge_date')
     const challengeDone = lastChallenge === today
     const challengeStreak = challengeDone ? (wx.getStorageSync('challenge_streak') || 1) : 0
     const packStats = PACKS.map(p => (wx.getStorageSync('pack_' + p.id) as number) || 0)
-    this.setData({ darkMode: getDarkMode(), mode, challengeDone, challengeStreak, packStats })
+    const achProgress = ACHS.map(a => (wx.getStorageSync(a.key) as number) || 0)
+    const savedSents = wx.getStorageSync('saved_sentences') || []
+    this.setData({ darkMode: getDarkMode(), mode, theme, challengeDone, challengeStreak, packStats, achProgress, savedSents })
     this.loadWords()
   },
 
@@ -857,9 +893,13 @@ Page<IVocabData, IVocabMethods>({
     const stats = { mastered: 0, learning: 0 }
     const tab = this.data.tab
     const filtered: IVocabWord[] = []
+    const sq = (this.data.searchQuery || '').toLowerCase()
     for (const w of words) {
       if (w.status === 'master') stats.mastered++
       else stats.learning++
+      let pass = true
+      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq)
+      if (!pass) continue
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
       else if (tab === 2 && w.status === 'master') filtered.push(w)
@@ -876,8 +916,12 @@ Page<IVocabData, IVocabMethods>({
   switchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = Number(e.currentTarget.dataset.tab)
     const words = this.data.words
+    const sq = (this.data.searchQuery || '').toLowerCase()
     const filtered: IVocabWord[] = []
     for (const w of words) {
+      let pass = true
+      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq)
+      if (!pass) continue
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
       else if (tab === 2 && w.status === 'master') filtered.push(w)
@@ -1073,9 +1117,57 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ mode })
   },
 
+  setTheme(e: WechatMiniprogram.TouchEvent) {
+    const theme = e.currentTarget.dataset.theme || ''
+    wx.setStorageSync('vocab_theme', theme)
+    this.setData({ theme })
+  },
+
+  onSearchInput(e: WechatMiniprogram.Input) {
+    this.setData({ searchQuery: e.detail.value })
+    this.loadWords()
+  },
+
+  openAch() {
+    this.setData({ showAch: !this.data.showAch, showSents: false, showPack: false, showStoryView: false })
+  },
+
+  openSents() {
+    const savedSents = wx.getStorageSync('saved_sentences') || []
+    this.setData({ showSents: !this.data.showSents, showAch: false, showPack: false, showStoryView: false, savedSents })
+  },
+
+  openWords() {
+    this.setData({ showAch: false, showSents: false, showPack: false, showStoryView: false })
+  },
+
+  toggleSaveSent(e: WechatMiniprogram.TouchEvent) {
+    const en = e.currentTarget.dataset.en
+    const cn = e.currentTarget.dataset.cn
+    const src = e.currentTarget.dataset.src || ''
+    if (!en) return
+    const idx = e.currentTarget.dataset.idx
+    if (idx !== undefined) {
+      // Remove from saved
+      const saved = wx.getStorageSync('saved_sentences') || []
+      saved.splice(Number(idx), 1)
+      wx.setStorageSync('saved_sentences', saved)
+      this.setData({ savedSents: saved })
+      wx.showToast({ title: '已移除', icon: 'none' })
+      return
+    }
+    // Save
+    const saved = wx.getStorageSync('saved_sentences') || []
+    if (saved.find((s: any) => s.en === en)) { wx.showToast({ title: '已收藏过', icon: 'none' }); return }
+    saved.unshift({ en, cn, src })
+    wx.setStorageSync('saved_sentences', saved)
+    this.setData({ savedSents: saved })
+    wx.showToast({ title: '⭐ 已收藏例句', icon: 'success' })
+  },
+
   openPacks() {
     this._updatePackStats()
-    this.setData({ showPack: !this.data.showPack, selectedPack: '', showStoryView: false })
+    this.setData({ showPack: !this.data.showPack, selectedPack: '', showStoryView: false, showAch: false, showSents: false })
   },
 
   openStoryView() {
