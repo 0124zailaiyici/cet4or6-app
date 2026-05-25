@@ -646,6 +646,46 @@ const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
   witness: { phonetic: '/ˈwɪtnəs/', definition: 'n. 目击者；v. 目击' },
 }
 
+// ===== 音效 =====
+let _audioCtx: any = null
+function playSfx(type: 'correct' | 'wrong' | 'complete' | 'flip') {
+  try {
+    if (!_audioCtx) _audioCtx = (wx as any).createWebAudioContext()
+    const ctx = _audioCtx as any
+    const now = ctx.currentTime
+    if (type === 'correct') {
+      // ascending two-tone
+      for (let i = 0; i < 2; i++) {
+        const o = ctx.createOscillator(); const g = ctx.createGain()
+        o.connect(g); g.connect(ctx.destination)
+        o.frequency.value = [523, 659][i]
+        g.gain.value = 0.2; g.gain.exponentialRampToValueAtTime(0.01, now + 0.15 + i * 0.12)
+        o.start(now + i * 0.12); o.stop(now + 0.2 + i * 0.12)
+      }
+    } else if (type === 'wrong') {
+      const o = ctx.createOscillator(); const g = ctx.createGain()
+      o.connect(g); g.connect(ctx.destination)
+      o.frequency.value = 330; o.frequency.linearRampToValueAtTime(220, now + 0.2)
+      g.gain.value = 0.25; g.gain.exponentialRampToValueAtTime(0.01, now + 0.35)
+      o.start(now); o.stop(now + 0.35)
+    } else if (type === 'complete') {
+      [523, 587, 659, 784].forEach((f, i) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain()
+        o.connect(g); g.connect(ctx.destination)
+        o.frequency.value = f
+        g.gain.value = 0.2; g.gain.exponentialRampToValueAtTime(0.01, now + 0.15 + i * 0.15)
+        o.start(now + i * 0.15); o.stop(now + 0.2 + i * 0.15)
+      })
+    } else if (type === 'flip') {
+      const o = ctx.createOscillator(); const g = ctx.createGain()
+      o.connect(g); g.connect(ctx.destination)
+      o.frequency.value = 880; o.type = 'sine'
+      g.gain.value = 0.08; g.gain.exponentialRampToValueAtTime(0.01, now + 0.08)
+      o.start(now); o.stop(now + 0.08)
+    }
+  } catch {}
+}
+
 // ===== 故事 =====
 interface IStory { icon: string; title: string; text: string }
 const STORIES: IStory[] = [
@@ -956,6 +996,7 @@ Page<IVocabData, IVocabMethods>({
   },
 
   flipCard() {
+    playSfx('flip')
     this.setData({ gameFlipped: !this.data.gameFlipped })
   },
 
@@ -984,6 +1025,7 @@ Page<IVocabData, IVocabMethods>({
       sw.growth = Math.min(3, (sw.growth || 0) + 1)
       sw.stars = Math.min(3, (sw.stars || 0) + 1)
     }
+    playSfx('correct')
     this.setData({ streak: this.data.streak + 1, combo })
     wx.setStorageSync('studyData', app.globalData.studyData)
     this._checkPackCompletion(w.word)
@@ -996,6 +1038,7 @@ Page<IVocabData, IVocabMethods>({
     const app = getApp<IAppOption>()
     const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
     if (sw) { sw.correctStreak = 0; sw.status = 'review' }
+    playSfx('wrong')
     this.setData({ streak: 0, combo: 0 })
     wx.setStorageSync('studyData', app.globalData.studyData)
     setTimeout(() => this.nextGame(), 300)
@@ -1004,6 +1047,7 @@ Page<IVocabData, IVocabMethods>({
   nextGame(skipFrom?: number) {
     const nextIdx = this.data.gameWordIdx + 1
     if (nextIdx >= this.data.gameTotal || nextIdx >= this.data.gameSessionStart + this.data.gameSessionLimit) {
+      playSfx('complete')
       this.closeGame()
       this.startConfetti()
       this.setData({ celebrateShow: true })
