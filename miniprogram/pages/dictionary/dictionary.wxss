@@ -1,7 +1,6 @@
 .page {
   min-height: 100vh;
   padding: 28rpx;
-  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--card-bg) 100%);
 }
 
 /* ── 顶部导航 ── */

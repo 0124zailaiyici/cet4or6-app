@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
   <text class="skip" catchtap="skip">跳过</text>
   <view class="swipe-wrap" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
     <view class="swipe" style="transform: translateX(-{{current}}00vw)">

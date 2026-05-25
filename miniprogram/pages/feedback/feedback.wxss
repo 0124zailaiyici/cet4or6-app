@@ -33,3 +33,14 @@
 .link:last-child { border-bottom: none; }
 .arrow { font-size: 32rpx; color: #ccc; }
 .ver { font-size: 24rpx; color: #8a7a9a; }
+
+.dark-theme.page { background: #12121f !important; }
+.dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
+.dark-theme .card { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .t { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .t.on { color: #ff8fab !important; background: rgba(255,143,171,0.08) !important; border-color: rgba(255,143,171,0.2) !important; }
+.dark-theme .input { background: #2a2a4a !important; color: #e0d0e8 !important; border-color: #3a3a5a !important; }
+.dark-theme .note { color: #a090b0 !important; }
+.dark-theme .link { color: #e0d0e8 !important; border-color: #2a2a4a !important; }
+.dark-theme .arrow { color: #6a6a8a !important; }
+.dark-theme .ver { color: #a090b0 !important; }

@@ -24,3 +24,10 @@
   font-size: 30rpx; font-weight: 700; box-shadow: 0 8rpx 32rpx rgba(255,107,138,0.3);
 }
 .btn:active { opacity: 0.9; transform: scale(0.98); }
+
+.dark-theme.page { background: #12121f !important; }
+.dark-theme .skip { color: #a090b0 !important; }
+.dark-theme .title { color: #e0d0e8 !important; }
+.dark-theme .desc { color: #a090b0 !important; }
+.dark-theme .dot { background: #3a3a5a !important; }
+.dark-theme .dot.on { background: #ff8fab !important; }

@@ -1,8 +1,16 @@
+import { applyTheme, getDarkMode } from '../../utils/theme'
+
 Page({
   data: {
     fbType: '功能异常',
     fbText: '',
     types: ['功能异常', '功能建议', '体验评价', '其他'],
+    darkMode: false,
+  },
+
+  onShow() {
+    applyTheme(getDarkMode())
+    this.setData({ darkMode: getDarkMode() })
   },
 
   setType(e: WechatMiniprogram.TouchEvent) {

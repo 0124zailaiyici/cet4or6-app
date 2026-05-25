@@ -1,3 +1,5 @@
+import { applyTheme, getDarkMode } from '../../utils/theme'
+
 Page({
   data: {
     morningTime: '7:30',
@@ -7,6 +9,12 @@ Page({
     morningSub: false,
     eveningSub: false,
     weeklySub: false,
+    darkMode: false,
+  },
+
+  onShow() {
+    applyTheme(getDarkMode())
+    this.setData({ darkMode: getDarkMode() })
   },
 
   toggleMorning() {

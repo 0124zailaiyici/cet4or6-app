@@ -21,3 +21,13 @@
 
 .tip { margin: 20rpx; padding: 20rpx; background: #fff; border-radius: 14rpx; box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04); }
 .tip-t { font-size: 24rpx; color: #8a7a9a; line-height: 1.6; }
+
+.dark-theme.page { background: #12121f !important; }
+.dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
+.dark-theme .card { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
+.dark-theme .label { color: #e0d0e8 !important; }
+.dark-theme .t { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .t.on { color: #fff !important; background: #ff8fab !important; }
+.dark-theme .hint, .dark-theme .tip-t { color: #a090b0 !important; }
+.dark-theme .sub { color: #ff8fab !important; border-color: rgba(255,143,171,0.2) !important; }
+.dark-theme .tip { background: #1e1e38 !important; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2) !important; }
