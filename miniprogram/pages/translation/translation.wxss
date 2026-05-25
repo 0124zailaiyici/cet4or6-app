@@ -78,6 +78,19 @@
 .ps-struct .c{display:block;color:#6d3352;margin-bottom:6rpx}
 .ps-struct .hint{display:block;color:#7c4d8a;font-weight:500;margin-top:6rpx;font-size:22rpx}
 .ps-tip{background:#fff8e6;border-radius:14rpx;padding:14rpx 18rpx;font-size:22rpx;line-height:1.7;color:#6d4c2a}
+.weak-cards{display:flex;flex-wrap:wrap;gap:12rpx;margin:0 24rpx 20rpx}
+.wc{flex:1;min-width:140rpx;background:#fff;border-radius:14rpx;padding:16rpx;text-align:center;box-shadow:0 2rpx 12rpx rgba(255,158,181,0.04)}
+.wc.warn{border:2rpx solid rgba(211,47,47,0.12)}
+.wc.mid{border:2rpx solid rgba(255,152,0,0.12)}
+.wc.ok{border:2rpx solid rgba(56,142,60,0.12)}
+.wc .wc-l{font-size:22rpx;color:#8a7a9a;margin-bottom:8rpx}
+.wc .wc-bar{height:6rpx;border-radius:3rpx;background:#fff0f3;margin-bottom:6rpx}
+.wc .wc-f{height:100%;border-radius:3rpx;background:linear-gradient(90deg,#ff6b8a,#ff4d6d);transition:width 0.3s}
+.wc.warn .wc-f{background:linear-gradient(90deg,#d32f2f,#c62828)}
+.wc.mid .wc-f{background:linear-gradient(90deg,#ff9800,#f57c00)}
+.wc.ok .wc-f{background:linear-gradient(90deg,#388e3c,#2e7d32)}
+.wc .wc-n{display:block;font-size:32rpx;font-weight:800;color:#2d2d4e}
+.wc .wc-m{display:block;font-size:18rpx;color:#ccc}
 /* ── 按钮 ── */
 .btn-next{width:100%;height:88rpx;border-radius:44rpx;border:none;background:linear-gradient(135deg,#f9a8d4,#f472b6);color:#fff;font-size:28rpx;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 6rpx 24rpx rgba(244,114,182,0.15);margin-bottom:8rpx}
 .btn-next:active{transform:scale(0.97)}
@@ -174,6 +187,13 @@
 .dark-theme .today-card{background:linear-gradient(135deg,#1a2a20,#1a2a1e);border-color:rgba(102,187,106,0.06)}
 .dark-theme .today-card .today-label{color:#81c784}
 .dark-theme .ps-tip{background:#2a2020;color:#d4c0a0}
+.dark-theme .wc{background:#1e1e38!important;box-shadow:0 2rpx 12rpx rgba(0,0,0,0.2)!important}
+.dark-theme .wc.warn{border-color:rgba(239,83,80,0.2)!important}
+.dark-theme .wc.mid{border-color:rgba(255,183,77,0.2)!important}
+.dark-theme .wc.ok{border-color:rgba(102,187,106,0.2)!important}
+.dark-theme .wc .wc-l{color:#a090b0!important}
+.dark-theme .wc .wc-n{color:#e0d0e8!important}
+.dark-theme .wc .wc-m{color:#6a6a8a!important}
 .dark-theme .empty-tip{color:#6a4a6a}
 .dark-theme .cwc{background:#201628}
 .dark-theme .cw.ok{background:#1a2a20;color:#81c784}

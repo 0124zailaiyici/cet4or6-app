@@ -78,6 +78,7 @@ Page({
     hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
     words: [] as { word: string; ok: boolean }[],
     todayItem: null as any,
+    weakPoints: [] as { key: string; label: string; avg: number; count: number }[],
   },
 
   onLoad() {
@@ -116,7 +117,20 @@ Page({
     /* 今日推荐：找第一个未完成的 L1 或 L2 题 */
     const todo = listItems.filter(t => !t._done)
     const todayItem = todo.length > 0 ? (todo.find(t => t._level <= 2) || todo[0]) : null
-    this.setData({ translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360), levels, todayItem })
+    // 弱项分析
+    const dimNames: Record<string, string> = { vocabulary: '词汇', grammar: '语法', semantics: '语义', expression: '表达' }
+    const dimScores: Record<string, number[]> = {}
+    for (const h of history) {
+      if (!h.dimensions) continue
+      for (const [k, v] of Object.entries(h.dimensions)) {
+        if (!dimScores[k]) dimScores[k] = []; dimScores[k].push(v)
+      }
+    }
+    const weakPoints: { key: string; label: string; avg: number; count: number }[] = Object.entries(dimScores).map(([k, vals]) => {
+      const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+      return { key: k, label: dimNames[k] || k, avg, count: vals.length }
+    }).sort((a, b) => a.avg - b.avg)
+    this.setData({ translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360), levels, todayItem, weakPoints })
   },
 
   switchPage(e: any) {

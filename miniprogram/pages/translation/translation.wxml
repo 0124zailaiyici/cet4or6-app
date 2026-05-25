@@ -106,7 +106,15 @@
       </view>
     </view>
     <view class="stitle">💡 弱项提示</view>
-    <view class="ps-tip" style="margin:0 24rpx 20rpx">完成更多练习后，这里会显示你的薄弱维度（词汇/语法/语义/表达）和针对性推荐。</view>
+    <view class="ps-tip" wx:if="{{weakPoints.length === 0}}" style="margin:0 24rpx 20rpx">完成更多练习后，这里会显示你的薄弱维度（词汇/语法/语义/表达）和针对性推荐。</view>
+    <view class="weak-cards" wx:else>
+      <view class="wc {{item.avg < 60 ? 'warn' : item.avg < 80 ? 'mid' : 'ok'}}" wx:for="{{weakPoints}}" wx:key="key">
+        <view class="wc-l">{{item.label}}</view>
+        <view class="wc-bar"><view class="wc-f" style="width:{{item.avg}}%"></view></view>
+        <text class="wc-n">{{item.avg}}</text>
+        <text class="wc-m">{{item.count}}次</text>
+      </view>
+    </view>
   </block>
 
   <!-- ═══ 收藏 ═══ -->
