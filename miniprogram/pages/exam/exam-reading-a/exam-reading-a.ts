@@ -1,4 +1,5 @@
 import readingsData from '../../../data/readings'
+import readingAnnotations from '../../reading/reading_annotations'
 import { applyTheme, getDarkMode } from '../../../utils/theme'
 
 Page({
@@ -11,6 +12,14 @@ Page({
     _used: [] as boolean[],
     _active: '',
     _touchX: 0,
+    _submitted: false,
+    showResult: false,
+    _correctCount: 0,
+    _totalCount: 0,
+    _blankResults: {} as Record<string, string>,
+    _optionResults: [] as string[],
+    _resultItems: [] as any[],
+    _letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
     darkMode: false,
   },
 
@@ -27,7 +36,29 @@ Page({
     const used = (p.options || []).map((w: string) => Object.values(ba).includes(w))
     const segs = parseSegments(p.passage || '', Object.keys(p.correctAnswers))
     const pages = splitPages(segs)
-    this.setData({ passage: p, _pages: pages, _pageIdx: 0, _curSegs: pages[0] || [], _sel: ba, _used: used, _active: '' })
+    let submitted = false, blankResults: Record<string, string> = {}, optionResults: string[] = [], resultItems: any[] = [], correctCount = 0
+    if ((ans as any).submitted) {
+      submitted = true
+      const ca = p.correctAnswers || {}
+      const opts = p.options || []
+      const annot = (readingAnnotations as any)[p.id]
+      Object.keys(ca).forEach(k => {
+        const ua = ba[k]
+        const isCorrect = ua === ca[k]
+        if (isCorrect) correctCount++
+        blankResults[k] = isCorrect ? 'ok' : 'ko'
+        resultItems.push({ label: `第${k}空`, userAnswer: ua || '未填', correctAnswer: ca[k], isCorrect, locate: annot?.qLocate?.[k] || '', hint: annot?.qHint?.[k] || '' })
+      })
+      optionResults = opts.map((w: string) => {
+        const isCorrect = Object.values(ca).includes(w)
+        const isUsed = Object.values(ba).includes(w)
+        if (isUsed && !isCorrect) return 'ko'
+        if (isUsed && isCorrect) return 'ok'
+        if (isCorrect) return 'ok'
+        return ''
+      })
+    }
+    this.setData({ passage: p, _pages: pages, _pageIdx: 0, _curSegs: pages[0] || [], _sel: ba, _used: used, _active: '', _submitted: submitted, showResult: false, _correctCount: correctCount, _totalCount: Object.keys(p.correctAnswers || {}).length, _blankResults: blankResults, _optionResults: optionResults, _resultItems: resultItems })
   },
 
   onTouchStart(e: any) { this.data._touchX = e.touches[0].clientX },
@@ -44,11 +75,13 @@ Page({
   },
 
   onBlankTap(e: any) {
+    if (this.data._submitted) return
     const key = e.currentTarget.dataset.key
     this.setData({ _active: this.data._active === key ? '' : key })
   },
 
   onChipTap(e: any) {
+    if (this.data._submitted) return
     if (!this.data._active) { wx.showToast({ title: '请先在文章中点击一个空', icon: 'none' }); return }
     const word = e.currentTarget.dataset.word
     const key = this.data._active
@@ -71,6 +104,17 @@ Page({
     const segs = parseSegments(p.passage || '', Object.keys(p.correctAnswers))
     const pages = splitPages(segs)
     this.setData({ _active: '', _sel: ba, _used: newFlags, _pages: pages, _curSegs: pages[this.data._pageIdx] || [] })
+  },
+
+  showResultAgain() { this.setData({ showResult: true }) },
+  hideResult() { this.setData({ showResult: false }) },
+
+  jumpToParagraph(e: any) {
+    const loc = e.currentTarget.dataset.locate as string
+    const pIdx = parseInt(loc.replace(/[^0-9]/g, '')) - 1
+    const target = Math.min(pIdx, this.data._pages.length - 1)
+    this.setData({ _pageIdx: target, _curSegs: this.data._pages[target] || [] })
+    wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
   },
 
   goBack() { wx.navigateBack() },

@@ -76,6 +76,34 @@ export interface ScorerResult {
   }
 }
 
+export function scoreWriting(text: string): {
+  score: number; dimensions: { content: number; structure: number; language: number }; suggestions: string
+} {
+  const wc = text.trim() ? text.trim().split(/\s+/).length : 0
+  const sc = text.split(/[.!?]+/).filter(Boolean).length
+  const paras = text.split('\n').filter(Boolean).length
+  let content = 60, structure = 60, language = 60
+  const notes: string[] = []
+  if (wc < 80) { notes.push('词数不足，建议 120-180 词'); content = 40; structure = 40 }
+  else if (wc >= 120 && wc <= 180) { notes.push('✅ 词数符合四级要求'); content = 75; structure = 70 }
+  else { notes.push(`作文 ${wc} 词，建议 120-180 词`); content = wc > 180 ? 65 : 55 }
+  if (paras < 2) { notes.push('建议分 2-3 段'); structure = Math.min(structure, 45) }
+  else if (paras >= 3) { notes.push(`✅ 分为 ${paras} 段`); structure = Math.min(structure + 15, 85) }
+  else structure = Math.min(structure + 5, 75)
+  if (sc < 5) { notes.push('句子偏少，建议 8-15 句'); content = Math.min(content, 50) }
+  else if (sc >= 8) { notes.push(`✅ ${sc} 个句子`); content = Math.min(content + 10, 85) }
+  const hasIntro = /first(ly)?|to begin with|it is (widely|universally)/i.test(text)
+  const hasBody = /second(ly)?|furthermore|moreover|in addition|on the (one|other) hand/i.test(text)
+  const hasConcl = /in conclusion|to sum up|in my opinion|in my view/i.test(text)
+  if (hasIntro) structure = Math.min(structure + 8, 90)
+  if (hasBody) structure = Math.min(structure + 8, 90)
+  if (hasConcl) structure = Math.min(structure + 10, 90)
+  if (hasIntro && hasBody && hasConcl) notes.push('✅ 总—分—总结构清晰')
+  else notes.push('💡 建议总—分—总结构')
+  const avgScore = Math.round((content + structure + language) / 3)
+  return { score: avgScore, dimensions: { content, structure, language }, suggestions: notes.join('\n') }
+}
+
 export function scoreTranslation(
   answer: string,
   item: { reference: string; keywords?: string[]; acceptableAnswers?: string[] }

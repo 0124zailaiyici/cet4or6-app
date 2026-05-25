@@ -2,18 +2,31 @@
   <view class="topbar">
     <text catchtap="goBack">← 返回</text>
     <h1 style="flex:1;text-align:center">听力</h1>
-    <text></text>
+    <text wx:if="{{_submitted && !showResult}}" class="tb-score" catchtap="showResultAgain">{{_correctCount}}/{{_totalCount}}</text>
+    <text wx:if="{{_submitted && showResult}}" class="tb-score on" catchtap="hideResult">{{_correctCount}}/{{_totalCount}}</text>
   </view>
-  <scroll-view class="scroll" scroll-y>
-    <view class="audio-row">
-      <view class="audio-btn {{isPlaying ? 'playing' : ''}}" catchtap="toggleAudio">{{isPlaying ? '⏸ 暂停' : '▶ 播放音频'}}</view>
-    </view>
-    <view wx:for="{{questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="card">
-      <view class="q-stem">Question {{q.qi}}</view>
-      <view wx:for="{{q.options}}" wx:for-index="oi" wx:for-item="opt" wx:key="*this" class="opt {{sel[q.qi] === oi ? 'sel' : ''}}" data-qi="{{q.qi}}" data-oi="{{oi}}" catchtap="select">
-        <text class="letter">{{['A','B','C','D'][oi]}}</text>
-        <text class="text">{{opt}}</text>
+  <block wx:if="{{!showResult}}">
+    <scroll-view class="scroll" scroll-y>
+      <view class="audio-row">
+        <view class="audio-btn {{isPlaying ? 'playing' : ''}}" catchtap="toggleAudio">{{isPlaying ? '⏸ 暂停' : '▶ 播放音频'}}</view>
       </view>
-    </view>
-  </scroll-view>
+      <view wx:for="{{questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="card">
+        <view class="q-stem">Question {{q.qi}}</view>
+        <view wx:for="{{q.options}}" wx:for-index="oi" wx:for-item="opt" wx:key="*this" class="opt {{sel[q.qi] === oi ? 'sel' : ''}}" data-qi="{{q.qi}}" data-oi="{{oi}}" catchtap="{{_submitted ? '' : 'select'}}">
+          <text class="letter">{{_letters[oi]}}</text>
+          <text class="text">{{opt}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </block>
+  <view wx:if="{{_submitted && showResult}}" class="result-view">
+    <scroll-view class="rv-list" scroll-y>
+      <view class="rv-card {{_results[q.qi] ? 'correct' : 'wrong'}}" wx:for="{{questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi">
+        <view class="rvc-hd"><view class="rvc-num {{_results[q.qi] ? 'ok' : 'bad'}}">{{_results[q.qi] ? '✓' : '✗'}}</view><text class="rvc-label">Q{{q.qi}}</text></view>
+        <view class="rvc-opts">
+          <view class="rvc-opt {{oi === _correctIdxs[q.qi] ? 'ans' : ''}} {{sel[q.qi] === oi && oi !== _correctIdxs[q.qi] ? 'wrong' : ''}}" wx:for="{{q.options}}" wx:key="*this" wx:for-index="oi">{{_letters[oi]}}. {{item}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
 </view>

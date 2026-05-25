@@ -1,11 +1,13 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="topbar">
-    <view class="tb-back" catchtap="goBack">返回</view>
-    <text class="tb-title">长篇阅读匹配</text>
-    <view class="tb-badge tag-B">匹配</view>
-  </view>
+<view class="page {{_submitted && showResult ? 'page-results' : ''}} {{darkMode ? 'dark-theme' : ''}}">
+    <view class="topbar">
+      <view class="tb-back" catchtap="goBack">返回</view>
+      <text class="tb-title">长篇阅读匹配</text>
+      <view class="tb-badge tag-B">匹配</view>
+      <text wx:if="{{_submitted && !showResult}}" class="tb-score" catchtap="showResultAgain">{{_correctCount}}/{{_totalCount}}</text>
+      <text wx:if="{{_submitted && showResult}}" class="tb-score on" catchtap="hideResult">{{_correctCount}}/{{_totalCount}}</text>
+    </view>
   <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
-    <scroll-view class="pz-scroll" scroll-y>
+    <scroll-view class="pz-scroll" scroll-y enhanced="{{true}}">
       <view class="pz-text">
         <view class="pass-para" wx:for="{{_curParas}}" wx:key="letter" wx:for-item="para">
           <text><text style="color:#546e7a;font-weight:700">{{para.letter}})</text> {{para.text}}</text>
@@ -17,22 +19,35 @@
     </view>
   </view>
   <view class="divider"></view>
-  <view class="quest-zone">
-    <view class="qz-label">📋 匹配陈述 · 第 <text>{{_stmtPageIdx + 1}}</text>/<text>{{_stmtMax}}</text> 页（先点陈述，再点字母）</view>
-    <scroll-view class="qb-scroll" scroll-y bindtouchstart="onStmtTouchStart" bindtouchend="onStmtTouchEnd">
-      <view wx:for="{{_curStmts}}" wx:key="qi" wx:for-index="qi" class="qb-item {{activeStmt === item.qi ? 'active' : ''}}" data-qi="{{item.qi}}" catchtap="onSelectStmt">
-        <text class="qbi-num">{{item.qi + 36}}</text>
-        <text class="qbi-txt">{{item.q}}</text>
-        <view class="qbi-ans" wx:if="{{passage._ma[item.qi]}}">{{passage._ma[item.qi]}}</view>
+  <block wx:if="{{!showResult}}">
+    <view class="quest-zone">
+      <view wx:if="{{!_submitted}}" class="qz-label">📋 匹配陈述 · 第 <text>{{_stmtPageIdx + 1}}</text>/<text>{{_stmtMax}}</text> 页（先点陈述，再点字母）</view>
+      <scroll-view wx:if="{{!_submitted}}" class="qb-scroll" scroll-y bindtouchstart="onStmtTouchStart" bindtouchend="onStmtTouchEnd">
+          <view wx:for="{{_curStmts}}" wx:key="qi" wx:for-index="qi" class="qb-item {{activeStmt === item.qi ? 'active' : ''}}" data-qi="{{item.qi}}" catchtap="onSelectStmt">
+            <text class="qbi-num">{{item.qi + 36}}</text>
+            <text class="qbi-txt">{{item.q}}</text>
+            <view wx:if="{{passage._ma[item.qi] && !_submitted}}" class="qbi-ans" data-idx="{{item.qi}}" catchtap="removeMatch">{{passage._ma[item.qi]}}</view>
+            <view wx:elif="{{passage._ma[item.qi] && _submitted}}" class="qbi-ans {{'qbia-' + _stmtResults[item.qi]}}">{{passage._ma[item.qi]}}</view>
+            <text wx:elif="{{_submitted && passage.correctAnswers[item.qi]}}" class="qbi-miss">漏选</text>
+            <text wx:if="{{_submitted && _stmtResults[item.qi] === 'ko'}}" class="qbi-cor">→ {{passage.correctAnswers[item.qi]}}</text>
+          </view>
+      </scroll-view>
+      <view class="dots" wx:if="{{_stmtPages.length > 1 && !_submitted}}">
+        <view wx:for="{{_stmtPages}}" wx:key="*this" wx:for-index="si" class="dot {{si === _stmtPageIdx ? 'on' : ''}}"></view>
       </view>
-    </scroll-view>
-    <view class="dots" wx:if="{{_stmtPages.length > 1}}">
-      <view wx:for="{{_stmtPages}}" wx:key="*this" wx:for-index="si" class="dot {{si === _stmtPageIdx ? 'on' : ''}}"></view>
+      <view class="qb-bar" wx:if="{{!_submitted}}">
+        <view class="qb-bar-letters">
+          <text class="qb-l" wx:for="{{_availLetters}}" wx:key="*this" wx:for-item="l" catchtap="onMatchLetter" data-val="{{l}}">{{l}}</text>
+        </view>
+      </view>
     </view>
-    <view class="qb-bar">
-      <view class="qb-bar-letters">
-        <text class="qb-l" wx:for="{{letters}}" wx:key="*this" wx:for-item="l" catchtap="onMatchLetter" data-val="{{l}}">{{l}}</text>
-      </view>
+  </block>
+  <view wx:if="{{_submitted && showResult}}" class="result-view">
+    <view class="rv-card {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{_resultItems}}" wx:key="label" wx:for-item="item">
+      <view class="rvc-hd"><view class="rvc-num {{item.isCorrect ? 'ok' : 'bad'}}">{{item.isCorrect ? '✓' : '✗'}}</view><text class="rvc-label">{{item.label}}</text><text class="rvc-locate" wx:if="{{item.locate}}" data-locate="{{item.locate}}" catchtap="jumpToParagraph">📍 {{item.locate}}</text></view>
+      <text class="rvc-stem" wx:if="{{item.questionStem}}">{{item.questionStem}}</text>
+      <view class="rvc-ans" wx:if="{{!item.isCorrect}}"><text class="rvc-ans-label">你的:</text><text class="rvc-ans-val wrong">{{item.userAnswer}}</text><text class="rvc-ans-label">正确:</text><text class="rvc-ans-val ok">{{item.correctAnswer}}</text></view>
+      <view class="rvc-hint" wx:if="{{item.hint}}">💡 {{item.hint}}</view>
     </view>
   </view>
 </view>

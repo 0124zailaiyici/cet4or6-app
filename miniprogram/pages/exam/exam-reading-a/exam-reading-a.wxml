@@ -1,15 +1,17 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="topbar">
-    <view class="tb-back" catchtap="goBack">返回</view>
-    <text class="tb-title">选词填空</text>
-    <view class="tb-badge tag-A">选词</view>
-  </view>
+<view class="page {{_submitted && showResult ? 'page-results' : ''}} {{darkMode ? 'dark-theme' : ''}}">
+    <view class="topbar">
+      <view class="tb-back" catchtap="goBack">返回</view>
+      <text class="tb-title">选词填空</text>
+      <view class="tb-badge tag-A">选词</view>
+      <text wx:if="{{_submitted && !showResult}}" class="tb-score" catchtap="showResultAgain">{{_correctCount}}/{{_totalCount}}</text>
+      <text wx:if="{{_submitted && showResult}}" class="tb-score on" catchtap="hideResult">{{_correctCount}}/{{_totalCount}}</text>
+    </view>
   <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
-    <scroll-view class="pz-scroll" scroll-y>
+    <scroll-view class="pz-scroll" scroll-y enhanced="{{true}}">
       <text class="pz-text">
         <block wx:for="{{_curSegs}}" wx:key="*this" wx:for-item="seg">
           <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
-          <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{_sel[seg.num] ? 'filled' : ''}} {{_active === seg.num ? 'active' : ''}}" data-key="{{seg.num}}" catchtap="onBlankTap">{{_sel[seg.num] || seg.num}}</text>
+          <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{_sel[seg.num] ? 'filled' : ''}} {{_active === seg.num ? 'active' : ''}} {{_submitted ? (_blankResults[seg.num] === 'ok' ? 'bk-ok' : 'bk-ko') : ''}}" data-key="{{seg.num}}" catchtap="{{_submitted ? '' : 'onBlankTap'}}"><text>{{_sel[seg.num] || seg.num}}</text><text wx:if="{{_submitted && _blankResults[seg.num] === 'ko'}}" class="bk-cor">→正确: {{passage.correctAnswers[seg.num]}}</text></text>
         </block>
       </text>
     </scroll-view>
@@ -18,12 +20,21 @@
     </view>
   </view>
   <view class="divider"></view>
-  <view class="quest-zone">
-    <view class="qz-label">📋 选词（15选10）<text wx:if="{{_active}}" style="color:#ff6b8a"> · 请选词填入第{{_active}}空</text></view>
-    <scroll-view class="qz-chip-scroll" scroll-y>
-      <view class="qz-chips">
-        <text class="qzc {{_used[wi] ? 'used' : ''}}" wx:for="{{passage.options}}" wx:key="*this" wx:for-index="wi" wx:for-item="w" data-key="{{_active}}" data-word="{{w}}" catchtap="onChipTap">{{['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'][wi]}}. {{w}}</text>
-      </view>
-    </scroll-view>
+  <block wx:if="{{!showResult}}">
+    <view class="quest-zone">
+      <view wx:if="{{!_submitted}}" class="qz-label">📋 选词（15选10）<text wx:if="{{_active}}" style="color:#ff6b8a"> · 请选词填入第{{_active}}空</text></view>
+      <scroll-view wx:if="{{!_submitted}}" class="qz-chip-scroll" scroll-y>
+        <view class="qz-chips">
+          <text class="qzc {{_used[wi] ? 'used' : ''}}" wx:for="{{passage.options}}" wx:key="*this" wx:for-index="wi" wx:for-item="w" data-key="{{_active}}" data-word="{{w}}" catchtap="onChipTap">{{_letters[wi]}}. {{w}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+  <view wx:if="{{_submitted && showResult}}" class="result-view">
+    <view class="rv-card {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{_resultItems}}" wx:key="label" wx:for-item="item">
+      <view class="rvc-hd"><view class="rvc-num {{item.isCorrect ? 'ok' : 'bad'}}">{{item.isCorrect ? '✓' : '✗'}}</view><text class="rvc-label">{{item.label}}</text><text class="rvc-locate" wx:if="{{item.locate}}" data-locate="{{item.locate}}" catchtap="jumpToParagraph">📍 {{item.locate}}</text></view>
+      <view class="rvc-ans" wx:if="{{!item.isCorrect}}"><text class="rvc-ans-label">你的:</text><text class="rvc-ans-val wrong">{{item.userAnswer}}</text><text class="rvc-ans-label">正确:</text><text class="rvc-ans-val ok">{{item.correctAnswer}}</text></view>
+      <view class="rvc-hint" wx:if="{{item.hint}}">💡 {{item.hint}}</view>
+    </view>
   </view>
 </view>

@@ -4,10 +4,14 @@
     <view class="topbar"><h1>模拟考试</h1><text class="sub">选一套真题，计时模拟真实考场</text></view>
     <block wx:for="{{examSets}}" wx:key="id">
       <view class="card">
-        <view class="c-row"><text class="t">{{item.label}}</text><text class="badge">已导入</text></view>
+        <view class="c-row"><text class="t">{{item.label}}</text><text wx:if="{{_takenSets[item.id]}}" class="badge" style="background:#81c784">已考 ✓</text><text wx:else class="badge">已导入</text></view>
         <view class="tags"><text class="tg">写作</text><text class="tg">听力</text><text class="tg">阅读</text><text class="tg">翻译</text></view>
         <view class="tags"><text class="tg">125分钟</text><text class="tg">自动评分</text></view>
-        <view class="start" data-set-id="{{item.id}}" catchtap="startExam">开始考试</view>
+        <view class="c-actions">
+          <view class="start" data-set-id="{{item.id}}" catchtap="startExam">{{_takenSets[item.id] ? '重新考试' : '开始考试'}}</view>
+          <view wx:if="{{_takenSets[item.id]}}" class="review-link" data-set-id="{{item.id}}" catchtap="reviewExam">查看答题</view>
+          <view wx:if="{{_takenSets[item.id]}}" class="clear-link" data-set-id="{{item.id}}" catchtap="clearExam">清除</view>
+        </view>
       </view>
     </block>
   </block>
@@ -63,6 +67,54 @@
       <text class="sa">→</text>
     </view>
 
-    <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷并退出</view></view>
+    <view class="submit-row"><view class="sbtn" catchtap="submitExam">交卷</view></view>
+  </block>
+
+  <block wx:if="{{phase === 'result'}}">
+    <view class="topbar"><h1>考试结果</h1><text class="sub">{{currentSet.label}}</text></view>
+    <scroll-view style="flex:1;padding:20rpx" scroll-y>
+      <view class="result-total">
+        <text class="rt-score">{{readingScore + listeningScore + (writingScore || 0) + (translationScore || 0)}}/{{readingTotalScore + listeningTotalScore + (writingTotalScore || 0) + (translationTotalScore || 0)}}</text>
+        <text class="rt-label">总分</text>
+      </view>
+
+      <view class="rsec" catchtap="goReading">
+        <text class="rsec-h">📖 阅读理解 <text style="font-size:20rpx;color:#8a7a9a">点此看答题</text></text>
+        <view class="rrow" wx:for="{{readingResults}}" wx:key="index">
+          <text class="rname">{{item.title}}</text>
+          <text class="rval {{item.score === item.total ? 'rperf' : item.score === 0 ? 'rbad' : ''}}">{{item.score}}/{{item.total}}</text>
+        </view>
+        <view class="rrow total"><text class="rname">小计</text><text class="rval">{{readingScore}}/{{readingTotalScore}}</text></view>
+      </view>
+
+      <view class="rsec" wx:if="{{listeningResults.length > 0}}" catchtap="goListening">
+        <text class="rsec-h">🎧 听力理解 <text style="font-size:20rpx;color:#8a7a9a">点此看答题</text></text>
+        <view class="rrow" wx:for="{{listeningResults}}" wx:key="index">
+          <text class="rname">{{item.title}}</text>
+          <text class="rval {{item.score === item.total ? 'rperf' : item.score === 0 ? 'rbad' : ''}}">{{item.score}}/{{item.total}}</text>
+        </view>
+        <view class="rrow total"><text class="rname">小计</text><text class="rval">{{listeningScore}}/{{listeningTotalScore}}</text></view>
+      </view>
+
+      <view class="rsec" wx:if="{{writingResults.length > 0}}" catchtap="goWriting">
+        <text class="rsec-h">✍️ 写作 <text style="font-size:20rpx;color:#8a7a9a">点此看答题</text></text>
+        <view class="rrow" wx:for="{{writingResults}}" wx:key="index">
+          <text class="rname">{{item.title}}</text>
+          <text class="rval {{item.score >= 80 ? 'rperf' : item.score < 40 ? 'rbad' : ''}}">{{item.score}}/{{item.total}}</text>
+        </view>
+        <view class="rrow total"><text class="rname">小计</text><text class="rval">{{writingScore}}/{{writingTotalScore}}</text></view>
+      </view>
+
+      <view class="rsec" wx:if="{{translationResults.length > 0}}" catchtap="goTranslation">
+        <text class="rsec-h">🌐 翻译 <text style="font-size:20rpx;color:#8a7a9a">点此看答题</text></text>
+        <view class="rrow" wx:for="{{translationResults}}" wx:key="index">
+          <text class="rname">{{item.title}}</text>
+          <text class="rval {{item.score >= 80 ? 'rperf' : item.score < 40 ? 'rbad' : ''}}">{{item.score}}/{{item.total}}</text>
+        </view>
+        <view class="rrow total"><text class="rname">小计</text><text class="rval">{{translationScore}}/{{translationTotalScore}}</text></view>
+      </view>
+
+      <view class="submit-row"><view class="sbtn" catchtap="goBack">返回首页</view></view>
+    </scroll-view>
   </block>
 </view>

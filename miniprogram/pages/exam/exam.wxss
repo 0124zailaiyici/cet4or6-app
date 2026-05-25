@@ -10,6 +10,10 @@
 .tags { display: flex; gap: 8rpx; margin-bottom: 6rpx; }
 .tg { font-size: 20rpx; color: #8a7a9a; padding: 4rpx 14rpx; border-radius: 8rpx; background: #fff0f3; }
 .start { margin-top: 12rpx; padding: 16rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; text-align: center; font-size: 28rpx; font-weight: 700; }
+.c-actions { display: flex; align-items: center; gap: 16rpx; margin-top: 12rpx; }
+.c-actions .start { flex: 1; margin-top: 0; }
+.review-link { font-size: 22rpx; color: #546e7a; padding: 8rpx 0; flex-shrink: 0; }
+.clear-link { font-size: 22rpx; color: #ff6b8a; padding: 8rpx 0; flex-shrink: 0; }
 
 .timer-big { text-align: center; padding: 30rpx 20rpx 20rpx; flex-shrink: 0; }
 .t-n { font-size: 80rpx; font-weight: 800; color: #2d2d4e; letter-spacing: 4rpx; }
@@ -35,3 +39,23 @@
 .dark-theme .t-n { color: #e0d0e8 !important; }
 .dark-theme .tg { background: #2a2a4a !important; color: #a090b0 !important; }
 .dark-theme .sd { color: #a090b0 !important; }
+
+.result-total { text-align: center; padding: 40rpx 0; }
+.rt-score { font-size: 80rpx; font-weight: 800; color: #2d2d4e; }
+.rt-label { display: block; font-size: 24rpx; color: #8a7a9a; margin-top: 8rpx; }
+
+.rsec { background: #fff; border-radius: 18rpx; padding: 20rpx; margin-bottom: 16rpx; box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04); }
+.rsec-h { display: block; font-size: 26rpx; font-weight: 700; color: #2d2d4e; margin-bottom: 12rpx; }
+.rrow { display: flex; justify-content: space-between; align-items: center; padding: 8rpx 0; }
+.rname { font-size: 24rpx; color: #4a4a6a; flex: 1; }
+.rval { font-size: 24rpx; font-weight: 700; color: #546e7a; }
+.rval.rperf { color: #4caf50; }
+.rval.rbad { color: #e53935; }
+.rrow.total { border-top: 1rpx solid #f0f0f0; margin-top: 8rpx; padding-top: 12rpx; }
+.rrow.total .rname { font-weight: 700; color: #2d2d4e; }
+
+.dark-theme .rt-score { color: #e0d0e8 !important; }
+.dark-theme .rsec { background: #1e1e38 !important; }
+.dark-theme .rsec-h, .dark-theme .rrow.total .rname { color: #e0d0e8 !important; }
+.dark-theme .rname { color: #c0b0d0 !important; }
+.dark-theme .rval { color: #a090b0 !important; }

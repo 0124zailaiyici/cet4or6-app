@@ -42,8 +42,8 @@
     </view>
   </view>
 
-  <!-- 搜索框 -->
-  <view class="sbar">
+  <!-- 搜索框（仅单词视图） -->
+  <view class="sbar" wx:if="{{!showAch && !showSents && !showPack && !showStoryView}}">
     <input class="sinp" placeholder="🔍 搜索单词或释义…" value="{{searchQuery}}" bindinput="onSearchInput" />
   </view>
 

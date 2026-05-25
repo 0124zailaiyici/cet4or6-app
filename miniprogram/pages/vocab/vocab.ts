@@ -1417,7 +1417,7 @@ Page<IVocabData, IVocabMethods>({
   },
 
   addWord() {
-    this.setData({ showAddInput: true, addInputValue: '' })
+    this.setData({ showAddInput: !this.data.showAddInput, addInputValue: '' })
   },
 
   onAddInput(e: WechatMiniprogram.Input) {

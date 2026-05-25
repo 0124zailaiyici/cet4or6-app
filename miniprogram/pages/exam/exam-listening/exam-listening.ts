@@ -16,6 +16,13 @@ Page({
     questions: [] as IListeningQ[],
     sel: {} as Record<number, number>,
     isPlaying: false,
+    _submitted: false,
+    showResult: false,
+    _correctCount: 0,
+    _totalCount: 0,
+    _results: {} as Record<number, boolean>,
+    _correctIdxs: {} as Record<number, number>,
+    _letters: ['A','B','C','D'],
     darkMode: false,
   },
 
@@ -39,7 +46,21 @@ Page({
     }
 
     const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
-    this.setData({ passage, questions, sel: saved })
+    const submitted = !!(saved as any).submitted
+    let correctCount = 0, results: Record<number, boolean> = {}, correctIdxs: Record<number, number> = {}
+    const ca = passage.correctAnswers || {}
+    Object.keys(ca).forEach((k: string) => {
+      const qi = Number(k)
+      const correctIdx = { A: 0, B: 1, C: 2, D: 3 }[ca[k] as string] ?? -1
+      correctIdxs[qi] = correctIdx
+      if (submitted) {
+        const userIdx = saved[qi]
+        const isCorrect = userIdx === correctIdx
+        results[qi] = isCorrect
+        if (isCorrect) correctCount++
+      }
+    })
+    this.setData({ passage, questions, sel: saved, _submitted: submitted, showResult: false, _correctCount: correctCount, _totalCount: Object.keys(ca).length, _results: results, _correctIdxs: correctIdxs })
   },
 
   onUnload() {
@@ -84,6 +105,9 @@ Page({
       wx.setStorageSync('studyData', app.globalData.studyData)
     }
   },
+
+  showResultAgain() { this.setData({ showResult: true }) },
+  hideResult() { this.setData({ showResult: false }) },
 
   goBack() {
     if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
