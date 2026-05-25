@@ -862,5 +862,11 @@ Page<IListeningData, IListeningMethods>({
     wx.showToast({ title: '已标记完成', icon: 'success' })
   },
 
+  onShareAppMessage() {
+    return {
+      title: '🎵 听力精听 — 我在四级备考助手练习听力！',
+      path: '/pages/listening/listening',
+    }
+  },
 
 })

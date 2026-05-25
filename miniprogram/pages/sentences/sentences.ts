@@ -391,4 +391,11 @@ Page<ISentencesData, ISentencesMethods>({
       this.setData({ parsing: false })
     }
   },
+
+  onShareAppMessage() {
+    return {
+      title: `💬 语境句子 — 已掌握 ${this.data.masteredIds.length} 句！`,
+      path: '/pages/sentences/sentences',
+    }
+  },
 })
