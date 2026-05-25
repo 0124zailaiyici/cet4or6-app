@@ -22,25 +22,28 @@
     <view class="addok" catchtap="onAddBtn">添加</view>
   </view>
 
-  <scroll-view class="list" scroll-y>
+  <scroll-view class="list" scroll-y catchtap="closeSwipe">
     <view class="empty" wx:if="{{filteredWords.length === 0}}">
       <text>暂无单词</text>
       <text class="hint">从真题阅读自动收集</text>
     </view>
-    <view class="wcard" wx:for="{{filteredWords}}" wx:key="word" wx:for-index="idx">
-      <view class="wi {{item.status === 'master' ? 'master' : item.status === 'review' ? 'review' : 'new'}}">
-        <text>{{item.word[0].toUpperCase()}}</text>
+    <view class="wcard-wrap" wx:for="{{filteredWords}}" wx:key="word" wx:for-index="idx" data-idx="{{idx}}" bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd">
+      <view class="wcard {{swipedIdx === idx ? 'open' : ''}}">
+        <view class="wi {{item.status === 'master' ? 'master' : item.status === 'review' ? 'review' : 'new'}}">
+          <text>{{item.word[0].toUpperCase()}}</text>
+        </view>
+        <view class="wb">
+          <text class="ww">{{item.word}}</text>
+          <text class="wp" wx:if="{{item.phonetic}}">{{item.phonetic}}</text>
+          <text class="wcn">{{item.chn || item.definition || ''}}</text>
+          <text class="wsrc" wx:if="{{item.context}}">{{item.context}}</text>
+          <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
+        </view>
+        <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.chn ? 'startGame' : 'lookupWord'}}">
+          {{item.status === 'master' ? '✓' : (item.chn ? '浏览' : '查词')}}
+        </view>
       </view>
-      <view class="wb">
-        <text class="ww">{{item.word}}</text>
-        <text class="wp" wx:if="{{item.phonetic}}">{{item.phonetic}}</text>
-        <text class="wcn">{{item.chn || item.definition || ''}}</text>
-        <text class="wsrc" wx:if="{{item.context}}">{{item.context}}</text>
-        <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
-      </view>
-      <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.chn ? 'startGame' : 'lookupWord'}}">
-        {{item.status === 'master' ? '✓' : (item.chn ? '浏览' : '查词')}}
-      </view>
+      <view class="wdel" catchtap="deleteWord" data-word="{{item.word}}">删除</view>
     </view>
   </scroll-view>
 

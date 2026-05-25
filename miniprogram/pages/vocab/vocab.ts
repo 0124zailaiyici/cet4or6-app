@@ -36,6 +36,7 @@ interface IVocabData {
   manualModalWord: string
   manualModalPhonetic: string
   manualModalValue: string
+  swipedIdx: number
   _tick: number
 }
 
@@ -57,6 +58,10 @@ interface IVocabMethods {
   onManualInput(e: WechatMiniprogram.Input): void
   confirmManualModal(): void
   cancelManualModal(): void
+  swipeStart(e: WechatMiniprogram.TouchEvent): void
+  swipeEnd(e: WechatMiniprogram.TouchEvent): void
+  deleteWord(e: WechatMiniprogram.TouchEvent): void
+  closeSwipe(): void
   _doAddWord(w: string): Promise<void>
   _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]): void
   loadWords(): void
@@ -654,6 +659,8 @@ function extractWords(): IVocabWord[] {
 
 function hasCJK(s: string | undefined): boolean { return !!(s && /[\u4e00-\u9fff]/.test(s)) }
 
+let _swipeStartX = 0
+
 Page<IVocabData, IVocabMethods>({
   data: {
     words: [],
@@ -677,6 +684,7 @@ Page<IVocabData, IVocabMethods>({
     manualModalWord: '',
     manualModalPhonetic: '',
     manualModalValue: '',
+    swipedIdx: -1,
     _tick: 0,
   },
 
@@ -908,6 +916,37 @@ Page<IVocabData, IVocabMethods>({
       }
     }
     this.setData({ lookingUp: false })
+  },
+
+  swipeStart(e: WechatMiniprogram.TouchEvent) {
+    _swipeStartX = e.touches[0].clientX
+  },
+
+  swipeEnd(e: WechatMiniprogram.TouchEvent) {
+    const idx = Number(e.currentTarget.dataset.idx)
+    const deltaX = e.changedTouches[0].clientX - _swipeStartX
+    if (deltaX < -40) {
+      this.setData({ swipedIdx: idx })
+    } else if (this.data.swipedIdx !== idx) {
+      this.setData({ swipedIdx: -1 })
+    }
+  },
+
+  deleteWord(e: WechatMiniprogram.TouchEvent) {
+    const word = e.currentTarget.dataset.word
+    const app = getApp<IAppOption>()
+    const words = app.globalData.studyData.vocabWords as IVocabWord[]
+    const idx = words.findIndex(v => v.word === word)
+    if (idx === -1) return
+    words.splice(idx, 1)
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.setData({ swipedIdx: -1 })
+    this.loadWords()
+    wx.showToast({ title: '已删除 ' + word, icon: 'none' })
+  },
+
+  closeSwipe() {
+    this.setData({ swipedIdx: -1 })
   },
 
   _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]) {
