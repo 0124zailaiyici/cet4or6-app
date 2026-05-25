@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>单词本 · 四模式原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3eeed;color:#2d2d4e;min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column;padding-bottom:80px}
+/* mode theme vars */
+body{--accent:#ff6b8a;--accent2:#1e88e5;--accent3:#66bb6a;--accent4:#ffa726}
+body.mode-battle{--accent:#ff3d00;--accent2:#d50000;--accent3:#ff6d00;--accent4:#ff9100}
+body.mode-garden{--accent:#66bb6a;--accent2:#43a047;--accent3:#81c784;--accent4:#a5d6a7}
+body.mode-card{--accent:#ab47bc;--accent2:#8e24aa;--accent3:#ce93d8;--accent4:#e1bee7}
+.tb{padding:36px 20px 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;transition:background .3s}
+.tb .tt{font-size:20px;font-weight:800}
+.tb .sub{font-size:13px;opacity:.85;margin-top:2px}
+
+/* mode selector */
+.msel{display:flex;gap:4px;margin:10px 14px 6px}
+.mbtn{flex:1;text-align:center;padding:8px 0;font-size:12px;color:#8a7a9a;background:#fff;border-radius:8px;cursor:pointer;transition:.2s;border:1px solid transparent}
+.mbtn.on{color:var(--accent);font-weight:600;background:rgba(255,107,138,.06);border-color:var(--accent);transition:color .3s,border-color .3s}
+.stats{display:flex;gap:6px;margin:0 14px 10px}
+.st{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 8px rgba(255,158,181,.04)}
+.st .n{display:block;font-size:26px;font-weight:800;color:var(--accent);transition:color .3s}
+.st .n.g{color:#388e3c}
+.st .l{display:block;font-size:12px;color:#8a7a9a;margin-top:2px}
+.tabs{display:flex;gap:4px;margin:0 14px 8px}
+.tab{flex:1;text-align:center;padding:8px 0;font-size:13px;color:#8a7a9a;background:#fff;border-radius:8px;cursor:pointer;transition:.2s}
+.tab.on{color:#ff6b8a;font-weight:600;background:rgba(255,107,138,.06);border:1px solid rgba(255,107,138,.12)}
+.list{flex:1;padding:0 14px 20px;overflow-y:auto}
+.card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;box-shadow:0 1px 8px rgba(255,158,181,.04)}
+.card:active{transform:scale(.97)}
+.ci{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
+.ci.n{background:rgba(255,107,138,.06);color:#ff6b8a}
+.ci.r{background:rgba(255,152,0,.06);color:#f57c00}
+.ci.m{background:rgba(56,142,60,.06);color:#388e3c}
+.cb{flex:1;min-width:0}
+.cb .w{font-size:15px;font-weight:700;color:#2d2d4e}
+.cb .p{font-size:11px;color:#8a7a9a;margin-top:1px}
+.cb .c{font-size:12px;color:#2d2d4e;margin-top:2px}
+/* mode visuals in list */
+.mode-tag{font-size:18px;letter-spacing:2px}
+/* battle */
+.hp-bar{display:inline-flex;gap:2px;font-size:12px}
+/* garden */
+.growth{display:inline-flex;font-size:16px;gap:2px}
+/* card */
+.stars{color:#ffa726;font-size:12px;letter-spacing:1px}
+
+/* flip overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:100;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s,background .3s}
+.overlay.show{background:rgba(0,0,0,.5);pointer-events:auto;opacity:1}
+.flip-ctn{width:320px;min-height:420px;perspective:800px;position:relative}
+.flip-inner{position:relative;width:100%;min-height:420px;transition:transform .5s cubic-bezier(.4,.0,.2,1);transform-style:preserve-3d}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.fr,.fb{position:absolute;inset:0;backface-visibility:hidden;background:#fff;border-radius:32px;padding:28px 30px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.12)}
+.fb{transform:rotateY(180deg)}
+.gtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;width:100%}
+.gprog{font-size:11px;color:#8a7a9a;font-weight:600}
+.gclose{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8a7a9a;background:rgba(0,0,0,.04);cursor:pointer}
+.gq{font-size:11px;color:#ff6b8a;font-weight:600;margin-bottom:4px}
+.gw{font-size:34px;font-weight:800;color:#2d2d4e;letter-spacing:1px}
+.gp{font-size:12px;color:#8a7a9a;margin-top:3px;margin-bottom:10px}
+.gctx{font-size:12px;color:#4a4a6a;line-height:1.5;padding:10px;background:#f8f5f4;border-radius:10px;width:100%;box-sizing:border-box;max-height:100px;overflow-y:auto;flex-shrink:1}
+.speaker{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:4px 14px;border-radius:16px;background:rgba(30,136,229,.08);color:#1e88e5;font-size:11px;cursor:pointer}
+.ghint{font-size:11px;color:var(--accent);margin-top:auto;padding-top:6px;transition:color .3s}
+.fbw{font-size:20px;font-weight:800;color:#2d2d4e;margin-top:4px}
+.fbp{font-size:11px;color:#8a7a9a;margin-bottom:8px}
+.gc{font-size:20px;font-weight:700;color:var(--accent2);line-height:1.3;padding:10px 16px;background:rgba(30,136,229,.06);border-radius:10px;width:100%;box-sizing:border-box;transition:color .3s,background .3s}
+.gctxcn{font-size:11px;color:#8a7a9a;margin-top:8px;line-height:1.4}
+.gacts{display:flex;gap:10px;margin-top:auto;justify-content:center;width:100%;padding-top:14px}
+.gb{padding:10px 28px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;border:none}
+.gb:active{transform:scale(.95)}
+.gb.known{background:linear-gradient(135deg,#66bb6a,#43a047);color:#fff}
+.gb.hard{background:rgba(255,107,138,.1);color:#ff6b8a}
+
+/* battle mode - feedback */
+.battle-hp{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:14px}
+.battle-hp .hp{display:flex;gap:3px}
+.battle-hp .hp span{transition:.3s}
+.battle-combo{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:4px;min-height:18px;transition:color .3s}
+.battle-dmg{position:fixed;font-size:36px;font-weight:800;color:var(--accent);pointer-events:none;z-index:101;animation:dmgUp .6s ease-out forwards;opacity:0}
+.monster{font-size:48px;margin-bottom:6px;transition:transform .15s}
+.monster.hit{animation:hitShake .3s}
+@keyframes dmgUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
+@keyframes hitShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+@keyframes monsterHit{0%{transform:scale(1)}50%{transform:scale(.85)}100%{transform:scale(1)}}
+
+/* garden mode */
+.garden-plant{font-size:48px;margin-bottom:6px;transition:transform .3s}
+.garden-plant.grow{animation:plantGrow .4s ease-out}
+@keyframes plantGrow{0%{transform:scale(.6);opacity:.5}50%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.garden-msg{font-size:12px;color:#8a7a9a;margin-top:4px;min-height:18px;font-style:italic}
+
+/* card mode */
+.card-badge{font-size:48px;margin-bottom:6px}
+.card-rarity{font-size:11px;padding:2px 12px;border-radius:10px;margin-bottom:4px;display:inline-block}
+.card-rarity.R{background:#ffcdd2;color:#c62828}
+.card-rarity.SR{background:#e1bee7;color:#6a1b9a}
+.card-rarity.SSR{background:#fff3e0;color:#e65100}
+.card-stars{font-size:18px;margin-bottom:4px;color:#ffa726}
+.card-collect-progress{font-size:11px;color:#8a7a9a;margin-bottom:6px}
+
+/* celebrate */
+.celebrate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .4s}
+.celebrate.show{opacity:1;pointer-events:auto}
+.cbox{background:#fff;border-radius:24px;padding:36px 32px;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.15)}
+.cemoji{font-size:48px;margin-bottom:8px}
+.ctit{font-size:18px;font-weight:700;color:#2d2d4e}
+.csub{font-size:12px;color:#8a7a9a;margin-top:4px}
+.cbtn{margin-top:16px;padding:10px 32px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;pointer-events:auto;transition:.2s}
+.cbtn:active{transform:scale(.95)}
+#confetti{position:fixed;inset:0;z-index:199;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="tb">
+    <div class="tt">📖 单词本</div>
+    <div class="sub" id="sub">背词模式 · 战斗</div>
+  </div>
+
+  <!-- 模式选择 -->
+  <div class="msel">
+    <div class="mbtn on" data-mode="battle" onclick="setMode('battle')">⚔️ 战斗</div>
+    <div class="mbtn" data-mode="garden" onclick="setMode('garden')">🌸 花园</div>
+    <div class="mbtn" data-mode="card" onclick="setMode('card')">🎴 集卡</div>
+  </div>
+
+  <div class="stats">
+    <div class="st"><span class="n g" id="mastered">0</span><span class="l">✓ 已掌握</span></div>
+    <div class="st"><span class="n" id="learning">0</span><span class="l">📝 学习中</span></div>
+    <div class="st"><span class="n" id="streak">0</span><span class="l">🔥 连胜</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="switchTab(0)">📝 学习中</div>
+    <div class="tab" onclick="switchTab(1)">🔥 待复习</div>
+    <div class="tab" onclick="switchTab(2)">✓ 已掌握</div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<!-- 翻卡 -->
+<div class="overlay" id="overlay">
+  <div class="flip-ctn">
+    <div class="flip-inner" id="flipInner">
+      <!-- 正面 -->
+      <div class="fr" onclick="flipCard()">
+        <div class="gtop">
+          <span class="gprog" id="gprog">1/10</span>
+          <span class="gclose" onclick="event.stopPropagation();closeGame()">✕</span>
+        </div>
+        <!-- 战斗模式：怪物 + 血条 -->
+        <div id="battleFrontExtra" style="display:none">
+          <div class="battle-combo" id="comboDisplay"></div>
+          <div class="monster" id="monster">👹</div>
+          <div class="battle-hp">
+            <span style="font-size:12px;color:#8a7a9a">HP </span>
+            <span class="hp" id="monsterHp"></span>
+          </div>
+        </div>
+        <!-- 花园模式：植物 -->
+        <div id="gardenFrontExtra" style="display:none">
+          <div class="garden-plant" id="gardenPlant">🌱</div>
+          <div class="garden-msg" id="gardenMsg">还没有种下这个单词</div>
+        </div>
+        <!-- 集卡模式：星级 -->
+        <div id="cardFrontExtra" style="display:none">
+          <div class="card-badge" id="cardBadge">🃏</div>
+          <div class="card-rarity" id="cardRarity">N</div>
+          <div class="card-collect-progress" id="cardProgress">收集进度 0/12</div>
+        </div>
+        <div class="gq" id="gq"></div>
+        <div class="gw" id="gw"></div>
+        <div class="gp" id="gp"></div>
+        <div class="gctx" id="gctx"></div>
+        <div class="speaker" onclick="event.stopPropagation();speak()">🔊 听发音</div>
+        <div class="ghint" id="ghint">点击翻转</div>
+      </div>
+      <!-- 背面 -->
+      <div class="fb" onclick="flipCard()">
+        <div class="gtop">
+          <span class="gprog" id="gprog2">1/10</span>
+          <span class="gclose" onclick="event.stopPropagation();closeGame()">✕</span>
+        </div>
+        <div class="fbw" id="fbw"></div>
+        <div class="fbp" id="fbp"></div>
+        <div class="gc" id="gc"></div>
+        <div class="gctxcn" id="gctxcn"></div>
+        <div class="gacts">
+          <div class="gb hard" onclick="event.stopPropagation();markHard()">😵 不认识</div>
+          <div class="gb known" onclick="event.stopPropagation();markKnown()">✅ 认识</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 庆祝 -->
+<div class="celebrate" id="celebrate">
+  <div class="box" style="background:#fff;border-radius:24px;padding:36px 32px;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.15)">
+    <div class="emoji" id="celebrateEmoji" style="font-size:48px;margin-bottom:8px">🎉</div>
+    <div class="tit" style="font-size:18px;font-weight:700;color:#2d2d4e" id="celebrateTitle">太棒了！</div>
+    <div class="sub" style="font-size:12px;color:#8a7a9a;margin-top:4px" id="celebrateSub">完成了本轮复习</div>
+    <div class="btn" onclick="closeCelebrate()" style="margin-top:16px;padding:10px 32px;border-radius:14px;color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;display:inline-block" id="celebrateBtn">继续加油 💪</div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+// ===== 数据 =====
+const WORDS = [
+  {word:'abandon',phonetic:"/əˈbændən/",definition:"v. 抛弃，放弃",context:"He had to abandon his plan due to lack of funding.","contextCn":"由于缺乏资金，他不得不放弃自己的计划。",source:'CET-4'},
+  {word:'abolish',phonetic:"/əˈbɒlɪʃ/",definition:"v. 废除，取消",context:"Many people advocate to abolish the outdated law.","contextCn":"许多人主张废除这条过时的法律。",source:'CET-4'},
+  {word:'absorb',phonetic:"/əbˈzɔːb/",definition:"v. 吸收；吸引",context:"Plants absorb carbon dioxide from the atmosphere.","contextCn":"植物从大气中吸收二氧化碳。",source:'CET-4'},
+  {word:'abstract',phonetic:"/ˈæbstrækt/",definition:"adj. 抽象的；n. 摘要",context:"The concept of freedom is highly abstract.","contextCn":"自由这个概念非常抽象。",source:'CET-4'},
+  {word:'abundant',phonetic:"/əˈbʌndənt/",definition:"adj. 丰富的，充裕的",context:"The region is abundant in natural resources.","contextCn":"该地区自然资源丰富。",source:'CET-4'},
+  {word:'accelerate',phonetic:"/əkˈseləreɪt/",definition:"v. 加速，促进",context:"The car accelerated quickly on the highway.","contextCn":"汽车在高速公路上迅速加速。",source:'CET-4'},
+  {word:'access',phonetic:"/ˈækses/",definition:"n. 通道；v. 访问",context:"Students have free access to the library.","contextCn":"学生可以免费使用图书馆。",source:'CET-4'},
+  {word:'accomplish',phonetic:"/əˈkʌmplɪʃ/",definition:"v. 完成，实现",context:"She accomplished her goal of running a marathon.","contextCn":"她实现了跑马拉松的目标。",source:'CET-4'},
+  {word:'accurate',phonetic:"/ˈækjərət/",definition:"adj. 准确的",context:"The data must be accurate for the experiment.","contextCn":"实验数据必须准确。",source:'CET-4'},
+  {word:'achieve',phonetic:"/əˈtʃiːv/",definition:"v. 达到，取得",context:"He worked hard to achieve his dreams.","contextCn":"他努力工作以实现自己的梦想。",source:'CET-4'},
+  {word:'acknowledge',phonetic:"/əkˈnɒlɪdʒ/",definition:"v. 承认；感谢",context:"She acknowledged her mistake and apologized.","contextCn":"她承认了自己的错误并道歉。",source:'CET-4'},
+  {word:'acquire',phonetic:"/əˈkwaɪə/",definition:"v. 获得，学到",context:"It takes time to acquire a new language.","contextCn":"掌握一门新语言需要时间。",source:'CET-4'},
+]
+
+// ===== 状态 =====
+let data = WORDS.map((w,i) => ({...w, status:i<3?'review':i<6?'master':'new', correctStreak: i<3?0:i<6?3:0, growth: 0, stars: 0}))
+let tab = 0, mode = 'battle', gameSession = [], sessionIdx = 0, streak = 0, gameFlipped = false, currentWord = null, combo = 0
+
+// ===== 模式切换 =====
+function setMode(m) {
+  mode = m
+  document.body.className = 'mode-' + m
+  document.querySelectorAll('.mbtn').forEach(el => el.classList.toggle('on', el.dataset.mode === m))
+  document.getElementById('sub').textContent = {battle:'背词模式 · 战斗',garden:'背词模式 · 花园',card:'背词模式 · 集卡'}[m]
+  // toggle mode extras
+  document.getElementById('battleFrontExtra').style.display = m === 'battle' ? '' : 'none'
+  document.getElementById('gardenFrontExtra').style.display = m === 'garden' ? '' : 'none'
+  document.getElementById('cardFrontExtra').style.display = m === 'card' ? '' : 'none'
+  render()
+}
+function getFiltered() {
+  if (tab === 0) return data.filter(w => w.status !== 'master')
+  if (tab === 1) return data.filter(w => w.status === 'review')
+  return data.filter(w => w.status === 'master')
+}
+function render() {
+  const filtered = getFiltered()
+  document.getElementById('mastered').textContent = data.filter(w => w.status === 'master').length
+  document.getElementById('learning').textContent = data.filter(w => w.status !== 'master').length
+  document.getElementById('streak').textContent = streak
+  const list = document.getElementById('list')
+  if (filtered.length === 0) { list.innerHTML = '<div style="text-align:center;padding:80px 0;color:#8a7a9a;font-size:14px">暂无单词</div>'; return }
+  list.innerHTML = filtered.map((w,i) => {
+    const c = w.status === 'master' ? 'm' : w.status === 'review' ? 'r' : 'n'
+    let modeTag = ''
+    if (mode === 'battle') {
+      const hp = 5 - Math.min(4, w.correctStreak)
+      modeTag = '<span class="hp-bar">' + '❤️'.repeat(hp) + '🖤'.repeat(5-hp) + '</span>'
+    } else if (mode === 'garden') {
+      const stages = ['🌱','🌿','🌹','🌳']
+      modeTag = '<span class="growth">' + stages[Math.min(3, w.growth || 0)] + '</span>'
+    } else if (mode === 'card') {
+      const starCount = Math.min(3, w.stars || 0)
+      modeTag = '<span class="stars">' + '⭐'.repeat(starCount) + (starCount < 3 ? '☆'.repeat(3-starCount) : '') + '</span>'
+    }
+    return '<div class="card" onclick="startGame(' + i + ')">'
+      + '<div class="ci ' + c + '">' + w.word[0].toUpperCase() + '</div>'
+      + '<div class="cb">'
+      + '<div class="w">' + w.word + '</div>'
+      + '<div class="p">' + (w.phonetic||'') + '</div>'
+      + '<div class="c">' + (w.definition||'') + '</div></div>'
+      + '<div class="mode-tag">' + modeTag + '</div>'
+      + '</div>'
+  }).join('')
+}
+function switchTab(t) { tab = t; document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('on', i===t)); render() }
+
+// ===== 游戏 =====
+function startGame(idx) {
+  const filtered = getFiltered()
+  const remaining = filtered.length - idx
+  const limit = Math.min(10, remaining)
+  gameSession = filtered.slice(idx, idx + limit)
+  sessionIdx = 0; gameFlipped = false; combo = 0
+  showCard()
+  document.getElementById('overlay').classList.add('show')
+}
+function showCard() {
+  const w = gameSession[sessionIdx]
+  if (!w) { closeGame(); celebrate(); return }
+  currentWord = w; gameFlipped = false
+  document.getElementById('flipInner').classList.remove('flipped')
+  document.getElementById('gprog').textContent = (sessionIdx+1) + '/' + gameSession.length
+  document.getElementById('gprog2').textContent = (sessionIdx+1) + '/' + gameSession.length
+  document.getElementById('gq').textContent = w.source ? '📖 ' + w.source : ''
+  document.getElementById('gw').textContent = w.word
+  document.getElementById('gp').textContent = w.phonetic || ''
+  document.getElementById('gctx').textContent = w.context || ''
+  document.getElementById('fbw').textContent = w.word
+  document.getElementById('fbp').textContent = w.phonetic || ''
+  document.getElementById('gc').textContent = w.definition || ''
+  document.getElementById('gctxcn').textContent = w.contextCn || ''
+  // mode-specific
+  if (mode === 'battle') {
+    const hp = 5 - Math.min(4, w.correctStreak || 0)
+    const monsters = ['👹','🐉','👾','🧟','🐺']
+    document.getElementById('monster').textContent = monsters[Math.min(4, sessionIdx % 5)]
+    document.getElementById('monsterHp').innerHTML = '❤️'.repeat(hp) + '🖤'.repeat(5-hp)
+    document.getElementById('comboDisplay').textContent = combo > 1 ? '🔥 ' + combo + ' 连击！' : ''
+  }
+  if (mode === 'garden') {
+    const stages = ['🌱','🌿','🌹','🌳']
+    const s = Math.min(3, w.growth || 0)
+    document.getElementById('gardenPlant').textContent = stages[s]
+    document.getElementById('gardenMsg').textContent = s === 0 ? '刚种下这颗种子' : s === 1 ? '小苗正在生长' : s === 2 ? '花开了！' : '已长成大树 🌳'
+  }
+  if (mode === 'card') {
+    const stars1 = Math.min(3, w.stars || 0)
+    const rarity = stars1 === 0 ? 'N' : stars1 === 1 ? 'R' : stars1 === 2 ? 'SR' : 'SSR'
+    const badges = {N:'🃏',R:'🎴',SR:'💎',SSR:'🌟'}
+    document.getElementById('cardBadge').textContent = badges[rarity]
+    document.getElementById('cardRarity').textContent = rarity; 
+    document.getElementById('cardRarity').className = 'card-rarity ' + rarity
+    document.getElementById('cardProgress').textContent = '已收集 ' + stars1 + '/3'
+  }
+}
+function flipCard() { if (!currentWord) return; gameFlipped = !gameFlipped; document.getElementById('flipInner').classList.toggle('flipped', gameFlipped) }
+function speak() { if (!currentWord) return; const u = new SpeechSynthesisUtterance(currentWord.word); u.lang='en-US'; u.rate=.85; speechSynthesis.cancel(); speechSynthesis.speak(u) }
+
+function markKnown() {
+  if (!currentWord) return
+  const w = data.find(d => d.word === currentWord.word)
+  if (w) {
+    w.correctStreak++; w.growth = Math.min(3, (w.growth||0)+1); w.stars = Math.min(3, (w.stars||0)+1)
+    if (w.correctStreak >= 3) w.status = 'master'
+    else w.status = 'learning'
+  }
+  streak++; combo++
+  // battle feedback
+  if (mode === 'battle') {
+    const monster = document.getElementById('monster')
+    monster.style.animation = 'none'; void monster.offsetWidth; monster.style.animation = 'monsterHit .3s'
+    showDamage('-' + (combo > 2 ? '💥' : '💢'))
+    document.getElementById('comboDisplay').textContent = combo > 1 ? '🔥 ' + combo + ' 连击！' : ''
+  }
+  if (mode === 'garden') {
+    const plant = document.getElementById('gardenPlant')
+    plant.style.animation = 'none'; void plant.offsetWidth; plant.className = 'garden-plant grow'
+    setTimeout(() => plant.className = 'garden-plant', 400)
+    const msgs = ['🌱 种子发芽了！','🌿 长出新叶子！','🌹 开出漂亮的花！','🌳 长成大树了！']
+    document.getElementById('gardenMsg').textContent = msgs[Math.min(3, w ? w.growth : 0)]
+  }
+  if (mode === 'card') {
+    const stars2 = Math.min(3, w?.stars || 0)
+    const rarity = stars2 === 0 ? 'N' : stars2 === 1 ? 'R' : stars2 === 2 ? 'SR' : 'SSR'
+    document.getElementById('cardRarity').textContent = rarity
+    document.getElementById('cardRarity').className = 'card-rarity ' + rarity
+  }
+  setTimeout(() => nextGame(), 500)
+}
+
+function showDamage(text) {
+  const el = document.createElement('div')
+  el.className = 'battle-dmg'; el.textContent = text
+  el.style.left = (window.innerWidth/2 - 40) + 'px'; el.style.top = (window.innerHeight/2 - 60) + 'px'
+  document.body.appendChild(el)
+  setTimeout(() => el.remove(), 700)
+}
+
+function markHard() {
+  if (!currentWord) return
+  const w = data.find(d => d.word === currentWord.word)
+  if (w) { w.correctStreak = 0; w.status = 'review' }
+  streak = 0; combo = 0
+  if (mode === 'battle') {
+    document.getElementById('comboDisplay').textContent = '💀 连击中断！'
+    setTimeout(() => { document.getElementById('comboDisplay').textContent = '' }, 600)
+  }
+  if (mode === 'garden') {
+    document.getElementById('gardenMsg').textContent = '🐛 叶子被虫咬了…再答对就会好起来'
+  }
+  setTimeout(() => nextGame(), 400)
+}
+
+function nextGame() {
+  sessionIdx++
+  if (sessionIdx >= gameSession.length) { closeGame(); celebrate(); return }
+  showCard()
+}
+
+function closeGame() {
+  document.getElementById('overlay').classList.remove('show')
+  document.getElementById('flipInner').classList.remove('flipped')
+  render()
+}
+
+function closeCelebrate() { document.getElementById('celebrate').classList.remove('show'); stopConfetti() }
+
+function celebrate() {
+  if (sessionIdx === 0) return
+  const emojis = {battle:'⚔️',garden:'🌸',card:'🎴'}
+  const titles = {battle:'BOSS 击败！',garden:'花园又长大了！',card:'新卡包解锁！'}
+  document.getElementById('celebrateEmoji').textContent = emojis[mode]
+  document.getElementById('celebrateTitle').textContent = titles[mode]
+  document.getElementById('celebrateSub').textContent = '本轮完成 ' + gameSession.length + ' 个词 · 累计掌握 ' + data.filter(w => w.status === 'master').length + ' 个'
+  const btn = document.getElementById('celebrateBtn')
+  btn.style.background = 'linear-gradient(135deg,' + getComputedStyle(document.body).getPropertyValue('--accent').trim() + ',' + getComputedStyle(document.body).getPropertyValue('--accent2').trim() + ')'
+  document.getElementById('celebrate').classList.add('show')
+  startConfetti()
+}
+
+// confetti
+const canvas = document.getElementById('confetti'), ctx = canvas.getContext('2d')
+let animId = null, particles = []
+const colors = {battle:['#ff3d00','#d50000','#ff6d00','#ff9100'],garden:['#66bb6a','#43a047','#81c784','#a5d6a7'],card:['#ab47bc','#8e24aa','#ce93d8','#e1bee7']}
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+window.addEventListener('resize', resizeCanvas); resizeCanvas()
+function startConfetti() {
+  const cols = colors[mode] || ['#ff8fab','#4fc3f7','#66bb6a','#ffa726']
+  particles = []; for (let i = 0; i < 80; i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,w:3+Math.random()*3,h:2+Math.random()*2,color:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*2,vy:1+Math.random()*3,rot:Math.random()*360,rv:(Math.random()-.5)*6})
+  if (animId) cancelAnimationFrame(animId); drawConfetti()
+}
+function drawConfetti() {
+  ctx.clearRect(0,0,canvas.width,canvas.height); let alive = false
+  for (const p of particles) { p.x+=p.vx; p.y+=p.vy; p.rot+=p.rv; p.vy+=.04; if(p.y<canvas.height+20) alive = true; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore() }
+  if (alive) animId = requestAnimationFrame(drawConfetti); else animId = null
+}
+function stopConfetti() { if(animId){cancelAnimationFrame(animId);animId=null} ctx.clearRect(0,0,canvas.width,canvas.height) }
+
+setMode('battle')
+</script>
+</body>
+</html>
