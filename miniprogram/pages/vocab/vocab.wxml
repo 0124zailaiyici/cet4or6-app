@@ -17,6 +17,11 @@
     <view class="tab add" catchtap="addWord">+ 添加</view>
   </view>
 
+  <view class="addbar {{showAddInput ? 'show' : ''}}">
+    <input class="addinp" placeholder="输入英文单词" value="{{addInputValue}}" bindinput="onAddInput" bindconfirm="onAddConfirm" focus="{{showAddInput}}" />
+    <view class="addok" catchtap="onAddBtn">添加</view>
+  </view>
+
   <scroll-view class="list" scroll-y>
     <view class="empty" wx:if="{{filteredWords.length === 0}}">
       <text>暂无单词</text>
@@ -68,6 +73,17 @@
         <view class="gf">
           <view class="gb next" catchtap="nextGame">下一个</view>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mm-overlay {{showManualModal ? 'show' : ''}}" catchtap="cancelManualModal">
+    <view class="mm-box" catchtap="">
+      <view class="mm-ttl">未查询到「{{manualModalWord}}」</view>
+      <input class="mm-inp" placeholder="输入中文释义后回车添加" value="{{manualModalValue}}" bindinput="onManualInput" bindconfirm="confirmManualModal" focus="{{showManualModal}}" />
+      <view class="mm-btns">
+        <view class="mm-btn" catchtap="cancelManualModal">取消</view>
+        <view class="mm-btn mm-pri" catchtap="confirmManualModal">确定</view>
       </view>
     </view>
   </view>

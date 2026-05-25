@@ -61,6 +61,7 @@ export function lookupWord(word: string): Promise<any> {
     wx.request({
       url: `${API_BASE}/dictionary?word=${encodeURIComponent(word)}`,
       method: 'GET',
+      timeout: 8000,
       success: (res) => {
         if (res.statusCode === 200) resolve(res.data)
         else reject(new Error(`查询失败 ${res.statusCode}`))

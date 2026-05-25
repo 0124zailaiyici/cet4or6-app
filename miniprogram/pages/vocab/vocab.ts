@@ -1,6 +1,6 @@
 import readingsData from '../../data/readings'
 import { applyTheme, getDarkMode } from '../../utils/theme'
-import { lookupWord, aiTranslateWord, translateTextBatch, translateText } from '../../utils/api'
+import { lookupWord, aiTranslateWord, translateTextBatch, translateText, generateSentence } from '../../utils/api'
 
 interface IVocabWord {
   word: string
@@ -30,6 +30,12 @@ interface IVocabData {
   gameFlipped: boolean
   lookingUp: boolean
   gameLoading: boolean
+  showAddInput: boolean
+  addInputValue: string
+  showManualModal: boolean
+  manualModalWord: string
+  manualModalPhonetic: string
+  manualModalValue: string
   _tick: number
 }
 
@@ -40,11 +46,19 @@ interface IVocabMethods {
   fetchChinese(w: IVocabWord): Promise<boolean>
   persistChn(w: IVocabWord): Promise<void>
   preTranslateContexts(): Promise<void>
+  fetchContextCn(w: IVocabWord): Promise<void>
   flipCard(): void
   nextGame(skipFrom?: number): void
   closeGame(): void
   addWord(): void
+  onAddInput(e: WechatMiniprogram.Input): void
+  onAddConfirm(e: WechatMiniprogram.Input): void
+  onAddBtn(): void
+  onManualInput(e: WechatMiniprogram.Input): void
+  confirmManualModal(): void
+  cancelManualModal(): void
   _doAddWord(w: string): Promise<void>
+  _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]): void
   loadWords(): void
   lookupWord(e: WechatMiniprogram.TouchEvent): void
 }
@@ -657,6 +671,12 @@ Page<IVocabData, IVocabMethods>({
     gameFlipped: false,
     lookingUp: false,
     gameLoading: false,
+    showAddInput: false,
+    addInputValue: '',
+    showManualModal: false,
+    manualModalWord: '',
+    manualModalPhonetic: '',
+    manualModalValue: '',
     _tick: 0,
   },
 
@@ -890,48 +910,108 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ lookingUp: false })
   },
 
+  _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]) {
+    const newWord: IVocabWord = {
+      word: w, phonetic, definition: '', chn,
+      source: '手动添加', context, contextCn,
+      status: 'new', correctStreak: 0,
+    }
+    words.unshift(newWord)
+    const a = getApp<IAppOption>()
+    wx.setStorageSync('studyData', a.globalData.studyData)
+    this.loadWords()
+    wx.showToast({ title: '已添加 ' + w, icon: 'success' })
+  },
+
   addWord() {
-    wx.showModal({
-      title: '添加单词',
-      editable: true,
-      placeholderText: '输入英文单词',
-      success: (res) => {
-        if (!res.confirm || !res.content) return
-        this._doAddWord(res.content.trim().toLowerCase())
-      },
-    })
+    this.setData({ showAddInput: true, addInputValue: '' })
+  },
+
+  onAddInput(e: WechatMiniprogram.Input) {
+    this.setData({ addInputValue: e.detail.value })
+  },
+
+  onAddConfirm(e: WechatMiniprogram.Input) {
+    const w = (e.detail.value || '').trim().toLowerCase()
+    if (!w) return
+    this.setData({ showAddInput: false })
+    this._doAddWord(w)
+  },
+
+  onAddBtn() {
+    const w = (this.data.addInputValue || '').trim().toLowerCase()
+    if (!w) return
+    this.setData({ showAddInput: false })
+    this._doAddWord(w)
+  },
+
+  onManualInput(e: WechatMiniprogram.Input) {
+    this.setData({ manualModalValue: e.detail.value })
+  },
+
+  confirmManualModal() {
+    const mc = this.data.manualModalValue.trim()
+    if (!mc) { wx.showToast({ title: '释义不能为空', icon: 'none' }); return }
+    const w = this.data.manualModalWord
+    const ph = this.data.manualModalPhonetic
+    const app = getApp<IAppOption>()
+    const words = app.globalData.studyData.vocabWords as IVocabWord[]
+    this.setData({ showManualModal: false, manualModalValue: '' })
+    this._saveAddedWord(w, ph, mc, '', '', words)
+  },
+
+  cancelManualModal() {
+    this.setData({ showManualModal: false, manualModalValue: '' })
   },
 
   async _doAddWord(w: string) {
-    const app = getApp<IAppOption>()
-    const words = app.globalData.studyData.vocabWords as IVocabWord[]
-    if (words.find(v => v.word === w)) {
-      wx.showToast({ title: '单词已存在', icon: 'none' })
-      return
-    }
-    const known = WORD_BANK[w]
-    const newWord: IVocabWord = {
-      word: w,
-      phonetic: known?.phonetic || '',
-      definition: '',
-      chn: known?.definition || '',
-      source: '手动添加',
-      context: '',
-      contextCn: '',
-      status: 'new',
-      correctStreak: 0,
-    }
-    words.unshift(newWord)
-    wx.setStorageSync('studyData', app.globalData.studyData)
-    this.loadWords()
-    if (!newWord.chn) {
-      wx.showToast({ title: '正在查词…', icon: 'loading' })
-      const ok = await this.fetchChinese(newWord)
-      if (ok) {
-        await this.persistChn(newWord)
-        this.loadWords()
+    try {
+      const app = getApp<IAppOption>()
+      const words = app.globalData.studyData.vocabWords as IVocabWord[]
+      if (words.find(v => v.word === w)) {
+        wx.showToast({ title: '单词已存在', icon: 'none' })
+        return
       }
-    }
-    wx.showToast({ title: '已添加 ' + w, icon: 'success' })
+      wx.showToast({ title: '正在查词…', icon: 'loading' })
+      let chn = ''
+      let phonetic = ''
+      let dict404 = false
+      try {
+        const result = await lookupWord(w)
+        const entry = Array.isArray(result) ? result[0] : result
+        if (entry?.chinese) chn = entry.chinese
+        if (entry?.phonetic) phonetic = entry.phonetic
+        else if (entry?.phonetics?.[0]?.text) phonetic = entry.phonetics[0].text
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : ''
+        if (msg.includes('404')) dict404 = true
+        else wx.showToast({ title: '查询失败', icon: 'none' })
+      }
+      if (!chn && !dict404) {
+        const known = WORD_BANK[w]
+        if (known) { chn = known.definition; phonetic = known.phonetic }
+      }
+      if (!chn && !dict404) {
+        try {
+          const ai = await aiTranslateWord(w)
+          if (ai?.chinese) chn = ai.chinese
+        } catch {}
+      }
+      if (!chn) {
+        wx.hideToast()
+        this.setData({ showAddInput: false, showManualModal: true, manualModalWord: w, manualModalPhonetic: phonetic, manualModalValue: '' })
+        return
+      }
+      let context = ''
+      let contextCn = ''
+      try {
+        const sents = await generateSentence({ word: w, count: 1 })
+        if (sents?.length > 0) {
+          context = sents[0].english
+          contextCn = sents[0].chinese
+        }
+      } catch {}
+      this._saveAddedWord(w, phonetic, chn, context, contextCn, words)
+    } catch (e) { wx.showToast({ title: '添加失败', icon: 'none' }) }
   },
 })
