@@ -1,6 +1,7 @@
 import readingsData from '../../data/readings'
 import readingAnnotations from './reading_annotations'
 import { applyTheme, getDarkMode } from '../../utils/theme'
+import { doCheckIn } from '../../utils/checkin'
 
 interface IReadingItem {
   id: number
@@ -543,6 +544,7 @@ Page<IReadingData, IReadingMethods>({
       map[id] = { submitted: true, score: correctCount, totalScore: totalCount }
       this.setData({ completionMap: map })
     }
+    doCheckIn('reading')
   },
 
   hideResult() {
