@@ -916,6 +916,7 @@ Page<IVocabData, IVocabMethods>({
       filteredWords: filtered,
       ...stats,
       streak: this.data.streak,
+      loading: false,
     })
     this.preTranslateContexts()
   },
