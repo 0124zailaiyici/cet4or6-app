@@ -73,8 +73,11 @@
 
       <!-- ===== 结果视图（提交后） ===== -->
       <view wx:if="{{showResult}}" class="result-view">
-        <scroll-view class="rv-list" scroll-y enhanced="{{true}}">
-          <view class="rv-card {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{resultItems}}" wx:key="label">
+        <view class="rv-nav">
+          <text class="rvn-item {{scrollToResult === 'r-' + index ? 'on' : ''}}" wx:for="{{resultItems}}" wx:key="label" data-idx="{{index}}" catchtap="scrollToResultItem">{{item.isCorrect ? '✓' : '✗'}} {{item.label}}</text>
+        </view>
+        <scroll-view class="rv-list" scroll-y scroll-into-view="{{scrollToResult}}">
+          <view class="rv-card {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{resultItems}}" wx:key="label" id="r-{{index}}">
             <view class="rvc-hd">
               <view class="rvc-num {{item.isCorrect ? 'ok' : 'bad'}}">{{item.isCorrect ? '✓' : '✗'}}</view>
               <text class="rvc-label">{{item.label}}</text>
@@ -82,8 +85,8 @@
             </view>
             <text class="rvc-stem" wx:if="{{item.questionStem}}">{{item.questionStem}}</text>
             <view class="rvc-opts" wx:if="{{item.allOptions && item.allOptions.length > 0}}">
-                <view class="rvc-opt {{idx === item.correctOptionIndex ? 'ans' : ''}} {{idx === item.userOptionIndex && idx !== item.correctOptionIndex ? 'wrong' : ''}}" wx:for="{{item.allOptions}}" wx:key="*this" wx:for-index="idx" wx:for-item="opt">{{opt}}</view>
-              </view>
+              <view class="rvc-opt {{idx === item.correctOptionIndex ? 'ans' : ''}} {{idx === item.userOptionIndex && idx !== item.correctOptionIndex ? 'wrong' : ''}}" wx:for="{{item.allOptions}}" wx:key="*this" wx:for-index="idx" wx:for-item="opt">{{opt}}</view>
+            </view>
             <view class="rvc-ans" wx:if="{{!item.isCorrect && !item.allOptions}}">
               <text class="rvc-ans-label">你的:</text>
               <text class="rvc-ans-val wrong">{{item.userAnswer}}</text>

@@ -70,6 +70,8 @@ interface IReadingData {
   showTrans: boolean
   pageParas: Array<{ text: string; paraIdx: number }>
   pageWordSegments: Array<{ type: string; text: string; word?: string; zh?: string }>
+  showResultNav: boolean
+  scrollToResult: string
   examMode: boolean
 }
 
@@ -113,6 +115,8 @@ interface IReadingMethods {
   onWordTap(e: WechatMiniprogram.TouchEvent): void
   updatePageParas(): void
   tokenizeToSegments(text: string, segs: Array<{ type: string; text: string; word?: string; zh?: string; num?: string }>, vocab: Record<string, string>): void
+  toggleResultNav(): void
+  scrollToResultItem(e: WechatMiniprogram.TouchEvent): void
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -154,6 +158,8 @@ Page<IReadingData, IReadingMethods>({
     showTrans: false,
     pageParas: [],
     pageWordSegments: [],
+    showResultNav: false,
+    scrollToResult: '',
     examMode: false
   },
 
@@ -731,7 +737,18 @@ Page<IReadingData, IReadingMethods>({
     }
   },
 
-  onTouchStart(e: WechatMiniprogram.TouchEvent) { this.setData({ touchStartX: e.touches[0].clientX }) },
+  onTouchStart(e: WechatMiniprogram.TouchEvent) { this.setData({ touchStartX: e.touches[0].clientX     })
+  },
+
+  toggleResultNav() {
+    this.setData({ showResultNav: !this.data.showResultNav })
+  },
+
+  scrollToResultItem(e: WechatMiniprogram.TouchEvent) {
+    const idx = e.currentTarget.dataset.idx as string
+    if (!idx) return
+    this.setData({ scrollToResult: 'r-' + idx, showResultNav: false })
+  },
   onPassageTouchEnd(e: WechatMiniprogram.TouchEvent) {
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
     if (dx > 50) this.prevPassage(); else if (dx < -50) this.nextPassage()

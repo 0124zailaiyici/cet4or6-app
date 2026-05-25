@@ -277,8 +277,8 @@
 .rv-list { flex: 1; min-height: 0; height: 1rpx; padding: 16rpx 20rpx 0; }
 
 .rv-card {
-  background: #fff; border-radius: 16rpx; padding: 20rpx 24rpx;
-  margin-bottom: 14rpx; box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
+  background: #fff; border-radius: 16rpx; padding: 16rpx 20rpx;
+  margin-bottom: 10rpx; box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04);
   border-left: 4rpx solid transparent;
   animation: rvCardIn 0.4s ease both;
 }
@@ -373,7 +373,27 @@
 .rv-item.wrong .rvi-your { color: #e57373; text-decoration: line-through; }
 .rvi-ans { font-size: 22rpx; color: #388e3c; font-weight: 600; }
 .rvi-hint {
-  font-size: 20rpx; color: #6a7a8a; line-height: 1.5;
-  margin-top: 6rpx; padding: 8rpx 12rpx; border-radius: 8rpx;
+  font-size: 22rpx; color: #6a7a8a; line-height: 1.5;
+  margin-top: 4rpx; padding: 8rpx 12rpx; border-radius: 8rpx;
   background: rgba(0,0,0,0.03);
 }
+
+/* ===== 结果视图（提交后） ===== */
+.result-view {
+  flex: 1.5; display: flex; flex-direction: column; min-height: 0;
+  background: #f7f0ef;
+}
+
+/* Result nav bar */
+.rv-nav {
+  display: flex; gap: 8rpx; padding: 10rpx 20rpx 0;
+  overflow-x: auto; flex-shrink: 0; white-space: nowrap;
+}
+.rv-nav::-webkit-scrollbar { width: 0; height: 0; }
+.rvn-item {
+  font-size: 22rpx; padding: 6rpx 14rpx; border-radius: 10rpx;
+  background: #fff; color: #546e7a; border: 1rpx solid #ece4e2;
+  flex-shrink: 0; cursor: pointer; transition: 0.15s;
+}
+.rvn-item:active { background: #eef1f3; }
+.rvn-item.on { background: #1e88e5; color: #fff; border-color: #1e88e5; }
