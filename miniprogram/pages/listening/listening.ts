@@ -251,6 +251,7 @@ class AudioManager {
 
       ctx.onTimeUpdate(() => {
         if (this.pageRef && this.pageRef.data.audioMode && this.ctx) {
+          const d = this.pageRef.data
           const fmt = (t: number) => {
             const m = Math.floor(t / 60)
             const s = Math.floor(t % 60)
@@ -262,6 +263,13 @@ class AudioManager {
             audioTimeStr: fmt(ctx.currentTime),
             audioDurationStr: fmt(ctx.duration),
           })
+          if (d.focusMode && d.loopSentence) {
+            const origIdx = d.focusSentenceMap[d.currentIndex] ?? 0
+            const sent = d.currentPassage?.sentences[origIdx]
+            if (sent && sent.end > 0 && ctx.currentTime >= sent.end) {
+              ctx.seek(sent.start || 0)
+            }
+          }
         }
       })
 
@@ -627,8 +635,6 @@ Page<IListeningData, IListeningMethods>({
         loopSentence: false,
         speed: 1,
         isPlaying: false,
-        audioTime: 0,
-        audioTimeStr: '0:00',
         focusSentences: [],
         focusSentenceMap: [],
         focusPageIndices: [],
@@ -689,12 +695,14 @@ Page<IListeningData, IListeningMethods>({
 
   seekAudio(e: WechatMiniprogram.TouchEvent) {
     if (!this.data.audioMode) return
-    const rect = (e.currentTarget as any).boundingClientRect
-    if (!rect) return
-    const x = e.detail.x - rect.left
-    const ratio = Math.max(0, Math.min(1, x / rect.width))
-    const seekTime = ratio * this.data.audioDuration
-    audio.seek(seekTime)
+    const x = (e as any).detail.x
+    if (x == null) return
+    const query = wx.createSelectorQuery().in(this)
+    query.select('.ap-bar').boundingClientRect((rect: any) => {
+      if (!rect || !rect.width) return
+      const ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width))
+      audio.seek(ratio * (this.data.audioDuration || 0))
+    }).exec()
   },
 
   playPause() {
@@ -859,6 +867,13 @@ Page<IListeningData, IListeningMethods>({
   getBlankText(text: string): string {
     if (!this.data.dictationMode) return text
     const words = text.split(' ')
-    return words.map((w, i) => i % 3 === 0 ? '____' : w).join(' ')
+    let contentIdx = 0
+    return words.map(w => {
+      const clean = w.replace(/\n/g, '')
+      if (/^Q\d+\.$/.test(clean) || /^[A-D]\)$/.test(clean)) return w
+      if (clean === '') return w
+      contentIdx++
+      return contentIdx % 3 === 0 ? '____' : w
+    }).join(' ')
   },
 })

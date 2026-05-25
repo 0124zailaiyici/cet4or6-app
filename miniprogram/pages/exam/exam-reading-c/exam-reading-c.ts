@@ -16,7 +16,7 @@ Page({
     _totalCount: 0,
     _qResults: {} as Record<number, string>,
     _resultItems: [] as any[],
-    _savedScrollY: 0,
+    _scrollToResult: '',
     darkMode: false,
     touchX: 0,
   },
@@ -111,15 +111,9 @@ Page({
     const target = this.data._paraPages.findIndex((page: string[]) => { acc += page.length; return acc > pIdx })
     const pageIdx = Math.max(0, target < 0 ? this.data._paraPages.length - 1 : target)
     this.setData({ _paraPageIdx: pageIdx, _curParas: this.data._paraPages[pageIdx] || [] })
-    wx.createSelectorQuery().selectViewport().scrollOffset((res: any) => {
-      this.setData({ _savedScrollY: res.scrollTop })
-      wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
-    }).exec()
   },
-  backToResults() {
-    const y = this.data._savedScrollY
-    this.setData({ _savedScrollY: 0 })
-    wx.pageScrollTo({ scrollTop: y, duration: 300 })
+  scrollToResultItem(e: any) {
+    this.setData({ _scrollToResult: 'r-' + e.currentTarget.dataset.idx })
   },
 
   goBack() { wx.navigateBack() },

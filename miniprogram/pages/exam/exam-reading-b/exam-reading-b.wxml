@@ -1,4 +1,4 @@
-<view class="page {{_submitted && showResult ? 'page-results' : ''}} {{darkMode ? 'dark-theme' : ''}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
     <view class="topbar">
       <view class="tb-back" catchtap="goBack">返回</view>
       <text class="tb-title">长篇阅读匹配</text>
@@ -43,12 +43,14 @@
     </view>
   </block>
   <view wx:if="{{_submitted && showResult}}" class="result-view">
-    <view class="rv-card {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{_resultItems}}" wx:key="label" wx:for-item="item">
-      <view class="rvc-hd"><view class="rvc-num {{item.isCorrect ? 'ok' : 'bad'}}">{{item.isCorrect ? '✓' : '✗'}}</view><text class="rvc-label">{{item.label}}</text><text class="rvc-locate" wx:if="{{item.locate}}" data-locate="{{item.locate}}" catchtap="jumpToParagraph">📍 {{item.locate}}</text></view>
-      <text class="rvc-stem" wx:if="{{item.questionStem}}">{{item.questionStem}}</text>
-      <view class="rvc-ans" wx:if="{{!item.isCorrect}}"><text class="rvc-ans-label">你的:</text><text class="rvc-ans-val wrong">{{item.userAnswer}}</text><text class="rvc-ans-label">正确:</text><text class="rvc-ans-val ok">{{item.correctAnswer}}</text></view>
-      <view class="rvc-hint" wx:if="{{item.hint}}">💡 {{item.hint}}</view>
-    </view>
+    <view class="rv-nav"><text class="rvn-item {{_scrollToResult === 'r-' + index ? 'on' : ''}}" wx:for="{{_resultItems}}" wx:key="label" data-idx="{{index}}" catchtap="scrollToResultItem">{{item.isCorrect ? '✓' : '✗'}} {{item.label}}</text></view>
+    <scroll-view class="rv-list" scroll-y scroll-into-view="{{_scrollToResult}}">
+      <view class="rv-card {{item.isCorrect ? 'correct' : 'wrong'}}" wx:for="{{_resultItems}}" wx:key="label" id="r-{{index}}">
+        <view class="rvc-hd"><view class="rvc-num {{item.isCorrect ? 'ok' : 'bad'}}">{{item.isCorrect ? '✓' : '✗'}}</view><text class="rvc-label">{{item.label}}</text><text class="rvc-locate" wx:if="{{item.locate}}" data-locate="{{item.locate}}" catchtap="jumpToParagraph">📍 {{item.locate}}</text></view>
+        <text class="rvc-stem" wx:if="{{item.questionStem}}">{{item.questionStem}}</text>
+        <view class="rvc-ans" wx:if="{{!item.isCorrect}}"><text class="rvc-ans-label">你的:</text><text class="rvc-ans-val wrong">{{item.userAnswer}}</text><text class="rvc-ans-label">正确:</text><text class="rvc-ans-val ok">{{item.correctAnswer}}</text></view>
+        <view class="rvc-hint" wx:if="{{item.hint}}">💡 {{item.hint}}</view>
+      </view>
+    </scroll-view>
   </view>
-  <view wx:if="{{_submitted && showResult && _savedScrollY > 0}}" class="back-rs" catchtap="backToResults">⬇ 结果</view>
 </view>
