@@ -28,6 +28,7 @@ interface IDictData {
   aiAvailable: boolean
   aiEnabled: boolean
   exampleCount: number
+  adding: boolean
 }
 
 const POS_MAP: Record<string, string> = {
@@ -52,6 +53,7 @@ Page<IDictData>({
     aiAvailable: false,
     aiEnabled: false,
     exampleCount: 0,
+    adding: false,
   },
 
   onLoad() {
@@ -151,6 +153,26 @@ Page<IDictData>({
     const val = !this.data.aiEnabled
     this.setData({ aiEnabled: val })
     wx.setStorageSync('dictAiEnabled', val)
+  },
+
+  addToVocab() {
+    const r = this.data.result
+    if (!r || this.data.adding) return
+    const app = getApp<IAppOption>()
+    const words = app.globalData.studyData.vocabWords as any[]
+    if (words.find((w: any) => w.word === r.word)) {
+      wx.showToast({ title: '已在单词本中', icon: 'none' })
+      this.setData({ adding: true })
+      return
+    }
+    words.unshift({
+      word: r.word, phonetic: r.phonetic, definition: '', chn: r.chinese || '',
+      source: '词典查询', context: '', contextCn: '', audioUrl: r.audio || '',
+      status: 'new', correctStreak: 0, growth: 0, stars: 0,
+    })
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.setData({ adding: true })
+    wx.showToast({ title: '已加入单词本', icon: 'success' })
   },
 
   playAudio() {

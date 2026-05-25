@@ -72,6 +72,7 @@
           </view>
         </view>
       </view>
+      <view class="add-vocab {{adding ? 'done' : ''}}" catchtap="addToVocab">{{adding ? '✅ 已加入单词本' : '➕ 加入单词本'}}</view>
     </view>
   </block>
 
