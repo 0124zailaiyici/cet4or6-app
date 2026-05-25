@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>单词本 · 下阶段功能原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3eeed;color:#2d2d4e;min-height:100vh;display:flex;justify-content:center}
+body.dark{background:#12121f;color:#e0d0e8}
+.app{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column;padding-bottom:80px}
+/* theme vars */
+body{--bg:#f3eeed;--card:#fff;--text:#2d2d4e;--muted:#8a7a9a;--accent:#ff6b8a;--accent2:#1e88e5;--border:#f0e8e7}
+body.dark{--bg:#12121f;--card:#1e1e38;--text:#e0d0e8;--muted:#7a6a8a;--accent:#ff8fab;--accent2:#4fc3f7;--border:#2a2a4a}
+body.theme-ocean{--bg:#e8f4f8;--card:#fff;--text:#1a3a4a;--muted:#5a8a9a;--accent:#00897b;--accent2:#00acc1;--border:#d0e8f0}
+body.dark.theme-ocean{--bg:#0a1a24;--card:#0d2a36;--text:#a0d0e0;--muted:#4a7a8a;--accent:#4db6ac;--accent2:#4dd0e1;--border:#1a3a48}
+body.theme-sunset{--bg:#fef3e8;--card:#fff;--text:#3a2a1a;--muted:#9a7a5a;--accent:#e65100;--accent2:#ff6f00;--border:#f0e0d0}
+body.dark.theme-sunset{--bg:#1a1008;--card:#2a1a0e;--text:#d0b080;--muted:#8a6a4a;--accent:#ff8a50;--accent2:#ffa040;--border:#3a2a1a}
+body.theme-forest{--bg:#eaf5ea;--card:#fff;--text:#1a3a1a;--muted:#5a8a5a;--accent:#2e7d32;--accent2:#558b2f;--border:#d0e8d0}
+body.dark.theme-forest{--bg:#0a1a0a;--card:#0d2a0d;--text:#80b080;--muted:#4a7a4a;--accent:#66bb6a;--accent2:#8bc34a;--border:#1a3a1a}
+body.theme-midnight{--bg:#e8e8f4;--card:#fff;--text:#1a1a3a;--muted:#5a5a9a;--accent:#5c6bc0;--accent2:#7c4dff;--border:#d0d0e8}
+body.dark.theme-midnight{--bg:#0a0a1a;--card:#0d0d2a;--text:#8080c0;--muted:#4a4a8a;--accent:#7986cb;--accent2:#b39ddb;--border:#1a1a3a}
+
+body{background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+
+/* Header */
+.tb{padding:36px 20px 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;transition:background .3s}
+.tb .tt{font-size:20px;font-weight:800}
+.tb .sub{font-size:13px;opacity:.85;margin-top:2px}
+
+/* Theme picker */
+.tp{display:flex;gap:8px;margin:10px 14px 6px;flex-wrap:wrap}
+.tp-dot{width:36px;height:36px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.2s;flex-shrink:0}
+.tp-dot.on{border-color:var(--text);transform:scale(1.15)}
+.tp-label{font-size:11px;color:var(--muted);margin-top:4px;text-align:center;display:block}
+
+/* Stats + search */
+.stats{display:flex;gap:6px;margin:0 14px 8px}
+.st{flex:1;background:var(--card);border-radius:10px;padding:10px;text-align:center}
+.st .n{display:block;font-size:24px;font-weight:800;color:var(--accent);transition:color .3s}
+.st .n.g{color:#388e3c}
+.st .l{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.sbar{display:flex;margin:0 14px 8px;gap:6px}
+.sinp{flex:1;padding:10px 14px;border-radius:10px;font-size:14px;border:2px solid var(--border);background:var(--card);color:var(--text);outline:none;transition:.2s}
+.sinp:focus{border-color:var(--accent2)}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin:0 14px 8px}
+.tab{flex:1;text-align:center;padding:8px 0;font-size:13px;color:var(--muted);background:var(--card);border-radius:8px;cursor:pointer;transition:.2s;border:1px solid transparent}
+.tab.on{color:var(--accent);font-weight:600;background:rgba(255,107,138,.06);border-color:rgba(255,107,138,.12)}
+
+/* List */
+.list{flex:1;padding:0 14px 20px;overflow-y:auto}
+.card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s}
+.card:active{transform:scale(.97)}
+.ci{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;background:rgba(255,107,138,.06);color:var(--accent)}
+.cb{flex:1;min-width:0}
+.cb .w{font-size:15px;font-weight:700;color:var(--text)}
+.cb .p{font-size:11px;color:var(--muted);margin-top:1px}
+.cb .c{font-size:12px;color:var(--muted);margin-top:2px}
+.ca{font-size:11px;color:var(--accent);padding:3px 10px;border-radius:6px;border:1px solid rgba(255,107,138,.12);flex-shrink:0}
+
+/* Achievements */
+.ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ach{background:var(--card);border-radius:14px;padding:16px;text-align:center;box-shadow:0 1px 8px rgba(255,158,181,.04);position:relative}
+.ach .ico{font-size:36px;display:block;margin-bottom:4px;filter:grayscale(1);opacity:.4;transition:.3s}
+.ach.unlocked .ico{filter:grayscale(0);opacity:1}
+.ach .nm{font-size:13px;font-weight:600;color:var(--text);display:block}
+.ach .desc{font-size:10px;color:var(--muted);margin-top:2px;display:block}
+.ach .prog{height:4px;border-radius:2px;background:var(--border);margin-top:8px;overflow:hidden}
+.ach .prog .fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+.ach .lock{position:absolute;top:8px;right:8px;font-size:14px}
+
+/* Sentence collect */
+.sent-list{}
+.sent{background:var(--card);border-radius:12px;padding:14px;margin-bottom:8px}
+.sent .en{font-size:13px;color:var(--text);line-height:1.5}
+.sent .cn{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+.sent .src{font-size:10px;color:var(--muted);margin-top:4px}
+.sent .save{float:right;font-size:18px;cursor:pointer;padding:4px;border-radius:6px;transition:.2s}
+.sent .save:active{background:rgba(255,107,138,.1)}
+.sent .save.saved{color:#ffa726}
+
+/* Nav */
+.sec-nav{display:flex;gap:4px;margin:10px 14px 6px}
+.snav{flex:1;text-align:center;padding:10px 0;font-size:13px;color:var(--muted);background:var(--card);border-radius:10px;cursor:pointer;transition:.2s;border:1px solid transparent}
+.snav.on{color:var(--accent);font-weight:600;background:rgba(255,107,138,.06);border-color:rgba(255,107,138,.2)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="tb">
+    <div class="tt">📖 单词本</div>
+    <div class="sub" id="subTitle">主题 · 搜索 · 成就 · 收藏</div>
+  </div>
+
+  <!-- 主题选择 -->
+  <div class="tp" id="themePicker">
+    <div style="text-align:center"><div class="tp-dot on" style="background:linear-gradient(135deg,#ffb3c6,#ff8fab)" onclick="setTheme('')"></div><span class="tp-label">默认</span></div>
+    <div style="text-align:center"><div class="tp-dot" style="background:linear-gradient(135deg,#00acc1,#00897b)" onclick="setTheme('ocean')"></div><span class="tp-label">海洋</span></div>
+    <div style="text-align:center"><div class="tp-dot" style="background:linear-gradient(135deg,#ff6f00,#e65100)" onclick="setTheme('sunset')"></div><span class="tp-label">日落</span></div>
+    <div style="text-align:center"><div class="tp-dot" style="background:linear-gradient(135deg,#558b2f,#2e7d32)" onclick="setTheme('forest')"></div><span class="tp-label">森林</span></div>
+    <div style="text-align:center"><div class="tp-dot" style="background:linear-gradient(135deg,#7c4dff,#5c6bc0)" onclick="setTheme('midnight')"></div><span class="tp-label">极光</span></div>
+    <div style="text-align:center"><div class="tp-dot" onclick="document.body.classList.toggle('dark')" style="background:#2a2a4a;font-size:16px;display:flex;align-items:center;justify-content:center;color:#fff">🌓</div><span class="tp-label">暗色</span></div>
+  </div>
+
+  <div class="stats">
+    <div class="st"><span class="n g">12</span><span class="l">已掌握</span></div>
+    <div class="st"><span class="n">38</span><span class="l">收集中</span></div>
+    <div class="st"><span class="n">7</span><span class="l">成就</span></div>
+  </div>
+
+  <!-- 搜索框 -->
+  <div class="sbar">
+    <input class="sinp" id="searchInput" placeholder="🔍 搜索单词或释义…" style="width:100%" oninput="filterWords(this.value)">
+  </div>
+
+  <!-- 导航 -->
+  <div class="sec-nav">
+    <div class="snav on" onclick="switchSec('words')">📖 单词</div>
+    <div class="snav" onclick="switchSec('achs')">🏆 成就</div>
+    <div class="snav" onclick="switchSec('sents')">📝 例句</div>
+  </div>
+
+  <div class="content" id="contentArea" style="flex:1;padding:0 14px 20px;overflow-y:auto"></div>
+</div>
+
+<script>
+const WORDS = [
+  {w:'abandon',p:"/əˈbændən/",c:"v. 抛弃，放弃",src:'CET-4'},
+  {w:'absorb',p:"/əbˈzɔːb/",c:"v. 吸收",src:'CET-4'},
+  {w:'access',p:"/ˈækses/",c:"n. 通道",src:'CET-4'},
+  {w:'accomplish',p:"/əˈkʌmplɪʃ/",c:"v. 完成",src:'CET-4'},
+  {w:'achieve',p:"/əˈtʃiːv/",c:"v. 达到",src:'CET-4'},
+  {w:'adapt',p:"/əˈdæpt/",c:"v. 适应",src:'CET-4'},
+  {w:'adventure',p:"/ədˈventʃə/",c:"n. 冒险",src:'CET-4'},
+  {w:'balance',p:"/ˈbæləns/",c:"n. 平衡",src:'CET-4'},
+  {w:'brave',p:"/breɪv/",c:"adj. 勇敢的",src:'CET-4'},
+  {w:'bright',p:"/braɪt/",c:"adj. 明亮的",src:'CET-4'},
+  {w:'courage',p:"/ˈkʌrɪdʒ/",c:"n. 勇气",src:'CET-4'},
+  {w:'create',p:"/kriˈeɪt/",c:"v. 创造",src:'CET-4'},
+]
+const ACHS = [
+  {ico:'🎯',nm:'初出茅庐',desc:'完成第 1 次背词',prog:1,target:1,unlocked:true},
+  {ico:'🔥',nm:'连击王者',desc:'达成 10 连击',prog:7,target:10,unlocked:false},
+  {ico:'💯',nm:'百词斩',desc:'累计掌握 100 个词',prog:12,target:100,unlocked:false},
+  {ico:'🏅',nm:'全勤周',desc:'连续 7 天完成挑战',prog:4,target:7,unlocked:false},
+  {ico:'⭐',nm:'三星收藏家',desc:'10 个词达到 3 星',prog:3,target:10,unlocked:false},
+  {ico:'🌺',nm:'花园大师',desc:'种出 5 棵大树',prog:2,target:5,unlocked:false},
+  {ico:'📚',nm:'学霸',desc:'集齐 3 个卡包',prog:1,target:3,unlocked:false},
+  {ico:'💪',nm:'坚持不懈',desc:'累计背词 50 轮',prog:8,target:50,unlocked:false},
+]
+const SENTS = [
+  {en:'He had to abandon his plan due to lack of funding.',cn:'由于缺乏资金，他不得不放弃自己的计划。',src:'abandon · CET-4 真题',saved:true},
+  {en:'Plants absorb carbon dioxide from the atmosphere.',cn:'植物从大气中吸收二氧化碳。',src:'absorb · CET-4 真题',saved:true},
+  {en:'Students have free access to the library.',cn:'学生可以免费使用图书馆。',src:'access · CET-4 真题',saved:false},
+  {en:'She accomplished her goal of running a marathon.',cn:'她实现了跑马拉松的目标。',src:'accomplish · CET-4 真题',saved:true},
+  {en:'You are capable of achieving great things.',cn:'你有能力成就伟大事业。',src:'学生例句 ♥',saved:false},
+  {en:'The view from the mountain was absolutely breathtaking.',cn:'山顶的景色令人叹为观止。',src:'旅行日记收藏',saved:true},
+  {en:'Courage is not the absence of fear, but the triumph over it.',cn:'勇气不是没有恐惧，而是战胜恐惧。',src:'阅读 · 美文',saved:true},
+]
+let sec = 'words'
+let filterVal = ''
+
+function setTheme(t) {
+  document.body.className = document.body.className.split(' ').filter(c => c.startsWith('theme-') || c === 'dark').join(' ')
+  if (t) document.body.classList.add('theme-' + t)
+  document.querySelectorAll('.tp-dot').forEach((d,i) => d.classList.toggle('on', i === (t ? ['','ocean','sunset','forest','midnight'].indexOf(t) : 0)))
+}
+
+function filterWords(v) { filterVal = v.toLowerCase(); render() }
+
+function switchSec(s) { sec = s; document.querySelectorAll('.snav').forEach((el,i) => el.classList.toggle('on', ['words','achs','sents'][i] === s)); render() }
+
+function render() {
+  const el = document.getElementById('contentArea')
+  if (sec === 'words') {
+    const filtered = WORDS.filter(w => !filterVal || w.w.includes(filterVal) || w.c.includes(filterVal))
+    el.innerHTML = filtered.length ? filtered.map(w => '<div class="card"><div class="ci">' + w.w[0].toUpperCase() + '</div><div class="cb"><div class="w">' + w.w + '</div><div class="p">' + w.p + '</div><div class="c">' + w.c + '</div></div><div class="ca">浏览</div></div>').join('') : '<div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">没有匹配的单词</div>'
+  } else if (sec === 'achs') {
+    el.innerHTML = '<div class="ach-grid">' + ACHS.map(a => '<div class="ach ' + (a.unlocked?'unlocked':'') + '"><span class="ico">' + a.ico + '</span><span class="nm">' + a.nm + '</span><span class="desc">' + a.desc + '</span><div class="prog"><div class="fill" style="width:' + Math.min(100,a.prog/a.target*100) + '%"></div></div><span class="lock">' + (a.unlocked?'✅':'🔒') + '</span></div>').join('') + '</div>'
+  } else if (sec === 'sents') {
+    el.innerHTML = '<div class="sent-list">' + SENTS.map(s => '<div class="sent"><span class="save ' + (s.saved?'saved':'') + '" onclick="this.classList.toggle(\'saved\')">' + (s.saved?'⭐':'☆') + '</span><div class="en">' + s.en + '</div><div class="cn">' + s.cn + '</div><div class="src">📖 ' + s.src + '</div></div>').join('') + '</div>'
+  }
+}
+render()
+</script>
+</body>
+</html>
