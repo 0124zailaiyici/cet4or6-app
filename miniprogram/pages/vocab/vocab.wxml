@@ -7,7 +7,7 @@
   <view class="stats">
     <view class="st"><text class="n g">{{mastered}}</text><text class="l">✓ 已掌握</text></view>
     <view class="st"><text class="n">{{learning}}</text><text class="l">📝 学习中</text></view>
-    <view class="st"><text class="n">{{reviewCount}}</text><text class="l">🔥 今日复习</text></view>
+    <view class="st"><text class="n">{{streak}}</text><text class="l">🔥 连胜</text></view>
   </view>
 
   <view class="tabs">
@@ -47,38 +47,58 @@
     </view>
   </scroll-view>
 
+  <!-- 翻卡 3D -->
   <view class="game-overlay {{gameWord || gameLoading ? 'show' : ''}}" catchtap="closeGame">
-    <view class="game-card {{gameWord || gameLoading ? 'show' : ''}}" catchtap="">
+    <view class="flip-ctn {{gameWord || gameLoading ? 'show' : ''}}" catchtap="">
       <view wx:if="{{!gameWord && gameLoading}}">
         <view class="gloading">加载中，请稍后…</view>
       </view>
-      <view wx:elif="{{gameWord}}">
-        <view class="gclose" catchtap="closeGame">✕</view>
-        <view class="gbar">
-          <view class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</view>
-          <view class="gminiload" wx:if="{{gameLoading}}">···</view>
+      <view class="flip-inner {{gameFlipped ? 'flipped' : ''}}" wx:elif="{{gameWord}}">
+
+        <!-- 正面 -->
+        <view class="flip-front" catchtap="flipCard">
+          <view class="gtop">
+            <text class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</text>
+            <view class="gclose" catchtap="closeGame">✕</view>
+          </view>
+          <text class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source.split('/')[0].trim()}}</text>
+          <text class="gw">{{gameWord.word}}</text>
+          <text class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</text>
+          <text class="gctx" wx:if="{{gameWord.context}}">{{gameWord.context}}</text>
+          <view class="speaker" catchtap="speakWord">🔊 听发音</view>
+          <text class="ghint">点击翻转</text>
         </view>
 
-        <view class="gfront {{gameFlipped ? 'hide' : ''}}" catchtap="flipCard">
-          <view class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source.split('/')[0].trim()}}</view>
-          <view class="gw">{{gameWord.word}}</view>
-          <view class="gp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</view>
-          <view class="gctx" wx:if="{{gameWord.context}}">{{gameWord.context}}</view>
-          <view class="ghint">点击翻转</view>
+        <!-- 背面 -->
+        <view class="flip-back" catchtap="flipCard">
+          <view class="gtop">
+            <text class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</text>
+            <view class="gclose" catchtap="closeGame">✕</view>
+          </view>
+          <text class="fbw">{{gameWord.word}}</text>
+          <text class="fbp" wx:if="{{gameWord.phonetic}}">{{gameWord.phonetic}}</text>
+          <view class="gc">{{gameWord.chn}}</view>
+          <text class="gctxcn" wx:if="{{gameWord.contextCn}}">{{gameWord.contextCn}}</text>
+          <view class="gacts">
+            <view class="gb hard" catchtap="markHard">😵 不认识</view>
+            <view class="gb known" catchtap="markKnown">✅ 认识</view>
+          </view>
         </view>
 
-        <view class="gback {{gameFlipped ? '' : 'hide'}}" catchtap="flipCard">
-          <view class="gchnttl">中文释义</view>
-          <view class="gchn">{{gameWord.chn}}</view>
-          <view class="gctxcn" wx:if="{{gameWord.contextCn}}">{{gameWord.contextCn}}</view>
-        </view>
-
-        <view class="gf">
-          <view class="gb next" catchtap="nextGame">下一个</view>
-        </view>
       </view>
     </view>
   </view>
+
+  <!-- 庆祝 -->
+  <view class="celebrate {{celebrateShow ? 'show' : ''}}">
+    <view class="cbox">
+      <text class="cemoji">🎉</text>
+      <text class="ctit">太棒了！</text>
+      <text class="csub">本轮完成，累计掌握 {{mastered}} 个词</text>
+      <view class="cbtn" catchtap="closeCelebrate">继续加油 💪</view>
+    </view>
+  </view>
+  <canvas class="confetti" id="confettiCanvas" type="2d"></canvas>
 
   <view class="mm-overlay {{showManualModal ? 'show' : ''}}" catchtap="cancelManualModal">
     <view class="mm-box" catchtap="">

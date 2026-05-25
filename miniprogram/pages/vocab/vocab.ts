@@ -10,6 +10,7 @@ interface IVocabWord {
   source: string
   context: string
   contextCn: string
+  audioUrl: string
   status: 'new' | 'learning' | 'review' | 'master'
   correctStreak: number
 }
@@ -20,7 +21,7 @@ interface IVocabData {
   tab: number
   mastered: number
   learning: number
-  reviewCount: number
+  streak: number
   darkMode: boolean
   gameWord: IVocabWord | null
   gameWordIdx: number
@@ -37,6 +38,7 @@ interface IVocabData {
   manualModalPhonetic: string
   manualModalValue: string
   swipedIdx: number
+  celebrateShow: boolean
   _tick: number
 }
 
@@ -62,6 +64,13 @@ interface IVocabMethods {
   swipeEnd(e: WechatMiniprogram.TouchEvent): void
   deleteWord(e: WechatMiniprogram.TouchEvent): void
   closeSwipe(): void
+  speakWord(): void
+  markKnown(): void
+  markHard(): void
+  _fetchAudioUrl(word: IVocabWord): Promise<void>
+  startConfetti(): void
+  stopConfetti(): void
+  closeCelebrate(): void
   _doAddWord(w: string): Promise<void>
   _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]): void
   loadWords(): void
@@ -646,6 +655,7 @@ function extractWords(): IVocabWord[] {
         source,
         context: ctx.trim(),
         contextCn: '',
+        audioUrl: '',
         status: 'new',
         correctStreak: 0,
       }
@@ -668,7 +678,7 @@ Page<IVocabData, IVocabMethods>({
     tab: 0,
     mastered: 0,
     learning: 0,
-    reviewCount: 0,
+    streak: 0,
     darkMode: false,
     gameWord: null,
     gameWordIdx: 0,
@@ -685,6 +695,7 @@ Page<IVocabData, IVocabMethods>({
     manualModalPhonetic: '',
     manualModalValue: '',
     swipedIdx: -1,
+    celebrateShow: false,
     _tick: 0,
   },
 
@@ -713,13 +724,12 @@ Page<IVocabData, IVocabMethods>({
       wx.setStorageSync('studyData', app.globalData.studyData)
     }
     const words = stored.slice()
-    const stats = { mastered: 0, learning: 0, reviewCount: 0 }
+    const stats = { mastered: 0, learning: 0 }
     const tab = this.data.tab
     const filtered: IVocabWord[] = []
     for (const w of words) {
       if (w.status === 'master') stats.mastered++
       else stats.learning++
-      if (w.status === 'review') stats.reviewCount++
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
       else if (tab === 2 && w.status === 'master') filtered.push(w)
@@ -728,6 +738,7 @@ Page<IVocabData, IVocabMethods>({
       words,
       filteredWords: filtered,
       ...stats,
+      streak: this.data.streak,
     })
     this.preTranslateContexts()
   },
@@ -833,21 +844,20 @@ Page<IVocabData, IVocabMethods>({
   async showGameForIdx(idx: number, skipFrom?: number) {
     const word = this.data.filteredWords[idx]
     if (!word) { this.closeGame(); return }
-    this.setData({ gameLoading: true })
 
     if (!word.chn && hasCJK(word.definition)) {
       word.chn = word.definition; word.definition = ''
     }
 
     if (!word.chn) {
+      this.setData({ gameLoading: true, gameWord: null })
       const ok = await this.fetchChinese(word)
       if (ok) await this.persistChn(word)
-    }
-
-    if (!word.chn) {
-      this.setData({ gameLoading: false })
-      wx.showToast({ title: `跳过「${word.word}」`, icon: 'none' })
-      return this.nextGame(skipFrom ?? idx)
+      if (!word.chn) {
+        this.setData({ gameLoading: false })
+        wx.showToast({ title: `跳过「${word.word}」`, icon: 'none' })
+        return this.nextGame(skipFrom ?? idx)
+      }
     }
 
     this.setData({
@@ -855,17 +865,57 @@ Page<IVocabData, IVocabMethods>({
       gameFlipped: false, gameLoading: false,
     })
     if (!word.contextCn && word.context) this.fetchContextCn(word)
+    if (!word.audioUrl) this._fetchAudioUrl(word)
   },
 
   flipCard() {
     this.setData({ gameFlipped: !this.data.gameFlipped })
   },
 
+  speakWord() {
+    const w = this.data.gameWord
+    if (!w) return
+    if (w.audioUrl) {
+      const ac = wx.createInnerAudioContext()
+      ac.src = w.audioUrl
+      ac.play()
+    } else {
+      wx.showToast({ title: '暂无发音', icon: 'none' })
+    }
+  },
+
+  markKnown() {
+    const w = this.data.gameWord
+    if (!w) return
+    const app = getApp<IAppOption>()
+    const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
+    if (sw) {
+      sw.correctStreak++
+      if (sw.correctStreak >= 3) sw.status = 'master'
+      else sw.status = 'learning'
+    }
+    this.setData({ streak: this.data.streak + 1 })
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.nextGame()
+  },
+
+  markHard() {
+    const w = this.data.gameWord
+    if (!w) return
+    const app = getApp<IAppOption>()
+    const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
+    if (sw) { sw.correctStreak = 0; sw.status = 'review' }
+    this.setData({ streak: 0 })
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.nextGame()
+  },
+
   nextGame(skipFrom?: number) {
     const nextIdx = this.data.gameWordIdx + 1
     if (nextIdx >= this.data.gameTotal || nextIdx >= this.data.gameSessionStart + this.data.gameSessionLimit) {
       this.closeGame()
-      wx.showToast({ title: '浏览完毕！', icon: 'success' })
+      this.startConfetti()
+      this.setData({ celebrateShow: true })
       return
     }
     if (skipFrom !== undefined && nextIdx - skipFrom > 50) {
@@ -877,6 +927,72 @@ Page<IVocabData, IVocabMethods>({
 
   closeGame() {
     this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameFlipped: false })
+  },
+
+  async _fetchAudioUrl(word: IVocabWord) {
+    try {
+      const result = await lookupWord(word.word)
+      const entry = Array.isArray(result) ? result[0] : result
+      const au = entry?.phonetics?.find((p: any) => p?.audio)?.audio
+      if (au) { word.audioUrl = au; const app = getApp<IAppOption>(); wx.setStorageSync('studyData', app.globalData.studyData) }
+    } catch {}
+  },
+
+  startConfetti() {
+    const sys = wx.getSystemInfoSync()
+    const w = sys.windowWidth
+    const h = sys.windowHeight
+    const colors = ['#ff8fab','#4fc3f7','#66bb6a','#ffa726','#ab47bc','#ff6b8a']
+    const particles: Array<{x:number;y:number;w:number;h:number;color:string;vx:number;vy:number;rot:number;rv:number}> = []
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * w, y: Math.random() * h - h,
+        w: 3 + Math.random() * 3, h: 2 + Math.random() * 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - .5) * 2, vy: 1 + Math.random() * 3,
+        rot: Math.random() * 360, rv: (Math.random() - .5) * 6,
+      })
+    }
+    wx.createSelectorQuery().select('#confettiCanvas').fields({ node: true, size: true }).exec((res) => {
+      const canvas = res[0]?.node as any
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      canvas.width = w
+      canvas.height = h
+      let anim: number | null = null
+      const draw = () => {
+        ctx.clearRect(0, 0, w, h)
+        let alive = false
+        for (const p of particles) {
+          p.x += p.vx; p.y += p.vy; p.rot += p.rv; p.vy += .04
+          if (p.y < h + 20) alive = true
+          ctx.save()
+          ctx.translate(p.x, p.y)
+          ctx.rotate(p.rot * Math.PI / 180)
+          ctx.fillStyle = p.color
+          ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h)
+          ctx.restore()
+        }
+        if (alive) anim = canvas.requestAnimationFrame?.(draw) as any
+      }
+      draw()
+      ;(canvas as any)._confettiAnim = anim
+    })
+  },
+
+  stopConfetti() {
+    wx.createSelectorQuery().select('#confettiCanvas').fields({ node: true }).exec((res) => {
+      const canvas = res[0]?.node as any
+      if (canvas?._confettiAnim != null) canvas.cancelAnimationFrame?.(canvas._confettiAnim)
+      const ctx = canvas?.getContext('2d')
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
+    })
+  },
+
+  closeCelebrate() {
+    this.stopConfetti()
+    this.setData({ celebrateShow: false })
+    this.loadWords()
   },
 
   async lookupWord(e: WechatMiniprogram.TouchEvent) {
@@ -953,7 +1069,7 @@ Page<IVocabData, IVocabMethods>({
     const newWord: IVocabWord = {
       word: w, phonetic, definition: '', chn,
       source: '手动添加', context, contextCn,
-      status: 'new', correctStreak: 0,
+      audioUrl: '', status: 'new', correctStreak: 0,
     }
     words.unshift(newWord)
     const a = getApp<IAppOption>()

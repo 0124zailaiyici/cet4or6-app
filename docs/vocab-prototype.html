@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>单词本 · 原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3eeed;color:#2d2d4e;min-height:100vh;display:flex;justify-content:center}
+body.dark{background:#12121f;color:#e0d0e8}
+.app{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column;padding-bottom:80px}
+
+/* Header */
+.tb{padding:36px 20px 14px;background:linear-gradient(135deg,#ffb3c6,#ff8fab);color:#fff}
+body.dark .tb{background:linear-gradient(135deg,#2a2a4a,#1a1a38)}
+.tb .tt{font-size:20px;font-weight:800}
+.tb .sub{font-size:13px;opacity:.85;margin-top:2px}
+
+/* Stats */
+.stats{display:flex;gap:6px;margin:10px 14px}
+.st{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 8px rgba(255,158,181,.04)}
+body.dark .st{background:#1e1e38;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.st .n{display:block;font-size:26px;font-weight:800;color:#ff6b8a}
+.st .n.g{color:#388e3c}
+.st .l{display:block;font-size:12px;color:#8a7a9a;margin-top:2px}
+body.dark .st .l{color:#a090b0}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin:0 14px 8px}
+.tab{flex:1;text-align:center;padding:8px 0;font-size:13px;color:#8a7a9a;background:#fff;border-radius:8px;cursor:pointer;transition:.2s}
+body.dark .tab{background:#1e1e38;color:#a090b0}
+.tab.on{color:#ff6b8a;font-weight:600;background:rgba(255,107,138,.06);border:1px solid rgba(255,107,138,.12)}
+.tab.add{color:#1e88e5;max-width:70px;flex-shrink:0}
+
+/* List */
+.list{flex:1;padding:0 14px 20px;overflow-y:auto}
+.empty{text-align:center;padding:80px 0;color:#8a7a9a;font-size:14px}
+body.dark .empty{color:#a090b0}
+.empty .h{font-size:12px;margin-top:6px;color:#bbb}
+
+/* Cards */
+.card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;box-shadow:0 1px 8px rgba(255,158,181,.04)}
+body.dark .card{background:#1e1e38;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.card:active{transform:scale(.97)}
+.ci{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
+.ci.n{background:rgba(255,107,138,.06);color:#ff6b8a}
+.ci.r{background:rgba(255,152,0,.06);color:#f57c00}
+.ci.m{background:rgba(56,142,60,.06);color:#388e3c}
+.cb{flex:1;min-width:0}
+.cb .w{font-size:15px;font-weight:700;color:#2d2d4e}
+body.dark .cb .w{color:#e0d0e8}
+.cb .p{font-size:11px;color:#8a7a9a;margin-top:1px}
+body.dark .cb .p{color:#a090b0}
+.cb .c{font-size:12px;color:#2d2d4e;margin-top:2px}
+body.dark .cb .c{color:#a090b0}
+.ca{font-size:11px;color:#ff6b8a;padding:3px 10px;border-radius:6px;border:1px solid rgba(255,107,138,.12);flex-shrink:0}
+.ca.done{color:#388e3c;border-color:rgba(56,142,60,.12);background:rgba(56,142,60,.04)}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:100;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s,background .3s}
+.overlay.show{background:rgba(0,0,0,.5);pointer-events:auto;opacity:1}
+
+/* Flip card */
+.flip-ctn{width:320px;min-height:380px;perspective:800px;position:relative}
+.flip-inner{position:relative;width:100%;min-height:380px;transition:transform .5s cubic-bezier(.4,.0,.2,1);transform-style:preserve-3d}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.fr,.fb{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;border-radius:32px;padding:32px 36px 28px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.15);min-height:380px}
+body.dark .fr,body.dark .fb{background:#1e1e38;box-shadow:0 16px 60px rgba(0,0,0,.3)}
+.fb{transform:rotateY(180deg)}
+
+.gtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;width:100%}
+.gprog{font-size:11px;color:#8a7a9a;font-weight:600}
+.gclose{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8a7a9a;background:rgba(0,0,0,.04);cursor:pointer}
+body.dark .gclose{color:#6a6a8a;background:rgba(255,255,255,.06)}
+body.dark .gprog{color:#6a6a8a}
+
+/* Front */
+.gq{font-size:11px;color:#ff6b8a;font-weight:600;margin-bottom:6px}
+.gw{font-size:36px;font-weight:800;color:#2d2d4e;letter-spacing:1px}
+body.dark .gw{color:#e0d0e8}
+.gp{font-size:13px;color:#8a7a9a;margin-top:4px}
+body.dark .gp{color:#a090b0}
+.gctx{font-size:12px;color:#4a4a6a;line-height:1.6;margin-top:12px;padding:12px;background:#f8f5f4;border-radius:12px;text-align:center}
+body.dark .gctx{color:#c0b0d0;background:#2a2a4a}
+.speaker{margin:8px auto 0}
+.ghint{font-size:11px;color:#ff6b8a;margin-top:10px;text-align:center}
+
+/* Speaker */
+.speaker{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 14px;border-radius:16px;background:rgba(30,136,229,.08);color:#1e88e5;font-size:12px;cursor:pointer;transition:.2s;user-select:none;width:fit-content}
+.speaker:active{background:rgba(30,136,229,.15);transform:scale(.95)}
+
+/* Back */
+.gct{font-size:11px;color:#8a7a9a;margin-bottom:4px}
+.fbw{font-size:22px;font-weight:800;color:#2d2d4e;margin-top:4px}
+body.dark .fbw{color:#e0d0e8}
+.fbp{font-size:12px;color:#8a7a9a;margin-top:2px;margin-bottom:12px}
+body.dark .fbp{color:#a090b0}
+.gc{font-size:22px;font-weight:700;color:#1e88e5;line-height:1.4;padding:8px 16px;background:rgba(30,136,229,.06);border-radius:12px;width:100%}
+body.dark .gc{color:#4fc3f7;background:rgba(79,195,247,.08)}
+.gctxcn{font-size:11px;color:#8a7a9a;margin-top:10px;line-height:1.5;padding:0 4px}
+body.dark .gctxcn{color:#8a7a9a}
+
+/* Actions */
+.gacts{display:flex;gap:8px;margin-top:auto;justify-content:center;padding-top:16px;width:100%}
+.gb{padding:12px 32px;border-radius:18px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;border:none;text-align:center}
+.gb:active{transform:scale(.95)}
+.gb.known{background:linear-gradient(135deg,#66bb6a,#43a047);color:#fff}
+.gb.hard{background:rgba(255,107,138,.1);color:#ff6b8a}
+.gb.next{background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;padding:10px 36px}
+
+/* Celebrate */
+.celebrate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .4s}
+.celebrate.show{opacity:1}
+.celebrate .box{background:#fff;border-radius:24px;padding:36px 32px;text-align:center;box-shadow:0 16px 60px rgba(0,0,0,.2)}
+body.dark .celebrate .box{background:#1e1e38}
+.celebrate .emoji{font-size:48px;margin-bottom:8px}
+.celebrate .tit{font-size:18px;font-weight:700;color:#2d2d4e}
+body.dark .celebrate .tit{color:#e0d0e8}
+.celebrate .sub{font-size:12px;color:#8a7a9a;margin-top:4px}
+.celebrate .btn{margin-top:16px;padding:10px 32px;border-radius:14px;background:linear-gradient(135deg,#ff8fab,#ff6b8a);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;pointer-events:auto;transition:.2s}
+.celebrate .btn:active{transform:scale(.95)}
+#confetti{position:fixed;inset:0;z-index:199;pointer-events:none}
+
+/* Dark toggle */
+.toggle{position:fixed;top:12px;right:12px;z-index:50;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.06);color:#8a7a9a;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+body.dark .toggle{background:rgba(255,255,255,.08);color:#a090b0}
+.toggle:active{transform:scale(.9)}
+</style>
+</head>
+<body class="">
+<button class="toggle" onclick="document.body.classList.toggle('dark')">🌓</button>
+
+<div class="app">
+  <div class="tb">
+    <div class="tt">📖 单词本</div>
+    <div class="sub">翻一翻，听一听，四级词汇轻松拿下</div>
+  </div>
+
+  <div class="stats">
+    <div class="st"><span class="n g" id="mastered">0</span><span class="l">✓ 已掌握</span></div>
+    <div class="st"><span class="n" id="learning">0</span><span class="l">📝 学习中</span></div>
+    <div class="st"><span class="n" id="streak">0</span><span class="l">🔥 连胜</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="switchTab(0)">📝 学习中</div>
+    <div class="tab" onclick="switchTab(1)">🔥 待复习</div>
+    <div class="tab" onclick="switchTab(2)">✓ 已掌握</div>
+    <div class="tab add" onclick="openSearch()">🔍</div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<!-- 翻卡 -->
+<div class="overlay" id="overlay">
+  <div class="flip-ctn">
+    <div class="flip-inner" id="flipInner">
+      <!-- 正面 -->
+      <div class="fr" onclick="flipCard()">
+        <div class="gtop">
+          <span class="gprog" id="gprog">1/10</span>
+          <span class="gclose" onclick="event.stopPropagation();closeGame()">✕</span>
+        </div>
+        <div class="gq" id="gq"></div>
+        <div class="gw" id="gw"></div>
+        <div class="gp" id="gp"></div>
+        <div class="gctx" id="gctx"></div>
+        <div class="speaker" onclick="event.stopPropagation();speak()">🔊 听发音</div>
+        <div class="ghint">点击翻转</div>
+      </div>
+      <!-- 背面 -->
+      <div class="fb" onclick="flipCard()">
+        <div class="gtop">
+          <span class="gprog" id="gprog2">1/10</span>
+          <span class="gclose" onclick="event.stopPropagation();closeGame()">✕</span>
+        </div>
+        <div class="fbw" id="fbw"></div>
+        <div class="fbp" id="fbp"></div>
+        <div class="gc" id="gc"></div>
+        <div class="gctxcn" id="gctxcn"></div>
+        <div class="gacts">
+          <div class="gb hard" onclick="event.stopPropagation();markHard()">😵 不认识</div>
+          <div class="gb known" onclick="event.stopPropagation();markKnown()">✅ 认识</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 庆祝 -->
+<div class="celebrate" id="celebrate">
+  <div class="box">
+    <div class="emoji">🎉</div>
+    <div class="tit">太棒了！</div>
+    <div class="sub" id="csub">完成了本轮复习</div>
+    <div class="btn" onclick="closeCelebrate()">继续加油 💪</div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+// ===== 数据 =====
+const WORDS = [
+  {word:'abandon',phonetic:"/əˈbændən/",definition:"v. 抛弃，放弃",context:"He had to abandon his plan due to lack of funding.","contextCn":"由于缺乏资金，他不得不放弃自己的计划。",source:'CET-4'},
+  {word:'abolish',phonetic:"/əˈbɒlɪʃ/",definition:"v. 废除，取消",context:"Many people advocate to abolish the outdated law.","contextCn":"许多人主张废除这条过时的法律。",source:'CET-4'},
+  {word:'absorb',phonetic:"/əbˈzɔːb/",definition:"v. 吸收；吸引",context:"Plants absorb carbon dioxide from the atmosphere.","contextCn":"植物从大气中吸收二氧化碳。",source:'CET-4'},
+  {word:'abstract',phonetic:"/ˈæbstrækt/",definition:"adj. 抽象的；n. 摘要",context:"The concept of freedom is highly abstract.","contextCn":"自由这个概念非常抽象。",source:'CET-4'},
+  {word:'abundant',phonetic:"/əˈbʌndənt/",definition:"adj. 丰富的，充裕的",context:"The region is abundant in natural resources.","contextCn":"该地区自然资源丰富。",source:'CET-4'},
+  {word:'accelerate',phonetic:"/əkˈseləreɪt/",definition:"v. 加速，促进",context:"The car accelerated quickly on the highway.","contextCn":"汽车在高速公路上迅速加速。",source:'CET-4'},
+  {word:'access',phonetic:"/ˈækses/",definition:"n. 通道；v. 访问",context:"Students have free access to the library.","contextCn":"学生可以免费使用图书馆。",source:'CET-4'},
+  {word:'accomplish',phonetic:"/əˈkʌmplɪʃ/",definition:"v. 完成，实现",context:"She accomplished her goal of running a marathon.","contextCn":"她实现了跑马拉松的目标。",source:'CET-4'},
+  {word:'accurate',phonetic:"/ˈækjərət/",definition:"adj. 准确的",context:"The data must be accurate for the experiment.","contextCn":"实验数据必须准确。",source:'CET-4'},
+  {word:'achieve',phonetic:"/əˈtʃiːv/",definition:"v. 达到，取得",context:"He worked hard to achieve his dreams.","contextCn":"他努力工作以实现自己的梦想。",source:'CET-4'},
+  {word:'acknowledge',phonetic:"/əkˈnɒlɪdʒ/",definition:"v. 承认；感谢",context:"She acknowledged her mistake and apologized.","contextCn":"她承认了自己的错误并道歉。",source:'CET-4'},
+  {word:'acquire',phonetic:"/əˈkwaɪə/",definition:"v. 获得，学到",context:"It takes time to acquire a new language.","contextCn":"掌握一门新语言需要时间。",source:'CET-4'},
+]
+
+// ===== 状态 =====
+let data = WORDS.map(w => ({...w, status:'new', correctStreak:0}))
+let tab = 0
+let gameSession = []
+let sessionIdx = 0
+let streak = 0
+let gameFlipped = false
+let currentWord = null
+
+// ===== 列表 =====
+function getFiltered() {
+  if (tab === 0) return data.filter(w => w.status !== 'master')
+  if (tab === 1) return data.filter(w => w.status === 'review')
+  return data.filter(w => w.status === 'master')
+}
+
+function render() {
+  const filtered = getFiltered()
+  document.getElementById('mastered').textContent = data.filter(w => w.status === 'master').length
+  document.getElementById('learning').textContent = data.filter(w => w.status !== 'master').length
+  document.getElementById('streak').textContent = streak
+
+  const list = document.getElementById('list')
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty">暂无单词<div class="h">从阅读中自动收集 · 或手动添加</div></div>'
+    return
+  }
+  list.innerHTML = filtered.map((w,i) => {
+    const c = w.status === 'master' ? 'm' : w.status === 'review' ? 'r' : 'n'
+    return `<div class="card" onclick="startGame(${i})">
+      <div class="ci ${c}">${w.word[0].toUpperCase()}</div>
+      <div class="cb">
+        <div class="w">${w.word}</div>
+        <div class="p">${w.phonetic || ''}</div>
+        <div class="c">${w.definition || ''}</div>
+      </div>
+      <div class="ca ${w.status === 'master' ? 'done' : ''}">${w.status === 'master' ? '✓' : '浏览'}</div>
+    </div>`
+  }).join('')
+}
+
+function switchTab(t) {
+  tab = t
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('on', i === t))
+  render()
+}
+
+function openSearch() {}
+
+// ===== 游戏 =====
+function startGame(idx) {
+  const filtered = getFiltered()
+  const remaining = filtered.length - idx
+  const limit = Math.min(10, remaining)
+  gameSession = filtered.slice(idx, idx + limit)
+  sessionIdx = 0
+  gameFlipped = false
+  showCard()
+  document.getElementById('overlay').classList.add('show')
+}
+
+function showCard() {
+  const w = gameSession[sessionIdx]
+  if (!w) { closeGame(); celebrate(); return }
+  currentWord = w
+  gameFlipped = false
+  document.getElementById('flipInner').classList.remove('flipped')
+  document.getElementById('gprog').textContent = sessionIdx+1 + '/' + gameSession.length
+  document.getElementById('gprog2').textContent = sessionIdx+1 + '/' + gameSession.length
+  document.getElementById('gq').textContent = w.source ? '📖 ' + w.source : ''
+  document.getElementById('gw').textContent = w.word
+  document.getElementById('gp').textContent = w.phonetic || ''
+  document.getElementById('gctx').textContent = w.context || ''
+  document.getElementById('fbw').textContent = w.word
+  document.getElementById('fbp').textContent = w.phonetic || ''
+  document.getElementById('gc').textContent = w.definition || ''
+  document.getElementById('gctxcn').textContent = w.contextCn || ''
+}
+
+function flipCard() {
+  if (!currentWord) return
+  gameFlipped = !gameFlipped
+  document.getElementById('flipInner').classList.toggle('flipped', gameFlipped)
+}
+
+function speak() {
+  if (!currentWord) return
+  const u = new SpeechSynthesisUtterance(currentWord.word)
+  u.lang = 'en-US'
+  u.rate = .85
+  speechSynthesis.cancel()
+  speechSynthesis.speak(u)
+}
+
+function markKnown() {
+  if (!currentWord) return
+  const w = data.find(d => d.word === currentWord.word)
+  if (w) {
+    w.correctStreak++
+    if (w.correctStreak >= 3) w.status = 'master'
+    else w.status = 'learning'
+  }
+  streak++
+  nextGame()
+}
+
+function markHard() {
+  if (!currentWord) return
+  const w = data.find(d => d.word === currentWord.word)
+  if (w) { w.correctStreak = 0; w.status = 'review' }
+  streak = 0
+  nextGame()
+}
+
+function nextGame() {
+  sessionIdx++
+  if (sessionIdx >= gameSession.length) { closeGame(); celebrate(); return }
+  showCard()
+}
+
+function closeGame() {
+  document.getElementById('overlay').classList.remove('show')
+  document.getElementById('flipInner').classList.remove('flipped')
+  render()
+}
+
+function closeCelebrate() {
+  document.getElementById('celebrate').classList.remove('show')
+  stopConfetti()
+}
+
+function celebrate() {
+  if (sessionIdx === 0) return
+  document.getElementById('csub').textContent = '本轮完成 ' + gameSession.length + ' 个词 · 累计掌握 ' + data.filter(w => w.status === 'master').length + ' 个'
+  document.getElementById('celebrate').classList.add('show')
+  startConfetti()
+}
+
+// ===== Confetti =====
+const canvas = document.getElementById('confetti')
+const ctx = canvas.getContext('2d')
+let animId = null, particles = []
+const colors = ['#ff8fab','#4fc3f7','#66bb6a','#ffa726','#ab47bc','#ff6b8a']
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+window.addEventListener('resize', resizeCanvas)
+resizeCanvas()
+
+function startConfetti() {
+  particles = []
+  for (let i = 0; i < 100; i++) {
+    particles.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+      w: 5 + Math.random() * 3, h: 3 + Math.random() * 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - .5) * 2, vy: 1 + Math.random() * 3,
+      rot: Math.random() * 360, rv: (Math.random() - .5) * 6,
+    })
+  }
+  if (animId) cancelAnimationFrame(animId)
+  drawConfetti()
+}
+
+function drawConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  let alive = false
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.rot += p.rv; p.vy += .04
+    if (p.y < canvas.height + 20) alive = true
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180)
+    ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore()
+  }
+  if (alive) animId = requestAnimationFrame(drawConfetti)
+  else animId = null
+}
+
+function stopConfetti() {
+  if (animId) { cancelAnimationFrame(animId); animId = null }
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+}
+
+render()
+</script>
+</body>
+</html>
