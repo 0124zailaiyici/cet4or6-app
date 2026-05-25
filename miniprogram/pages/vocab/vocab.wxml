@@ -1,7 +1,14 @@
-<view class="page {{darkMode ? 'dark' : ''}}">
+<view class="page {{darkMode ? 'dark' : ''}} mode-{{mode}}">
   <view class="tb">
     <view class="ttl">单词本</view>
-    <view class="sub">从你做过的题中学，闯关拿下四级词汇</view>
+    <view class="sub" id="modeSub">背词模式 · {{mode === 'battle' ? '战斗' : mode === 'garden' ? '花园' : '集卡'}}</view>
+  </view>
+
+  <!-- 模式选择 -->
+  <view class="msel">
+    <view class="mbtn {{mode === 'battle' ? 'on' : ''}}" data-mode="battle" catchtap="setMode">⚔️ 战斗</view>
+    <view class="mbtn {{mode === 'garden' ? 'on' : ''}}" data-mode="garden" catchtap="setMode">🌸 花园</view>
+    <view class="mbtn {{mode === 'card' ? 'on' : ''}}" data-mode="card" catchtap="setMode">🎴 集卡</view>
   </view>
 
   <view class="stats">
@@ -39,6 +46,20 @@
           <text class="wsrc" wx:if="{{item.context}}">{{item.context}}</text>
           <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
         </view>
+        <view class="wmode" wx:if="{{mode === 'battle'}}">
+          <text wx:for="{{5 - Math.min(4, item.correctStreak)}}" wx:key="*this">❤️</text>
+          <text wx:for="{{Math.min(4, item.correctStreak)}}" wx:key="*this">🖤</text>
+        </view>
+        <view wx:elif="{{mode === 'garden'}}" class="wmode">
+          <text wx:if="{{item.growth <= 0}}">🌱</text>
+          <text wx:elif="{{item.growth <= 1}}">🌿</text>
+          <text wx:elif="{{item.growth <= 2}}">🌹</text>
+          <text wx:else>🌳</text>
+        </view>
+        <view wx:elif="{{mode === 'card'}}" class="wmode">
+          <text wx:for="{{Math.min(3, item.stars)}}" wx:key="*this">⭐</text>
+          <text wx:for="{{3 - Math.min(3, item.stars)}}" wx:key="*this">☆</text>
+        </view>
         <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.chn ? 'startGame' : 'lookupWord'}}">
           {{item.status === 'master' ? '✓' : (item.chn ? '浏览' : '查词')}}
         </view>
@@ -60,6 +81,51 @@
           <view class="gtop">
             <text class="gprog">{{gameWordIdx - gameSessionStart + 1}}/{{gameSessionLimit}}</text>
             <view class="gclose" catchtap="closeGame">✕</view>
+          </view>
+          <!-- 战斗模式 -->
+          <view wx:if="{{mode === 'battle'}}">
+            <text class="gcombo" wx:if="{{combo > 1}}">🔥 {{combo}} 连击</text>
+            <text class="gmonster" id="monster">
+              <text wx:if="{{(gameWordIdx - gameSessionStart) % 5 === 0}}">👹</text>
+              <text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 1}}">🐉</text>
+              <text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 2}}">👾</text>
+              <text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 3}}">🧟</text>
+              <text wx:else>🐺</text>
+            </text>
+            <view class="gmonster-hp">
+              <text wx:for="{{5 - Math.min(4, gameWord.correctStreak)}}" wx:key="*this">❤️</text>
+              <text wx:for="{{Math.min(4, gameWord.correctStreak)}}" wx:key="*this">🖤</text>
+            </view>
+          </view>
+          <!-- 花园模式 -->
+          <view wx:elif="{{mode === 'garden'}}" class="ggarden">
+            <text class="gplant">
+              <text wx:if="{{gameWord.growth <= 0}}">🌱</text>
+              <text wx:elif="{{gameWord.growth <= 1}}">🌿</text>
+              <text wx:elif="{{gameWord.growth <= 2}}">🌹</text>
+              <text wx:else>🌳</text>
+            </text>
+            <text class="gmsg">
+              <text wx:if="{{gameWord.growth <= 0}}">刚种下这颗种子</text>
+              <text wx:elif="{{gameWord.growth <= 1}}">小苗正在生长</text>
+              <text wx:elif="{{gameWord.growth <= 2}}">花开了</text>
+              <text wx:else>已长成大树</text>
+            </text>
+          </view>
+          <!-- 集卡模式 -->
+          <view wx:elif="{{mode === 'card'}}" class="gcard">
+            <text class="gbadge">
+              <text wx:if="{{gameWord.stars <= 0}}">🃏</text>
+              <text wx:elif="{{gameWord.stars <= 1}}">🎴</text>
+              <text wx:elif="{{gameWord.stars <= 2}}">💎</text>
+              <text wx:else>🌟</text>
+            </text>
+            <text class="grarity {{gameWord.stars <= 0 ? 'N' : gameWord.stars <= 1 ? 'R' : gameWord.stars <= 2 ? 'SR' : 'SSR'}}">
+              <text wx:if="{{gameWord.stars <= 0}}">N</text>
+              <text wx:elif="{{gameWord.stars <= 1}}">R</text>
+              <text wx:elif="{{gameWord.stars <= 2}}">SR</text>
+              <text wx:else>SSR</text>
+            </text>
           </view>
           <text class="gq" wx:if="{{gameWord.source}}">📖 {{gameWord.source.split('/')[0].trim()}}</text>
           <text class="gw">{{gameWord.word}}</text>
@@ -92,8 +158,8 @@
   <!-- 庆祝 -->
   <view class="celebrate {{celebrateShow ? 'show' : ''}}">
     <view class="cbox">
-      <text class="cemoji">🎉</text>
-      <text class="ctit">太棒了！</text>
+      <text class="cemoji">{{mode === 'battle' ? '⚔️' : mode === 'garden' ? '🌸' : '🎴'}}</text>
+      <text class="ctit">{{mode === 'battle' ? 'BOSS 击败！' : mode === 'garden' ? '花园又长大了！' : '新卡包解锁！'}}</text>
       <text class="csub">本轮完成，累计掌握 {{mastered}} 个词</text>
       <view class="cbtn" catchtap="closeCelebrate">继续加油 💪</view>
     </view>

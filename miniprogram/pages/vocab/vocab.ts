@@ -13,6 +13,8 @@ interface IVocabWord {
   audioUrl: string
   status: 'new' | 'learning' | 'review' | 'master'
   correctStreak: number
+  growth: number
+  stars: number
 }
 
 interface IVocabData {
@@ -22,6 +24,8 @@ interface IVocabData {
   mastered: number
   learning: number
   streak: number
+  mode: string
+  combo: number
   darkMode: boolean
   gameWord: IVocabWord | null
   gameWordIdx: number
@@ -64,6 +68,7 @@ interface IVocabMethods {
   swipeEnd(e: WechatMiniprogram.TouchEvent): void
   deleteWord(e: WechatMiniprogram.TouchEvent): void
   closeSwipe(): void
+  setMode(e: WechatMiniprogram.TouchEvent): void
   speakWord(): void
   markKnown(): void
   markHard(): void
@@ -658,6 +663,8 @@ function extractWords(): IVocabWord[] {
         audioUrl: '',
         status: 'new',
         correctStreak: 0,
+        growth: 0,
+        stars: 0,
       }
     }
   }
@@ -679,6 +686,8 @@ Page<IVocabData, IVocabMethods>({
     mastered: 0,
     learning: 0,
     streak: 0,
+    mode: 'battle',
+    combo: 0,
     darkMode: false,
     gameWord: null,
     gameWordIdx: 0,
@@ -701,7 +710,8 @@ Page<IVocabData, IVocabMethods>({
 
   onShow() {
     applyTheme(getDarkMode())
-    this.setData({ darkMode: getDarkMode() })
+    const mode = wx.getStorageSync('vocab_mode') || 'battle'
+    this.setData({ darkMode: getDarkMode(), mode })
     this.loadWords()
   },
 
@@ -760,7 +770,7 @@ Page<IVocabData, IVocabMethods>({
     const word = this.data.filteredWords[idx]
     if (!word?.chn) return
     const remaining = this.data.filteredWords.length - idx
-    this.setData({ gameSessionLimit: Math.min(10, remaining), gameSessionStart: idx })
+    this.setData({ gameSessionLimit: Math.min(10, remaining), gameSessionStart: idx, combo: 0 })
     this.showGameForIdx(idx)
   },
 
@@ -887,16 +897,19 @@ Page<IVocabData, IVocabMethods>({
   markKnown() {
     const w = this.data.gameWord
     if (!w) return
+    const combo = this.data.combo + 1
     const app = getApp<IAppOption>()
     const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
     if (sw) {
       sw.correctStreak++
       if (sw.correctStreak >= 3) sw.status = 'master'
       else sw.status = 'learning'
+      sw.growth = Math.min(3, (sw.growth || 0) + 1)
+      sw.stars = Math.min(3, (sw.stars || 0) + 1)
     }
-    this.setData({ streak: this.data.streak + 1 })
+    this.setData({ streak: this.data.streak + 1, combo })
     wx.setStorageSync('studyData', app.globalData.studyData)
-    this.nextGame()
+    setTimeout(() => this.nextGame(), 300)
   },
 
   markHard() {
@@ -905,9 +918,9 @@ Page<IVocabData, IVocabMethods>({
     const app = getApp<IAppOption>()
     const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
     if (sw) { sw.correctStreak = 0; sw.status = 'review' }
-    this.setData({ streak: 0 })
+    this.setData({ streak: 0, combo: 0 })
     wx.setStorageSync('studyData', app.globalData.studyData)
-    this.nextGame()
+    setTimeout(() => this.nextGame(), 300)
   },
 
   nextGame(skipFrom?: number) {
@@ -929,6 +942,12 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameFlipped: false })
   },
 
+  setMode(e: WechatMiniprogram.TouchEvent) {
+    const mode = e.currentTarget.dataset.mode
+    wx.setStorageSync('vocab_mode', mode)
+    this.setData({ mode })
+  },
+
   async _fetchAudioUrl(word: IVocabWord) {
     try {
       const result = await lookupWord(word.word)
@@ -942,7 +961,8 @@ Page<IVocabData, IVocabMethods>({
     const sys = wx.getSystemInfoSync()
     const w = sys.windowWidth
     const h = sys.windowHeight
-    const colors = ['#ff8fab','#4fc3f7','#66bb6a','#ffa726','#ab47bc','#ff6b8a']
+    const modeColors: Record<string, string[]> = {battle:['#ff3d00','#d50000','#ff6d00','#ff9100'],garden:['#66bb6a','#43a047','#81c784','#a5d6a7'],card:['#ab47bc','#8e24aa','#ce93d8','#e1bee7']}
+    const colors = modeColors[this.data.mode] || ['#ff8fab','#4fc3f7','#66bb6a','#ffa726','#ab47bc','#ff6b8a']
     const particles: Array<{x:number;y:number;w:number;h:number;color:string;vx:number;vy:number;rot:number;rv:number}> = []
     for (let i = 0; i < 80; i++) {
       particles.push({
@@ -1069,7 +1089,7 @@ Page<IVocabData, IVocabMethods>({
     const newWord: IVocabWord = {
       word: w, phonetic, definition: '', chn,
       source: '手动添加', context, contextCn,
-      audioUrl: '', status: 'new', correctStreak: 0,
+      audioUrl: '', status: 'new', correctStreak: 0, growth: 0, stars: 0,
     }
     words.unshift(newWord)
     const a = getApp<IAppOption>()
