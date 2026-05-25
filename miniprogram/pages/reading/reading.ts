@@ -100,6 +100,7 @@ interface IReadingMethods {
   removeMatch(e: WechatMiniprogram.TouchEvent): void
   saveMatch(): void
   submit(): void
+  onShareAppMessage(): any
   hideResult(): void
   showResultAgain(): void
   jumpToParagraph(e: WechatMiniprogram.TouchEvent): void
@@ -556,6 +557,17 @@ Page<IReadingData, IReadingMethods>({
 
   showResultAgain() {
     this.setData({ showResult: true })
+  },
+
+  onShareAppMessage() {
+    const s = this.data
+    if (s.submitted && s.showResult) {
+      return {
+        title: `📖 阅读理解 ${s.score}/${s.totalScore} — 我在四级备考助手做题中！`,
+        path: '/pages/reading/reading',
+      }
+    }
+    return { title: '📖 四级备考助手 — 阅读理解', path: '/pages/reading/reading' }
   },
 
   jumpToParagraph(e: WechatMiniprogram.TouchEvent) {
