@@ -120,11 +120,16 @@
 
   <!-- 例句视图 -->
   <scroll-view class="list" scroll-y wx:elif="{{showSents}}" catchtap="closeSwipe">
+    <view class="sents-ctrl">
+      <text class="sents-cbtn" catchtap="sentFontDown">A−</text>
+      <text class="sents-size">{{sentFontSize}}</text>
+      <text class="sents-cbtn" catchtap="sentFontUp">A+</text>
+    </view>
     <view class="empt" wx:if="{{savedSents.length === 0}}"><text class="emt">还没有收藏的例句</text><text class="emh">在翻卡时点击⭐即可收藏</text></view>
     <view class="sc" wx:for="{{savedSents}}" wx:key="en" wx:for-index="idx">
       <view class="sc-del" catchtap="toggleSaveSent" data-idx="{{idx}}">🗑️</view>
-      <text class="sce">{{item.en}}</text>
-      <text class="scc">{{item.cn}}</text>
+      <text class="sce" style="font-size:{{sentFontSize}}rpx">{{item.en}}</text>
+      <text class="scc" style="font-size:{{sentFontSize - 2}}rpx">{{item.cn}}</text>
       <text class="scs">📖 {{item.src || ''}}</text>
     </view>
   </scroll-view>

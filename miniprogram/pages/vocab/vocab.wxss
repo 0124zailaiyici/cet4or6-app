@@ -155,6 +155,9 @@
 .sce { display: block; font-size: 16rpx; color: var(--text); line-height: 1.4; padding-right: 36rpx; }
 .scc { display: block; font-size: 14rpx; color: var(--muted); margin-top: 3rpx; line-height: 1.3; }
 .scs { display: block; font-size: 12rpx; color: var(--muted); margin-top: 3rpx; }
+.sents-ctrl { display: flex; align-items: center; justify-content: center; gap: 16rpx; margin-bottom: 12rpx; }
+.sents-cbtn { font-size: 24rpx; font-weight: 700; color: var(--accent); padding: 8rpx 20rpx; border-radius: 10rpx; background: var(--card); }
+.sents-size { font-size: 22rpx; color: var(--muted); min-width: 40rpx; text-align: center; }
 .empt { text-align: center; padding: 120rpx 0; }
 .emt { display: block; font-size: 28rpx; color: var(--muted); }
 .emh { display: block; font-size: 22rpx; color: #bbb; margin-top: 6rpx; }

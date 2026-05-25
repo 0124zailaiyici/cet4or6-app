@@ -51,6 +51,7 @@ interface IVocabData {
   showSents: boolean
   savedSents: any[]
   achProgress: number[]
+  sentFontSize: number
   gameWord: IVocabWord | null
   gameWordIdx: number
   gameTotal: number
@@ -99,6 +100,8 @@ interface IVocabMethods {
   openAch(): void
   openSents(): void
   toggleSaveSent(e: WechatMiniprogram.TouchEvent): void
+  sentFontUp(): void
+  sentFontDown(): void
   speakWord(): void
   markKnown(): void
   markHard(): void
@@ -847,6 +850,7 @@ Page<IVocabData, IVocabMethods>({
     showSents: false,
     savedSents: [],
     achProgress: [],
+    sentFontSize: 16,
     challengeActive: false,
     challengeDone: false,
     challengeStreak: 0,
@@ -867,7 +871,8 @@ Page<IVocabData, IVocabMethods>({
     const packStats = PACKS.map(p => (wx.getStorageSync('pack_' + p.id) as number) || 0)
     const achProgress = ACHS.map(a => (wx.getStorageSync(a.key) as number) || 0)
     const savedSents = wx.getStorageSync('saved_sentences') || []
-    this.setData({ darkMode: getDarkMode(), mode, theme, challengeDone, challengeStreak, packStats, achProgress, savedSents })
+    const sentFontSize = wx.getStorageSync('sent_font_size') || 16
+    this.setData({ darkMode: getDarkMode(), mode, theme, challengeDone, challengeStreak, packStats, achProgress, savedSents, sentFontSize })
     this.loadWords()
   },
 
@@ -1163,6 +1168,18 @@ Page<IVocabData, IVocabMethods>({
     wx.setStorageSync('saved_sentences', saved)
     this.setData({ savedSents: saved })
     wx.showToast({ title: '⭐ 已收藏例句', icon: 'success' })
+  },
+
+  sentFontUp() {
+    const v = Math.min(28, this.data.sentFontSize + 1)
+    wx.setStorageSync('sent_font_size', v)
+    this.setData({ sentFontSize: v })
+  },
+
+  sentFontDown() {
+    const v = Math.max(10, this.data.sentFontSize - 1)
+    wx.setStorageSync('sent_font_size', v)
+    this.setData({ sentFontSize: v })
   },
 
   openPacks() {
