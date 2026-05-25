@@ -40,6 +40,8 @@
 
 .empty { display: flex; flex-direction: column; align-items: center; padding: 120rpx 0; font-size: 28rpx; color: #8a7a9a; }
 .empty .hint { font-size: 24rpx; margin-top: 8rpx; }
+.empty-btn { margin-top: 24rpx; padding: 14rpx 36rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; font-size: 26rpx; font-weight: 600; }
+.dark-theme .empty-btn { background: linear-gradient(135deg, #4a4a7a, #3a3a6a) !important; }
 
 /* Dark */
 .dark-theme.page { background: #12121f !important; }

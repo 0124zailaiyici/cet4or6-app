@@ -59,6 +59,7 @@ interface IVocabData {
   gameSessionStart: number
   gameFlipped: boolean
   lookingUp: boolean
+  loading: boolean
   gameLoading: boolean
   showAddInput: boolean
   addInputValue: string
@@ -823,6 +824,7 @@ Page<IVocabData, IVocabMethods>({
     gameSessionStart: 0,
     gameFlipped: false,
     lookingUp: false,
+    loading: true,
     gameLoading: false,
     showAddInput: false,
     addInputValue: '',

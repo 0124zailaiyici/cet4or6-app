@@ -28,6 +28,8 @@ interface IErrorsData {
 interface IErrorsMethods {
   switchTab(e: WechatMiniprogram.TouchEvent): void
   loadErrors(): void
+  goReading(): void
+  goListening(): void
 }
 
 Page<IErrorsData, IErrorsMethods>({
@@ -153,6 +155,14 @@ Page<IErrorsData, IErrorsMethods>({
       rightCount: right, wrongCount: wrong,
       totalAttempted: readingErrors.length + listeningErrors.length,
     })
+  },
+
+  goReading() {
+    wx.navigateTo({ url: '/pages/reading/reading' })
+  },
+
+  goListening() {
+    wx.navigateTo({ url: '/pages/listening/listening' })
   },
 })
 

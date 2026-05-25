@@ -231,3 +231,16 @@ view, text, scroll-view { box-sizing: border-box; }
 
 /* ---- Stars ---- */
 .dark-theme .sc-fav.fav-on, .dark-theme .fc-remove { color: #ff8fab !important; }
+
+/* ===== Loading Skeleton ===== */
+.skeleton { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 200rpx 0; }
+.skel-spin { width: 60rpx; height: 60rpx; border: 6rpx solid #fff0f3; border-top-color: #ff6b8a; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20rpx; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.skel-text { font-size: 26rpx; color: #8a7a9a; }
+
+/* Empty state action button */
+.empty-btn { margin-top: 24rpx; padding: 14rpx 36rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; font-size: 26rpx; font-weight: 600; }
+.dark-theme .empty-btn { background: linear-gradient(135deg, #4a4a7a, #3a3a6a) !important; }
+
+.dark-theme .skel-spin { border-color: #2a2a4a; border-top-color: #ff8fab; }
+.dark-theme .skel-text { color: #a090b0; }

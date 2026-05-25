@@ -698,7 +698,7 @@ Page<IListeningData, IListeningMethods>({
     const x = (e as any).detail.x
     if (x == null) return
     const query = wx.createSelectorQuery().in(this)
-    query.select('.ap-bar').boundingClientRect((rect: any) => {
+    query.select('.seek-track').boundingClientRect((rect: any) => {
       if (!rect || !rect.width) return
       const ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width))
       audio.seek(ratio * (this.data.audioDuration || 0))
@@ -866,14 +866,28 @@ Page<IListeningData, IListeningMethods>({
 
   getBlankText(text: string): string {
     if (!this.data.dictationMode) return text
+    const skipWords = new Set([
+      'a','an','the','in','on','at','to','for','of','with','by','from','about','into',
+      'through','during','before','after','between','under','over','up','down','out',
+      'he','she','it','they','we','you','i','me','him','her','them','us','his','its',
+      'their','my','your','our','is','am','are','was','were','be','been','being',
+      'have','has','had','do','does','did','will','would','can','could','shall','should',
+      'may','might','must','need','dare','and','but','or','nor','yet','so','because',
+      'although','while','when','where','if','not','no','very','just','also','too',
+      'as','than','that','which','what','who','whom','whose','this','these','those',
+      'there','here','how','why','both','each','every','all','some','any','many','much',
+    ])
     const words = text.split(' ')
-    let contentIdx = 0
-    return words.map(w => {
-      const clean = w.replace(/\n/g, '')
-      if (/^Q\d+\.$/.test(clean) || /^[A-D]\)$/.test(clean)) return w
-      if (clean === '') return w
-      contentIdx++
-      return contentIdx % 3 === 0 ? '____' : w
-    }).join(' ')
+    const result: string[] = []
+    let contentCount = 0
+    for (const w of words) {
+      const clean = w.replace(/\n/g, '').replace(/[^a-zA-Z0-9'-]/g, '')
+      const lower = clean.toLowerCase()
+      if (/^Q\d+\.$/.test(clean) || /^[A-D]\)$/.test(clean)) { result.push(w); continue }
+      if (clean === '' || skipWords.has(lower) || clean.length <= 2) { result.push(w); continue }
+      contentCount++
+      result.push(contentCount % 3 === 0 ? '____' : w)
+    }
+    return result.join(' ')
   },
 })

@@ -1,69 +1,82 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <!-- ===== 列表页 ===== -->
   <block wx:if="{{mode === 'list'}}">
     <view class="l-header">
-      <view class="lh-bg"></view>
-      <view class="lh-content">
-        <text class="lh-title">听力精听</text>
-        <text class="lh-sub">{{passages.length}} 篇听力材料</text>
+      <view class="welcome-card">
+        <view class="wc-avatar">🐱</view>
+        <view class="wc-text">
+          <text class="wc-title">今天也要加油喔！</text>
+          <text class="wc-sub">{{completedPassages.length}}/{{passages.length}} 篇已完成</text>
+        </view>
       </view>
+    </view>
+
+    <view class="sec-title">
+      <text>📚 我的听力</text>
+      <text>{{passages.length}} 篇材料</text>
     </view>
 
     <scroll-view class="lcard-scroll" scroll-y>
       <view class="lcard-list">
-      <view class="lcard" wx:for="{{passages}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
-        <view class="lc-icon" style="background: linear-gradient(135deg, #4fc3f7, #2196f3);">
-          <text>🎵</text>
-        </view>
-        <view class="lc-info">
-          <text class="lc-title">{{item.title}}</text>
-          <text class="lc-meta">{{item.sentences.length}} 句</text>
-        </view>
-        <view class="lc-arrow">
-          <text>→</text>
+        <view class="lcard" wx:for="{{passages}}" wx:key="id" data-id="{{item.id}}" catchtap="enterDetail">
+          <view class="lc-icon s{{(index % 3) + 1}}">
+            <text>🎵</text>
+            <text class="lc-sticker">{{index === 0 ? '✨' : (index === 1 ? '⭐' : '🌸')}}</text>
+          </view>
+          <view class="lc-info">
+            <text class="lc-title">{{item.title}}</text>
+            <text class="lc-meta">{{item.sentences.length}} 句 · 约 25 分钟</text>
+          </view>
+          <view class="lc-tag">🎧 精听</view>
+          <view wx:if="{{!completedPassages.includes(item.id) && index < 2}}" class="lc-badge {{index === 1 ? 'hot' : ''}}">{{index === 0 ? 'NEW' : '🔥 热门'}}</view>
         </view>
       </view>
-    </view>
     </scroll-view>
   </block>
 
+  <!-- ===== 总结页 ===== -->
   <block wx:elif="{{mode === 'summary'}}">
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">{{examMode ? '返回考试' : '返回'}}</view>
-      <text class="detail-title">{{currentPassage.title}}</text>
-      <view wx:if="{{!examMode}}" class="detail-complete" catchtap="markCompleted">✓</view>
+      <view class="back-btn" catchtap="backToList">←</view>
+      <text class="detail-title">📊 作答总结</text>
+      <view wx:if="{{!examMode}}" class="da-complete" catchtap="markCompleted">✓</view>
     </view>
+
     <scroll-view class="summary-scroll" scroll-y>
-      <view class="sm-card">
-        <view class="sm-title">作答总结</view>
-        <view class="sm-stats">
-          <view class="sm-stat">
-            <text class="sm-num">{{summaryAnswered}}</text>
-            <text class="sm-label">已作答</text>
+      <view class="summary-card">
+        <text class="sc-emoji">🎉</text>
+        <text class="sc-title">做得不错！</text>
+        <view class="summary-stats">
+          <view class="summary-stat">
+            <text class="summary-num">{{summaryAnswered}}</text>
+            <text class="summary-label">已作答</text>
           </view>
-          <view class="sm-divider"></view>
-          <view class="sm-stat">
-            <text class="sm-num">{{summaryTotal}}</text>
-            <text class="sm-label">总题数</text>
+          <view class="summary-divider"></view>
+          <view class="summary-stat">
+            <text class="summary-num">{{summaryTotal}}</text>
+            <text class="summary-label">总题数</text>
           </view>
-          <view class="sm-divider"></view>
-          <view class="sm-stat">
-            <text class="sm-num">{{summaryMarked}}</text>
-            <text class="sm-label">已标记</text>
+          <view class="summary-divider"></view>
+          <view class="summary-stat">
+            <text class="summary-num">{{summaryMarked}}</text>
+            <text class="summary-label">已标记</text>
           </view>
         </view>
       </view>
+
       <view class="sm-marked" wx:if="{{summaryMarked > 0}}">
-        <view class="sm-subtitle">标记需重听的题目</view>
+        <view class="sm-subtitle">📌 标记需重听的题目</view>
         <view class="sm-mitem" wx:for="{{pages}}" wx:key="type" wx:for-index="pi" wx:if="{{markedFlags[pi] && item.type === 'q'}}">
-          <view class="smm-tag">{{item.stem}}</view>
-          <view class="smm-opt" wx:for="{{item.opts}}" wx:for-index="oi" wx:key="*this">
-            <text class="smm-o {{selectedAnswers[pi] === oi ? 'on' : ''}}">{{optionLetters[oi]}}. {{item}}</text>
+          <text class="smm-tag">{{item.stem}}</text>
+          <view class="smm-opt {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:for-index="oi" wx:key="*this">
+            <text>{{optionLetters[oi]}}. {{item}}</text>
           </view>
         </view>
       </view>
       <view class="sm-marked" wx:else>
-        <view class="sm-empty">没有标记的题目，表现不错</view>
+        <view class="sm-empty">没有标记的题目，表现不错 🎀</view>
       </view>
+
       <view class="sm-actions">
         <view class="sm-btn primary" catchtap="retryPages">继续做题</view>
         <view class="sm-btn" catchtap="backToList">返回列表</view>
@@ -71,34 +84,140 @@
     </scroll-view>
   </block>
 
+  <!-- ===== 详情模式 ===== -->
   <block wx:else>
     <view class="detail-header">
-      <view class="back-btn" catchtap="backToList">{{examMode ? '返回考试' : '返回'}}</view>
+      <view class="back-btn" catchtap="backToList">{{examMode ? '←' : '←'}}</view>
       <text class="detail-title">{{currentPassage.title}}</text>
-      <view wx:if="{{audioMode && !examMode}}" class="focus-toggle {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">精听</view>
-      <view wx:if="{{!examMode && pages.length > 0}}" class="focus-toggle" catchtap="viewSummary">总结</view>
-      <view wx:if="{{!examMode}}" class="detail-complete" catchtap="markCompleted">✓</view>
+      <view class="detail-actions">
+        <view wx:if="{{audioMode && !examMode}}" class="da-btn {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">✨ 精听</view>
+        <view wx:if="{{!examMode && pages.length > 0}}" class="da-btn" catchtap="viewSummary">📊 总结</view>
+        <view wx:if="{{!examMode}}" class="da-complete" catchtap="markCompleted">✓</view>
+      </view>
     </view>
 
-    <!-- === 精听模式（逐句拆解） === -->
+    <!-- ===== 精听模式 ===== -->
     <block wx:if="{{audioMode && focusMode}}">
+      <view class="s3-body">
+        <!-- 控制栏 -->
+        <view class="focus-ctls">
+          <view class="fc-pill {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+          <view class="fc-pill {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '循环'}}</view>
+          <view class="fc-pill dict {{dictationMode ? 'on' : ''}}" catchtap="toggleDictation">{{dictationMode ? '✏️' : '听写'}}</view>
+          <text class="fc-time">{{audioTimeStr}} / {{audioDurationStr}}</text>
+        </view>
+
+        <!-- 句子列表 -->
+        <scroll-view class="sent-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
+          <view class="sent-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="*this" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
+            <view class="sent-num">{{index + 1}}</view>
+            <view class="sent-body">
+              <text class="sent-text">{{dictationMode ? getBlankText(item) : item}}</text>
+            </view>
+            <view class="sent-acts">
+              <view class="sent-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
+              <view class="sent-hard {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
+            </view>
+          </view>
+        </scroll-view>
+
+        <!-- 播放器 -->
+        <view class="fplayer">
+          <view class="fprev" catchtap="prevSentence">◀</view>
+          <view class="fplay" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+          <view class="fnext" catchtap="nextSentence">▶</view>
+          <view class="fprogress">
+            <view class="fprogress-fill" style="width: {{focusSentences.length > 0 ? currentIndex / focusSentences.length * 100 : 0}}%"></view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- ===== 标准 MP3 翻页模式 ===== -->
+    <block wx:elif="{{audioMode}}">
+      <view class="s2-body">
+        <!-- 进度条 -->
+        <view class="seek-bar">
+          <view class="seek-track" catchtap="seekAudio">
+            <view class="seek-fill" style="width: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%">
+              <view class="seek-thumb"></view>
+            </view>
+          </view>
+          <view class="seek-time">
+            <text>{{audioTimeStr}}</text>
+            <text>{{audioDurationStr}}</text>
+          </view>
+        </view>
+
+        <!-- 控制按钮 -->
+        <view class="controls-row">
+          <view class="ctl-pill {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
+          <view class="ctl-pill {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '循环'}}</view>
+        </view>
+
+        <!-- 数据警告 -->
+        <view class="dwarn" wx:if="{{dataWarning}}">
+          <text>{{dataWarning}}</text>
+        </view>
+
+        <!-- 题目卡片 -->
+        <view class="page-area">
+          <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
+            <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
+              <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
+                <!-- Directions -->
+                <view wx:if="{{item.type === 'dir'}}" class="p-dir">
+                  <view class="p-section">{{item.section}}</view>
+                  <view class="p-dir-text">{{item.stem}}</view>
+                </view>
+                <!-- Question -->
+                <view wx:else class="p-q">
+                  <view class="p-section">{{item.section}}<text wx:if="{{focusMode && markedFlags[pi]}}" style="color:var(--rose);font-size:18rpx;margin-left:6rpx"> 📌</text></view>
+                  <view class="p-stem">{{item.stem}}</view>
+                  <view class="p-opts">
+                    <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
+                      <view class="po-l">{{optionLetters[oi]}}</view>
+                      <view class="po-t">{{item}}</view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 底栏 -->
+        <view class="bottom-bar">
+          <view class="bot-nav" catchtap="prevPage">⬅ 上一题</view>
+          <view class="bot-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
+          <view class="bot-dots">
+            <view class="bd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
+          </view>
+          <view class="bot-nav" catchtap="nextPage">下一题 ➔</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- ===== 逐句精听模式（无音频） ===== -->
+    <block wx:else>
       <view class="controls-bar">
         <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-        <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 循环中' : '循环'}}</view>
-        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">{{dictationMode ? '✏️ 听写中' : '听写'}}</view>
-        <text class="focus-time">{{audioTimeStr}} / {{audioDurationStr}}</text>
+        <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
+        <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
+        <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '单句'}}</view>
       </view>
 
-      <scroll-view class="sentence-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
+      <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}">
         <view class="sentence-list">
-          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="*this" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
+          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
-              <text class="se-en">{{dictationMode ? getBlankText(item) : item}}</text>
+              <text class="se-en" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
+              <text class="se-en hidden" wx:else>🔇 点击播放收听</text>
             </view>
             <view class="se-actions">
-              <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
-              <view class="se-hard {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
+              <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}" data-index="{{index}}" catchtap="playSentence">{{index === currentIndex && loading ? '...' : '▶'}}</view>
+              <view class="se-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
             </view>
           </view>
         </view>
@@ -108,98 +227,8 @@
         <view class="pb-prev" catchtap="prevSentence">◀</view>
         <view class="pb-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
         <view class="pb-next" catchtap="nextSentence">▶</view>
-        <view class="pb-progress"><view class="pb-fill" style="width: {{focusSentences.length > 0 ? currentIndex / focusSentences.length * 100 : 0}}%"></view></view>
+        <view class="pb-progress"><view class="pb-fill" style="width: {{currentIndex / currentPassage.sentences.length * 100}}%"></view></view>
       </view>
-    </block>
-
-    <!-- === 标准MP3翻页模式 === -->
-    <block wx:elif="{{audioMode}}">
-      <view class="audio-player">
-        <view class="ap-bar" catchtap="seekAudio">
-          <view class="ap-fill" style="width: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>
-          <view class="ap-thumb" style="left: {{audioDuration > 0 ? audioTime / audioDuration * 100 : 0}}%"></view>
-        </view>
-        <view class="ap-time">
-          <text>{{audioTimeStr}}</text>
-          <text>{{audioDurationStr}}</text>
-        </view>
-      </view>
-
-      <view class="controls">
-        <view class="spd {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-        <view class="ctl {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">循环</view>
-      </view>
-
-      <view class="dwarn" wx:if="{{dataWarning}}">
-        <text>{{dataWarning}}</text>
-      </view>
-
-      <view class="page-area">
-        <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
-          <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
-            <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
-              <!-- Directions page -->
-              <view wx:if="{{item.type === 'dir'}}" class="p-dir">
-                <view class="p-section">{{item.section}}</view>
-                <view class="p-dir-text">{{item.stem}}</view>
-              </view>
-              <!-- Question page -->
-              <view wx:else class="p-q">
-                <view class="p-section">{{item.section}}<text wx:if="{{focusMode && markedFlags[pi]}}" style="color:#ff6b8a;font-size:20rpx;margin-left:8rpx"> 📌 标记</text></view>
-                <view class="p-stem">{{item.stem}}</view>
-                <view class="p-opts">
-                  <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
-                    <view class="po-l">{{optionLetters[oi]}}</view>
-                    <view class="po-t">{{item}}</view>
-                  </view>
-                </view>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <view class="p-bar">
-        <view class="p-nav" catchtap="prevPage">⬅ 上一题</view>
-        <view class="p-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-        <view class="p-dots">
-          <view class="pd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
-        </view>
-        <view class="p-nav" catchtap="nextPage">下一题 ➔</view>
-      </view>
-    </block>
-
-    <!-- === 逐句精听模式（原） === -->
-    <block wx:else>
-    <view class="controls-bar">
-      <view class="speed-btn {{speed === item ? 'active' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-      <view class="ctrl-btn {{showTranscript ? 'active' : ''}}" catchtap="toggleTranscript">原文</view>
-      <view class="ctrl-btn {{dictationMode ? 'active' : ''}}" catchtap="toggleDictation">填空</view>
-      <view class="ctrl-btn {{loopSentence ? 'active' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁 单句循环中' : '单句'}}</view>
-    </view>
-
-    <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}">
-      <view class="sentence-list">
-        <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
-          <view class="se-num">{{index + 1}}</view>
-          <view class="se-text">
-            <text class="se-en" wx:if="{{showTranscript}}">{{getBlankText(item.text)}}</text>
-            <text class="se-en hidden" wx:else>🔇 点击播放收听</text>
-          </view>
-          <view class="se-actions">
-            <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}" data-index="{{index}}" catchtap="playSentence">{{index === currentIndex && loading ? '...' : '▶'}}</view>
-            <view class="se-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
-
-    <view class="player-bar">
-      <view class="pb-prev" catchtap="prevSentence">◀</view>
-      <view class="pb-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-      <view class="pb-next" catchtap="nextSentence">▶</view>
-      <view class="pb-progress"><view class="pb-fill" style="width: {{currentIndex / currentPassage.sentences.length * 100}}%"></view></view>
-    </view>
     </block>
   </block>
 </view>

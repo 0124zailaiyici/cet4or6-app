@@ -136,9 +136,14 @@
 
   <!-- 单词列表 -->
   <scroll-view class="list" scroll-y wx:else catchtap="closeSwipe">
-    <view class="empty" wx:if="{{filteredWords.length === 0}}">
-      <text>暂无单词</text>
-      <text class="hint">从真题阅读自动收集</text>
+    <view class="empty" wx:if="{{filteredWords.length === 0 && !loading}}">
+      <text>📝 暂无单词</text>
+      <text class="hint">从真题阅读自动收集，或点右上角 + 添加</text>
+      <view class="empty-btn" catchtap="goReading">去做阅读题</view>
+    </view>
+    <view class="skeleton" wx:elif="{{loading}}">
+      <view class="skel-spin"></view>
+      <text class="skel-text">提取单词中...</text>
     </view>
     <view class="wcard-wrap" wx:for="{{filteredWords}}" wx:key="word" wx:for-index="idx" data-idx="{{idx}}" bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd">
       <view class="wcard {{swipedIdx === idx ? 'open' : ''}}">

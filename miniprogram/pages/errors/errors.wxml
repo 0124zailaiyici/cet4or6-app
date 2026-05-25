@@ -29,6 +29,7 @@
       <view class="empty" wx:if="{{readingErrors.length === 0}}">
         <text>📖 还没有阅读记录</text>
         <text class="hint">做几道阅读题试试</text>
+        <view class="empty-btn" catchtap="goReading">去做阅读题</view>
       </view>
       <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{readingErrors}}" wx:key="id" wx:for-item="item">
         <view class="h">
@@ -47,6 +48,7 @@
       <view class="empty" wx:if="{{listeningErrors.length === 0}}">
         <text>🎵 还没有听力记录</text>
         <text class="hint">做几道听力题试试</text>
+        <view class="empty-btn" catchtap="goListening">去做听力题</view>
       </view>
       <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{listeningErrors}}" wx:key="id" wx:for-item="item">
         <view class="h">

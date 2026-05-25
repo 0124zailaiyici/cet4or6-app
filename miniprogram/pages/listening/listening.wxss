@@ -189,7 +189,7 @@ page { height: 100%; }
 }
 .p-opts { display: flex; flex-wrap: wrap; gap: 10rpx; }
 .po {
-  width: calc(50% - 5rpx);
+  width: 100%;
   display: flex; align-items: flex-start; gap: 8rpx;
   padding: 14rpx 16rpx; border-radius: var(--radius-sm);
   font-size: 24rpx; color: var(--brown-light); line-height: 1.5; font-weight: 600;
