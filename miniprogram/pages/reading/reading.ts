@@ -104,6 +104,7 @@ interface IReadingMethods {
   hideResult(): void
   showResultAgain(): void
   jumpToParagraph(e: WechatMiniprogram.TouchEvent): void
+  shareResult(): void
   resetCurrent(): void
   checkAllAnswered(): boolean
   getMissingCount(): { total: number; answered: number }
@@ -622,6 +623,10 @@ Page<IReadingData, IReadingMethods>({
         })
       }
     })
+  },
+
+  shareResult() {
+    wx.showToast({ title: '点击右上角 … → 转发给朋友', icon: 'none' })
   },
 
   // ===== Section A =====

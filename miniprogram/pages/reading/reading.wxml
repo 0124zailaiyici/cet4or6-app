@@ -37,6 +37,7 @@
         <text class="tb-score" wx:if="{{submitted && !showResult}}" catchtap="showResultAgain">{{score}}/{{totalScore}}</text>
         <text class="tb-score on" wx:if="{{submitted && showResult}}" catchtap="hideResult">{{score}}/{{totalScore}}</text>
         <view class="tb-reset" wx:if="{{submitted}}" catchtap="resetCurrent">重来</view>
+        <view class="tb-share" wx:if="{{submitted}}" catchtap="shareResult">分享</view>
       </view>
 
       <!-- 文章区（始终显示，提交后锁定） -->
