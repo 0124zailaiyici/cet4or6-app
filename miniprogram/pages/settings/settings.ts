@@ -124,11 +124,17 @@ Page<ISettingsData, ISettingsMethods>({
   exportData() {
     const app = getApp<IAppOption>()
     const json = JSON.stringify(app.globalData.studyData, null, 2)
-    wx.setClipboardData({
-      data: json,
-      success: () => wx.showToast({ title: '学习数据已复制到剪贴板', icon: 'success' }),
-      fail: () => wx.showToast({ title: '复制失败', icon: 'none' }),
-    })
+    try {
+      const fs = wx.getFileSystemManager()
+      const fileName = `cet4_backup_${new Date().toISOString().slice(0, 10)}.txt`
+      const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`
+      fs.writeFileSync(filePath, json, 'utf-8')
+      ;(wx as any).shareFileMessage({ filePath, fileName })
+      wx.showToast({ title: '发送备份到文件传输助手', icon: 'none' })
+    } catch (e) {
+      wx.setClipboardData({ data: json })
+      wx.showToast({ title: '已复制到剪贴板', icon: 'success' })
+    }
   },
 
   importData() {
