@@ -16,6 +16,7 @@ Page({
     _totalCount: 0,
     _qResults: {} as Record<number, string>,
     _resultItems: [] as any[],
+    _savedScrollY: 0,
     darkMode: false,
     touchX: 0,
   },
@@ -41,13 +42,13 @@ Page({
       Object.keys(correct).forEach(k => {
         const qi = Number(k)
         const ua = ca[qi]
-        const correctOption = (p.choices?.[qi] || []).find((ch: string) => ch.startsWith(correct[k])) || ''
-        const isCorrect = ua === correctOption
+        const letter = correct[k]
+        const isCorrect = ua ? (ua === letter || ua.startsWith(letter)) : false
         if (isCorrect) correctCount++
         qResults[qi] = isCorrect ? 'ok' : 'ko'
         const allOpts = (p.choices?.[qi] || []).map((ch: string) => ch)
-        const correctIdx = allOpts.findIndex((ch: string) => ch.startsWith(correct[k]))
-        const userIdx = ua ? allOpts.findIndex((ch: string) => ch === ua) : -1
+        const correctIdx = allOpts.findIndex((ch: string) => ch.startsWith(letter))
+        const userIdx = ua ? allOpts.findIndex((ch: string) => ch.startsWith(ua.slice(0, 1))) : -1
         resultItems.push({ label: `Q${qi + 46}`, questionStem: (p.questions || [])[qi] || '', userAnswer: ua ? ua.slice(0, 1).toUpperCase() + ')' : '未选', correctAnswer: correct[k] + ')', isCorrect, allOptions: allOpts, correctOptionIndex: correctIdx, userOptionIndex: userIdx, locate: annot?.qLocate?.[String(qi)] || '', hint: annot?.qHint?.[String(qi)] || '' })
       })
     }
@@ -110,7 +111,15 @@ Page({
     const target = this.data._paraPages.findIndex((page: string[]) => { acc += page.length; return acc > pIdx })
     const pageIdx = Math.max(0, target < 0 ? this.data._paraPages.length - 1 : target)
     this.setData({ _paraPageIdx: pageIdx, _curParas: this.data._paraPages[pageIdx] || [] })
-    wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
+    wx.createSelectorQuery().selectViewport().scrollOffset((res: any) => {
+      this.setData({ _savedScrollY: res.scrollTop })
+      wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
+    }).exec()
+  },
+  backToResults() {
+    const y = this.data._savedScrollY
+    this.setData({ _savedScrollY: 0 })
+    wx.pageScrollTo({ scrollTop: y, duration: 300 })
   },
 
   goBack() { wx.navigateBack() },

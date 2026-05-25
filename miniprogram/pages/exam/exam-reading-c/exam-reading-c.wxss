@@ -96,3 +96,5 @@
 .dark-theme .qzt-ok { color: #81c784 !important; border-color: #4caf50 !important; background: rgba(76,175,80,0.12) !important; }
 .dark-theme .qzt-ko { color: #e57373 !important; border-color: #ef5350 !important; background: rgba(239,83,80,0.12) !important; }
 .dark-theme .qzt-cor { color: #81c784 !important; border-color: #388e3c !important; background: rgba(56,142,60,0.06) !important; }
+
+.back-rs { position: fixed; bottom: 40rpx; right: 36rpx; background: rgba(30,136,229,0.92); color: #fff; padding: 16rpx 30rpx; border-radius: 40rpx; font-size: 26rpx; font-weight: 600; box-shadow: 0 4rpx 20rpx rgba(30,136,229,0.3); z-index: 999; }

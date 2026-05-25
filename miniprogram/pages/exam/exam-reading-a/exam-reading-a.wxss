@@ -90,3 +90,5 @@
 .dark-theme .bk-cor { color: #64b5f6 !important; }
 .dark-theme .qzc-ok { border-color: #4caf50 !important; color: #81c784 !important; background: rgba(76,175,80,0.12) !important; }
 .dark-theme .qzc-ko { border-color: #ef5350 !important; color: #e57373 !important; background: rgba(239,83,80,0.12) !important; }
+
+.back-rs { position: fixed; bottom: 40rpx; right: 36rpx; background: rgba(30,136,229,0.92); color: #fff; padding: 16rpx 30rpx; border-radius: 40rpx; font-size: 26rpx; font-weight: 600; box-shadow: 0 4rpx 20rpx rgba(30,136,229,0.3); z-index: 999; }

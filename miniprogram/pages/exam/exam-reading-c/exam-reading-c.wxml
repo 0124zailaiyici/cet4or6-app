@@ -42,4 +42,5 @@
       <view class="rvc-hint" wx:if="{{item.hint}}">💡 {{item.hint}}</view>
     </view>
   </view>
+  <view wx:if="{{_submitted && showResult && _savedScrollY > 0}}" class="back-rs" catchtap="backToResults">⬇ 结果</view>
 </view>

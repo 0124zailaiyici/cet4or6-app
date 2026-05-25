@@ -23,6 +23,7 @@ Page({
     _letterResults: {} as Record<string, string>,
     _resultItems: [] as any[],
     _availLetters: [] as string[],
+    _savedScrollY: 0,
     darkMode: false,
     letters: 'ABCDEFGHIJKLMN'.split(''),
   },
@@ -166,7 +167,15 @@ Page({
     const paras = this.data._paraPages
     const target = paras.findIndex((page: any[]) => page.some((para: any) => para.letter === letter))
     if (target >= 0) this.setData({ _paraPageIdx: target, _curParas: paras[target] || [] })
-    wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
+    wx.createSelectorQuery().selectViewport().scrollOffset((res: any) => {
+      this.setData({ _savedScrollY: res.scrollTop })
+      wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
+    }).exec()
+  },
+  backToResults() {
+    const y = this.data._savedScrollY
+    this.setData({ _savedScrollY: 0 })
+    wx.pageScrollTo({ scrollTop: y, duration: 300 })
   },
 
   goBack() { wx.navigateBack() },

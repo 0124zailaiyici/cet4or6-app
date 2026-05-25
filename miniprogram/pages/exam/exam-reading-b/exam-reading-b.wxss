@@ -91,3 +91,5 @@
 .dots { display: flex; justify-content: center; gap: 6rpx; padding: 6rpx 0 4rpx; flex-shrink: 0; }
 .dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #d0c8d0; }
 .dot.on { background: #546e7a; width: 22rpx; border-radius: 5rpx; }
+
+.back-rs { position: fixed; bottom: 40rpx; right: 36rpx; background: rgba(30,136,229,0.92); color: #fff; padding: 16rpx 30rpx; border-radius: 40rpx; font-size: 26rpx; font-weight: 600; box-shadow: 0 4rpx 20rpx rgba(30,136,229,0.3); z-index: 999; }

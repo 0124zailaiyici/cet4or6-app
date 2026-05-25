@@ -20,6 +20,7 @@ Page({
     _optionResults: [] as string[],
     _resultItems: [] as any[],
     _letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
+    _savedScrollY: 0,
     darkMode: false,
   },
 
@@ -114,7 +115,15 @@ Page({
     const pIdx = parseInt(loc.replace(/[^0-9]/g, '')) - 1
     const target = Math.min(pIdx, this.data._pages.length - 1)
     this.setData({ _pageIdx: target, _curSegs: this.data._pages[target] || [] })
-    wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
+    wx.createSelectorQuery().selectViewport().scrollOffset((res: any) => {
+      this.setData({ _savedScrollY: res.scrollTop })
+      wx.pageScrollTo({ selector: '.pass-zone', duration: 300, offsetTop: 80 })
+    }).exec()
+  },
+  backToResults() {
+    const y = this.data._savedScrollY
+    this.setData({ _savedScrollY: 0 })
+    wx.pageScrollTo({ scrollTop: y, duration: 300 })
   },
 
   goBack() { wx.navigateBack() },
