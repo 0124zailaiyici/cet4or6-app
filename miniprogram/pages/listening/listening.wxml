@@ -104,50 +104,13 @@
       <view class="back-btn" catchtap="backToList">{{examMode ? '←' : '←'}}</view>
       <text class="detail-title">{{currentPassage.title}}</text>
       <view class="detail-actions">
-        <view wx:if="{{audioMode && !examMode}}" class="da-btn {{focusMode ? 'on' : ''}}" catchtap="toggleFocus">✨ 精听</view>
         <view wx:if="{{!examMode && pages.length > 0}}" class="da-btn" catchtap="viewSummary">📊 总结</view>
         <view wx:if="{{!examMode}}" class="da-complete" catchtap="markCompleted">✓</view>
       </view>
     </view>
 
-    <!-- ===== 精听模式 ===== -->
-    <block wx:if="{{audioMode && focusMode}}">
-      <view class="s3-body">
-        <!-- 控制栏 -->
-        <view class="focus-ctls">
-          <view class="fc-pill {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
-          <view class="fc-pill {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '循环'}}</view>
-          <text class="fc-time">{{audioTimeStr}} / {{audioDurationStr}}</text>
-        </view>
-
-        <!-- 句子列表 -->
-        <scroll-view class="sent-scroll" scroll-y scroll-into-view="fs-{{currentIndex}}">
-          <view class="sent-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="*this" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
-            <view class="sent-num">{{index + 1}}</view>
-            <view class="sent-body">
-              <text class="sent-text" user-select>{{item}}</text>
-            </view>
-            <view class="sent-acts">
-              <view class="sent-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
-              <view class="sent-hard {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
-            </view>
-          </view>
-        </scroll-view>
-
-        <!-- 播放器 -->
-        <view class="fplayer">
-          <view class="fprev" catchtap="prevSentence">◀</view>
-          <view class="fplay" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
-          <view class="fnext" catchtap="nextSentence">▶</view>
-          <view class="fprogress">
-            <view class="fprogress-fill" style="width: {{focusSentences.length > 0 ? currentIndex / focusSentences.length * 100 : 0}}%"></view>
-          </view>
-        </view>
-      </view>
-    </block>
-
     <!-- ===== 标准 MP3 翻页模式 ===== -->
-    <block wx:elif="{{audioMode}}">
+    <block wx:if="{{audioMode}}">
       <view class="s2-body">
         <!-- 进度条 -->
         <view class="seek-bar">

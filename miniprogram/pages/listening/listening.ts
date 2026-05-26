@@ -104,12 +104,12 @@ interface IListeningMethods {
   onOptionTap(e: WechatMiniprogram.TouchEvent): void
   prevPage(): void
   nextPage(): void
-  toggleFocus(): void
   rewindAudio(): void
   forwardAudio(): void
   markForReview(): void
   viewSummary(): void
   retryPages(): void
+  toggleFocus(): void
   seekFocusCurrent(): void
 }
 
@@ -259,15 +259,12 @@ class AudioManager {
           this.customOnEnded()
         } else if (this.pageRef) {
           const d = this.pageRef.data
+          if (!d.isPlaying) return
           if (d.audioMode) {
             if (d.loopSentence && this.ctx) {
-              if (d.focusMode) {
-                this.pageRef.playCurrent()
-              } else {
-                this.ctx.seek(0)
-                this.ctx.play()
-                this.pageRef.setData({ isPlaying: true })
-              }
+              this.ctx.seek(0)
+              this.ctx.play()
+              this.pageRef.setData({ isPlaying: true })
             } else {
               this.pageRef.setData({ isPlaying: false })
             }
@@ -483,6 +480,7 @@ Page<IListeningData, IListeningMethods>({
         ? passage.audioUrl!
         : `${API_BASE}${encodeURI(passage.audioUrl!)}`
       audio.stop()
+      this.setData({ loading: true })
       audio.play(audioUrl)
 
       const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}
