@@ -1,7 +1,7 @@
 import listeningData from '../../../data/listening'
 import { applyTheme, getDarkMode } from '../../../utils/theme'
 
-const API_BASE = 'http://localhost:3001'
+const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
 
 interface IListeningQ {
   qi: number
