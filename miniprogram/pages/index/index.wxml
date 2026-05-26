@@ -1,21 +1,34 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <!-- Hero -->
+
+  <!-- ===== Hero ===== -->
   <view class="hero">
-    <view class="hero-stats">
-      <text class="greeting">{{greeting}}</text>
-      <view class="streak" wx:if="{{streak > 0}}">
-        <text>🔥</text>
-        <text>连续 {{streak}} 天</text>
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+    <view class="hero-top" style="padding-top:{{statusBarHeight + 24}}px">
+      <view class="hero-info">
+          <text class="greeting">{{greeting}}</text>
+          <view class="streak" wx:if="{{streak > 0}}">
+            <text>🔥 连续 {{streak}} 天</text>
+          </view>
+          <view class="streak" wx:else>
+            <text>💪 今天开始积累</text>
+          </view>
+        </view>
+        <view class="checkin {{checkedIn ? 'done' : ''}}" catchtap="handleCheckIn">{{checkedIn ? '✓ 已打卡' : '📌 打卡'}}</view>
       </view>
-      <view class="streak" wx:else>
-        <text>💪</text>
-        <text>今天开始</text>
+      <view class="hero-metrics">
+        <view class="hm-item"><text class="hm-v">{{todayListen}}</text><text class="hm-l">听力</text></view>
+        <view class="hm-divider"></view>
+        <view class="hm-item"><text class="hm-v">{{todaySentence}}</text><text class="hm-l">句子</text></view>
+        <view class="hm-divider"></view>
+        <view class="hm-item"><text class="hm-v">{{todayTrans}}</text><text class="hm-l">翻译</text></view>
+        <view class="hm-divider"></view>
+        <view class="hm-item"><text class="hm-v">{{todayWrite}}</text><text class="hm-l">写作</text></view>
       </view>
     </view>
-    <view class="checkin {{checkedIn ? 'done' : ''}}" catchtap="handleCheckIn">{{checkedIn ? '✓ 已打卡' : '📌 打卡'}}</view>
   </view>
 
-  <!-- Today's Mission -->
+  <!-- ===== 今日任务 ===== -->
   <view class="mission" catchtap="doMission">
     <view class="mission-bg">
       <text class="mission-label">📌 今日任务</text>
@@ -28,7 +41,7 @@
     </view>
   </view>
 
-  <!-- Daily Sentence -->
+  <!-- ===== 每日一句 ===== -->
   <view class="ds" catchtap="playDailySentence">
     <view class="ds-hd">
       <text class="ds-tag">💬 每日一句</text>
@@ -41,7 +54,7 @@
     <text class="ds-zh">{{dailyZh}}</text>
   </view>
 
-  <!-- Quick Actions -->
+  <!-- ===== 快捷操作 ===== -->
   <view class="qa-row">
     <view class="qa" catchtap="quickListen">
       <text class="qa-e">🎧</text>
@@ -57,7 +70,7 @@
     </view>
   </view>
 
-  <!-- Modules -->
+  <!-- ===== 模块网格 ===== -->
   <view class="sec-h"><text>📚 真题训练</text></view>
   <view class="grid">
     <view class="gi mc-listening" data-url="/pages/listening/listening" catchtap="goTo">
@@ -88,4 +101,5 @@
       <text class="gi-e">📋</text><text class="gi-n">模拟考</text>
     </view>
   </view>
+
 </view>

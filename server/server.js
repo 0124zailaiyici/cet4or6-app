@@ -9,6 +9,66 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
+app.use('/audio/split', express.static(path.join(__dirname, 'audio', 'split')));
+
+// Dynamic audio segment extraction
+const { execSync } = require('child_process');
+const SPLIT_DIR = path.join(__dirname, 'audio', 'split');
+if (!fs.existsSync(SPLIT_DIR)) fs.mkdirSync(SPLIT_DIR, { recursive: true });
+
+const PASSAGE_DATA = (() => {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'), 'utf8');
+    const objs = [];
+    const re = /\{\s*"id":\s*(\d+)[\s\S]*?"audioUrl":\s*"([^"]+)"[\s\S]*?"sentences":\s*\[([\s\S]*?)\]\s*,\s*"fullText":/g;
+    let m;
+    while ((m = re.exec(raw)) !== null) {
+      const sents = [];
+      const sr = /"start":\s*(\d+)\s*,\s*"end":\s*(\d+)/g;
+      let sm;
+      while ((sm = sr.exec(m[3])) !== null) sents.push({ start: parseInt(sm[1]), end: parseInt(sm[2]) });
+      objs.push({ id: m[1], audioFile: m[2].replace(/^\//, ''), sentences: sents });
+    }
+    return objs;
+  } catch { return [] }
+})();
+
+app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
+  const { passageId, sentenceIdx } = req.params;
+  const idx = parseInt(sentenceIdx);
+  const passage = PASSAGE_DATA.find(p => p.id === passageId);
+  if (!passage) return res.status(404).json({ error: 'passage not found' });
+
+  const sent = passage.sentences[idx];
+  if (!sent || (sent.start === 0 && sent.end === 0))
+    return res.status(404).json({ error: 'no timestamp for this sentence' });
+
+  const segFile = path.join(SPLIT_DIR, `${passageId}_${idx}.mp3`);
+
+  if (fs.existsSync(segFile)) return res.sendFile(segFile);
+
+  const audioPath = path.join(__dirname, passage.audioFile);
+  if (!fs.existsSync(audioPath)) return res.status(404).json({ error: 'audio file not found' });
+
+  // Extract segment with ffmpeg
+  let start = sent.start, end = sent.end;
+  if (end === 0 && start > 0) {
+    let nextStart = null;
+    for (let j = idx + 1; j < passage.sentences.length; j++) {
+      if (passage.sentences[j].start > start) { nextStart = passage.sentences[j].start; break }
+    }
+    end = nextStart || start + 10;
+  }
+  if (start >= end) return res.status(400).json({ error: 'invalid range' });
+
+  try {
+    execSync(`ffmpeg -y -i "${audioPath}" -ss ${start} -to ${end} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`,
+      { timeout: 30000 });
+    res.sendFile(segFile);
+  } catch {
+    res.status(500).json({ error: 'extraction failed' });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 const API_KEY = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_APIKEY;

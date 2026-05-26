@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>四级备考助手</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;700;900&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Noto Sans SC','PingFang SC',sans-serif;
+  background:#f5f0f3;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+.phone {
+  width:390px;
+  height:780px;
+  background:#fff;
+  border-radius:44px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.04);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+/* ===== Scrollbar ===== */
+.scroll::-webkit-scrollbar { width:3px; }
+.scroll::-webkit-scrollbar-thumb { background:#e8dce2; border-radius:2px; }
+
+/* ===== Top safe area ===== */
+.status-bar {
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 24px;
+  flex-shrink:0;
+}
+.status-bar .time { font-size:14px; font-weight:700; color:#4a3a42; }
+.status-bar .icons { display:flex; gap:4px; font-size:12px; color:#8a7a82; }
+
+.scroll-area {
+  flex:1;
+  overflow-y:auto;
+  padding:0 20px 120px;
+}
+/* ===== Hero ===== */
+.hero {
+  padding:8px 4px 20px;
+}
+.hero .greeting { font-size:26px; font-weight:900; color:#2a1a22; }
+.hero .greeting .wave { display:inline-block; }
+.hero .streak {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin-top:4px;
+  padding:4px 12px 4px 8px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#fff0f3,#fff5f7);
+  font-size:13px;
+  font-weight:700;
+  color:#e86a8a;
+}
+.hero .streak .fire { font-size:16px; }
+
+/* ===== Today Mission ===== */
+.mission {
+  margin-bottom:20px;
+  border-radius:20px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.2s;
+  position:relative;
+}
+.mission:active { transform:scale(0.97); }
+.mission-bg {
+  padding:22px 24px;
+  background:linear-gradient(135deg,#ff8fab,#ff6b8a);
+  position:relative;
+}
+.mission-bg::after {
+  content:'🎯'; position:absolute; right:16px; top:50%; transform:translateY(-50%);
+  font-size:40px; opacity:0.15;
+}
+.mission .label {
+  font-size:12px; font-weight:700; color:rgba(255,255,255,0.8);
+  letter-spacing:2px; margin-bottom:4px;
+}
+.mission .title {
+  font-size:22px; font-weight:900; color:#fff; line-height:1.3;
+}
+.mission .sub {
+  font-size:14px; font-weight:600; color:rgba(255,255,255,0.85);
+  margin-top:4px;
+}
+.mission .action {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin-top:12px;
+  padding:8px 18px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.22);
+  font-size:13px; font-weight:700; color:#fff;
+}
+.mission .action .arrow { font-size:16px; }
+
+/* ===== Daily Sentence ===== */
+.daily-sent {
+  margin-bottom:20px;
+  padding:20px 22px;
+  border-radius:18px;
+  background:#fff5f7;
+  border:2px solid #ffe8ee;
+  cursor:pointer;
+  transition:0.2s;
+}
+.daily-sent:active { transform:scale(0.98); }
+.daily-sent .header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.daily-sent .header .tag {
+  font-size:12px; font-weight:700; color:#e86a8a;
+  letter-spacing:1px;
+}
+.daily-sent .header .play-btn {
+  width:36px; height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff8fab,#d4b5ff);
+  display:flex;
+  align-items:center; justify-content:center;
+  font-size:16px; color:#fff;
+  box-shadow:0 3px 10px rgba(255,143,171,0.25);
+  transition:0.2s;
+}
+.daily-sent .header .play-btn:active { transform:scale(0.9); }
+.daily-sent .en {
+  font-size:16px; font-weight:700; color:#2a1a22;
+  line-height:1.6;
+}
+.daily-sent .zh {
+  font-size:14px; font-weight:600; color:#8a7a82;
+  margin-top:4px; line-height:1.5;
+}
+
+/* ===== Quick Actions ===== */
+.quick-actions {
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+.qa {
+  flex:1;
+  padding:14px 0;
+  border-radius:16px;
+  text-align:center;
+  font-size:13px; font-weight:700; color:#4a3a42;
+  background:#faf5f7;
+  border:2px solid #f5eef2;
+  transition:0.2s;
+  cursor:pointer;
+}
+.qa:active { transform:scale(0.95); background:#f5eef2; }
+.qa .emoji { font-size:20px; display:block; margin-bottom:4px; }
+
+/* ===== Training Grid ===== */
+.section-title {
+  font-size:13px; font-weight:700; color:#8a7a82;
+  letter-spacing:2px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  margin-bottom:24px;
+}
+.gi {
+  padding:16px 8px;
+  border-radius:16px;
+  text-align:center;
+  transition:0.2s;
+  cursor:pointer;
+  border:2px solid transparent;
+}
+.gi:active { transform:scale(0.94); }
+.gi .emoji { font-size:24px; display:block; margin-bottom:6px; }
+.gi .name { font-size:13px; font-weight:700; color:#4a3a42; }
+.gi .desc { font-size:10px; font-weight:600; color:#8a7a82; margin-top:2px; }
+
+/* Grid color variants */
+.gi.c1 { background:#fff0f3; border-color:#ffe8ee; }
+.gi.c2 { background:#f5f0ff; border-color:#ede6ff; }
+.gi.c3 { background:#f0fff5; border-color:#e6f9ed; }
+.gi.c4 { background:#fff8f0; border-color:#fff0e0; }
+.gi.c5 { background:#f0f8ff; border-color:#e6f0ff; }
+.gi.c6 { background:#fff5f0; border-color:#ffede6; }
+.gi.c7 { background:#f5fff0; border-color:#edf9e6; }
+.gi.c8 { background:#fff0f8; border-color:#ffe6f0; }
+.gi.c9 { background:#f0f5ff; border-color:#e6edff; }
+
+/* ===== Bottom nav ===== */
+.bottom-nav {
+  position:absolute;
+  bottom:0; left:0; right:0;
+  display:flex;
+  padding:8px 16px 24px;
+  background:#fff;
+  border-top:1px solid #f0ebee;
+  flex-shrink:0;
+}
+.nav-item {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  font-size:10px; font-weight:600; color:#8a7a82;
+  cursor:pointer;
+  transition:0.2s;
+}
+.nav-item .icon { font-size:20px; }
+.nav-item.active { color:#ff6b8a; }
+.nav-item:active { transform:scale(0.92); }
+
+/* ===== First-visit overlay ===== */
+.overlay {
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
+  background:rgba(42,26,34,0.5);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  transition:0.4s;
+}
+.overlay.hidden { opacity:0; pointer-events:none; }
+.overlay .card {
+  width:320px;
+  background:#fff;
+  border-radius:28px;
+  padding:32px 28px;
+  text-align:center;
+  transform:translateY(0);
+  transition:0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.overlay.hidden .card { transform:translateY(30px); }
+.overlay .big-emoji { font-size:56px; margin-bottom:12px; }
+.overlay .o-title {
+  font-size:22px; font-weight:900; color:#2a1a22;
+  margin-bottom:8px;
+}
+.overlay .o-desc {
+  font-size:14px; font-weight:600; color:#8a7a82;
+  line-height:1.6; margin-bottom:20px;
+}
+.overlay .o-btn {
+  display:inline-block;
+  padding:14px 40px;
+  border-radius:28px;
+  background:linear-gradient(135deg,#ff8fab,#ff6b8a);
+  color:#fff;
+  font-size:16px; font-weight:700;
+  box-shadow:0 6px 20px rgba(255,107,138,0.3);
+  cursor:pointer;
+  transition:0.2s;
+}
+.overlay .o-btn:active { transform:scale(0.95); }
+
+.quiz-step {
+  display:none;
+}
+.quiz-step.active { display:block; }
+.quiz-step .q-num {
+  font-size:12px; font-weight:700; color:#8a7a82;
+  margin-bottom:4px;
+}
+.quiz-step .q-text {
+  font-size:18px; font-weight:700; color:#2a1a22;
+  margin-bottom:16px; line-height:1.5;
+}
+.quiz-step .q-opt {
+  width:100%;
+  padding:14px 18px;
+  margin-bottom:8px;
+  border-radius:14px;
+  background:#faf5f7;
+  border:2px solid #f5eef2;
+  text-align:left;
+  font-size:14px; font-weight:600; color:#4a3a42;
+  cursor:pointer;
+  transition:0.15s;
+}
+.quiz-step .q-opt:active { background:#f5eef2; }
+.quiz-step .q-opt.selected {
+  border-color:#ff6b8a;
+  background:#fff0f3;
+  color:#e86a8a;
+}
+.quiz-step .q-opt.correct {
+  border-color:#4caf50;
+  background:#f0faf0;
+  color:#2e7d32;
+}
+.quiz-step .q-opt.wrong {
+  border-color:#f44336;
+  background:#faf0f0;
+  color:#c62828;
+}
+.quiz-step .q-opt .q-ltr {
+  display:inline-flex;
+  width:24px; height:24px; border-radius:8px;
+  background:rgba(74,58,66,0.08);
+  align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color:#4a3a42;
+  margin-right:10px;
+}
+.quiz-step .q-opt.selected .q-ltr { background:#ff6b8a; color:#fff; }
+.quiz-step .q-opt.correct .q-ltr { background:#4caf50; color:#fff; }
+.quiz-step .q-opt.wrong .q-ltr { background:#f44336; color:#fff; }
+.quiz-result { display:none; }
+.quiz-result.active { display:block; }
+.quiz-result .score {
+  font-size:48px; font-weight:900;
+  background:linear-gradient(135deg,#ff8fab,#d4b5ff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin:8px 0;
+}
+.quiz-result .score-label {
+  font-size:14px; font-weight:600; color:#8a7a82;
+}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">15:33</span>
+    <span class="icons">📶 📶 🔋</span>
+  </div>
+
+  <!-- First Visit Overlay -->
+  <div class="overlay" id="overlay">
+    <div class="card">
+      <!-- Step 1: Welcome -->
+      <div class="quiz-step active" data-step="0">
+        <div class="big-emoji">🎯</div>
+        <div class="o-title">先测一下？</div>
+        <div class="o-desc">3 道题，看看你的起点在哪。<br>不管对错，有个开始就行。</div>
+        <div class="o-btn" onclick="startQuiz()">好，来吧 →</div>
+      </div>
+      <!-- Step 2-4: Quiz -->
+      <div class="quiz-step" data-step="1">
+        <div class="q-num">1 / 3</div>
+        <div class="q-text">
+          "The center of American automobile innovation has in the past decade moved 2,000 miles away."<br>
+          这句话的大意是？
+        </div>
+        <div class="q-opt" data-idx="0" onclick="selectOpt(this)">
+          <span class="q-ltr">A</span> 美国汽车价格涨了
+        </div>
+        <div class="q-opt" data-idx="1" onclick="selectOpt(this)">
+          <span class="q-ltr">B</span> 汽车创新中心转移了
+        </div>
+        <div class="q-opt" data-idx="2" onclick="selectOpt(this)">
+          <span class="q-ltr">C</span> 汽车工厂倒闭了
+        </div>
+        <div class="q-opt" data-idx="3" onclick="selectOpt(this)">
+          <span class="q-ltr">D</span> 高速公路修好了
+        </div>
+      </div>
+      <div class="quiz-step" data-step="2">
+        <div class="q-num">2 / 3</div>
+        <div class="q-text">
+          "It is a mistake to simply equate longevity with issues of old age."<br>
+          "equate" 最接近的意思是？
+        </div>
+        <div class="q-opt" data-idx="0" onclick="selectOpt(this)">
+          <span class="q-ltr">A</span> 等同
+        </div>
+        <div class="q-opt" data-idx="1" onclick="selectOpt(this)">
+          <span class="q-ltr">B</span> 计算
+        </div>
+        <div class="q-opt" data-idx="2" onclick="selectOpt(this)">
+          <span class="q-ltr">C</span> 争论
+        </div>
+        <div class="q-opt" data-idx="3" onclick="selectOpt(this)">
+          <span class="q-ltr">D</span> 解决
+        </div>
+      </div>
+      <div class="quiz-step" data-step="3">
+        <div class="q-num">3 / 3</div>
+        <div class="q-text">
+          以下哪个最可能是四级听力的 Section A 题型？
+        </div>
+        <div class="q-opt" data-idx="0" onclick="selectOpt(this)">
+          <span class="q-ltr">A</span> 新闻报道选择题
+        </div>
+        <div class="q-opt" data-idx="1" onclick="selectOpt(this)">
+          <span class="q-ltr">B</span> 完形填空
+        </div>
+        <div class="q-opt" data-idx="2" onclick="selectOpt(this)">
+          <span class="q-ltr">C</span> 段落翻译
+        </div>
+        <div class="q-opt" data-idx="3" onclick="selectOpt(this)">
+          <span class="q-ltr">D</span> 命题作文
+        </div>
+      </div>
+      <!-- Result -->
+      <div class="quiz-result" id="quizResult">
+        <div class="big-emoji" id="resultEmoji">🎉</div>
+        <div class="o-title" id="resultTitle">还不错！</div>
+        <div class="score" id="resultScore">3/3</div>
+        <div class="score-label">正确率</div>
+        <div class="o-desc" id="resultDesc" style="margin-top:12px;">你已经有一定基础了，开始系统练习吧！</div>
+        <div class="o-btn" onclick="finishGuide()">开始学习 →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="scroll-area scroll" id="mainContent">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="greeting">下午好 👋</div>
+      <div class="streak">
+        <span class="fire">🔥</span> 连续学习 3 天
+      </div>
+    </div>
+
+    <!-- Today's Mission -->
+    <div class="mission" onclick="alert('开始今日任务')">
+      <div class="mission-bg">
+        <div class="label">📌 今日任务</div>
+        <div class="title">听一个句子</div>
+        <div class="sub">精听一句真题，2 分钟搞定</div>
+        <div class="action">
+          开始 <span class="arrow">→</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Sentence -->
+    <div class="daily-sent" onclick="alert('播放语音')">
+      <div class="header">
+        <span class="tag">💬 每日一句</span>
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="en">"The center of American automobile innovation has moved 2,000 miles away."</div>
+      <div class="zh">美国汽车创新中心已经转移了 2000 英里。</div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <div class="qa" onclick="alert('听一句')">
+        <span class="emoji">🎧</span>
+        听一句
+      </div>
+      <div class="qa" onclick="alert('背一词')">
+        <span class="emoji">📖</span>
+        背一词
+      </div>
+      <div class="qa" onclick="alert('打卡')">
+        <span class="emoji">✅</span>
+        打卡
+      </div>
+    </div>
+
+    <!-- Training Grid -->
+    <div class="section-title">📚 真题训练</div>
+    <div class="grid">
+      <div class="gi c1" onclick="alert('进入听力')">
+        <span class="emoji">🎵</span>
+        <div class="name">听力</div>
+        <div class="desc">真题精听</div>
+      </div>
+      <div class="gi c2" onclick="alert('进入阅读')">
+        <span class="emoji">📖</span>
+        <div class="name">阅读</div>
+        <div class="desc">真题精读</div>
+      </div>
+      <div class="gi c3" onclick="alert('进入翻译')">
+        <span class="emoji">✏️</span>
+        <div class="name">翻译</div>
+        <div class="desc">段落翻译</div>
+      </div>
+      <div class="gi c4" onclick="alert('进入写作')">
+        <span class="emoji">📝</span>
+        <div class="name">写作</div>
+        <div class="desc">范文练习</div>
+      </div>
+      <div class="gi c5" onclick="alert('进入句子')">
+        <span class="emoji">💬</span>
+        <div class="name">句子</div>
+        <div class="desc">跟读模仿</div>
+      </div>
+      <div class="gi c6" onclick="alert('进入模拟')">
+        <span class="emoji">📋</span>
+        <div class="name">模拟考</div>
+        <div class="desc">限时模考</div>
+      </div>
+      <div class="gi c7" onclick="alert('进入单词本')">
+        <span class="emoji">📕</span>
+        <div class="name">单词本</div>
+        <div class="desc">生词复习</div>
+      </div>
+      <div class="gi c8" onclick="alert('进入统计')">
+        <span class="emoji">📊</span>
+        <div class="name">统计</div>
+        <div class="desc">学习报告</div>
+      </div>
+      <div class="gi c9" onclick="alert('进入错题本')">
+        <span class="emoji">📌</span>
+        <div class="name">错题本</div>
+        <div class="desc">查漏补缺</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active"><span class="icon">🏠</span>首页</div>
+    <div class="nav-item"><span class="icon">📊</span>学习</div>
+    <div class="nav-item"><span class="icon">📕</span>单词本</div>
+    <div class="nav-item"><span class="icon">👤</span>我的</div>
+  </div>
+</div>
+
+<script>
+const answers = ['B','A','A'];
+let currentStep = 0;
+let selected = {};
+
+function startQuiz() {
+  document.querySelector('[data-step="0"]').classList.remove('active');
+  document.querySelector('[data-step="1"]').classList.add('active');
+  currentStep = 1;
+}
+
+function selectOpt(el) {
+  const step = currentStep;
+  const stepEl = document.querySelector(`[data-step="${step}"]`);
+  if (!stepEl) return;
+
+  // Remove previous selection
+  stepEl.querySelectorAll('.q-opt').forEach(o => o.classList.remove('selected','correct','wrong'));
+
+  const idx = parseInt(el.dataset.idx);
+  el.classList.add('selected');
+  selected[step] = idx;
+
+  // Show result after brief delay
+  setTimeout(() => {
+    el.classList.remove('selected');
+    const correct = answers[step - 1];
+    const correctIdx = {'A':0,'B':1,'C':2,'D':3}[correct];
+    stepEl.querySelectorAll('.q-opt')[correctIdx].classList.add('correct');
+    if (idx !== correctIdx) el.classList.add('wrong');
+
+    setTimeout(() => {
+      if (step < 3) {
+        stepEl.classList.remove('active');
+        const next = step + 1;
+        document.querySelector(`[data-step="${next}"]`).classList.add('active');
+        currentStep = next;
+      } else {
+        // Show result
+        stepEl.classList.remove('active');
+        const correctCount = [1,2,3].filter(s => {
+          const ans = {'A':0,'B':1,'C':2,'D':3}[answers[s-1]];
+          return selected[s] === ans;
+        }).length;
+        const result = document.getElementById('quizResult');
+        result.classList.add('active');
+        document.getElementById('resultScore').textContent = correctCount + '/3';
+        if (correctCount === 3) {
+          document.getElementById('resultEmoji').textContent = '🏆';
+          document.getElementById('resultTitle').textContent = '满分！';
+          document.getElementById('resultDesc').textContent = '你的基础很不错，开始系统备考吧！';
+        } else if (correctCount >= 1) {
+          document.getElementById('resultEmoji').textContent = '🎉';
+          document.getElementById('resultTitle').textContent = '不错的开始！';
+          document.getElementById('resultDesc').textContent = '继续练习，坚持就是进步。';
+        } else {
+          document.getElementById('resultEmoji').textContent = '💪';
+          document.getElementById('resultTitle').textContent = '第一步已经迈出了！';
+          document.getElementById('resultDesc').textContent = '没关系，从基础开始，每天进步一点点。';
+        }
+      }
+    }, 600);
+  }, 300);
+}
+
+function finishGuide() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+</script>
+</body>
+</html>

@@ -3,6 +3,10 @@ import { applyTheme, getDarkMode } from '../../utils/theme'
 
 const API_BASE = 'https://cet4or6-app-production.up.railway.app'
 
+function getStatusBarHeight(): number {
+  try { return wx.getSystemInfoSync().statusBarHeight || 0 } catch { return 0 }
+}
+
 interface IHomeData {
   greeting: string
   checkedIn: boolean
@@ -14,6 +18,11 @@ interface IHomeData {
   dailyEn: string
   dailyZh: string
   dailyPlaying: boolean
+  todayListen: number
+  todaySentence: number
+  todayTrans: number
+  todayWrite: number
+  statusBarHeight: number
 }
 
 interface IHomeMethods {
@@ -53,9 +62,15 @@ Page<IHomeData, IHomeMethods>({
     dailyEn: '',
     dailyZh: '',
     dailyPlaying: false,
+    todayListen: 0,
+    todaySentence: 0,
+    todayTrans: 0,
+    todayWrite: 0,
+    statusBarHeight: 0,
   },
 
   onLoad() {
+    this.setData({ statusBarHeight: getStatusBarHeight() })
     this.refresh()
   },
 
@@ -75,6 +90,10 @@ Page<IHomeData, IHomeMethods>({
     const today = getTodayActivity()
     const checkedIn = isCheckedInToday()
     const streak = calcStreak(sd.checkInDates)
+    const todayListen = today.listen || 0
+    const todaySentence = today.sentence || 0
+    const todayTrans = today.translation || 0
+    const todayWrite = today.writing || 0
 
     // Mission recommendation
     let missionTitle = '休息一下 🌟'
@@ -112,6 +131,10 @@ Page<IHomeData, IHomeMethods>({
       missionBtn,
       dailyEn: ds.en,
       dailyZh: ds.zh,
+      todayListen,
+      todaySentence,
+      todayTrans,
+      todayWrite,
     })
   },
 
