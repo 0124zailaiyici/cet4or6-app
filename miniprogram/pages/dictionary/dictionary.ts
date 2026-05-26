@@ -81,7 +81,7 @@ Page<IDictData>({
   },
 
   async search(e?: WechatMiniprogram.TouchEvent) {
-    const word = e?.currentTarget?.dataset?.word as string | undefined
+    const word = e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.word as string | undefined
     const q = (word || this.data.query).trim()
     if (!q) return
     this.setData({ loading: true, error: '', result: null })
