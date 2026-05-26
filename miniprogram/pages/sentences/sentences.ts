@@ -309,7 +309,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   startPuzzle() {
-    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 8)
+    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
     if (sentences.length === 0) {
       wx.showToast({ title: '没有适合拼图的句子', icon: 'none' })
       this.setData({ viewMode: 'list' } as any)
@@ -379,7 +379,7 @@ Page<ISentencesData, ISentencesMethods>({
   checkPuzzleAnswer() {
     const selected = this.data.puzzleSelected
     const answers = this.data.puzzleAnswers
-    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 8)
+    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
     let allCorrect = true
     for (let i = 0; i < answers.length; i++) {
       if (selected[i] !== answers[i]) {
@@ -418,7 +418,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   finishPuzzle() {
-    const total = Math.min(this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 8).length, this.data.puzzleTotal)
+    const total = Math.min(this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12).length, this.data.puzzleTotal)
     const maxScore = total * 50 + 100
     const ratio = this.data.puzzleScore / maxScore
     let stars = 0
