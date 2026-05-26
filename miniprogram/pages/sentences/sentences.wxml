@@ -103,7 +103,7 @@
 
     <block wx:if="{{!puzzleFinished || puzzleStars === 0}}">
       <view class="pz-hint">
-        <text class="pz-hint-cn">{{filteredSentences[puzzleIndex]?.chinese || ''}}</text>
+        <text class="pz-hint-cn">{{filteredSentences.length > puzzleIndex ? filteredSentences[puzzleIndex].chinese : ''}}</text>
         <text class="pz-hint-en">按正确顺序点击单词拼成句子</text>
       </view>
 
@@ -112,7 +112,7 @@
           class="pz-drop-word {{puzzleFinished ? 'done' : ''}}"
           wx:for="{{puzzleSelected}}" wx:key="*this"
           data-wi="{{item}}"
-          catchtap="{{puzzleFinished ? '' : 'untapPuzzleWord'}}"
+          catchtap="untapPuzzleWord"
         >
           {{puzzleWords[item]}}
         </text>
@@ -121,7 +121,7 @@
 
       <view class="pz-bank">
         <text
-          class="pz-bank-word {{puzzleSelected.indexOf(index) >= 0 ? 'used' : ''}}"
+          class="pz-bank-word {{puzzleWordUsed[index] ? 'used' : ''}}"
           wx:for="{{puzzleWords}}" wx:key="*this" wx:for-index="index"
           data-wi="{{index}}"
           catchtap="tapPuzzleWord"

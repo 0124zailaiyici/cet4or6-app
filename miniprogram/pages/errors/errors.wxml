@@ -48,7 +48,7 @@
           {{bossDefeated ? '💫' : (currentFloor === 0 ? '👹' : '👾')}}
         </text>
         <view class="boss-name">
-          <text>{{floors[currentFloor]?.name || '???'}}</text>
+          <text>{{floors.length > currentFloor ? floors[currentFloor].name : '???'}}</text>
           <text class="boss-tag">{{currentFloor === 0 ? '🎵 LISTENING' : '📖 READING'}}</text>
         </view>
       </view>
@@ -68,7 +68,7 @@
       <view class="combo-bar">
         <text class="c-label">连击</text>
         <view class="c-track">
-          <view class="c-fill" style="width:{{Math.min(100, combo * 20)}}%"></view>
+          <view class="c-fill" style="width:{{combo * 20 > 100 ? 100 : combo * 20}}%"></view>
         </view>
         <text class="c-num">x{{combo}}</text>
       </view>

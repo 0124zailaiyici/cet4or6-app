@@ -38,6 +38,7 @@ interface ISentencesData {
   puzzleWords: string[]
   puzzleSelected: number[]
   puzzleAnswers: number[]
+  puzzleWordUsed: boolean[]
   puzzleScore: number
   puzzleCombo: number
   puzzleIndex: number
@@ -105,6 +106,7 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleWords: [],
     puzzleSelected: [],
     puzzleAnswers: [],
+    puzzleWordUsed: [],
     puzzleScore: 0,
     puzzleCombo: 0,
     puzzleIndex: 0,
@@ -308,6 +310,7 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleWords: shuffled.map(i => words[i]),
       puzzleAnswers: correct,
       puzzleSelected: [],
+      puzzleWordUsed: shuffled.map(() => false),
       puzzleTime: Math.max(15, 30 - idx * 2),
       puzzleFinished: false,
     } as any)
@@ -316,10 +319,12 @@ Page<ISentencesData, ISentencesMethods>({
   tapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
     if (this.data.puzzleFinished) return
     const wi = Number(e.currentTarget.dataset.wi)
+    const used = this.data.puzzleWordUsed
+    if (used[wi]) return
     const selected = this.data.puzzleSelected
-    if (selected.indexOf(wi) >= 0) return
     selected.push(wi)
-    this.setData({ puzzleSelected: selected } as any)
+    used[wi] = true
+    this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
 
     if (selected.length === this.data.puzzleAnswers.length) {
       this.checkPuzzleAnswer()
@@ -330,8 +335,13 @@ Page<ISentencesData, ISentencesMethods>({
     if (this.data.puzzleFinished) return
     const wi = Number(e.currentTarget.dataset.wi)
     let selected = this.data.puzzleSelected
-    selected = selected.filter(i => i !== wi)
-    this.setData({ puzzleSelected: selected } as any)
+    const used = this.data.puzzleWordUsed
+    const idx = selected.indexOf(wi)
+    if (idx >= 0) {
+      selected.splice(idx, 1)
+      used[wi] = false
+      this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
+    }
   },
 
   checkPuzzleAnswer() {
