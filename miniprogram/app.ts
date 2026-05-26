@@ -1,5 +1,7 @@
 import { applyTheme } from './utils/theme'
 
+const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app' } catch(e) { return 'https://cet4or6-app-production.up.railway.app' } })()
+
 const defaults = {
   completedListens: [] as number[],
   masteredSentences: [] as number[],
@@ -34,6 +36,8 @@ App<IAppOption>({
     if (this.globalData.darkMode) {
       applyTheme(true)
     }
+    // 预唤醒 Railway（避免冷启动）
+    wx.request({ url: API_BASE + '/health', method: 'GET', timeout: 5000 })
     // 首次启动显示引导页
     if (!wx.getStorageSync('hasGuided')) {
       wx.reLaunch({ url: '/pages/guide/guide' })
