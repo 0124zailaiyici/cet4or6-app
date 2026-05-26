@@ -148,7 +148,7 @@
     <view class="wcard-wrap" wx:for="{{filteredWords}}" wx:key="word" wx:for-index="idx" data-idx="{{idx}}" bindtouchstart="swipeStart" bindtouchmove="swipeMove" bindtouchend="swipeEnd">
       <view class="wcard {{swipedIdx === idx ? 'open' : ''}}">
         <view class="wi {{item.status === 'master' ? 'master' : item.status === 'review' ? 'review' : 'new'}}">
-          <text>{{item.word[0].toUpperCase()}}</text>
+          <text>{{item.word ? item.word[0].toUpperCase() : ''}}</text>
         </view>
         <view class="wb">
           <text class="ww">{{item.word}}</text>

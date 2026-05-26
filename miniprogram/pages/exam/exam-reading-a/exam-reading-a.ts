@@ -141,7 +141,7 @@ function splitPages(segs: any[]): any[][] {
   const mid = Math.ceil(total / 2)
   let acc = 0
   for (let i = 0; i < segs.length; i++) {
-    acc += segs[i].text && text.length || 1
+    acc += segs[i].text && segs[i].text.length || 1
     if (acc >= mid && i > 1) return [segs.slice(0, i), segs.slice(i)]
   }
   return [segs]
