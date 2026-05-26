@@ -5,5 +5,6 @@ server/.env
 server/audio/
 server/pdfs/
 server/dict_cache.json
+server/tmp/
 answer_keys/
 miniprogram/pages/sentences_orig.wxml
