@@ -163,15 +163,7 @@
 .mc-errors { background: linear-gradient(135deg, #ff8a65, #d84315); }
 .mc-vocab { background: linear-gradient(135deg, #7c4dff, #651fff); }
 .mc-statistics { background: linear-gradient(135deg, #4db6ac, #00897b); }
-  color: #2d2d4e;
-}
 
-.section-subtitle {
-  display: block;
-  font-size: 24rpx;
-  color: #8a7a9a;
-  margin-top: 4rpx;
-}
 
 /* ===== Module Grid ===== */
 .module-grid {
