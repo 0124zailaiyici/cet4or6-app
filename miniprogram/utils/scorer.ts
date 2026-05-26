@@ -169,7 +169,6 @@ export function scoreTranslation(
     let best = 0
     for (const acc of acceptableAnswers) {
       const accWords = norm(acc)
-      const accSet = expandSet(accWords)
       let sim = 0
       let cnt = 0
       for (let n = 1; n <= 3; n++) {

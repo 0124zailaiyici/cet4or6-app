@@ -111,7 +111,7 @@ interface WritingScore {
   score: number; dimensions: { content: number; structure: number; language: number }; suggestions: string; reference: string
 }
 
-function scoreWritingLocal(text: string, prompt: string, reference: string): WritingScore {
+function scoreWritingLocal(text: string, reference: string): WritingScore {
   const wc = countWords(text), sc = text.split(/[.!?]+/).filter(Boolean).length
   const paras = text.split('\n').filter(Boolean).length
   let content = 60, structure = 60, language = 60
@@ -205,7 +205,7 @@ Page<IWritingData, Record<string, any>>({
     const recent: number[] = wx.getStorageSync('writingRecentPatterns') || []
     const pats = patternsData as IPattern[]
     const writes = writingsData as IWriting[]
-    const patternVisible = pats.map(p => true)
+    const patternVisible = pats.map(() => true)
     const examTypeLabels = writes.map(w => w.prompt.indexOf('真题') > -1 ? '真题' : '模拟')
     this.setData({
       patterns: pats,
@@ -484,7 +484,7 @@ Page<IWritingData, Record<string, any>>({
     if (!text) { wx.showToast({ title: '请输入作文', icon: 'none' }); return }
     this.setData({ submitting: true, showResult: false, result: null })
     wx.showLoading({ title: '评审中...' })
-    let local = scoreWritingLocal(text, prompt, reference)
+    let local = scoreWritingLocal(text, reference)
     let score = local.score, dimensions = local.dimensions, suggestions = local.suggestions, ref = reference
     if (this.data.aiAvailable && this.data.aiEnabled) {
       try {
