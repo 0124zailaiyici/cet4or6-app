@@ -1,6 +1,6 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar">
-    <h1>错题 Boss</h1>
+    <view class="h1">错题 Boss</view>
     <view class="view-toggle">
       <text class="vt-btn {{view === 'boss' ? 'on' : ''}}" data-view="boss" catchtap="switchView">⚔️ 讨伐</text>
       <text class="vt-btn {{view === 'list' ? 'on' : ''}}" data-view="list" catchtap="switchView">📋 列表</text>

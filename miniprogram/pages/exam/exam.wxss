@@ -1,6 +1,6 @@
 .page { min-height: 100vh; display: flex; flex-direction: column; background: #f3eeed; }
 .topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; }
-.topbar h1 { font-size: 34rpx; font-weight: 800; }
+.topbar .h1 { font-size: 34rpx; font-weight: 800; }
 .topbar .sub { display: block; font-size: 24rpx; opacity: 0.85; margin-top: 4rpx; }
 
 .card { background: #fff; margin: 12rpx 20rpx; border-radius: 18rpx; padding: 20rpx; box-shadow: 0 2rpx 12rpx rgba(255,158,181,0.04); }

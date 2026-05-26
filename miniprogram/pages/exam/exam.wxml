@@ -1,7 +1,7 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
 
   <block wx:if="{{phase === 'list'}}">
-    <view class="topbar"><h1>模拟考试</h1><text class="sub">选一套真题，计时模拟真实考场</text></view>
+    <view class="topbar"><view class="h1">模拟考试</view><text class="sub">选一套真题，计时模拟真实考场</text></view>
     <block wx:for="{{examSets}}" wx:key="id">
       <view class="card">
         <view class="c-row"><text class="t">{{item.label}}</text><text wx:if="{{_takenSets[item.id]}}" class="badge" style="background:#81c784">已考 ✓</text><text wx:else class="badge">已导入</text></view>
@@ -20,7 +20,7 @@
     <view class="topbar">
       <view style="display:flex;align-items:center;gap:10px">
         <text style="font-size:20px" catchtap="goBack">←</text>
-        <h1 style="flex:1">{{currentSet.label}}</h1>
+        <view class="h1" style="flex:1">{{currentSet.label}}</view>
       </view>
     </view>
 
@@ -71,7 +71,7 @@
   </block>
 
   <block wx:if="{{phase === 'result'}}">
-    <view class="topbar"><h1>考试结果</h1><text class="sub">{{currentSet.label}}</text></view>
+    <view class="topbar"><view class="h1">考试结果</view><text class="sub">{{currentSet.label}}</text></view>
     <scroll-view style="flex:1;padding:20rpx" scroll-y>
       <view class="result-total">
         <text class="rt-score">{{readingScore + listeningScore + (writingScore || 0) + (translationScore || 0)}}/{{readingTotalScore + listeningTotalScore + (writingTotalScore || 0) + (translationTotalScore || 0)}}</text>

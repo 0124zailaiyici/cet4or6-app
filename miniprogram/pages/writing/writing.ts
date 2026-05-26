@@ -169,7 +169,7 @@ interface IWritingData {
   timerPhaseLabel: string; timerPercent: number
 }
 
-Page<IWritingData>({
+Page<IWritingData, Record<string, any>>({
   data: {
     tab: 0, tabs: ['句型急救包', '引导写作', '考场模拟'],
     patterns: [], writings: [],

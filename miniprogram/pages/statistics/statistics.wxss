@@ -1,7 +1,7 @@
 .page { min-height: 100vh; display: flex; flex-direction: column; background: #f3eeed; }
 .topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 14rpx; color: #fff; flex-shrink: 0; }
-.topbar h1 { font-size: 34rpx; font-weight: 800; }
-.topbar p { font-size: 24rpx; opacity: 0.85; margin-top: 4rpx; }
+.topbar .h1 { font-size: 34rpx; font-weight: 800; }
+.topbar .p { font-size: 24rpx; opacity: 0.85; margin-top: 4rpx; }
 
 .body { flex: 1; overflow-y: auto; padding: 12rpx 14rpx 20rpx; }
 

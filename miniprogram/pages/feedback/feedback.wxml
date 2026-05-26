@@ -1,6 +1,6 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar">
-    <h1>帮助与反馈</h1>
+    <view class="h1">帮助与反馈</view>
     <text class="tag">意见</text>
   </view>
 

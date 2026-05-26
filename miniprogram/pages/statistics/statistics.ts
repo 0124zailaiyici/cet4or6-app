@@ -67,9 +67,9 @@ Page<IStatData, IStatMethods>({
         for (const pidStr of Object.keys(sd.readingAnswers)) {
           const ans = sd.readingAnswers[Number(pidStr)]
           const passage = (readingsData as any[]).find((r: any) => r.id === Number(pidStr))
-          if (!passage || !passage.correctAnswers || !ans && ans.cAnswers) continue
+          if (!passage || !passage.correctAnswers || !ans || !ans.cAnswers) continue
           for (const qi of Object.keys(passage.correctAnswers)) {
-            if (passage.correctAnswers[qi] === ans.cAnswers[Number(qi)]) correct++
+            if (passage.correctAnswers[qi] === (ans.cAnswers as any)[Number(qi)]) correct++
             total++
           }
         }
@@ -78,7 +78,7 @@ Page<IStatData, IStatMethods>({
         for (const pidStr of Object.keys(sd.listeningAnswers)) {
           const ans = sd.listeningAnswers[Number(pidStr)]
           const passage = (listeningData as any[]).find((l: any) => l.id === Number(pidStr))
-          if (!passage && passage.correctAnswers) continue
+          if (!passage || !passage.correctAnswers) continue
           for (const qi of Object.keys(passage.correctAnswers)) {
             for (const piStr of Object.keys(ans)) {
               const pi = Number(piStr)

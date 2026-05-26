@@ -125,6 +125,7 @@ interface IVocabMethods {
   _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]): void
   loadWords(): void
   lookupWord(e: WechatMiniprogram.TouchEvent): void
+  onWordAction(e: WechatMiniprogram.TouchEvent): void
 }
 
 const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {

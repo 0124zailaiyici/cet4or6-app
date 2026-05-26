@@ -1,5 +1,5 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="topbar"><h1>翻译</h1><view class="tb-back" catchtap="goBack">返回</view></view>
+  <view class="topbar"><view class="h1">翻译</view><view class="tb-back" catchtap="goBack">返回</view></view>
   <scroll-view class="scroll" scroll-y>
     <view class="sec-label">请将以下中文翻译成英文：</view>
     <view class="src">{{item.chinese}}</view>

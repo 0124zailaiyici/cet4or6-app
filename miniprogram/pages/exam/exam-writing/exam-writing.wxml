@@ -1,5 +1,5 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="topbar"><h1>写作</h1><view class="tb-back" catchtap="goBack">返回</view></view>
+  <view class="topbar"><view class="h1">写作</view><view class="tb-back" catchtap="goBack">返回</view></view>
   <scroll-view class="scroll" scroll-y>
     <view class="sec-label">题目</view>
     <view class="prompt">{{prompt.prompt}}</view>

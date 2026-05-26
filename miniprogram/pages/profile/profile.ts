@@ -30,9 +30,9 @@ Page({
         for (const pidStr of Object.keys(sd.readingAnswers)) {
           const ans = sd.readingAnswers[Number(pidStr)]
           const p = (readingsData as any[]).find((r: any) => r.id === Number(pidStr))
-          if (!p && p.correctAnswers || !ans && ans.cAnswers) continue
+          if (!p || !p.correctAnswers || !ans || !ans.cAnswers) continue
           for (const qi of Object.keys(p.correctAnswers)) {
-            if (p.correctAnswers[qi] === ans.cAnswers[Number(qi)]) correct++
+            if (p.correctAnswers[qi] === (ans.cAnswers as any)[Number(qi)]) correct++
             total++
           }
         }

@@ -32,6 +32,7 @@
     "backgroundColor": "#fff5f7"
   },
   "style": "v2",
+  "componentFramework": "glass-easel",
   "tabBar": {
     "color": "#8a7a9a",
     "selectedColor": "#ff6b8a",
@@ -44,6 +45,5 @@
       { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "icons/mine.png", "selectedIconPath": "icons/mine_active.png" }
     ]
   },
-  "componentFramework": "glass-easel",
-  "lazyCodeLoading": "requiredComponents"
+
 }

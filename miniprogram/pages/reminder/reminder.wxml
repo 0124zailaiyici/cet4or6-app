@@ -1,6 +1,6 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar">
-    <h1>学习提醒</h1>
+    <view class="h1">学习提醒</view>
     <text class="tag">📱 订阅消息</text>
   </view>
 

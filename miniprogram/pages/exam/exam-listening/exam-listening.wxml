@@ -1,7 +1,7 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar">
     <text catchtap="goBack">← 返回</text>
-    <h1 style="flex:1;text-align:center">听力</h1>
+    <view class="h1" style="flex:1;text-align:center">听力</view>
     <text wx:if="{{_submitted && !showResult}}" class="tb-score" catchtap="showResultAgain">{{_correctCount}}/{{_totalCount}}</text>
     <text wx:if="{{_submitted && showResult}}" class="tb-score on" catchtap="hideResult">{{_correctCount}}/{{_totalCount}}</text>
   </view>

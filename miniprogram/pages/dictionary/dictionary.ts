@@ -42,7 +42,7 @@ const POS_MAP: Record<string, string> = {
   '感叹词': 'interjection', 'interjection': 'interjection',
 }
 
-Page<IDictData>({
+Page<IDictData, Record<string, any>>({
   data: {
     query: '',
     result: null,
