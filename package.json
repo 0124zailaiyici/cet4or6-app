@@ -1,13 +1,6 @@
 {
-  "name": "miniprogram-ts-quickstart",
-  "version": "1.0.0",
-  "description": "",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "",
-  "devDependencies": {
-    "miniprogram-api-typings": "^2.8.3-1",
-    "typescript": "^6.0.3"
+  "name": "cet4-or6-app",
+  "scripts": {
+    "start": "cd server && npm install && node server.js"
   }
 }

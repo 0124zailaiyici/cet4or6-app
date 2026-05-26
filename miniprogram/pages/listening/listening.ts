@@ -237,7 +237,7 @@ class AudioManager {
       ctx.onCanplay(() => {
         if (this.pageRef) {
           const d: any = { loading: false }
-          if (ctx.duration > 0) {
+          if (ctx.duration > 0 && isFinite(ctx.duration)) {
             const m = Math.floor(ctx.duration / 60)
             const s = Math.floor(ctx.duration % 60)
             d.audioDuration = ctx.duration
@@ -277,16 +277,19 @@ class AudioManager {
       ctx.onTimeUpdate(() => {
         if (this.pageRef && this.pageRef.data.audioMode && this.ctx) {
           const d = this.pageRef.data
-          const fmt = (t: number) => {
-            const m = Math.floor(t / 60)
-            const s = Math.floor(t % 60)
+          const t = ctx.currentTime
+          const dur = ctx.duration
+          if (!isFinite(t) || !isFinite(dur)) return
+          const fmt = (v: number) => {
+            const m = Math.floor(v / 60)
+            const s = Math.floor(v % 60)
             return `${m}:${s < 10 ? '0' : ''}${s}`
           }
           this.pageRef.setData({
-            audioTime: ctx.currentTime,
-            audioDuration: ctx.duration,
-            audioTimeStr: fmt(ctx.currentTime),
-            audioDurationStr: fmt(ctx.duration),
+            audioTime: t,
+            audioDuration: dur,
+            audioTimeStr: fmt(t),
+            audioDurationStr: fmt(dur),
           })
           if (d.focusMode && d.loopSentence) {
             const origIdx = d.focusSentenceMap[d.currentIndex] ?? 0
@@ -672,6 +675,7 @@ Page<IListeningData, IListeningMethods>({
     } else {
       audio.pause()
       audio.setRate(1)
+      audio.seek(0)
       this.setData({
         focusMode: false,
         loopSentence: false,
@@ -682,6 +686,8 @@ Page<IListeningData, IListeningMethods>({
         focusPageIndices: [],
         currentIndex: 0,
         currentPage: 0,
+        audioTime: 0,
+        audioTimeStr: '0:00',
       })
     }
   },

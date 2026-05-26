@@ -224,7 +224,7 @@
           <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
-              <text class="se-en" wx:if="{{showTranscript}}">{{item.text}}</text>
+              <text class="se-en" wx:if="{{showTranscript}}" user-select>{{item.text}}</text>
               <text class="se-en hidden" wx:else>🔇 点击播放收听</text>
             </view>
             <view class="se-actions">
