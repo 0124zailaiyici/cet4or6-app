@@ -329,8 +329,8 @@ class AudioManager {
   play(src: string, rate: number = 1) {
     const ctx = this.getCtx()
     ctx.stop()
-    ctx.playbackRate = rate
     ctx.src = src
+    ctx.playbackRate = rate
     ctx.play()
   }
 
