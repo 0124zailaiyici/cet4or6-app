@@ -16,6 +16,7 @@ interface IListeningItem {
   audioUrl: string
   sentences: ISentence[]
   fullText: string
+  correctAnswers?: Record<string, string>
 }
 
 interface IListeningPage {
@@ -23,6 +24,19 @@ interface IListeningPage {
   section: string
   stem?: string
   opts?: string[]
+}
+
+interface IQuestionResult {
+  pi: number
+  qNum: number
+  stem: string
+  userLetter: string
+  userText: string
+  correctLetter: string
+  correctText: string
+  isCorrect: boolean
+  isAnswered: boolean
+  hasAnswerKey: boolean
 }
 
 interface IListeningData {
@@ -60,6 +74,8 @@ interface IListeningData {
   summaryTotal: number
   summaryAnswered: number
   summaryMarked: number
+  summaryResults: IQuestionResult[]
+  summaryCorrectCount: number
   focusSentences: string[]
   focusSentenceMap: number[]
   focusPageIndices: number[]
@@ -219,7 +235,16 @@ class AudioManager {
       ctx.autoplay = true
 
       ctx.onCanplay(() => {
-        if (this.pageRef) this.pageRef.setData({ loading: false })
+        if (this.pageRef) {
+          const d: any = { loading: false }
+          if (ctx.duration > 0) {
+            const m = Math.floor(ctx.duration / 60)
+            const s = Math.floor(ctx.duration % 60)
+            d.audioDuration = ctx.duration
+            d.audioDurationStr = `${m}:${s < 10 ? '0' : ''}${s}`
+          }
+          this.pageRef.setData(d)
+        }
       })
 
       ctx.onEnded(() => {
@@ -575,7 +600,24 @@ Page<IListeningData, IListeningMethods>({
     const total = qPages.length
     const answered = Object.keys(this.data.selectedAnswers).length
     const marked = this.data.markedPages.length
-    this.setData({ mode: 'summary', isPlaying: false, summaryTotal: total, summaryAnswered: answered, summaryMarked: marked })
+    const ca = this.data.currentPassage?.correctAnswers || {}
+    const optionLetters = this.data.optionLetters
+    let correctCount = 0
+    const results: IQuestionResult[] = this.data.pages.map((p, pi) => {
+      if (p.type !== 'q') return null
+      const qNum = parseInt((p.stem || '').replace(/^Q/i, ''))
+      const correctLetter = ca[String(qNum)] || ''
+      const userOptionIdx = this.data.selectedAnswers[pi]
+      const isAnswered = userOptionIdx != null
+      const userLetter = isAnswered ? (optionLetters[userOptionIdx] || '') : ''
+      const userText = isAnswered && p.opts ? (p.opts[userOptionIdx] || '') : ''
+      const correctIdx = correctLetter ? ({ A: 0, B: 1, C: 2, D: 3 } as Record<string, number>)[correctLetter] ?? -1 : -1
+      const correctText = correctIdx >= 0 && p.opts ? (p.opts[correctIdx] || '') : ''
+      const isCorrect = correctLetter && isAnswered ? userLetter === correctLetter : false
+      if (isCorrect) correctCount++
+      return { pi, qNum, stem: p.stem || '', userLetter, userText, correctLetter, correctText, isCorrect, isAnswered, hasAnswerKey: !!correctLetter }
+    }).filter(Boolean) as IQuestionResult[]
+    this.setData({ mode: 'summary', isPlaying: false, summaryTotal: total, summaryAnswered: answered, summaryMarked: marked, summaryResults: results, summaryCorrectCount: correctCount })
   },
 
   retryPages() {
