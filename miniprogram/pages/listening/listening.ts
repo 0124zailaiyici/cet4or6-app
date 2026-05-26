@@ -79,6 +79,7 @@ interface IListeningData {
   focusSentences: string[]
   focusSentenceMap: number[]
   focusPageIndices: number[]
+  _retried?: boolean
 }
 
 interface IListeningMethods {
@@ -309,6 +310,14 @@ class AudioManager {
 
       ctx.onError((res) => {
         const code = (res as any).errCode
+        if (this.pageRef) {
+          const d = this.pageRef.data
+          if (!d._retried) {
+            this.pageRef.setData({ _retried: true, loading: true })
+            setTimeout(() => { if (this.ctx && this.ctx.src) { this.ctx.play() } }, 2000)
+            return
+          }
+        }
         wx.showToast({ title: `播放失败${code ? '(' + code + ')' : ''}`, icon: 'none' })
         if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
       })
@@ -332,6 +341,7 @@ class AudioManager {
     ctx.src = src
     ctx.playbackRate = rate
     ctx.play()
+    if (this.pageRef) this.pageRef.setData({ _retried: false })
   }
 
   resume(rate: number = 1) {
@@ -504,6 +514,7 @@ Page<IListeningData, IListeningMethods>({
         markedFlags: new Array(pages.length).fill(false),
         loopSentence: fm,
         speed: fm ? 0.8 : 1,
+        _retried: false,
       })
       audio.setRate(fm ? 0.8 : 1)
     } else {
