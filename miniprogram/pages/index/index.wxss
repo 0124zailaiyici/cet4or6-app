@@ -52,16 +52,16 @@
 .sec-h::after { content: ''; flex: 1; height: 2rpx; background: linear-gradient(90deg, #ffd9e0, transparent); margin-left: 10rpx; }
 
 /* ===== 3-column grid ===== */
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12rpx; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14rpx; }
 .gi {
-  border-radius: 20rpx; padding: 24rpx 8rpx; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 6rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.06);
+  border-radius: 22rpx; padding: 30rpx 10rpx; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 8rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
 }
 .gi:active { opacity: 0.85; transform: scale(0.96); }
-.gi .gi-e { font-size: 40rpx; line-height: 1; }
-.gi .gi-n { font-size: 24rpx; font-weight: 700; color: #fff; text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15); }
-.gi .gi-d { font-size: 18rpx; color: rgba(255,255,255,0.75); }
+.gi .gi-e { font-size: 44rpx; line-height: 1; }
+.gi .gi-n { font-size: 26rpx; font-weight: 700; color: #fff; text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15); }
+.gi .gi-d { font-size: 20rpx; color: rgba(255,255,255,0.75); }
 
 /* Card colors */
 .mc-listening { background: linear-gradient(135deg, #4fc3f7, #2196f3); }
@@ -74,13 +74,3 @@
 .mc-errors { background: linear-gradient(135deg, #ff8a65, #d84315); }
 .mc-vocab { background: linear-gradient(135deg, #7c4dff, #651fff); }
 .mc-statistics { background: linear-gradient(135deg, #4db6ac, #00897b); }
-
-/* ===== Bottom card ===== */
-.btm-card { margin-top: 28rpx; background: #fff; border-radius: 22rpx; padding: 22rpx 24rpx; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); }
-.btm-row { display: flex; align-items: center; gap: 16rpx; }
-.btm-n { font-size: 48rpx; font-weight: 800; color: #ff6b8a; }
-.btm-info { flex: 1; }
-.btm-t { display: block; font-size: 24rpx; font-weight: 600; color: #2d2d4e; margin-bottom: 8rpx; }
-.btm-bar { height: 8rpx; border-radius: 4rpx; background: #fff0f3; }
-.btm-f { height: 100%; border-radius: 4rpx; background: linear-gradient(90deg, #ff8fab, #ff6b8a); transition: width 0.3s; min-width: 0; }
-.btm-tip { display: block; font-size: 22rpx; color: #8a7a9a; margin-top: 14rpx; }

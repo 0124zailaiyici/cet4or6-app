@@ -12,7 +12,6 @@
 
 .card { background: #fff; border-radius: 20rpx; padding: 20rpx; margin-bottom: 16rpx; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); }
 .cst { font-size: 26rpx; font-weight: 700; color: #2d2d4e; margin-bottom: 12rpx; }
-.arow { display: flex; gap: 10rpx; }
 .ac { flex: 1; text-align: center; padding: 14rpx 8rpx; border-radius: 14rpx; border: 2rpx solid #fff0f3; }
 .ac .ae { display: block; font-size: 40rpx; margin-bottom: 4rpx; }
 .ac .an { display: block; font-size: 20rpx; color: #8a7a9a; }
