@@ -22,8 +22,8 @@
 .qz-c-card { flex: 1; overflow-y: auto; background: #fff; border-radius: 20rpx; padding: 24rpx 24rpx 16rpx; box-shadow: 0 2rpx 16rpx rgba(84,110,122,0.06); }
 .qz-c-card::-webkit-scrollbar { width: 0; height: 0; }
 .qz-c-question { font-size: 28rpx; line-height: 1.7; color: #2d2d4e; font-weight: 500; margin-bottom: 18rpx; display: block; }
-.qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
-.qzo { width: calc(50% - 6rpx); flex-shrink: 0; font-size: 26rpx; color: #4a4a6a; line-height: 1.5; padding: 20rpx 24rpx; border-radius: 16rpx; background: #f8f5f4; border: 2rpx solid #ece4e2; transition: 0.15s; word-break: break-word; }
+.qz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; }
+.qzo { font-size: 26rpx; color: #4a4a6a; line-height: 1.5; padding: 20rpx 24rpx; border-radius: 16rpx; background: #f8f5f4; border: 2rpx solid #ece4e2; transition: 0.15s; word-break: break-word; }
 .qzo.on { color: #1e88e5; font-weight: 600; border-color: #1e88e5; background: rgba(30,136,229,0.06); box-shadow: 0 2rpx 12rpx rgba(30,136,229,0.1); }
 
 .dots { display: flex; justify-content: center; gap: 6rpx; padding: 6rpx 0 4rpx; flex-shrink: 0; }

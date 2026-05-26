@@ -200,9 +200,8 @@
 }
 
 /* 选项区域 */
-.qz-opts { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.qz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; }
 .qzo {
-  width: calc(50% - 6rpx); flex-shrink: 0;
   font-size: 26rpx; color: #4a4a6a; line-height: 1.5;
   padding: 20rpx 24rpx; border-radius: 16rpx;
   background: #f8f5f4; border: 2rpx solid #ece4e2;
