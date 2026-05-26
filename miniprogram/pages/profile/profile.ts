@@ -30,7 +30,7 @@ Page({
         for (const pidStr of Object.keys(sd.readingAnswers)) {
           const ans = sd.readingAnswers[Number(pidStr)]
           const p = (readingsData as any[]).find((r: any) => r.id === Number(pidStr))
-          if (!p?.correctAnswers || !ans?.cAnswers) continue
+          if (!p && p.correctAnswers || !ans && ans.cAnswers) continue
           for (const qi of Object.keys(p.correctAnswers)) {
             if (p.correctAnswers[qi] === ans.cAnswers[Number(qi)]) correct++
             total++
@@ -41,11 +41,11 @@ Page({
         for (const pidStr of Object.keys(sd.listeningAnswers)) {
           const ans = sd.listeningAnswers[Number(pidStr)]
           const p = (listeningData as any[]).find((l: any) => l.id === Number(pidStr))
-          if (!p?.correctAnswers) continue
+          if (!p && p.correctAnswers) continue
           for (const qi of Object.keys(p.correctAnswers)) {
             for (const piStr of Object.keys(ans)) {
-              const sentText = p.sentences?.[Number(piStr)]?.text || ''
-              if (sentText.match(/^Q(\d+)\./)?.[1] === qi && ['A','B','C','D'][ans[Number(piStr)]] === p.correctAnswers[qi]) correct++
+              const sentText = p.sentences && p.sentences[Number(piStr)] && p.sentences[Number(piStr)].text || ''
+              if ((sentText.match(/^Q(\d+)\./) || [])[1] === qi && ['A','B','C','D'][ans[Number(piStr)]] === p.correctAnswers[qi]) correct++
             }
             total++
           }
@@ -66,7 +66,7 @@ Page({
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
       const checked = sd.checkInDates.includes(dateStr)
-      const lv = checked ? (d === now.getDate() ? 3 : (sd.todayActivity?.date === dateStr ? 2 : 1)) : 0
+      const lv = checked ? (d === now.getDate() ? 3 : (sd.todayActivity && sd.todayActivity.date === dateStr ? 2 : 1)) : 0
       cells.push({ day: d, level: lv, isToday: d === now.getDate() })
     }
     const calRows: typeof cells[] = []

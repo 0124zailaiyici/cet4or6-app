@@ -54,7 +54,7 @@ Page<IStatData, IStatMethods>({
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i)
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-      const count = (sd.todayActivity?.date === dateStr ? sd.todayActivity?.total || 0 : 0)
+      const count = (sd.todayActivity && sd.todayActivity.date === dateStr ? sd.todayActivity && sd.todayActivity.total || 0 : 0)
       // Check if checked in
       const checked = sd.checkInDates.includes(dateStr)
       weekBars.push({ h: checked ? Math.max(20, Math.min(100, count * 25)) : 0, label: weekLabels[i], today: i === 0 })
@@ -67,7 +67,7 @@ Page<IStatData, IStatMethods>({
         for (const pidStr of Object.keys(sd.readingAnswers)) {
           const ans = sd.readingAnswers[Number(pidStr)]
           const passage = (readingsData as any[]).find((r: any) => r.id === Number(pidStr))
-          if (!passage || !passage.correctAnswers || !ans?.cAnswers) continue
+          if (!passage || !passage.correctAnswers || !ans && ans.cAnswers) continue
           for (const qi of Object.keys(passage.correctAnswers)) {
             if (passage.correctAnswers[qi] === ans.cAnswers[Number(qi)]) correct++
             total++
@@ -78,12 +78,12 @@ Page<IStatData, IStatMethods>({
         for (const pidStr of Object.keys(sd.listeningAnswers)) {
           const ans = sd.listeningAnswers[Number(pidStr)]
           const passage = (listeningData as any[]).find((l: any) => l.id === Number(pidStr))
-          if (!passage?.correctAnswers) continue
+          if (!passage && passage.correctAnswers) continue
           for (const qi of Object.keys(passage.correctAnswers)) {
             for (const piStr of Object.keys(ans)) {
               const pi = Number(piStr)
-              const sentText = passage.sentences?.[pi]?.text || ''
-              if (sentText.match(/^Q(\d+)\./)?.[1] === qi && optionLetter(ans[pi]) === passage.correctAnswers[qi]) correct++
+              const sentText = passage.sentences && passage.sentences[pi] && passage.sentences[pi].text || ''
+              if ((sentText.match(/^Q(\d+)\./) || [])[1] === qi && optionLetter(ans[pi]) === passage.correctAnswers[qi]) correct++
             }
             total++
           }
@@ -119,7 +119,7 @@ Page<IStatData, IStatMethods>({
       const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
       const checked = sd.checkInDates.includes(dateStr)
       const isToday = d === now.getDate()
-      const level = checked ? (isToday ? 3 : (sd.todayActivity?.date === dateStr ? 2 : 1)) : 0
+      const level = checked ? (isToday ? 3 : (sd.todayActivity && sd.todayActivity.date === dateStr ? 2 : 1)) : 0
       cells.push({ day: d, level, isToday })
     }
     const calRows: typeof cells[] = []

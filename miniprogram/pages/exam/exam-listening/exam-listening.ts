@@ -37,7 +37,7 @@ Page({
 
     const questions: IListeningQ[] = []
     for (const s of passage.sentences || []) {
-      const qm = s.text?.match(/^Q(\d+)\.\s*/)
+      const qm = s.text && s.text.match(/^Q(\d+)\.\s*/)
       if (!qm) continue
       const qi = parseInt(qm[1])
       const parts = s.text.split(/[A-D]\)\s*/).filter(Boolean)
@@ -45,13 +45,13 @@ Page({
       if (options.length === 4) questions.push({ qi, options })
     }
 
-    const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
+    const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}
     const submitted = !!(saved as any).submitted
     let correctCount = 0, results: Record<number, boolean> = {}, correctIdxs: Record<number, number> = {}
     const ca = passage.correctAnswers || {}
     Object.keys(ca).forEach((k: string) => {
       const qi = Number(k)
-      const correctIdx = { A: 0, B: 1, C: 2, D: 3 }[ca[k] as string] ?? -1
+      const _m = { A: 0, B: 1, C: 2, D: 3 }[ca[k] as string]; const correctIdx = _m != null ? _m : -1
       correctIdxs[qi] = correctIdx
       if (submitted) {
         const userIdx = saved[qi]
@@ -68,7 +68,7 @@ Page({
   },
 
   toggleAudio() {
-    if (!this.data.passage?.audioUrl) { wx.showToast({ title: '暂无音频', icon: 'none' }); return }
+    if (!this.data.passage && this.data.passage.audioUrl) { wx.showToast({ title: '暂无音频', icon: 'none' }); return }
     if (audioCtx && this.data.isPlaying) {
       audioCtx.pause()
       this.setData({ isPlaying: false })
@@ -98,7 +98,7 @@ Page({
     if (sel[qi] === oi) delete sel[qi]
     else sel[qi] = oi
     this.setData({ sel })
-    if (this.data.passage?.id) {
+    if (this.data.passage && this.data.passage.id) {
       const app = getApp<IAppOption>()
       if (!app.globalData.studyData.listeningAnswers) app.globalData.studyData.listeningAnswers = {}
       app.globalData.studyData.listeningAnswers[this.data.passage.id] = sel

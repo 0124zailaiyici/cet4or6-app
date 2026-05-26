@@ -319,7 +319,7 @@ Page<ISentencesData, ISentencesMethods>({
         generating: false,
       })
       this.doFilter()
-      const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english
+      const hash = allSentences.length + '|' + allSentences[0] && allSentences[0].english + '|' + allSentences[allSentences.length - 1] && allSentences[allSentences.length - 1].english
       wx.setStorageSync('sentenceHash', hash)
 
       wx.showToast({ title: `已生成 ${results.length} 个句子`, icon: 'success' })
@@ -384,7 +384,7 @@ Page<ISentencesData, ISentencesMethods>({
         parsing: false,
       })
       this.doFilter()
-      const hash = allSentences.length + '|' + allSentences[0]?.english + '|' + allSentences[allSentences.length - 1]?.english
+      const hash = allSentences.length + '|' + allSentences[0] && allSentences[0].english + '|' + allSentences[allSentences.length - 1] && allSentences[allSentences.length - 1].english
       wx.setStorageSync('sentenceHash', hash)
 
       wx.showToast({ title: `已导入 ${results.length} 个句子`, icon: 'success' })

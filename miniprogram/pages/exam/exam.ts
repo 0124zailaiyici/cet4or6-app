@@ -108,7 +108,7 @@ Page<IExamData, IExamMethods>({
     const ra = getApp<IAppOption>().globalData.studyData.readingAnswers || {}
     const result: Record<string, boolean> = {}
     for (const set of sets) {
-      result[set.id] = set.readingIds.some((rid: number) => (ra[rid] as any)?.submitted)
+      result[set.id] = set.readingIds.some((rid: number) => (ra[rid] as any || {}).submitted)
     }
     return result
   },
@@ -162,7 +162,7 @@ Page<IExamData, IExamMethods>({
         rd += ans ? Object.keys(ans.matchAnswers || {}).length : 0
       } else if (passage.sectionType === 'C' && passage.questions) {
         for (let qi = 0; qi < passage.questions.length; qi++) {
-          if (ans?.cAnswers?.[qi]) rd++
+          if (ans && ans.cAnswers && ans.cAnswers[qi]) rd++
           rt++
         }
       }
@@ -173,7 +173,7 @@ Page<IExamData, IExamMethods>({
       const lid = this.data.currentSet.listeningId
       const lans = la[lid]
       const passage = (listeningData as any[]).find((l: any) => l.id === lid)
-      if (passage?.correctAnswers) {
+      if (passage && passage.correctAnswers) {
         lt = Object.keys(passage.correctAnswers).length
         if (lans) {
           for (const k of Object.keys(passage.correctAnswers)) {
@@ -251,7 +251,7 @@ Page<IExamData, IExamMethods>({
 
     if (set.listeningId) {
       const passage = lData.find((l: any) => l.id === set.listeningId)
-      if (passage?.correctAnswers) {
+      if (passage && passage.correctAnswers) {
         const ca = passage.correctAnswers || {}
         const lans = la[set.listeningId] || {}
         listeningTotal = Object.keys(ca).length
@@ -275,7 +275,7 @@ Page<IExamData, IExamMethods>({
       const ws = scoreWriting(wa[wKey])
       writingScore = ws.score
       const wData = (writingsData as any[]).find((w: any) => w.id === Number(wKey))
-      writingResults.push({ title: wData?.title || '写作', score: writingScore, total: writingTotal })
+      writingResults.push({ title: wData && wData.title || '写作', score: writingScore, total: writingTotal })
     }
 
     let translationScore = 0, translationTotal = 100
@@ -345,7 +345,7 @@ Page<IExamData, IExamMethods>({
     const lRes: { title: string; score: number; total: number }[] = []
     if (set.listeningId) {
       const p = lData.find((l: any) => l.id === set.listeningId)
-      if (p?.correctAnswers) {
+      if (p && p.correctAnswers) {
         const ca = p.correctAnswers
         lt = Object.keys(ca).length
         const lans = la[set.listeningId] || {}

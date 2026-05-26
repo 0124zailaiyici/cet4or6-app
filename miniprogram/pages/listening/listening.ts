@@ -292,8 +292,8 @@ class AudioManager {
             audioDurationStr: fmt(dur),
           })
           if (d.focusMode && d.loopSentence) {
-            const origIdx = d.focusSentenceMap[d.currentIndex] ?? 0
-            const sent = d.currentPassage?.sentences[origIdx]
+            const origIdx = d.focusSentenceMap[d.currentIndex] != null ? d.focusSentenceMap[d.currentIndex] : 0
+            const sent = d.currentPassage && d.currentPassage.sentences[origIdx]
             if (sent && sent.end > 0 && ctx.currentTime >= sent.end) {
               ctx.seek(sent.start || 0)
             }
@@ -351,15 +351,15 @@ class AudioManager {
   }
 
   getCurrentTime(): number {
-    return this.ctx?.currentTime ?? 0
+    return this.ctx && this.ctx.currentTime != null ? this.ctx.currentTime : 0
   }
 
   getDuration(): number {
-    return this.ctx?.duration ?? 0
+    return this.ctx && this.ctx.duration != null ? this.ctx.duration : 0
   }
 
   hasSource(): boolean {
-    return !!this.ctx?.src
+    return !!(this.ctx && this.ctx.src)
   }
 
   destroy() {
@@ -417,7 +417,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   onLoad(options: { passageId?: string; examMode?: string }) {
-    if (options?.examMode === '1') this.setData({ examMode: true })
+    if (options && options.examMode === '1') this.setData({ examMode: true })
     audio.attach(this)
     const passages = listeningData as IListeningItem[]
     const app = getApp<IAppOption>()
@@ -469,13 +469,13 @@ Page<IListeningData, IListeningMethods>({
       audio.stop()
       audio.play(audioUrl)
 
-      const saved = app.globalData.studyData.listeningAnswers?.[passage.id] || {}
+      const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}
       const pages = buildPages(passage)
 
       let warns: string[] = []
       for (const p of pages) {
         if (p.type !== 'q') continue
-        const n = p.opts?.length || 0
+        const n = p.opts && p.opts.length || 0
         if (n < 4) warns.push(`${p.stem}缺${4 - n}个选项`)
       }
 
@@ -554,7 +554,7 @@ Page<IListeningData, IListeningMethods>({
     this.setData({ selectedAnswers: sa })
 
     const app = getApp<IAppOption>()
-    const pid = this.data.currentPassage?.id
+    const pid = this.data.currentPassage && this.data.currentPassage.id
     if (pid) {
       if (!app.globalData.studyData.listeningAnswers) app.globalData.studyData.listeningAnswers = {}
       app.globalData.studyData.listeningAnswers[pid] = sa
@@ -572,7 +572,7 @@ Page<IListeningData, IListeningMethods>({
       }
       this.setData({
         currentPage: cp,
-        currentSectionLabel: p?.section || '',
+        currentSectionLabel: p && p.section || '',
         isCurrentMarked: this.data.markedFlags[cp] || false,
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
@@ -590,7 +590,7 @@ Page<IListeningData, IListeningMethods>({
       }
       this.setData({
         currentPage: cp,
-        currentSectionLabel: p?.section || '',
+        currentSectionLabel: p && p.section || '',
         isCurrentMarked: this.data.markedFlags[cp] || false,
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
@@ -605,7 +605,7 @@ Page<IListeningData, IListeningMethods>({
     const total = qPages.length
     const answered = Object.keys(this.data.selectedAnswers).length
     const marked = this.data.markedPages.length
-    const ca = this.data.currentPassage?.correctAnswers || {}
+    const ca = this.data.currentPassage && this.data.currentPassage.correctAnswers || {}
     const optionLetters = this.data.optionLetters
     let correctCount = 0
     const results: IQuestionResult[] = this.data.pages.map((p, pi) => {
@@ -616,7 +616,8 @@ Page<IListeningData, IListeningMethods>({
       const isAnswered = userOptionIdx != null
       const userLetter = isAnswered ? (optionLetters[userOptionIdx] || '') : ''
       const userText = isAnswered && p.opts ? (p.opts[userOptionIdx] || '') : ''
-      const correctIdx = correctLetter ? ({ A: 0, B: 1, C: 2, D: 3 } as Record<string, number>)[correctLetter] ?? -1 : -1
+      const letterMap = { A: 0, B: 1, C: 2, D: 3 } as Record<string, number>
+      const correctIdx = correctLetter ? (letterMap[correctLetter] !== undefined ? letterMap[correctLetter] : -1) : -1
       const correctText = correctIdx >= 0 && p.opts ? (p.opts[correctIdx] || '') : ''
       const isCorrect = correctLetter && isAnswered ? userLetter === correctLetter : false
       if (isCorrect) correctCount++
@@ -790,7 +791,7 @@ Page<IListeningData, IListeningMethods>({
   playSentence(e: WechatMiniprogram.TouchEvent) {
     const rawIndex = Number(e.currentTarget.dataset.index)
     const origIndex = this.data.focusMode
-      ? (this.data.focusSentenceMap[rawIndex] ?? rawIndex)
+      ? (this.data.focusSentenceMap[rawIndex] != null ? this.data.focusSentenceMap[rawIndex] : rawIndex)
       : rawIndex
     this.setData({ currentIndex: rawIndex })
     if (this.data.focusMode) {
@@ -853,8 +854,8 @@ Page<IListeningData, IListeningMethods>({
   },
 
   seekFocusCurrent() {
-    const origIndex = this.data.focusSentenceMap[this.data.currentIndex] ?? 0
-    const sent = this.data.currentPassage?.sentences[origIndex]
+    const origIndex = this.data.focusSentenceMap[this.data.currentIndex] != null ? this.data.focusSentenceMap[this.data.currentIndex] : 0
+    const sent = this.data.currentPassage && this.data.currentPassage.sentences[origIndex]
     if (sent) {
       audio.seek(sent.start || 0)
     }
@@ -879,7 +880,7 @@ Page<IListeningData, IListeningMethods>({
     const passage = this.data.currentPassage
     if (!passage) return
     const origIndex = this.data.focusMode
-      ? (this.data.focusSentenceMap[rawIndex] ?? rawIndex)
+      ? (this.data.focusSentenceMap[rawIndex] != null ? this.data.focusSentenceMap[rawIndex] : rawIndex)
       : rawIndex
     const app = getApp<IAppOption>()
     const stored = app.globalData.studyData.hardSentences

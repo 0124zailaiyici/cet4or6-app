@@ -55,7 +55,7 @@ Page({
         const correctLetter = ca[k]
         if (!letterResults[correctLetter] || letterResults[correctLetter] === 'ok') letterResults[correctLetter] = 'ok'
         if (ua && ua !== correctLetter) letterResults[ua] = 'ko'
-        resultItems.push({ label: `#${qi + 36}`, questionStem: (p.questions || [])[qi] || '', userAnswer: ua || '未选', correctAnswer: `第${correctLetter}段`, isCorrect, locate: annot?.qLocate?.[String(qi)] || '', hint: annot?.qHint?.[String(qi)] || '' })
+        resultItems.push({ label: `#${qi + 36}`, questionStem: (p.questions || [])[qi] || '', userAnswer: ua || '未选', correctAnswer: `第${correctLetter}段`, isCorrect, locate: annot && annot.qLocate && annot.qLocate[String(qi)] || '', hint: annot && annot.qHint && annot.qHint[String(qi)] || '' })
       })
     }
     const avail = this.data.letters.filter((l: string) => !Object.values(ma).includes(l))

@@ -48,7 +48,7 @@ Page({
         const isCorrect = ua === ca[k]
         if (isCorrect) correctCount++
         blankResults[k] = isCorrect ? 'ok' : 'ko'
-        resultItems.push({ label: `第${k}空`, userAnswer: ua || '未填', correctAnswer: ca[k], isCorrect, locate: annot?.qLocate?.[k] || '', hint: annot?.qHint?.[k] || '' })
+        resultItems.push({ label: `第${k}空`, userAnswer: ua || '未填', correctAnswer: ca[k], isCorrect, locate: annot && annot.qLocate && annot.qLocate[k] || '', hint: annot && annot.qHint && annot.qHint[k] || '' })
       })
       optionResults = opts.map((w: string) => {
         const isCorrect = Object.values(ca).includes(w)
@@ -137,11 +137,11 @@ function parseSegments(text: string, keys: string[]): any[] {
 }
 
 function splitPages(segs: any[]): any[][] {
-  const total = segs.reduce((s: number, seg: any) => s + (seg.text?.length || 1), 0)
+  const total = segs.reduce((s: number, seg: any) => s + (seg.text && seg.text.length || 1), 0)
   const mid = Math.ceil(total / 2)
   let acc = 0
   for (let i = 0; i < segs.length; i++) {
-    acc += segs[i].text?.length || 1
+    acc += segs[i].text && text.length || 1
     if (acc >= mid && i > 1) return [segs.slice(0, i), segs.slice(i)]
   }
   return [segs]

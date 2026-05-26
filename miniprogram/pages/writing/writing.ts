@@ -457,8 +457,8 @@ Page<IWritingData>({
   },
   async submitWriting() {
     const text = this.data.writingAnswer.trim()
-    const prompt = this.data.currentWriting?.prompt || ''
-    const reference = this.data.currentWriting?.reference || ''
+    const prompt = this.data.currentWriting && this.data.currentWriting.prompt || ''
+    const reference = this.data.currentWriting && this.data.currentWriting.reference || ''
     if (!text) { wx.showToast({ title: '请输入作文', icon: 'none' }); return }
     this.setData({ submitting: true, showResult: false, result: null })
     wx.showLoading({ title: '评审中...' })

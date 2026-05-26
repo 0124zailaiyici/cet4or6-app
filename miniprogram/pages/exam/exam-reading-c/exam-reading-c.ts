@@ -46,10 +46,10 @@ Page({
         const isCorrect = ua ? (ua === letter || ua.startsWith(letter)) : false
         if (isCorrect) correctCount++
         qResults[qi] = isCorrect ? 'ok' : 'ko'
-        const allOpts = (p.choices?.[qi] || []).map((ch: string) => ch)
+        const allOpts = (p.choices && p.choices[qi] || []).map((ch: string) => ch)
         const correctIdx = allOpts.findIndex((ch: string) => ch.startsWith(letter))
         const userIdx = ua ? allOpts.findIndex((ch: string) => ch.startsWith(ua.slice(0, 1))) : -1
-        resultItems.push({ label: `Q${qi + 46}`, questionStem: (p.questions || [])[qi] || '', userAnswer: ua ? ua.slice(0, 1).toUpperCase() + ')' : '未选', correctAnswer: correct[k] + ')', isCorrect, allOptions: allOpts, correctOptionIndex: correctIdx, userOptionIndex: userIdx, locate: annot?.qLocate?.[String(qi)] || '', hint: annot?.qHint?.[String(qi)] || '' })
+        resultItems.push({ label: `Q${qi + 46}`, questionStem: (p.questions || [])[qi] || '', userAnswer: ua ? ua.slice(0, 1).toUpperCase() + ')' : '未选', correctAnswer: correct[k] + ')', isCorrect, allOptions: allOpts, correctOptionIndex: correctIdx, userOptionIndex: userIdx, locate: annot && annot.qLocate && annot.qLocate[String(qi)] || '', hint: annot && annot.qHint && annot.qHint[String(qi)] || '' })
       })
     }
     this.setData({ passage: { ...p, _ans: ans, _ca: ca, _choices: choices }, _paraPages: paraPages, _paraPageIdx: 0, _curParas: paraPages[0] || [], _submitted: submitted, showResult: false, _correctCount: correctCount, _totalCount: Object.keys(p.correctAnswers || {}).length, _qResults: qResults, _resultItems: resultItems })
@@ -97,7 +97,7 @@ Page({
     const dx = e.changedTouches[0].clientX - this.data.touchX
     const p: any = this.data.passage
     if (!p) return
-    if (dx < -50 && this.data.currentQ < (p._choices?.length || 1) - 1) this.setData({ currentQ: this.data.currentQ + 1 })
+    if (dx < -50 && this.data.currentQ < (p._choices && p._choices.length || 1) - 1) this.setData({ currentQ: this.data.currentQ + 1 })
     else if (dx > 50 && this.data.currentQ > 0) this.setData({ currentQ: this.data.currentQ - 1 })
   },
 

@@ -940,7 +940,7 @@ Page<IVocabData, IVocabMethods>({
   startGame(e: WechatMiniprogram.TouchEvent) {
     const idx = Number(e.currentTarget.dataset.idx)
     const word = this.data.filteredWords[idx]
-    if (!word?.chn) return
+    if (!word && word.chn) return
     const remaining = this.data.filteredWords.length - idx
     this.setData({ gameSessionLimit: Math.min(10, remaining), gameSessionStart: idx, combo: 0 })
     this.showGameForIdx(idx)
@@ -972,14 +972,14 @@ Page<IVocabData, IVocabMethods>({
     if (!w.context || w.contextCn) return
     try {
       const r = await translateText(w.context)
-      if (r?.chinese && !/^[a-zA-Z\s,.'"!?;:-]+$/.test(r.chinese)) {
+      if (r && r.chinese && !/^[a-zA-Z\s,.'"!?;:-]+$/.test(r.chinese)) {
         w.contextCn = r.chinese
         const app = getApp<IAppOption>()
         const stored = app.globalData.studyData.vocabWords as IVocabWord[]
         const sw = stored.find(v => v.word === w.word)
         if (sw) sw.contextCn = r.chinese
         wx.setStorageSync('studyData', app.globalData.studyData)
-        if (this.data.gameWord?.word === w.word) {
+        if (this.data.gameWord && this.data.gameWord.word === w.word) {
           this.setData({ 'gameWord.contextCn': r.chinese })
         }
       }
@@ -1001,7 +1001,7 @@ Page<IVocabData, IVocabMethods>({
     const uniqueCtxs = [...ctxSet]
     try {
       const result = await translateTextBatch(uniqueCtxs)
-      if (result?.results && result.results.length === uniqueCtxs.length) {
+      if (result && result.results && result.results.length === uniqueCtxs.length) {
         const ctxMap = new Map<string, string>()
         for (let i = 0; i < uniqueCtxs.length; i++) ctxMap.set(uniqueCtxs[i], result.results[i])
         for (const w of needTrans) {
@@ -1016,7 +1016,7 @@ Page<IVocabData, IVocabMethods>({
         }
         wx.setStorageSync('studyData', app.globalData.studyData)
         if (this.data.gameWord) {
-          const gwCn = needTrans.find(w => w.word === this.data.gameWord!.word)?.contextCn
+          const gwCn = (needTrans.find(w => w.word === this.data.gameWord!.word) || {}).contextCn
           if (gwCn) this.setData({ 'gameWord.contextCn': gwCn })
         }
       }
@@ -1038,7 +1038,7 @@ Page<IVocabData, IVocabMethods>({
       if (!word.chn) {
         this.setData({ gameLoading: false })
         wx.showToast({ title: `跳过「${word.word}」`, icon: 'none' })
-        return this.nextGame(skipFrom ?? idx)
+        return this.nextGame(skipFrom != null ? skipFrom : idx)
       }
     }
 
@@ -1112,7 +1112,7 @@ Page<IVocabData, IVocabMethods>({
       this.closeGame()
       return
     }
-    this.showGameForIdx(nextIdx, skipFrom ?? this.data.gameWordIdx)
+    this.showGameForIdx(nextIdx, skipFrom != null ? skipFrom : this.data.gameWordIdx)
   },
 
   closeGame() {
@@ -1220,7 +1220,7 @@ Page<IVocabData, IVocabMethods>({
     const wordStr = words[idx]
     const known = WORD_BANK[wordStr]
     const word: IVocabWord = {
-      word: wordStr, phonetic: known?.phonetic || '', definition: '', chn: known?.definition || '',
+      word: wordStr, phonetic: known && known.phonetic || '', definition: '', chn: known && known.definition || '',
       source: '每日挑战', context: '', contextCn: '', audioUrl: '',
       status: 'new', correctStreak: 0, growth: 0, stars: 0,
     }
@@ -1238,7 +1238,7 @@ Page<IVocabData, IVocabMethods>({
   },
 
   challengeNext() {
-    const w = this.data.gameWord?.word
+    const w = this.data.gameWord && this.data.gameWord.word
     if (w) {
       const app = getApp<IAppOption>()
       const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w)
@@ -1290,7 +1290,7 @@ Page<IVocabData, IVocabMethods>({
     try {
       const result = await lookupWord(word.word)
       const entry = Array.isArray(result) ? result[0] : result
-      const au = entry?.phonetics?.find((p: any) => p?.audio)?.audio
+      const au = entry && entry.phonetics && (entry.phonetics.find((p: any) => p && p.audio) || {}).audio
       if (au) { word.audioUrl = au; const app = getApp<IAppOption>(); wx.setStorageSync('studyData', app.globalData.studyData) }
     } catch {}
   },
@@ -1312,7 +1312,7 @@ Page<IVocabData, IVocabMethods>({
       })
     }
     wx.createSelectorQuery().select('#confettiCanvas').fields({ node: true, size: true }).exec((res) => {
-      const canvas = res[0]?.node as any
+      const canvas = res[0] && res[0].node as any
       if (!canvas) return
       const ctx = canvas.getContext('2d')
       canvas.width = w
@@ -1331,7 +1331,7 @@ Page<IVocabData, IVocabMethods>({
           ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h)
           ctx.restore()
         }
-        if (alive) anim = canvas.requestAnimationFrame?.(draw) as any
+        if (alive) anim = canvas.requestAnimationFrame && canvas.requestAnimationFrame(draw) as any
       }
       draw()
       ;(canvas as any)._confettiAnim = anim
@@ -1340,9 +1340,9 @@ Page<IVocabData, IVocabMethods>({
 
   stopConfetti() {
     wx.createSelectorQuery().select('#confettiCanvas').fields({ node: true }).exec((res) => {
-      const canvas = res[0]?.node as any
-      if (canvas?._confettiAnim != null) canvas.cancelAnimationFrame?.(canvas._confettiAnim)
-      const ctx = canvas?.getContext('2d')
+      const canvas = res[0] && res[0].node as any
+      if (canvas && canvas._confettiAnim != null) canvas.cancelAnimationFrame && canvas.cancelAnimationFrame(canvas._confettiAnim)
+      const ctx = canvas && canvas.getContext('2d')
       if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
     })
   },
@@ -1361,8 +1361,8 @@ Page<IVocabData, IVocabMethods>({
     try {
       const result = await lookupWord(word.word)
       const entry = Array.isArray(result) ? result[0] : result
-      const phonetic = entry.phonetic || entry.phonetics?.[0]?.text || ''
-      const engDef = entry.meanings?.[0]?.definitions?.[0]?.definition || ''
+      const phonetic = entry.phonetic || entry.phonetics && entry.phonetics[0] && entry.phonetics[0].text || ''
+      const engDef = entry.meanings && entry.meanings[0] && entry.meanings[0].definitions && entry.meanings[0].definitions[0] && entry.meanings[0].definitions[0].definition || ''
       const chn = entry.chinese || ''
       if (!engDef && !chn) {
         wx.showToast({ title: '未找到释义', icon: 'none' })
@@ -1492,9 +1492,9 @@ Page<IVocabData, IVocabMethods>({
       try {
         const result = await lookupWord(w)
         const entry = Array.isArray(result) ? result[0] : result
-        if (entry?.chinese) chn = entry.chinese
-        if (entry?.phonetic) phonetic = entry.phonetic
-        else if (entry?.phonetics?.[0]?.text) phonetic = entry.phonetics[0].text
+        if (entry && entry.chinese) chn = entry.chinese
+        if (entry && entry.phonetic) phonetic = entry.phonetic
+        else if (entry && entry.phonetics && entry.phonetics[0] && entry.phonetics[0].text) phonetic = entry.phonetics[0].text
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : ''
         if (msg.includes('404')) dict404 = true
@@ -1507,7 +1507,7 @@ Page<IVocabData, IVocabMethods>({
       if (!chn && !dict404) {
         try {
           const ai = await aiTranslateWord(w)
-          if (ai?.chinese) chn = ai.chinese
+          if (ai && ai.chinese) chn = ai.chinese
         } catch {}
       }
       if (!chn) {
@@ -1519,7 +1519,7 @@ Page<IVocabData, IVocabMethods>({
       let contextCn = ''
       try {
         const sents = await generateSentence({ word: w, count: 1 })
-        if (sents?.length > 0) {
+        if (sents && sents.length > 0) {
           context = sents[0].english
           contextCn = sents[0].chinese
         }

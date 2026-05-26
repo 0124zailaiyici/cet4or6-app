@@ -76,8 +76,8 @@ Page<IErrorsData, IErrorsMethods>({
             const qi = parseInt(qiStr)
             const selLetter = ans.cAnswers[qi]
             const correctLetter = correct[String(qi)] || ''
-            const qText = passage.questions?.[qi] || ''
-            const opts = passage.choices?.[qi] || []
+            const qText = passage.questions && passage.questions[qi] || ''
+            const opts = passage.choices && passage.choices[qi] || []
             const optText = opts.find((o: string) => o.startsWith(selLetter + ')')) || selLetter
             const correctText = opts.find((o: string) => o.startsWith(correctLetter + ')')) || correctLetter
             readingErrors.push({
@@ -95,7 +95,7 @@ Page<IErrorsData, IErrorsMethods>({
             const si = parseInt(siStr)
             const letter = ans.matchAnswers[si]
             const correctLetter = correct[String(si)] || ''
-            const stmt = passage.questions?.[si] || ''
+            const stmt = passage.questions && passage.questions[si] || ''
             readingErrors.push({
               id: `r-${pid}-b-${si}`, source: title, section: '长篇阅读',
               qLabel: `#${si + 1}`, question: stmt, userAnswer: `匹配 ${letter}`,
@@ -132,7 +132,7 @@ Page<IErrorsData, IErrorsMethods>({
         for (const piStr of Object.keys(pageAnswers)) {
           const pi = parseInt(piStr)
           const oi = pageAnswers[pi]
-          const sentText = passage.sentences?.[pi]?.text || ''
+          const sentText = passage.sentences && passage.sentences[pi] && passage.sentences[pi].text || ''
           const qm = sentText.match(/^Q(\d+)\./)
           const qLabel = qm ? `Q${qm[1]}` : `第${pi}页`
           const userLetter = optionLetter(oi)

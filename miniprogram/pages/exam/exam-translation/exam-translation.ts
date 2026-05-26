@@ -12,8 +12,8 @@ Page({
     applyTheme(getDarkMode())
     this.setData({ darkMode: getDarkMode() })
     const translations = (translationsData as any[]).filter((t: any) => t && t.chinese)
-    const item = translations.find((t: any) => t.source?.includes('真题')) || translations[0] || null
-    const saved = ((getApp<IAppOption>().globalData.studyData as any).translationAnswers || {})[item?.id || 0] || ''
+    const item = translations.find((t: any) => t.source && t.source.includes('真题')) || translations[0] || null
+    const saved = ((getApp<IAppOption>().globalData.studyData as any).translationAnswers || {})[item && item.id || 0] || ''
     this.setData({ item, answer: saved })
   },
 
@@ -26,7 +26,7 @@ Page({
     const app = getApp<IAppOption>()
     const sd = app.globalData.studyData as any
     if (!sd.translationAnswers) sd.translationAnswers = {}
-    sd.translationAnswers[this.data.item?.id || 0] = this.data.answer
+    sd.translationAnswers[this.data.item && this.data.item.id || 0] = this.data.answer
     wx.setStorageSync('studyData', sd)
     wx.showToast({ title: '已保存', icon: 'success' })
     wx.navigateBack()

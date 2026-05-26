@@ -167,7 +167,7 @@ Page<IReadingData, IReadingMethods>({
   },
 
   onLoad(options?: { examMode?: string }) {
-    if (options?.examMode === '1') this.setData({ examMode: true })
+    if (options && options.examMode === '1') this.setData({ examMode: true })
     const readings = readingsData as unknown as IReadingItem[]
     this.setData({ readings })
     this.refreshCompletionMap()
@@ -199,7 +199,7 @@ Page<IReadingData, IReadingMethods>({
     const item = this.data.readings.find(r => r.id === id)
     if (item) {
       const annot = readingAnnotations[item.id]
-      const vocab = annot?.vocab || {}
+      const vocab = annot && annot.vocab || {}
       const pages = item.sectionType === 'B'
         ? this.formatBPassage(item.passage)
         : this.splitPassage(item.passage)
@@ -209,11 +209,11 @@ Page<IReadingData, IReadingMethods>({
         : []
       const paras = item.sectionType === 'B' ? this.formatBPassage(item.passage) : this.getPassageParas(item.passage)
       const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }))
-      const fullTranslation = annot?.translation || ''
+      const fullTranslation = annot && annot.translation || ''
       const app = getApp<IAppOption>()
       const saved = app.globalData.studyData.readingAnswers[item.id]
-      const matchSaved = saved?.matchAnswers || {}
-      const cAnswerSaved = saved?.cAnswers || {}
+      const matchSaved = saved && saved.matchAnswers || {}
+      const cAnswerSaved = saved && saved.cAnswers || {}
       const bPages: string[][] = []
       if (item.sectionType === 'B' && item.questions.length > 0) {
         for (let i = 0; i < item.questions.length; i += 5) bPages.push(item.questions.slice(i, i + 5))
@@ -224,8 +224,8 @@ Page<IReadingData, IReadingMethods>({
       this.setData({
         current: item, currentQ: 0, passagePage: 0, passagePages: pages,
         passageSeg: segs, formattedPages: formatted,
-        blankAnswers: saved?.blankAnswers || {},
-        usedFlags: saved?.usedFlags || [],
+        blankAnswers: saved && saved.blankAnswers || {},
+        usedFlags: saved && saved.usedFlags || [],
         activeBlank: null,
         bStmtPage: 0, bStmtPages: bPages,
         matchAnswers: matchSaved,
@@ -308,7 +308,7 @@ Page<IReadingData, IReadingMethods>({
           word,
           phonetic: '',
           definition: zh,
-          source: this.data.current?.title || '阅读理解',
+          source: this.data.current && this.data.current.title || '阅读理解',
           status: 'new',
           correctStreak: 0
         })
@@ -322,12 +322,12 @@ Page<IReadingData, IReadingMethods>({
   updatePageParas() {
     const paras = this.data.passageParas
     const page = this.data.passagePage
-    const st = this.data.current?.sectionType
+    const st = this.data.current && this.data.current.sectionType
     const step = st === 'B' ? 1 : 2
     const start = page * step
     const slice = paras.slice(start, start + step)
     const result = slice.map((text, i) => ({ text, paraIdx: start + i }))
-    const vocab = readingAnnotations[this.data.current?.id || 0]?.vocab || {}
+    const vocab = readingAnnotations[this.data.current && this.data.current.id || 0] && readingAnnotations[this.data.current && this.data.current.id || 0].vocab || {}
     const segments: Array<{ type: string; text: string; word?: string; zh?: string; num?: string }> = []
     for (const para of slice) {
       // Section A: split passageSeg-style to preserve blanks
@@ -397,7 +397,7 @@ Page<IReadingData, IReadingMethods>({
   rebuildFormatted(vocab: Record<string, string>, highlightIdx: number) {
     const paras = this.data.passageParas
     if (!paras.length) return
-    const isB = this.data.current?.sectionType === 'B'
+    const isB = this.data.current && this.data.current.sectionType === 'B'
     const pages: string[] = []
     const step = isB ? 1 : 2
     for (let i = 0; i < paras.length; i += step) {
@@ -423,18 +423,18 @@ Page<IReadingData, IReadingMethods>({
   },
 
   getMissingCount(): { total: number; answered: number } {
-    const st = this.data.current?.sectionType
+    const st = this.data.current && this.data.current.sectionType
     if (st === 'A') {
       const ba = this.data.blankAnswers
-      const total = Object.keys(this.data.current?.correctAnswers || {}).length
+      const total = Object.keys(this.data.current && this.data.current.correctAnswers || {}).length
       return { total, answered: Object.keys(ba).length }
     }
     if (st === 'B') {
-      const total = this.data.current?.questions?.length || 0
+      const total = this.data.current && this.data.current.questions && this.data.current.questions.length || 0
       return { total, answered: Object.keys(this.data.matchAnswers).length }
     }
     if (st === 'C') {
-      const total = this.data.current?.questions?.length || 0
+      const total = this.data.current && this.data.current.questions && this.data.current.questions.length || 0
       return { total, answered: Object.keys(this.data.cAnswers).length }
     }
     return { total: 0, answered: 0 }
@@ -458,8 +458,8 @@ Page<IReadingData, IReadingMethods>({
           userAnswer: user,
           correctAnswer: correct,
           isCorrect: user.toLowerCase().trim() === correct.toLowerCase().trim(),
-          locate: annot?.qLocate?.[k] || '',
-          hint: annot?.qHint?.[k] || ''
+          locate: annot && annot.qLocate && annot.qLocate[k] || '',
+          hint: annot && annot.qHint && annot.qHint[k] || ''
         })
       }
     } else if (item.sectionType === 'B') {
@@ -472,14 +472,14 @@ Page<IReadingData, IReadingMethods>({
           userAnswer: user,
           correctAnswer: ca[String(i)] || '',
           isCorrect: user === ca[String(i)],
-          locate: annot?.qLocate?.[String(i)] || '',
-          hint: annot?.qHint?.[String(i)] || '',
+          locate: annot && annot.qLocate && annot.qLocate[String(i)] || '',
+          hint: annot && annot.qHint && annot.qHint[String(i)] || '',
           questionStem: item.questions[i] || ''
         })
       }
     } else if (item.sectionType === 'C') {
       const cAns = this.data.cAnswers
-      const startNum = parseInt((item.questions[0]?.match(/^\d+/) || ['0'])[0])
+      const startNum = parseInt((item.questions[0] && item.questions[0].match(/^\d+/) || ['0'])[0])
       const choiceLabels = ['A', 'B', 'C', 'D']
       for (let i = 0; i < item.questions.length; i++) {
         const user = cAns[i] || '(未作答)'
@@ -490,8 +490,8 @@ Page<IReadingData, IReadingMethods>({
           userAnswer: user,
           correctAnswer: correctLetter,
           isCorrect: userLetter === correctLetter,
-          locate: annot?.qLocate?.[String(i)] || '',
-          hint: annot?.qHint?.[String(i)] || '',
+          locate: annot && annot.qLocate && annot.qLocate[String(i)] || '',
+          hint: annot && annot.qHint && annot.qHint[String(i)] || '',
           questionStem: item.questions[i] || '',
           allOptions: item.choices[i] || [],
           correctOptionIndex: choiceLabels.indexOf(correctLetter),
@@ -532,7 +532,7 @@ Page<IReadingData, IReadingMethods>({
       resultItems: results
     })
 
-    const id = this.data.current?.id
+    const id = this.data.current && this.data.current.id
     if (id) {
       const app = getApp<IAppOption>()
       const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
@@ -550,8 +550,8 @@ Page<IReadingData, IReadingMethods>({
   },
 
   hideResult() {
-    const annot = readingAnnotations[this.data.current?.id || 0]
-    const vocab = annot?.vocab || {}
+    const annot = readingAnnotations[this.data.current && this.data.current.id || 0]
+    const vocab = annot && annot.vocab || {}
     this.rebuildFormatted(vocab, -1)
     this.setData({ showResult: false })
   },
@@ -574,7 +574,7 @@ Page<IReadingData, IReadingMethods>({
   jumpToParagraph(e: WechatMiniprogram.TouchEvent) {
     const locate = e.currentTarget.dataset.locate as string
     if (!locate) return
-    const st = this.data.current?.sectionType
+    const st = this.data.current && this.data.current.sectionType
     // Section B: locate is like "A段", "I段" → letter index
     let paraIdx = -1
     if (st === 'B') {
@@ -586,8 +586,8 @@ Page<IReadingData, IReadingMethods>({
     }
     if (paraIdx < 0) return
     const page = st === 'B' ? paraIdx : Math.floor(paraIdx / 2)
-    const annot = readingAnnotations[this.data.current?.id || 0]
-    const vocab = annot?.vocab || {}
+    const annot = readingAnnotations[this.data.current && this.data.current.id || 0]
+    const vocab = annot && annot.vocab || {}
     this.rebuildFormatted(vocab, paraIdx)
     this.setData({
       passagePage: page,
@@ -604,7 +604,7 @@ Page<IReadingData, IReadingMethods>({
       content: '将清除当前篇目的所有答案和提交记录，确定重新开始吗？',
       success: (res) => {
         if (!res.confirm) return
-        const id = this.data.current?.id
+        const id = this.data.current && this.data.current.id
         if (id) {
           const app = getApp<IAppOption>()
           delete app.globalData.studyData.readingAnswers[id]
@@ -710,7 +710,7 @@ Page<IReadingData, IReadingMethods>({
   },
 
   saveAnswers() {
-    const id = this.data.current?.id
+    const id = this.data.current && this.data.current.id
     if (!id) return
     const app = getApp<IAppOption>()
     const existing = app.globalData.studyData.readingAnswers[id] || {}
@@ -735,7 +735,7 @@ Page<IReadingData, IReadingMethods>({
     }
   },
   nextQ() {
-    const t = this.data.current?.questions?.length || 0
+    const t = this.data.current && this.data.current.questions && this.data.current.questions.length || 0
     if (this.data.currentQ < t - 1) {
       const q = this.data.currentQ + 1
       const sl = this.data.cAnswers[q]
@@ -816,7 +816,7 @@ Page<IReadingData, IReadingMethods>({
   },
 
   saveMatch() {
-    const id = this.data.current?.id
+    const id = this.data.current && this.data.current.id
     if (!id) return
     const app = getApp<IAppOption>()
     const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
@@ -846,14 +846,14 @@ Page<IReadingData, IReadingMethods>({
   },
 
   updateCompact() {
-    const choices = this.data.current?.choices?.[this.data.currentQ]
+    const choices = this.data.current && this.data.current.choices && this.data.current.choices[this.data.currentQ]
     if (!choices || choices.length < 4) { this.setData({ compactOpts: false }); return }
     const allShort = choices.every((c: string) => c.length < 25)
     this.setData({ compactOpts: allShort })
   },
 
   saveCAnswer() {
-    const id = this.data.current?.id
+    const id = this.data.current && this.data.current.id
     if (!id) return
     const app = getApp<IAppOption>()
     const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] }
@@ -864,7 +864,7 @@ Page<IReadingData, IReadingMethods>({
 
   onQuestionTouchEnd(e: WechatMiniprogram.TouchEvent) {
     const dx = e.changedTouches[0].clientX - this.data.touchStartX
-    if (this.data.current?.sectionType === 'B') {
+    if (this.data.current && this.data.current.sectionType === 'B') {
       if (dx > 50 && this.data.bStmtPage > 0) this.setData({ bStmtPage: this.data.bStmtPage - 1 })
       else if (dx < -50 && this.data.bStmtPage < this.data.bStmtPages.length - 1) this.setData({ bStmtPage: this.data.bStmtPage + 1 })
     } else {
