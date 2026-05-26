@@ -81,5 +81,16 @@
         </view>
       </view>
     </view>
+
+    <view class="btm-card">
+      <view class="btm-row">
+        <text class="btm-n">{{streak}}</text>
+        <view class="btm-info">
+          <text class="btm-t">🔥 连续学习 {{streak}} 天</text>
+          <view class="btm-bar"><view class="btm-f" style="width:{{streak > 0 ? Math.min(100, streak / 30 * 100) : 0}}%"></view></view>
+        </view>
+      </view>
+      <text class="btm-tip">💡 每天进步一点点，坚持带来大改变</text>
+    </view>
   </view>
 </view>
