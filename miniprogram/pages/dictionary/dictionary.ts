@@ -106,8 +106,10 @@ Page<IDictData>({
         const data = await lookupWord(q)
         const entry = Array.isArray(data) ? data[0] : data
         const phonetics = entry.phonetics || []
-        const phonetic = entry.phonetic || phonetics.find((p: any) => p.text)?.text || ''
-        const audio = phonetics.find((p: any) => p.audio)?.audio || ''
+        const foundPhonetic = phonetics.find((p: any) => p.text) || {} as any
+        const phonetic = entry.phonetic || foundPhonetic.text || ''
+        const foundAudio = phonetics.find((p: any) => p.audio) || {} as any
+        const audio = foundAudio.audio || ''
         const chinese = entry.chinese || ''
 
         result = {
@@ -115,12 +117,12 @@ Page<IDictData>({
           phonetic,
           audio,
           chinese,
-          meanings: entry.meanings?.map((m: any) => ({
+          meanings: (entry.meanings || []).map((m: any) => ({
             partOfSpeech: m.partOfSpeech,
             _posClass: POS_MAP[m.partOfSpeech] || m.partOfSpeech,
-            synonyms: m.synonyms?.slice(0, 5) || [],
-            antonyms: m.antonyms?.slice(0, 5) || [],
-            definitions: m.definitions?.slice(0, 3).map((d: any) => ({
+            synonyms: (m.synonyms || []).slice(0, 5) || [],
+            antonyms: (m.antonyms || []).slice(0, 5) || [],
+            definitions: (m.definitions || []).slice(0, 3).map((d: any) => ({
               definition: d.definition,
               definitionCn: d.definitionCn || '',
               example: d.example || '',
@@ -176,7 +178,7 @@ Page<IDictData>({
   },
 
   playAudio() {
-    const audioSrc = this.data.result?.audio
+    const audioSrc = this.data.result && (this.data.result as any).audio
     if (!audioSrc) return
     const ctx = wx.createInnerAudioContext()
     ctx.src = audioSrc
