@@ -11,8 +11,10 @@ app.use(express.json());
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
 
 const PORT = process.env.PORT || 3001;
-const API_KEY = process.env.DEEPSEEK_API_KEY;
+const API_KEY = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_APIKEY;
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+const OLLAMA_URL = process.env.OLLAMA_URL || '';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:7b';
 
 const DICT_CACHE_FILE = path.join(__dirname, 'dict_cache.json');
 const DICT_BASE_FILE = path.join(__dirname, 'dict_base.json');
@@ -47,24 +49,30 @@ setInterval(() => {
   if (cacheDirty) { saveDictCache(); cacheDirty = false }
 }, 30000)
 
-function buildHeaders() {
-  return {
-    'Authorization': `Bearer ${API_KEY}`,
-    'Content-Type': 'application/json',
-  };
-}
-
-async function callDeepSeek(messages, temperature = 0.7, timeout = 15000) {
-  const res = await axios.post(
-    `${BASE_URL}/chat/completions`,
-    {
-      model: 'deepseek-chat',
-      messages,
-      temperature,
-    },
-    { headers: buildHeaders(), timeout }
-  );
-  return res.data.choices[0].message.content;
+async function callAI(messages, temperature = 0.7, timeout = 15000) {
+  // Ollama 优先
+  if (OLLAMA_URL) {
+    try {
+      const res = await axios.post(
+        `${OLLAMA_URL}/api/chat`,
+        { model: OLLAMA_MODEL, messages, stream: false, options: { temperature } },
+        { timeout }
+      );
+      return res.data.message.content;
+    } catch (err) {
+      console.log('Ollama 失败，回退 DeepSeek:', err.message);
+    }
+  }
+  // DeepSeek
+  if (API_KEY) {
+    const res = await axios.post(
+      `${BASE_URL}/chat/completions`,
+      { model: 'deepseek-chat', messages, temperature },
+      { headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, timeout }
+    );
+    return res.data.choices[0].message.content;
+  }
+  throw new Error('未配置 AI 后端（OLLAMA_URL 或 DEEPSEEK_API_KEY）');
 }
 
 app.post('/correct_translation', async (req, res) => {
@@ -74,7 +82,7 @@ app.post('/correct_translation', async (req, res) => {
   }
 
   try {
-    const result = await callDeepSeek([
+    const result = await callAI([
       { role: 'system', content: '你是一名四级英语翻译考官。请从以下四个维度对用户翻译评分（百分制），并给出逐句修改建议和参考译文：\n1. vocabulary(词汇): 用词是否准确、贴切、丰富\n2. grammar(语法): 语法结构是否正确，句式是否多样\n3. semantics(语义): 是否准确传达原文意思，有无漏译\n4. expression(表达): 表达是否地道、自然，符合英语习惯\n\n返回 JSON: {"score": 85, "dimensions": {"vocabulary": 80, "grammar": 85, "semantics": 90, "expression": 82}, "suggestions": "逐句/逐点给出具体修改建议", "reference": "完整的参考译文"}' },
       { role: 'user', content: `中文：${chinese}\n用户翻译：${userAnswer}` },
     ], 0.3);
@@ -91,7 +99,7 @@ app.post('/correct_writing', async (req, res) => {
   }
 
   try {
-    const result = await callDeepSeek([
+    const result = await callAI([
       { role: 'system', content: '你是一名四级英语写作考官。请对用户作文进行评分（百分制），从内容、结构、语言三个维度评价，并给出修改建议。返回 JSON：{"score": 78, "dimensions": {"content": 80, "structure": 75, "language": 78}, "suggestions": "具体修改建议", "reference": "参考范文"}' },
       { role: 'user', content: `题目：${prompt}\n用户作文：${userAnswer}` },
     ], 0.3);
@@ -108,7 +116,7 @@ app.post('/correct_paragraph', async (req, res) => {
   }
 
   try {
-    const result = await callDeepSeek([
+    const result = await callAI([
       { role: 'system', content: '你是一名四级英语写作考官。请对用户续写的段落进行评分（百分制），从连贯性、内容、语言三个维度评价，并给出修改建议。返回 JSON：{"score": 75, "dimensions": {"coherence": 70, "content": 78, "language": 76}, "suggestions": "具体修改建议"}' },
       { role: 'user', content: `主题句：${prompt || '未提供'}\n用户续写：${userAnswer}` },
     ], 0.3);
@@ -129,7 +137,7 @@ app.post('/teach_sentence', async (req, res) => {
       { role: 'system', content: '你是一名四级英语写作教师。请用中文解释这个句型结构，给出 2-3 个例句，并指出常见错误。' },
       { role: 'user', content: `句型：${pattern}${userSentence ? `\n用户写的句子：${userSentence}` : ''}` },
     ];
-    const result = await callDeepSeek(messages, 0.5);
+    const result = await callAI(messages, 0.5);
     res.json({ explanation: result });
   } catch (err) {
     res.status(500).json({ error: 'API 调用失败', detail: err.message });
@@ -194,7 +202,7 @@ app.get('/dictionary', async (req, res) => {
       chinese = baseChinese;
     } else if (API_KEY) {
       try {
-        chinese = await callDeepSeek([
+        chinese = await callAI([
           { role: 'system', content: '将英文单词翻译成中文，只返回最常用的1-2个中文释义，用逗号分隔，不要多余内容。' },
           { role: 'user', content: word },
         ], 0.1, 5000);
@@ -214,7 +222,7 @@ app.get('/dictionary', async (req, res) => {
       }
       if (items.length > 0) {
         try {
-          const result = await callDeepSeek([
+          const result = await callAI([
             { role: 'system', content: '将以下英文逐行翻译成中文，每行输出对应中文，保持顺序不变。只输出中文行，不要任何多余文字。' },
             { role: 'user', content: items.join('\n') },
           ], 0.1, 15000);
@@ -251,7 +259,7 @@ app.get('/dictionary/ai', async (req, res) => {
   try {
     if (full === 'true') {
       const [aiRes, dictRes] = await Promise.allSettled([
-        callDeepSeek([
+        callAI([
           { role: 'system', content: `你是一个英汉词典。查询英文单词"${word}"，返回如下格式的JSON（只返回JSON，不要markdown）：
 {
   "word": "${word}",
@@ -297,7 +305,7 @@ app.get('/dictionary/ai', async (req, res) => {
 
       res.json(result);
     } else {
-      const chinese = await callDeepSeek([
+      const chinese = await callAI([
         { role: 'system', content: '你是一个英汉词典助手。将用户输入的英文单词翻译成中文，给出2-3个最常见的中文释义，用逗号分隔。只返回中文翻译，不要多余内容。' },
         { role: 'user', content: word },
       ], 0.3);
@@ -314,7 +322,7 @@ app.get('/translate', async (req, res) => {
   try {
     let chinese = '';
     if (API_KEY) {
-      chinese = await callDeepSeek([
+      chinese = await callAI([
         { role: 'system', content: '将英文翻译成中文。只返回中文翻译，不要多余内容。' },
         { role: 'user', content: text },
       ], 0.1, 15000);
@@ -342,7 +350,7 @@ app.post('/translate_batch', async (req, res) => {
   }
   try {
     const numbered = texts.map((t, i) => `${i + 1}. ${t}`).join('\n');
-    const result = await callDeepSeek([
+    const result = await callAI([
       { role: 'system', content: '将以下英文句子逐句翻译成中文。只返回一个 JSON 数组，数组元素按顺序对应每句的中文翻译。不要多余内容。示例格式：["第一句翻译","第二句翻译"]' },
       { role: 'user', content: numbered },
     ], 0.1, 60000);
@@ -372,7 +380,7 @@ app.post('/generate_sentence', async (req, res) => {
       ? `请为四级英语单词"${word}"生成 ${count} 个适合大学生英语四级(CET-4)难度的语境句子。每个句子控制在15-25词，语法多样（包含定语从句、虚拟语气、倒装、强调句等四级常考句型），词汇以四级大纲词为主。返回 JSON 数组：[{"english":"...", "chinese":"...", "keywords":["...","..."], "topic":"科技/环保/教育/社会/生活/学习/励志/校园/就业/文化/品德"}]`
       : `请围绕话题"${topic}"生成 ${count} 个适合大学生英语四级(CET-4)难度的语境句子。每个句子控制在15-25词，语法多样（包含定语从句、虚拟语气、倒装、强调句等四级常考句型），词汇以四级大纲词为主。返回 JSON 数组：[{"english":"...", "chinese":"...", "keywords":["...","..."], "topic":"${topic}"}]`;
 
-    const result = await callDeepSeek([
+    const result = await callAI([
       { role: 'system', content: '你是大学英语四级(CET-4)教学专家。你生成的句子必须：1) 词汇在四级大纲范围内 2) 句长15-25词 3) 包含四级常见语法结构 4) 话题贴近大学生生活。只返回纯 JSON 数组，不要 markdown 格式。' },
       { role: 'user', content: prompt },
     ], 0.8);
@@ -398,7 +406,7 @@ ${text.trim()}
 
 返回纯 JSON 数组：[{"english":"句子1", "chinese":"中文翻译", "keywords":["kw1","kw2"], "topic":"科技/环保/教育/社会/生活/学习/励志/校园/就业/文化/品德"}]`;
 
-    const result = await callDeepSeek([
+    const result = await callAI([
       { role: 'system', content: '你是英语教学专家。将英文段落拆成句子，保持原句不变，只加翻译、关键词、话题。只返回纯 JSON 数组，不要 markdown。' },
       { role: 'user', content: prompt },
     ], 0.3);
@@ -411,7 +419,7 @@ ${text.trim()}
 });
 
 app.get('/health', (_, res) => {
-  res.json({ status: 'ok', apiKey: !!API_KEY });
+  res.json({ status: 'ok', deepseekKey: !!API_KEY, ollamaUrl: !!OLLAMA_URL });
 });
 
 app.listen(PORT, () => {
