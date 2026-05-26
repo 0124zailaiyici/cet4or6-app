@@ -16,6 +16,7 @@
     "pages/feedback/feedback",
     "pages/vocab/vocab",
     "pages/exam/exam",
+    "pages/profile/profile",
     "pages/exam/exam-writing/exam-writing",
     "pages/exam/exam-listening/exam-listening",
     "pages/exam/exam-reading/exam-reading",
@@ -38,8 +39,9 @@
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/index/index", "text": "首页", "iconPath": "icons/home.png", "selectedIconPath": "icons/home_active.png" },
+      { "pagePath": "pages/statistics/statistics", "text": "学习", "iconPath": "icons/stats.png", "selectedIconPath": "icons/stats_active.png" },
       { "pagePath": "pages/vocab/vocab", "text": "单词本", "iconPath": "icons/vocab.png", "selectedIconPath": "icons/vocab_active.png" },
-      { "pagePath": "pages/settings/settings", "text": "我的", "iconPath": "icons/mine.png", "selectedIconPath": "icons/mine_active.png" }
+      { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "icons/mine.png", "selectedIconPath": "icons/mine_active.png" }
     ]
   },
   "componentFramework": "glass-easel",

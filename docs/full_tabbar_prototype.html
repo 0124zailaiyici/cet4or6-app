@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>tabBar 全部页面原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background:#1a1a2e;font-family:-apple-system,sans-serif;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;gap:16px;padding:20px;flex-wrap:wrap; }
+
+.phone { width:375px;height:780px;border-radius:38px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;background:#f3eeed;transition:0.3s;position:relative;margin-bottom:16px; }
+
+/* Header */
+.pheader { background:linear-gradient(135deg,#ffb3c6,#ff8fab);padding:52px 20px 14px;color:#fff;flex-shrink:0; }
+.pheader .greet { font-size:12px;opacity:.85; }
+.pheader .pht { font-size:20px;font-weight:800;margin-top:2px; }
+.pheader .phsub { font-size:11px;opacity:.75;margin-top:2px; }
+
+/* Body scroll */
+.body { flex:1;overflow-y:auto;padding:10px 14px; }
+
+/* Banner */
+.banner { background:linear-gradient(135deg,#4fc3f7,#2196f3);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-bottom:10px;box-shadow:0 4px 14px rgba(33,150,243,0.2); }
+.banner .bi { font-size:24px; }
+.banner .bb { flex:1; }
+.banner .bt { display:block;font-size:13px;font-weight:700;color:#fff; }
+.banner .bd { display:block;font-size:10px;color:rgba(255,255,255,.8);margin-top:1px; }
+.banner .bgo { font-size:11px;color:#fff;font-weight:600;background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:6px; }
+
+/* Stats strip */
+.strip { display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.strip .sn { font-size:22px;font-weight:800;color:#ff6b8a; flex-shrink:0; }
+.strip .sb { flex:1; }
+.strip .sl { font-size:10px;color:#8a7a9a;margin-bottom:3px; }
+.strip .sbar { height:6px;border-radius:3px;background:#fff0f3; }
+.strip .sfill { height:100%;border-radius:3px;background:linear-gradient(90deg,#ff8fab,#ff6b8a);width:60%; }
+
+/* Section label */
+.slbl { font-size:10px;font-weight:700;color:#8a7a9a;text-transform:uppercase;margin:0 2px 6px;letter-spacing:.5px; }
+
+/* 3-col grid */
+.g3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px; }
+.gi { background:#fff;border-radius:12px;padding:12px 6px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.gi .ge { font-size:22px;margin-bottom:3px; }
+.gi .gn { font-size:11px;font-weight:600;color:#2d2d4e; }
+.gi .gd { font-size:9px;color:#8a7a9a;margin-top:1px; }
+
+/* 2-col grid */
+.g2 { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px; }
+.g2i { background:#fff;border-radius:12px;padding:14px 10px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.g2i .ge { font-size:22px; }
+.g2i .gb { flex:1; }
+.g2i .gn { font-size:12px;font-weight:600;color:#2d2d4e; }
+.g2i .gd { font-size:9px;color:#8a7a9a; }
+
+/* Card */
+.card { background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.cst { font-size:13px;font-weight:700;color:#2d2d4e;display:flex;justify-content:space-between;margin-bottom:8px; }
+.cst .more { font-size:10px;color:#8a7a9a;font-weight:400; }
+
+/* Achievement row */
+.ach-row { display:flex;gap:6px; }
+.ach { flex:1;text-align:center;padding:10px 4px;border-radius:10px;border:1px solid #fff0f3; }
+.ach .ae { font-size:22px;display:block; }
+.ach .an { font-size:9px;color:#8a7a9a;display:block;margin-top:2px; }
+.ach.locked { opacity:0.4; }
+
+/* Calendar */
+.cal { }
+.cal-h { display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px; }
+.cal-h span { text-align:center;font-size:9px;color:#8a7a9a; }
+.cal-row { display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px; }
+.cc { aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#2d2d4e; }
+.cc.cl1 { background:rgba(255,107,138,0.08); }
+.cc.cl2 { background:rgba(255,107,138,0.2); }
+.cc.cl3 { background:rgba(255,107,138,0.4);color:#fff;font-weight:600; }
+.cc.today { border:1.5px solid #2d2d4e;font-weight:700; }
+.cc.emp { background:transparent; }
+
+/* Profile header */
+.prof-h { background:linear-gradient(135deg,#ffb3c6,#ff8fab);padding:56px 20px 20px;color:#fff;display:flex;flex-direction:column;align-items:center;flex-shrink:0; }
+.avatar { width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px; }
+.pn { font-size:18px;font-weight:700; }
+.pd { font-size:11px;opacity:.75;margin-top:2px; }
+
+/* Set entry */
+.set-entry { display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #fff0f3;font-size:13px;color:#2d2d4e; }
+.set-entry:last-child { border-bottom:none; }
+.set-entry .se-icon { font-size:16px;flex-shrink:0; }
+.set-entry .se-label { flex:1; }
+.set-entry .se-note { font-size:10px;color:#8a7a9a; }
+
+/* Tab bar */
+.tab-bar { display:flex;background:#fff;border-top:1px solid #fff0f3;flex-shrink:0;padding-bottom:6px; }
+.tab-item { flex:1;display:flex;flex-direction:column;align-items:center;padding:4px 0;font-size:10px;color:#8a7a9a; }
+.tab-item.on { color:#ff6b8a; }
+.tab-item .ti { font-size:18px;margin-bottom:1px; }
+.tab-item.on .ti { font-size:20px; }
+.tab-label { font-size:9px; }
+
+/* 学习页 tab */
+.ltabs { display:flex;gap:4px;margin-bottom:10px; }
+.ltab { flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:11px;color:#8a7a9a;background:#fff; }
+.ltab.on { color:#ff6b8a;font-weight:600;background:rgba(255,107,138,0.06);border:1px solid rgba(255,107,138,0.12); }
+
+/* Dark */
+.dark { background:#12121f !important; }
+.dark .gi,.dark .g2i,.dark .card,.dark .strip,.dark .cal-cell,.dark .tab-bar,.dark .ltab { background:#1e1e38 !important;box-shadow:0 2px 10px rgba(0,0,0,0.2) !important; }
+.dark .gn,.dark .cst,.dark .set-entry,.dark .cc,.dark .ltab.on { color:#e0d0e8 !important; }
+.dark .gd,.dark .more,.dark .sl,.dark .slbl,.dark .tab-item,.dark .ach .an,.dark .se-note,.dark .cal-h span,.dark .ltab { color:#a090b0 !important; }
+.dark .set-entry,.dark .tab-bar,.dark .ach { border-color:#2a2a4a !important; }
+.dark .cc.today { border-color:#e0d0e8 !important; }
+.dark .strip { background:#1e1e38 !important; }
+.dark .cc.cl1 { background:rgba(255,143,171,0.08) !important; }
+.dark .cc.cl2 { background:rgba(255,143,171,0.2) !important; }
+.dark .cc.cl3 { background:rgba(255,143,171,0.4) !important;color:#fff !important; }
+.dark .ach.locked { opacity:0.3 !important; }
+</style>
+</head>
+<body>
+
+<!-- Phone 1: 首页 -->
+<div class="phone">
+  <div class="pheader">
+    <div class="greet">☀️ 下午好</div>
+    <div class="pht">四级备考助手</div>
+  </div>
+  <div class="body">
+    <div class="banner">
+      <span class="bi">🎯</span>
+      <div class="bb"><span class="bt">模拟考试</span><span class="bd">125 分钟 · 真考环境</span></div>
+      <span class="bgo">开始 ›</span>
+    </div>
+
+    <div class="strip">
+      <div class="sn">3/8</div>
+      <div class="sb"><div class="sl">今日完成 · 听力 1/1  句子 3/5</div><div class="sbar"><div class="sfill"></div></div></div>
+    </div>
+
+    <div class="slbl">📖 真题训练</div>
+    <div class="g3">
+      <div class="gi"><div class="ge">🎵</div><div class="gn">听力</div><div class="gd">精听</div></div>
+      <div class="gi"><div class="ge">📖</div><div class="gn">阅读</div><div class="gd">理解</div></div>
+      <div class="gi"><div class="ge">🌟</div><div class="gn">翻译</div><div class="gd">练习</div></div>
+      <div class="gi"><div class="ge">✍️</div><div class="gn">写作</div><div class="gd">教学</div></div>
+      <div class="gi"><div class="ge">💬</div><div class="gn">句子</div><div class="gd">语境</div></div>
+    </div>
+
+    <div class="slbl">📚 学习工具</div>
+    <div class="g3">
+      <div class="gi"><div class="ge">📕</div><div class="gn">单词本</div><div class="gd">闯关</div></div>
+      <div class="gi"><div class="ge">📝</div><div class="gn">错题本</div><div class="gd">查漏</div></div>
+      <div class="gi"><div class="ge">⭐</div><div class="gn">收藏</div><div class="gd">管理</div></div>
+      <div class="gi"><div class="ge">📖</div><div class="gn">词典</div><div class="gd">查询</div></div>
+      <div class="gi"><div class="ge">📊</div><div class="gn">统计</div><div class="gd">进度</div></div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item on"><div class="ti">🏠</div><div class="tab-label">首页</div></div>
+    <div class="tab-item"><div class="ti">📊</div><div class="tab-label">学习</div></div>
+    <div class="tab-item"><div class="ti">📕</div><div class="tab-label">单词本</div></div>
+    <div class="tab-item"><div class="ti">👤</div><div class="tab-label">我的</div></div>
+  </div>
+</div>
+
+<!-- Phone 2: 学习 -->
+<div class="phone">
+  <div class="pheader">
+    <div class="pht">学习统计</div>
+    <div class="phsub">你的进步，一清二楚</div>
+  </div>
+  <div class="body">
+    <div class="strip" style="gap:12px">
+      <div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:800;color:#ff6b8a">12</div><div style="font-size:10px;color:#8a7a9a">连续天数</div></div>
+      <div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:800;color:#ff6b8a">487</div><div style="font-size:10px;color:#8a7a9a">总题数</div></div>
+      <div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:800;color:#ff6b8a">73%</div><div style="font-size:10px;color:#8a7a9a">正确率</div></div>
+    </div>
+
+    <div class="ltabs">
+      <div class="ltab on">📈 趋势</div>
+      <div class="ltab">📊 模块</div>
+      <div class="ltab">🔥 日历</div>
+    </div>
+
+    <div class="card">
+      <div class="cst">本周趋势</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:40%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#ff8fab,#ff6b8a);min-height:4px"></div>
+          <span style="font-size:9px;color:#8a7a9a">周一</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:55%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#ff8fab,#ff6b8a);min-height:4px"></div>
+          <span style="font-size:9px;color:#8a7a9a">周二</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:30%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#ff8fab,#ff6b8a);min-height:4px"></div>
+          <span style="font-size:9px;color:#8a7a9a">周三</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:70%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#ff8fab,#ff6b8a);min-height:4px"></div>
+          <span style="font-size:9px;color:#8a7a9a">周四</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:45%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#ff8fab,#ff6b8a);min-height:4px"></div>
+          <span style="font-size:9px;color:#8a7a9a">周五</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:85%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#4fc3f7,#2196f3);min-height:4px"></div>
+          <span style="font-size:9px;color:#2196f3;font-weight:600">今天</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;height:0%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#ff8fab,#ff6b8a);min-height:0"></div>
+          <span style="font-size:9px;color:#8a7a9a">周日</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cst">各模块正确率</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:16px">🎵</span>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:11px;color:#2d2d4e;font-weight:600"><span>听力</span><span style="color:#8a7a9a;font-weight:400">65%</span></div><div style="height:5px;border-radius:2.5px;background:#fff0f3;margin-top:3px"><div style="width:65%;height:100%;border-radius:2.5px;background:#4fc3f7"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:16px">📖</span>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:11px;color:#2d2d4e;font-weight:600"><span>阅读</span><span style="color:#8a7a9a;font-weight:400">72%</span></div><div style="height:5px;border-radius:2.5px;background:#fff0f3;margin-top:3px"><div style="width:72%;height:100%;border-radius:2.5px;background:#81c784"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:16px">💬</span>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:11px;color:#2d2d4e;font-weight:600"><span>句子</span><span style="color:#8a7a9a;font-weight:400">28/50</span></div><div style="height:5px;border-radius:2.5px;background:#fff0f3;margin-top:3px"><div style="width:56%;height:100%;border-radius:2.5px;background:#ffb74d"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🌟</span>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:11px;color:#2d2d4e;font-weight:600"><span>翻译</span><span style="color:#8a7a9a;font-weight:400">76分</span></div><div style="height:5px;border-radius:2.5px;background:#fff0f3;margin-top:3px"><div style="width:76%;height:100%;border-radius:2.5px;background:#ce93d8"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item"><div class="ti">🏠</div><div class="tab-label">首页</div></div>
+    <div class="tab-item on"><div class="ti">📊</div><div class="tab-label">学习</div></div>
+    <div class="tab-item"><div class="ti">📕</div><div class="tab-label">单词本</div></div>
+    <div class="tab-item"><div class="ti">👤</div><div class="tab-label">我的</div></div>
+  </div>
+</div>
+
+<!-- Phone 3: 我的 -->
+<div class="phone">
+  <div class="prof-h">
+    <div class="avatar">👤</div>
+    <div class="pn">学习者</div>
+    <div class="pd">已学习 18 天 · 真题实战</div>
+  </div>
+  <div class="body">
+    <div class="strip" style="gap:0;justify-content:space-around">
+      <div style="text-align:center"><div style="font-size:24px;font-weight:800;color:#ff6b8a">18</div><div style="font-size:10px;color:#8a7a9a">学习天数</div></div>
+      <div style="text-align:center"><div style="font-size:24px;font-weight:800;color:#ff6b8a">487</div><div style="font-size:10px;color:#8a7a9a">总题数</div></div>
+      <div style="text-align:center"><div style="font-size:24px;font-weight:800;color:#ff6b8a">73%</div><div style="font-size:10px;color:#8a7a9a">正确率</div></div>
+    </div>
+
+    <div class="card">
+      <div class="cst">🏆 成就 <span class="more">3/12</span></div>
+      <div class="ach-row">
+        <div class="ach"><span class="ae">🔥</span><span class="an">连续 7 天</span></div>
+        <div class="ach"><span class="ae">🎯</span><span class="an">100 题</span></div>
+        <div class="ach locked"><span class="ae">⭐</span><span class="an">30 天</span></div>
+        <div class="ach locked"><span class="ae">📚</span><span class="an">5 套</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cst">🔥 五月 · 已学 15 天</div>
+      <div style="width:100%">
+        <div class="cal-h"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+        <div class="cal-row"><div class="cc emp"></div><div class="cc emp"></div><div class="cc emp"></div><div class="cc emp"></div><div class="cc">1</div><div class="cc cl1">2</div><div class="cc cl1">3</div></div>
+        <div class="cal-row"><div class="cc">4</div><div class="cc cl1">5</div><div class="cc cl2">6</div><div class="cc cl3">7</div><div class="cc cl1">8</div><div class="cc">9</div><div class="cc cl3">10</div></div>
+        <div class="cal-row"><div class="cc cl2">11</div><div class="cc">12</div><div class="cc">13</div><div class="cc cl1">14</div><div class="cc cl3">15</div><div class="cc cl1">16</div><div class="cc cl2">17</div></div>
+        <div class="cal-row"><div class="cc cl1">18</div><div class="cc">19</div><div class="cc">20</div><div class="cc cl1">21</div><div class="cc cl3 today">22</div><div class="cc cl1">23</div><div class="cc">24</div></div>
+        <div class="cal-row"><div class="cc cl2">25</div><div class="cc">26</div><div class="cc">27</div><div class="cc emp"></div><div class="cc emp"></div><div class="cc emp"></div><div class="cc emp"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="set-entry"><span class="se-icon">⚙️</span><span class="se-label">设置</span><span class="se-note">›</span></div>
+      <div class="set-entry"><span class="se-icon">🔔</span><span class="se-label">学习提醒</span><span class="se-note">›</span></div>
+      <div class="set-entry"><span class="se-icon">💬</span><span class="se-label">帮助与反馈</span><span class="se-note">›</span></div>
+      <div class="set-entry"><span class="se-icon">📄</span><span class="se-label">隐私与协议</span><span class="se-note">›</span></div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item"><div class="ti">🏠</div><div class="tab-label">首页</div></div>
+    <div class="tab-item"><div class="ti">📊</div><div class="tab-label">学习</div></div>
+    <div class="tab-item"><div class="ti">📕</div><div class="tab-label">单词本</div></div>
+    <div class="tab-item on"><div class="ti">👤</div><div class="tab-label">我的</div></div>
+  </div>
+</div>
+
+</body>
+</html>

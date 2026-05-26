@@ -1,0 +1,39 @@
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
+  <view class="prof-h">
+    <view class="avatar">👤</view>
+    <text class="pn">学习者</text>
+    <text class="pd">已学习 {{streak}} 天 · 真题实战</text>
+  </view>
+
+  <view class="body">
+    <view class="sum">
+      <view class="s"><text class="n">{{streak}}</text><text class="l">📅 学习天数</text></view>
+      <view class="s"><text class="n">{{totalItems}}</text><text class="l">📝 总题数</text></view>
+      <view class="s"><text class="n">{{accuracy}}%</text><text class="l">✅ 正确率</text></view>
+    </view>
+
+    <view class="card">
+      <view class="cst">🏆 成就</view>
+      <view class="arow">
+        <view class="ac {{item.unlocked ? '' : 'lock'}}" wx:for="{{achievements}}" wx:key="name">
+          <text class="ae">{{item.emoji}}</text>
+          <text class="an">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="cst">🔥 {{monthLabel}} · 已学 {{monthDays}} 天</view>
+      <view class="cal-h"><text wx:for="{{['日','一','二','三','四','五','六']}}" wx:key="*this">{{item}}</text></view>
+      <view class="cal-row" wx:for="{{calendar}}" wx:key="*this" wx:for-item="row">
+        <view class="cc {{item.day === null ? 'emp' : ''}} {{item.level > 2 ? 'cl3' : item.level > 1 ? 'cl2' : item.level > 0 ? 'cl1' : ''}} {{item.isToday ? 'today' : ''}}" wx:for="{{row}}" wx:for-item="item" wx:key="day"><text wx:if="{{item.day !== null}}">{{item.day}}</text></view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="entry" data-url="/pages/settings/settings" catchtap="goPage"><text class="ei">⚙️</text><text class="el">设置</text><text class="en">›</text></view>
+      <view class="entry" data-url="/pages/reminder/reminder" catchtap="goPage"><text class="ei">🔔</text><text class="el">学习提醒</text><text class="en">›</text></view>
+      <view class="entry" data-url="/pages/feedback/feedback" catchtap="goPage"><text class="ei">💬</text><text class="el">帮助与反馈</text><text class="en">›</text></view>
+    </view>
+  </view>
+</view>
