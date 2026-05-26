@@ -1,4 +1,6 @@
-const API_BASE = 'http://localhost:3001'
+// 部署到公网后改成你的 Railway 地址：
+// wx.setStorageSync('api_base', 'https://your-app.railway.app')
+const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'http://localhost:3001' } catch(_) { return 'http://localhost:3001' } })()
 
 interface CorrectionResult {
   score: number

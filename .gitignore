@@ -4,5 +4,6 @@ server/node_modules/
 server/.env
 server/audio/
 server/pdfs/
-*.png
+server/dict_cache.json
+answer_keys/
 miniprogram/pages/sentences_orig.wxml
