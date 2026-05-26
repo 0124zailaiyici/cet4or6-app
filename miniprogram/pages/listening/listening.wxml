@@ -184,7 +184,7 @@
 
       <scroll-view class="sentence-scroll" scroll-y scroll-into-view="s-{{currentIndex}}">
         <view class="sentence-list">
-          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(index) !== -1 ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
+          <view class="sentence-item {{index === currentIndex ? 'current' : ''}} {{sentenceHardStatus[index] ? 'hard' : ''}}" wx:for="{{currentPassage.sentences}}" wx:key="start" id="s-{{index}}">
             <view class="se-num">{{index + 1}}</view>
             <view class="se-text">
               <text class="se-en" wx:if="{{showTranscript}}" user-select>{{item.text}}</text>
@@ -192,7 +192,7 @@
             </view>
             <view class="se-actions">
               <view class="se-play {{index === currentIndex && isPlaying ? 'playing' : ''}}" data-index="{{index}}" catchtap="playSentence">{{index === currentIndex && loading ? '...' : '▶'}}</view>
-              <view class="se-hard {{hardSentences.indexOf(index) !== -1 ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
+              <view class="se-hard {{sentenceHardStatus[index] ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleHard">!</view>
             </view>
           </view>
         </view>

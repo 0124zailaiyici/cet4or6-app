@@ -92,6 +92,7 @@ Page({
   },
 
   select(e: any) {
+    if (this.data._submitted) return
     const qi = Number(e.currentTarget.dataset.qi)
     const oi = Number(e.currentTarget.dataset.oi)
     const sel = { ...this.data.sel }

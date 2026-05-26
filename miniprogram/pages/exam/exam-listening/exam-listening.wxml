@@ -12,7 +12,7 @@
       </view>
       <view wx:for="{{questions}}" wx:for-index="qi" wx:for-item="q" wx:key="qi" class="card">
         <view class="q-stem">Question {{q.qi}}</view>
-        <view wx:for="{{q.options}}" wx:for-index="oi" wx:for-item="opt" wx:key="*this" class="opt {{sel[q.qi] === oi ? 'sel' : ''}}" data-qi="{{q.qi}}" data-oi="{{oi}}" catchtap="{{_submitted ? '' : 'select'}}">
+        <view wx:for="{{q.options}}" wx:for-index="oi" wx:for-item="opt" wx:key="*this" class="opt {{sel[q.qi] === oi ? 'sel' : ''}}" data-qi="{{q.qi}}" data-oi="{{oi}}" catchtap="select">
           <text class="letter">{{_letters[oi]}}</text>
           <text class="text">{{opt}}</text>
         </view>

@@ -51,6 +51,7 @@ interface IListeningData {
 
   loopSentence: boolean
   hardSentences: number[]
+  sentenceHardStatus: boolean[]
   completedPassages: number[]
   loading: boolean
   darkMode: boolean
@@ -399,6 +400,7 @@ Page<IListeningData, IListeningMethods>({
     showTranscript: true,
     loopSentence: false,
     hardSentences: [],
+    sentenceHardStatus: [],
     completedPassages: [],
     loading: false,
     darkMode: false,
@@ -494,12 +496,14 @@ Page<IListeningData, IListeningMethods>({
       }
 
       const fm = this.data.focusMode
+      const sentenceHardStatus = passage.sentences.map((_, i) => localHard.indexOf(i) !== -1)
       this.setData({
         mode: 'detail',
         currentPassage: passage,
         currentIndex: 0,
         isPlaying: true,
         hardSentences: localHard,
+        sentenceHardStatus,
         audioMode: true,
         audioTime: 0,
         audioDuration: 0,
@@ -516,12 +520,14 @@ Page<IListeningData, IListeningMethods>({
       })
       audio.setRate(fm ? 0.8 : 1)
     } else {
+      const sentenceHardStatus = passage.sentences.map((_, i) => localHard.indexOf(i) !== -1)
       this.setData({
         mode: 'detail',
         currentPassage: passage,
         currentIndex: 0,
         isPlaying: false,
         hardSentences: localHard,
+        sentenceHardStatus,
         audioMode: false,
         audioTime: 0,
         audioDuration: 0,
@@ -910,7 +916,9 @@ Page<IListeningData, IListeningMethods>({
       stored.push({ passageId: passage.id, sentenceIndex: origIndex, text: passage.sentences[origIndex].text, passageTitle: passage.title })
       wx.showToast({ title: '已标记难句', icon: 'none' })
     }
-    this.setData({ hardSentences: [...hardSet] })
+    const finalHard = [...hardSet]
+    const sentenceHardStatus = passage.sentences.map((_, i) => finalHard.indexOf(i) !== -1)
+    this.setData({ hardSentences: finalHard, sentenceHardStatus })
     wx.setStorageSync('studyData', app.globalData.studyData)
   },
 

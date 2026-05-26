@@ -151,7 +151,9 @@ interface IWritingData {
   toolkitVisible: boolean; toolkitCategory: string; toolkitSearch: string
   categoryOptions: string[]; categoryEmojis: Record<string, string>
   patternCategories: Record<number, string>
+  patternVisible: boolean[]
   recentPatterns: number[]; recentPatternData: IPattern[]
+  examTypeLabels: string[]
 
   /* 引导写作 - 提纲 */
   guideStep: number
@@ -183,7 +185,9 @@ Page<IWritingData>({
     toolkitVisible: false, toolkitCategory: '全部', toolkitSearch: '',
     categoryOptions: CATEGORIES, categoryEmojis: CATEGORY_EMOJIS,
     patternCategories: PATTERN_CATEGORIES,
+    patternVisible: [],
     recentPatterns: [], recentPatternData: [],
+    examTypeLabels: [],
 
     guideStep: 1,
     outlineOpinion: '', outlineReasons: [], outlineReasonInput: '',
@@ -199,9 +203,15 @@ Page<IWritingData>({
   onLoad() {
     const app = getApp<IAppOption>()
     const recent: number[] = wx.getStorageSync('writingRecentPatterns') || []
+    const pats = patternsData as IPattern[]
+    const writes = writingsData as IWriting[]
+    const patternVisible = pats.map(p => true)
+    const examTypeLabels = writes.map(w => w.prompt.indexOf('真题') > -1 ? '真题' : '模拟')
     this.setData({
-      patterns: patternsData as IPattern[],
-      writings: writingsData as IWriting[],
+      patterns: pats,
+      writings: writes,
+      patternVisible,
+      examTypeLabels,
       darkMode: app.globalData.darkMode,
       recentPatterns: recent,
     })
@@ -209,6 +219,14 @@ Page<IWritingData>({
     checkHealth().then(r => { if (r.apiKey) this.setData({ aiAvailable: true }) }).catch(() => {})
   },
 
+  computePatternVisible(category: string, search: string) {
+    const q = search.toLowerCase().trim()
+    return (this.data.patterns as IPattern[]).map(p => {
+      if (category !== '全部' && (this.data.patternCategories[p.id] || '通用') !== category) return false
+      if (q && p.pattern.toLowerCase().indexOf(q) === -1 && p.chinese.indexOf(q) === -1) return false
+      return true
+    })
+  },
   onShow() {
     applyTheme(getDarkMode())
     this.setData({ darkMode: getApp<IAppOption>().globalData.darkMode })
@@ -242,10 +260,14 @@ Page<IWritingData>({
     this.setData({ userSentence: val, sentenceWordCount: val.trim() ? countWords(val) : 0 })
   },
   setToolkitCategory(e: WechatMiniprogram.TouchEvent) {
-    this.setData({ toolkitCategory: e.currentTarget.dataset.cat as string })
+    const toolkitCategory = e.currentTarget.dataset.cat as string
+    const patternVisible = this.computePatternVisible(toolkitCategory, this.data.toolkitSearch)
+    this.setData({ toolkitCategory, patternVisible })
   },
   onToolkitSearch(e: WechatMiniprogram.Input) {
-    this.setData({ toolkitSearch: e.detail.value })
+    const toolkitSearch = e.detail.value
+    const patternVisible = this.computePatternVisible(this.data.toolkitCategory, toolkitSearch)
+    this.setData({ toolkitSearch, patternVisible })
   },
   insertPattern(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number

@@ -34,6 +34,10 @@ interface ISentencesData {
   parsing: boolean
   favTexts: string[]
   masterTexts: string[]
+  favStatus: boolean[]
+  masterStatus: boolean[]
+  immFavStatus: boolean
+  immMasterStatus: boolean
   // Puzzle mode
   puzzleWords: string[]
   puzzleSelected: number[]
@@ -103,6 +107,10 @@ Page<ISentencesData, ISentencesMethods>({
     parsing: false,
     favTexts: [],
     masterTexts: [],
+    favStatus: [],
+    masterStatus: [],
+    immFavStatus: false,
+    immMasterStatus: false,
     puzzleWords: [],
     puzzleSelected: [],
     puzzleAnswers: [],
@@ -149,6 +157,8 @@ Page<ISentencesData, ISentencesMethods>({
       favoriteIds: app.globalData.studyData.favoriteSentenceIds || [],
       favTexts: sentences.map(s => (app.globalData.studyData.favoriteSentenceIds || []).indexOf(s.id) >= 0 ? '已收藏' : '收藏'),
       masterTexts: sentences.map(s => (app.globalData.studyData.masteredSentences || []).indexOf(s.id) >= 0 ? '已掌握' : '掌握'),
+      favStatus: sentences.map(s => (app.globalData.studyData.favoriteSentenceIds || []).indexOf(s.id) >= 0),
+      masterStatus: sentences.map(s => (app.globalData.studyData.masteredSentences || []).indexOf(s.id) >= 0),
     })
 
     if (options.id) {
@@ -189,7 +199,9 @@ Page<ISentencesData, ISentencesMethods>({
 
     const favTexts = filtered.map(s => favSet.has(s.id) ? '已收藏' : '收藏')
     const masterTexts = filtered.map(s => masteredSet.has(s.id) ? '已掌握' : '掌握')
-    this.setData({ filteredSentences: filtered, favTexts, masterTexts })
+    const favStatus = filtered.map(s => favSet.has(s.id))
+    const masterStatus = filtered.map(s => masteredSet.has(s.id))
+    this.setData({ filteredSentences: filtered, favTexts, masterTexts, favStatus, masterStatus })
   },
 
   onSearchInput(e: WechatMiniprogram.Input) {
@@ -218,9 +230,14 @@ Page<ISentencesData, ISentencesMethods>({
     const masteredArr = [...mastered]
     const masteredSet = new Set(masteredArr)
     const masterTexts = this.data.filteredSentences.map(s => masteredSet.has(s.id) ? '已掌握' : '掌握')
+    const masterStatus = this.data.filteredSentences.map(s => masteredSet.has(s.id))
+    const immIdx = this.data.immersionIndex
+    const immMasterStatus = this.data.filteredSentences.length > immIdx ? masteredSet.has(this.data.filteredSentences[immIdx].id) : false
     this.setData({
       masteredIds: masteredArr,
       masterTexts,
+      masterStatus,
+      immMasterStatus,
       topicCounts: { ...this.data.topicCounts, '已掌握': masteredArr.length, '未掌握': this.data.allSentences.length - masteredArr.length },
       filteredSentences: this.data.filteredSentences.slice(),
     })
@@ -242,7 +259,10 @@ Page<ISentencesData, ISentencesMethods>({
     const favArr = [...fav]
     const favSet = new Set(favArr)
     const favTexts = this.data.filteredSentences.map(s => favSet.has(s.id) ? '已收藏' : '收藏')
-    this.setData({ favoriteIds: favArr, favTexts, filteredSentences: this.data.filteredSentences.slice() })
+    const favStatus = this.data.filteredSentences.map(s => favSet.has(s.id))
+    const immIdx = this.data.immersionIndex
+    const immFavStatus = this.data.filteredSentences.length > immIdx ? favSet.has(this.data.filteredSentences[immIdx].id) : false
+    this.setData({ favoriteIds: favArr, favTexts, favStatus, immFavStatus, filteredSentences: this.data.filteredSentences.slice() })
 
     const app = getApp<IAppOption>()
     app.globalData.studyData.favoriteSentenceIds = favArr
@@ -265,14 +285,26 @@ Page<ISentencesData, ISentencesMethods>({
 
   prevSentence() {
     if (this.data.immersionIndex > 0) {
-      this.setData({ immersionIndex: this.data.immersionIndex - 1 })
+      const idx = this.data.immersionIndex - 1
+      const s = this.data.filteredSentences[idx]
+      this.setData({
+        immersionIndex: idx,
+        immFavStatus: this.data.favoriteIds.indexOf(s.id) >= 0,
+        immMasterStatus: this.data.masteredIds.indexOf(s.id) >= 0,
+      })
     }
   },
 
   nextSentence() {
     const max = this.data.filteredSentences.length - 1
     if (this.data.immersionIndex < max) {
-      this.setData({ immersionIndex: this.data.immersionIndex + 1 })
+      const idx = this.data.immersionIndex + 1
+      const s = this.data.filteredSentences[idx]
+      this.setData({
+        immersionIndex: idx,
+        immFavStatus: this.data.favoriteIds.indexOf(s.id) >= 0,
+        immMasterStatus: this.data.masteredIds.indexOf(s.id) >= 0,
+      })
     }
   },
 
@@ -466,6 +498,8 @@ Page<ISentencesData, ISentencesMethods>({
       topicCounts['未掌握'] = allSentences.length - this.data.masteredIds.length
       const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏')
       const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
+      const favStatus = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0)
+      const masterStatus = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0)
 
       this.setData({
         allSentences,
@@ -473,6 +507,8 @@ Page<ISentencesData, ISentencesMethods>({
         topicCounts,
         favTexts,
         masterTexts,
+        favStatus,
+        masterStatus,
         showGenModal: false,
         generating: false,
       })
@@ -531,6 +567,8 @@ Page<ISentencesData, ISentencesMethods>({
       tc['未掌握'] = allSentences.length - this.data.masteredIds.length
       const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏')
       const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握')
+      const favStatus = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0)
+      const masterStatus = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0)
 
       this.setData({
         allSentences,
@@ -538,6 +576,8 @@ Page<ISentencesData, ISentencesMethods>({
         topicCounts: tc,
         favTexts,
         masterTexts,
+        favStatus,
+        masterStatus,
         showPasteModal: false,
         parsing: false,
       })

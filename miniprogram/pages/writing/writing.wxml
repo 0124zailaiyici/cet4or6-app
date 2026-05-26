@@ -47,8 +47,8 @@
     </scroll-view>
 
     <!-- 句型列表 -->
-    <view class="tkl" wx:for="{{patterns}}" wx:key="id" wx:if="{{toolkitCategory === '全部' || patternCategories[item.id] === toolkitCategory}}">
-      <view wx:if="{{!toolkitSearch || item.pattern.indexOf(toolkitSearch) > -1 || item.chinese.indexOf(toolkitSearch) > -1}}" class="tki" data-id="{{item.id}}" catchtap="insertPattern">
+    <view class="tkl" wx:for="{{patterns}}" wx:key="id" wx:if="{{patternVisible[index]}}">
+      <view class="tki" data-id="{{item.id}}" catchtap="insertPattern">
         <view class="tki-bd">
           <view class="tki-pat">{{item.pattern}}</view>
           <view class="tki-cn">{{item.chinese}} · <text class="tki-tag">{{patternCategories[item.id] || '通用'}}</text></view>
@@ -254,11 +254,11 @@
   <scroll-view class="content" scroll-y wx:elif="{{tab === 2 && !currentWriting}}">
     <view class="hint">📝 选一道题，模拟考场写作</view>
     <view class="wl">
-      <view class="wi" wx:for="{{writings}}" wx:key="id" data-id="{{item.id}}" catchtap="enterWriting">
+      <view class="wi" wx:for="{{writings}}" wx:for-index="index" wx:key="id" data-id="{{item.id}}" catchtap="enterWriting">
         <view class="wi-icon">📄</view>
         <view class="wi-body">
           <view class="wi-title">{{item.title}}</view>
-          <view class="wi-meta">120–180 词 · 四级{{item.prompt.indexOf('真题') > -1 ? '真题' : '模拟'}}</view>
+          <view class="wi-meta">120–180 词 · 四级{{examTypeLabels[index]}}</view>
         </view>
       </view>
     </view>

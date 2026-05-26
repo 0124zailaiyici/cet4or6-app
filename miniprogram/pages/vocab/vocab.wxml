@@ -112,7 +112,7 @@
         <text class="agi">{{item.icon}}</text>
         <text class="agn">{{item.name}}</text>
         <text class="agd">{{item.desc}}</text>
-        <view class="agp"><view class="agf" style="width:{{Math.min(100, (achProgress[index] || 0) / item.target * 100) + '%'}}"></view></view>
+        <view class="agp"><view class="agf" style="width:{{(achProgress[index] || 0) >= item.target ? 100 : (achProgress[index] || 0) / item.target * 100}}%"></view></view>
         <text class="aglock">{{achProgress[index] >= item.target ? '✅' : '🔒'}}</text>
       </view>
     </view>
@@ -158,8 +158,7 @@
           <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
         </view>
         <view class="wmode" wx:if="{{mode === 'battle'}}">
-          <text wx:for="{{5 - Math.min(4, item.correctStreak)}}" wx:key="*this">❤️</text>
-          <text wx:for="{{Math.min(4, item.correctStreak)}}" wx:key="*this">🖤</text>
+          <text wx:for="{{5}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < 4 && i < item.correctStreak}}">🖤</text><text wx:else>❤️</text></text>
         </view>
         <view wx:elif="{{mode === 'garden'}}" class="wmode">
           <text wx:if="{{item.growth <= 0}}">🌱</text>
@@ -168,10 +167,9 @@
           <text wx:else>🌳</text>
         </view>
         <view wx:elif="{{mode === 'card'}}" class="wmode">
-          <text wx:for="{{Math.min(3, item.stars)}}" wx:key="*this">⭐</text>
-          <text wx:for="{{3 - Math.min(3, item.stars)}}" wx:key="*this">☆</text>
+          <text wx:for="{{3}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < item.stars}}">⭐</text><text wx:else>☆</text></text>
         </view>
-        <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="{{item.chn ? 'startGame' : 'lookupWord'}}">
+        <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="onWordAction">
           {{item.status === 'master' ? '✓' : (item.chn ? '浏览' : '查词')}}
         </view>
       </view>
@@ -192,7 +190,7 @@
           <view wx:if="{{mode === 'battle'}}">
             <text class="gcombo" wx:if="{{combo > 1}}">🔥 {{combo}} 连击</text>
             <text class="gmonster"><text wx:if="{{(gameWordIdx - gameSessionStart) % 5 === 0}}">👹</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 1}}">🐉</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 2}}">👾</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 3}}">🧟</text><text wx:else>🐺</text></text>
-            <view class="gmonster-hp"><text wx:for="{{5 - Math.min(4, gameWord.correctStreak)}}" wx:key="*this">❤️</text><text wx:for="{{Math.min(4, gameWord.correctStreak)}}" wx:key="*this">🖤</text></view>
+            <view class="gmonster-hp"><text wx:for="{{5}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < 4 && i < gameWord.correctStreak}}">🖤</text><text wx:else>❤️</text></text></view>
           </view>
           <view wx:elif="{{mode === 'garden'}}" class="ggarden">
             <text class="gplant"><text wx:if="{{gameWord.growth <= 0}}">🌱</text><text wx:elif="{{gameWord.growth <= 1}}">🌿</text><text wx:elif="{{gameWord.growth <= 2}}">🌹</text><text wx:else>🌳</text></text>

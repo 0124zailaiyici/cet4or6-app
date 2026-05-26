@@ -23,7 +23,7 @@
       <view wx:if="{{!_submitted}}" class="qz-c-card" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
         <view class="qz-c-question">{{passage.questions[currentQ]}}</view>
         <view class="qz-opts" wx:if="{{passage._choices[currentQ].length > 0}}">
-          <view wx:for="{{passage._choices[currentQ]}}" wx:key="*this" wx:for-index="oi" wx:for-item="ch" class="qzo {{passage._ca[currentQ] === ch ? 'on' : ''}}" data-qi="{{currentQ}}" data-val="{{ch}}" catchtap="{{_submitted ? '' : 'onSelect'}}">{{ch}}</view>
+          <view wx:for="{{passage._choices[currentQ]}}" wx:key="*this" wx:for-index="oi" wx:for-item="ch" class="qzo {{passage._ca[currentQ] === ch ? 'on' : ''}}" data-qi="{{currentQ}}" data-val="{{ch}}" catchtap="onSelect">{{ch}}</view>
         </view>
       </view>
       <view class="qz-dots" wx:if="{{passage.questions.length > 1 && !_submitted}}">

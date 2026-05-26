@@ -11,7 +11,7 @@
       <text class="pz-text">
         <block wx:for="{{_curSegs}}" wx:key="*this" wx:for-item="seg">
           <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
-          <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{_sel[seg.num] ? 'filled' : ''}} {{_active === seg.num ? 'active' : ''}} {{_submitted ? (_blankResults[seg.num] === 'ok' ? 'bk-ok' : 'bk-ko') : ''}}" data-key="{{seg.num}}" catchtap="{{_submitted ? '' : 'onBlankTap'}}"><text>{{_sel[seg.num] || seg.num}}</text><text wx:if="{{_submitted && _blankResults[seg.num] === 'ko'}}" class="bk-cor">→正确: {{passage.correctAnswers[seg.num]}}</text></text>
+          <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{_sel[seg.num] ? 'filled' : ''}} {{_active === seg.num ? 'active' : ''}} {{_submitted ? (_blankResults[seg.num] === 'ok' ? 'bk-ok' : 'bk-ko') : ''}}" data-key="{{seg.num}}" catchtap="onBlankTap"><text>{{_sel[seg.num] || seg.num}}</text><text wx:if="{{_submitted && _blankResults[seg.num] === 'ko'}}" class="bk-cor">→正确: {{passage.correctAnswers[seg.num]}}</text></text>
         </block>
       </text>
     </scroll-view>

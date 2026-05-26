@@ -937,10 +937,18 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ tab, filteredWords: filtered })
   },
 
+  onWordAction(e: WechatMiniprogram.TouchEvent) {
+    const idx = Number(e.currentTarget.dataset.idx)
+    const word = this.data.filteredWords[idx]
+    if (!word) return
+    if (word.chn) this.startGame(e)
+    else this.lookupWord(e)
+  },
+
   startGame(e: WechatMiniprogram.TouchEvent) {
     const idx = Number(e.currentTarget.dataset.idx)
     const word = this.data.filteredWords[idx]
-    if (!word && word.chn) return
+    if (!word) return
     const remaining = this.data.filteredWords.length - idx
     this.setData({ gameSessionLimit: Math.min(10, remaining), gameSessionStart: idx, combo: 0 })
     this.showGameForIdx(idx)
