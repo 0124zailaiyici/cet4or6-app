@@ -8,3 +8,7 @@ server/dict_cache.json
 server/tmp/
 answer_keys/
 miniprogram/pages/sentences_orig.wxml
+
+# CET exam data dirs
+*年*月CET4*/
+*年-*年真题资料*/

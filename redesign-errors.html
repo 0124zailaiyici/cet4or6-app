@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>📋 错题Boss - 四级备考</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fef0f0;
+  --surface:#fff8f8;
+  --card:#ffffff;
+  --border:#fcd5d5;
+  --text:#5a3a3a;
+  --dim:#c48a8a;
+  --accent:#f87171;
+  --accent2:#ef4444;
+  --accent-dim:#fee2e2;
+  --accent-glow:rgba(248,113,113,.2);
+  --gold:#fbbf24;
+  --green:#86efac;
+  --cyan:#67e8f9;
+  --orange:#fdba74;
+  --purple:#c4b5fd;
+}
+body{
+  font-family:'Noto Sans SC','Fredoka',sans-serif;
+  background:#f0dede;color:var(--text);min-height:100vh;
+  display:flex;justify-content:center;align-items:center;padding:20px;
+}
+.phone{
+  width:390px;min-height:780px;
+  background:var(--surface);border-radius:40px;padding:20px 16px;position:relative;
+  box-shadow:0 8px 40px rgba(248,113,113,.1),inset 0 0 0 1px var(--border);
+  overflow:hidden;
+}
+.phone::before{
+  content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:130px;height:5px;background:#f0d0d0;border-radius:3px;z-index:10;
+}
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0 16px;border-bottom:2px solid var(--border);margin-top:4px;
+}
+.header h1{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;font-family:'Fredoka',sans-serif}
+.header h1 span{color:var(--accent2)}
+.header-info{display:flex;gap:8px;font-size:11px}
+.header-info .pill{padding:4px 12px;border-radius:20px;background:var(--accent-dim);display:flex;align-items:center;gap:4px;color:var(--accent2);font-weight:600}
+.header-info .pill .num{font-family:'Fredoka',sans-serif;font-weight:700}
+.tower{display:flex;gap:6px;justify-content:center;padding:16px 0 12px}
+.tower .floor{width:36px;height:36px;border-radius:10px;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:'Fredoka',sans-serif;transition:all .3s;color:var(--dim)}
+.tower .floor.cleared{border-color:var(--green);background:#e8faf0;color:var(--green)}
+.tower .floor.current{border-color:var(--accent2);background:var(--accent-dim);color:var(--accent2);box-shadow:0 0 16px rgba(248,113,113,.25);animation:towerPulse 1.5s infinite}
+.tower .floor.locked{opacity:.3}
+.boss-area{background:#fff;border-radius:20px;padding:20px 16px;border:2px solid var(--border);margin-bottom:12px;position:relative;overflow:hidden;min-height:340px}
+.boss-area::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,var(--accent2),transparent)}
+.boss-sprite{text-align:center;padding:12px 0 8px;position:relative}
+.boss-sprite .monster{font-size:72px;line-height:1;display:block;transition:all .3s;filter:drop-shadow(0 0 16px rgba(248,113,113,.2));animation:float 3s ease-in-out infinite}
+.boss-sprite .monster.hit{animation:bossHit .5s ease}
+.boss-sprite .monster.defeated{filter:grayscale(1) brightness(.7);transform:rotate(10deg);animation:none}
+.boss-sprite .name{font-size:16px;font-weight:700;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.boss-sprite .name .type{font-size:10px;padding:3px 10px;border-radius:6px;font-weight:600}
+.boss-sprite .name .type.listening{background:#e0f8ff;color:#06b6d4}
+.boss-sprite .name .type.reading{background:var(--accent-dim);color:var(--accent2)}
+.hp-container{margin:12px 0 16px}
+.hp-bar{height:12px;background:var(--accent-dim);border-radius:6px;overflow:hidden;position:relative}
+.hp-bar .fill{height:100%;width:100%;background:linear-gradient(90deg,var(--accent2),var(--orange));border-radius:6px;transition:width .5s ease;position:relative}
+.hp-bar .fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,.2);border-radius:6px 6px 0 0}
+.hp-text{display:flex;justify-content:space-between;font-size:11px;margin-top:4px;color:var(--dim);font-family:'Fredoka',sans-serif}
+.hp-text .current{color:var(--accent2)}
+.battle-log{font-size:12px;color:var(--dim);padding:8px 14px;background:var(--bg);border-radius:10px;margin-bottom:12px;min-height:32px;line-height:1.6}
+.battle-log .highlight{color:var(--green);font-weight:600}
+.battle-log .damage{color:var(--accent2);font-weight:600}
+.battle-question{background:var(--bg);border-radius:14px;padding:14px;margin-bottom:12px}
+.battle-question .q-label{font-size:10px;letter-spacing:1.5px;color:var(--dim);font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
+.battle-question .q-label .num{color:var(--accent2)}
+.battle-question .q-text{font-size:14px;margin-bottom:12px;line-height:1.7}
+.battle-question .q-text .src{color:var(--dim);font-size:12px;margin-top:4px}
+.battle-question .options{display:flex;flex-direction:column;gap:8px}
+.battle-question .option{padding:10px 14px;background:#fff;border:2px solid var(--border);border-radius:12px;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px}
+.battle-question .option:hover{border-color:var(--accent2);background:var(--accent-dim)}
+.battle-question .option .letter{width:22px;height:22px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--dim);flex-shrink:0}
+.battle-question .option.correct{border-color:var(--green);background:#e8faf0}
+.battle-question .option.correct .letter{background:var(--green);color:#fff}
+.battle-question .option.wrong{border-color:var(--accent2);background:var(--accent-dim)}
+.battle-question .option.wrong .letter{background:var(--accent2);color:#fff}
+.battle-question .option.disabled{pointer-events:none;opacity:.6}
+.combo-meter{display:flex;align-items:center;gap:10px;padding:8px 0}
+.combo-meter .label{font-size:11px;color:var(--dim)}
+.combo-meter .bar-track{flex:1;height:8px;background:var(--accent-dim);border-radius:4px;overflow:hidden}
+.combo-meter .bar-track .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent2),var(--gold));border-radius:4px;transition:width .3s}
+.combo-meter .count{font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;color:var(--gold);min-width:30px;text-align:right}
+.reward-bar{display:flex;gap:8px;padding:8px 0 4px}
+.reward-item{flex:1;text-align:center;padding:8px;background:var(--bg);border-radius:10px;border:2px solid var(--border);font-size:11px;color:var(--dim)}
+.reward-item .icon{font-size:20px;display:block;margin-bottom:2px}
+.reward-item.unlocked{border-color:var(--gold);background:#fefce8}
+.reward-item.unlocked .label{color:#d97706}
+.result-overlay{
+  display:none;position:absolute;inset:0;background:rgba(255,248,248,.97);border-radius:40px;z-index:20;
+  flex-direction:column;align-items:center;justify-content:center;padding:40px;
+}
+.result-overlay.show{display:flex}
+.result-overlay .big-icon{font-size:80px;margin-bottom:12px}
+.result-overlay h2{font-size:28px;font-weight:700;margin-bottom:4px}
+.result-overlay .sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.result-overlay .loot-box{background:#fff;border:2px solid var(--gold);border-radius:16px;padding:20px 24px;margin-bottom:20px;text-align:center;box-shadow:0 0 30px rgba(251,191,36,.1)}
+.result-overlay .loot-box .item{font-size:48px;margin-bottom:4px}
+.result-overlay .loot-box .label{font-size:14px;color:#d97706;font-weight:600}
+.btn{padding:14px 40px;border-radius:30px;border:none;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 4px 20px rgba(248,113,113,.25)}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{background:var(--bg);color:var(--dim);border:2px solid var(--border)}
+@keyframes towerPulse{0%,100%{box-shadow:0 0 10px rgba(248,113,113,.15)}50%{box-shadow:0 0 25px rgba(248,113,113,.3)}}
+@keyframes bossHit{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-3deg)}40%{transform:translateX(10px) rotate(3deg)}60%{transform:translateX(-5px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.shake{animation:shake .5s ease}
+.scrollable{max-height:580px;overflow-y:auto;padding-right:4px}
+.scrollable::-webkit-scrollbar{width:4px}
+.scrollable::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <h1><span>📋</span> 错题 Boss</h1>
+    <div class="header-info"><span class="pill">⚔️ <span class="num">12</span> 讨伐</span><span class="pill">📛 <span class="num">7</span> 待讨伐</span></div>
+  </div>
+  <div class="scrollable">
+    <div class="tower">
+      <div class="floor cleared">1</div><div class="floor cleared">2</div>
+      <div class="floor current">3</div><div class="floor locked">4</div>
+      <div class="floor locked">5</div><div class="floor locked">B</div>
+    </div>
+    <div class="boss-area">
+      <div class="boss-sprite"><span class="monster" id="bossMonster">👹</span>
+        <div class="name">听力·长对话魔<span class="type listening">🎵 LISTENING</span></div>
+      </div>
+      <div class="hp-container">
+        <div class="hp-bar"><div class="fill" id="hpFill" style="width:100%"></div></div>
+        <div class="hp-text"><span class="current" id="hpCurrent">HP 100</span><span id="hpTotal">HP 100</span></div>
+      </div>
+      <div class="battle-log" id="battleLog">⚔️ 战斗开始！正确回答造成伤害，错误会被反击！</div>
+      <div class="combo-meter">
+        <span class="label">连击槽</span>
+        <div class="bar-track"><div class="fill" id="comboFill" style="width:0%"></div></div>
+        <span class="count" id="comboCount">x0</span>
+      </div>
+      <div class="battle-question" id="battleQ">
+        <div class="q-label"><span>⚔️ 讨伐战 · <span class="num">第3问</span></span><span style="color:var(--dim)">2/5</span></div>
+        <div class="q-text">What does the woman suggest the man do?<div class="src">📝 2023年12月 · 长对话</div></div>
+        <div class="options" id="battleOptions">
+          <div class="option" onclick="battleAttack(this,false)"><span class="letter">A</span>Talk to his professor after class</div>
+          <div class="option" onclick="battleAttack(this,true)"><span class="letter">B</span>Join a study group for review</div>
+          <div class="option" onclick="battleAttack(this,false)"><span class="letter">C</span>Take a break from studying</div>
+          <div class="option" onclick="battleAttack(this,false)"><span class="letter">D</span>Ask a classmate for notes</div>
+        </div>
+      </div>
+      <div class="reward-bar">
+        <div class="reward-item unlocked"><span class="icon">🎖️</span><span class="label">已获得</span></div>
+        <div class="reward-item" style="border-color:var(--accent2);background:var(--accent-dim)"><span class="icon">🗡️</span><span class="label">当前楼层</span></div>
+        <div class="reward-item"><span class="icon">👑</span><span class="label">Boss奖励</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;padding:4px 0 8px">
+      <div style="flex:1;text-align:center;padding:10px;background:#fff;border-radius:12px;border:2px solid var(--border)">
+        <div style="font-size:20px;font-weight:700;color:var(--green);font-family:Fredoka,sans-serif">8</div><div style="font-size:10px;color:var(--dim)">已复仇 ✓</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:10px;background:#fff;border-radius:12px;border:2px solid var(--border)">
+        <div style="font-size:20px;font-weight:700;color:var(--accent2);font-family:Fredoka,sans-serif">3</div><div style="font-size:10px;color:var(--dim)">连败中 💀</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:10px;background:#fff;border-radius:12px;border:2px solid var(--border)">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);font-family:Fredoka,sans-serif">71%</div><div style="font-size:10px;color:var(--dim)">复仇率</div>
+      </div>
+    </div>
+  </div>
+  <div class="result-overlay" id="resultOverlay">
+    <div class="big-icon">🎉</div>
+    <h2>Boss 击败！</h2>
+    <div class="sub">听力·长对话魔 · 讨伐完成</div>
+    <div class="loot-box"><div class="item">🗡️</div><div class="label">获得「听力之刃」</div><div class="sub" style="font-size:11px;margin-top:4px">听力错题 -50% · 永久加成</div></div>
+    <button class="btn btn-primary" onclick="closeResult()">登上第4层 🚀</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeResult()">再来一次</button>
+  </div>
+</div>
+<script>
+let bossHP=100,combo=0,questionNum=2,bossDefeated=false;
+function battleAttack(el,isCorrect){
+  if(el.classList.contains('disabled')||bossDefeated)return;
+  const options=document.querySelectorAll('#battleOptions .option');options.forEach(o=>o.classList.add('disabled'));
+  const log=document.getElementById('battleLog');
+  if(isCorrect){
+    el.classList.add('correct');const dmg=15+combo*5;bossHP=Math.max(0,bossHP-dmg);
+    document.getElementById('hpFill').style.width=(bossHP/100*100)+'%';
+    document.getElementById('hpCurrent').textContent=`HP ${bossHP}`;
+    combo++;document.getElementById('comboFill').style.width=Math.min(100,combo*20)+'%';document.getElementById('comboCount').textContent=`x${combo}`;
+    document.getElementById('bossMonster').classList.add('hit');setTimeout(()=>document.getElementById('bossMonster').classList.remove('hit'),500);
+    log.innerHTML=`⚔️ <span class="damage">-${dmg} HP!</span> 正确！连击 x${combo} 伤害加成！`;
+    if(bossHP<=0){bossDefeated=true;document.getElementById('bossMonster').classList.add('defeated');log.innerHTML='🎉 <span class="highlight">Boss 击败！</span> 所有错题已讨伐！';setTimeout(()=>document.getElementById('resultOverlay').classList.add('show'),800);return}
+  }else{
+    el.classList.add('wrong');combo=0;
+    document.getElementById('comboFill').style.width='0%';document.getElementById('comboCount').textContent='x0';
+    log.innerHTML='💥 错误！被 Boss 反击！连击中断！';
+    document.querySelector('.boss-area').classList.add('shake');setTimeout(()=>document.querySelector('.boss-area').classList.remove('shake'),500);
+  }
+  setTimeout(()=>{
+    options.forEach(o=>o.classList.remove('correct','wrong','disabled'));questionNum++;
+    document.querySelector('.q-label .num').textContent=`第${questionNum}问`;
+    document.querySelector('.q-text').innerHTML=`Why is the library closed this week?<div class="src">📝 2023年12月 · 长对话</div>`;
+    const t=['Construction work is underway',"It's being renovated",'Staff training program','Holiday schedule change'],l=['A','B','C','D'];
+    document.querySelectorAll('#battleOptions .option').forEach((o,i)=>{o.innerHTML=`<span class="letter">${l[i]}</span>${t[i]}`})
+  },1000)
+}
+function closeResult(){
+  document.getElementById('resultOverlay').classList.remove('show');bossHP=100;bossDefeated=false;combo=0;questionNum=2;
+  document.getElementById('hpFill').style.width='100%';document.getElementById('hpCurrent').textContent='HP 100';
+  document.getElementById('comboFill').style.width='0%';document.getElementById('comboCount').textContent='x0';
+  document.getElementById('bossMonster').classList.remove('defeated');document.getElementById('battleLog').textContent='⚔️ 战斗开始！正确回答造成伤害，错误会被反击！';
+  document.querySelector('.q-label .num').textContent='第3问';
+  document.querySelectorAll('#battleOptions .option').forEach(o=>o.classList.remove('correct','wrong','disabled'))
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>📖 阅读密室 - 四级备考</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f0ff;
+  --surface:#fcfaff;
+  --card:#ffffff;
+  --border:#ede4f7;
+  --text:#4a3a5a;
+  --dim:#b8a5cf;
+  --accent:#c4b5fd;
+  --accent2:#a78bfa;
+  --accent-dim:#f0eaff;
+  --accent-glow:rgba(196,181,253,.25);
+  --amber:#fbbf24;
+  --green:#86efac;
+  --rose:#fb7185;
+  --cyan:#67e8f9;
+  --shadow:rgba(196,181,253,.12);
+}
+body{
+  font-family:'Noto Sans SC','Fredoka',sans-serif;
+  background:#eae2f5;color:var(--text);min-height:100vh;
+  display:flex;justify-content:center;align-items:center;padding:20px;
+}
+.phone{
+  width:390px;min-height:780px;
+  background:var(--surface);border-radius:40px;padding:20px 16px;position:relative;
+  box-shadow:0 8px 40px rgba(196,181,253,.15),inset 0 0 0 1px var(--border);
+  overflow:hidden;
+}
+.phone::before{
+  content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:130px;height:5px;background:#e0d6f0;border-radius:3px;z-index:10;
+}
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0 16px;border-bottom:2px solid var(--border);margin-top:4px;
+}
+.header h1{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;font-family:'Fredoka',sans-serif}
+.header h1 span{color:var(--accent2)}
+.ox-meter{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+.ox-bar{width:60px;height:8px;background:var(--accent-dim);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.ox-bar .fill{
+  height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--accent2));
+  border-radius:4px;transition:width .6s;
+}
+.ox-bar .fill.danger{background:linear-gradient(90deg,var(--rose),var(--amber))}
+.room-header{display:flex;justify-content:space-between;align-items:center;padding:16px 0 8px}
+.room-header .room-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.room-header .room-name .icon{font-size:22px}
+.room-header .clues{font-size:12px;color:var(--amber);font-weight:600;background:#fefce8;padding:4px 14px;border-radius:20px}
+.room-map{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.room-map .area{
+  padding:14px;background:#fff;border-radius:14px;border:2px solid var(--border);
+  text-align:center;cursor:pointer;transition:all .3s;position:relative;
+}
+.room-map .area:hover{border-color:var(--accent2);background:var(--accent-dim)}
+.room-map .area .emoji{font-size:30px;margin-bottom:4px}
+.room-map .area .name{font-size:12px;color:var(--dim);font-weight:500}
+.room-map .area.active{border-color:var(--accent2);background:var(--accent-dim)}
+.room-map .area .check{position:absolute;top:4px;right:6px;font-size:14px;display:none}
+.room-map .area.cleared{border-color:var(--green);background:#e8faf0}
+.room-map .area.cleared .check{display:block;color:var(--green)}
+.passage-box{background:#fff;border-radius:20px;padding:18px;border:2px solid var(--border);margin-bottom:16px;position:relative}
+.passage-box .decor{
+  position:absolute;top:-2px;left:24px;right:24px;height:4px;
+  background:linear-gradient(90deg,transparent,var(--accent2),transparent);
+  border-radius:0 0 4px 4px;
+}
+.passage-box .badge-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.passage-box .badge-row .tag{font-size:11px;padding:3px 12px;border-radius:6px;font-weight:500}
+.passage-box .badge-row .tag.difficulty{background:var(--accent-dim);color:var(--accent2)}
+.passage-box .badge-row .tag.length{background:#e0f8ff;color:#06b6d4}
+.passage-box .badge-row .tag.clue{background:#fefce8;color:var(--amber)}
+.passage-content{font-size:14px;line-height:2;color:var(--text);max-height:200px;overflow-y:auto;padding-right:6px}
+.passage-content::-webkit-scrollbar{width:4px}
+.passage-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.passage-content p{margin-bottom:12px;text-indent:2em}
+.passage-content .highlight{background:#f0eaff;padding:0 4px;border-radius:3px;border-bottom:2px solid var(--accent2);cursor:pointer}
+.passage-content .blurred{color:transparent;background:var(--border);border-radius:3px;padding:0 4px;cursor:pointer;transition:all .3s}
+.passage-content .blurred.revealed{color:var(--accent2);background:var(--accent-dim)}
+.key-items{display:flex;gap:8px;margin-bottom:12px}
+.key-item{padding:6px 14px;background:var(--bg);border:2px solid var(--border);border-radius:10px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:6px}
+.key-item.found{border-color:var(--amber);color:#d97706;background:#fefce8}
+.key-item .icon{font-size:16px}
+.question-box{background:var(--bg);border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid var(--border)}
+.question-box .q-label{font-size:11px;letter-spacing:1px;color:var(--accent2);font-weight:600;margin-bottom:8px}
+.question-box .q-text{font-size:14px;margin-bottom:12px;line-height:1.7}
+.question-box .options{display:flex;flex-direction:column;gap:8px}
+.question-box .option{padding:10px 14px;background:#fff;border:2px solid var(--border);border-radius:12px;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px}
+.question-box .option:hover{border-color:var(--accent2)}
+.question-box .option .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .3s;color:var(--dim)}
+.question-box .option.correct{border-color:var(--green);background:#e8faf0}
+.question-box .option.correct .dot{background:var(--green);border-color:var(--green);color:#fff}
+.question-box .option.wrong{border-color:var(--rose);background:#fff0f3}
+.question-box .option.wrong .dot{background:var(--rose);border-color:var(--rose);color:#fff}
+.question-box .option.disabled{pointer-events:none;opacity:.6}
+.unlock-chain{display:flex;gap:8px;justify-content:center;margin:16px 0}
+.unlock-chain .link{width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .3s}
+.unlock-chain .link.done{border-color:var(--green);background:#e8faf0;color:var(--green)}
+.unlock-chain .link.current{border-color:var(--accent2);background:var(--accent-dim);color:var(--accent2);box-shadow:0 0 16px var(--accent-glow)}
+.unlock-chain .link.locked{opacity:.35}
+.timer-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:12px;margin-bottom:14px}
+.timer-bar .clock{font-size:18px}
+.timer-bar .time{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;flex:1}
+.timer-bar .warn{color:var(--rose)}
+.result-overlay{
+  display:none;position:absolute;inset:0;background:rgba(255,250,252,.97);border-radius:40px;z-index:20;
+  flex-direction:column;align-items:center;justify-content:center;padding:40px;
+}
+.result-overlay.show{display:flex}
+.result-overlay .big-icon{font-size:72px;margin-bottom:12px}
+.result-overlay h2{font-size:26px;font-weight:700;margin-bottom:4px}
+.result-overlay .sub{color:var(--dim);font-size:14px;margin-bottom:20px}
+.result-overlay .treasure{background:#fff;border:2px solid var(--amber);border-radius:16px;padding:20px 24px;margin-bottom:20px;text-align:center}
+.result-overlay .treasure .item{font-size:40px;margin-bottom:4px}
+.result-overlay .treasure .label{font-size:14px;color:#d97706;font-weight:600}
+.btn{padding:14px 40px;border-radius:30px;border:none;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 4px 20px rgba(196,181,253,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(196,181,253,.3)}
+.btn-secondary{background:var(--bg);color:var(--dim);border:2px solid var(--border)}
+.btn-secondary:hover{color:var(--text);border-color:var(--accent2)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.room-map,.passage-box{animation:fadeIn .5s ease}
+.scrollable{max-height:580px;overflow-y:auto;padding-right:4px}
+.scrollable::-webkit-scrollbar{width:4px}
+.scrollable::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <h1><span>📖</span> 阅读密室</h1>
+    <div class="ox-meter"><span>🫧</span><div class="ox-bar"><div class="fill" id="oxFill"></div></div><span id="oxPercent" style="font-family:Fredoka,sans-serif">100%</span></div>
+  </div>
+  <div class="scrollable">
+    <div class="room-header">
+      <div class="room-name"><span class="icon">🏛️</span> 学术殿堂 · 第3间</div>
+      <div class="clues">🔍 线索 3/5</div>
+    </div>
+    <div class="room-map">
+      <div class="area cleared"><div class="emoji">📜</div><div class="name">入口大厅</div><span class="check">✓</span></div>
+      <div class="area cleared"><div class="emoji">📚</div><div class="name">书架区</div><span class="check">✓</span></div>
+      <div class="area active"><div class="emoji">🔬</div><div class="name">实验室</div></div>
+      <div class="area locked" style="opacity:.35"><div class="emoji">🔒</div><div class="name">档案馆</div></div>
+    </div>
+    <div class="timer-bar"><span class="clock">⏳</span><span class="time">4:32</span><span style="font-size:11px;color:var(--dim)">剩余时间</span></div>
+    <div class="key-items">
+      <div class="key-item found"><span class="icon">🗝️</span> 钥匙·A</div>
+      <div class="key-item found"><span class="icon">📜</span> 卷轴·壹</div>
+      <div class="key-item"><span class="icon">❓</span> ???</div>
+      <div class="key-item"><span class="icon">❓</span> ???</div>
+    </div>
+    <div class="passage-box">
+      <div class="decor"></div>
+      <div class="badge-row">
+        <span class="tag difficulty">🔥 中等</span>
+        <span class="tag length">📄 412词</span>
+        <span class="tag clue">🔍 含2条线索</span>
+      </div>
+      <div class="passage-content">
+        <p>The concept of "flow" — a state of complete absorption in an activity — was first identified by psychologist Mihaly Csikszentmihalyi. People experiencing flow report feeling <span class="blurred" onclick="this.classList.add('revealed')">████████</span>, focused, and in control.</p>
+        <p>Interestingly, recent studies have shown that students who experience flow during <span class="highlight" onclick="revealClue(0)">study sessions</span> retain information significantly better. The key lies in the balance between challenge and skill — too easy leads to boredom, too difficult causes <span class="blurred" onclick="this.classList.add('revealed')">███████</span>.</p>
+        <p>Educational institutions are now redesigning curricula to incorporate flow-friendly elements. <span class="highlight" onclick="revealClue(1)">Gamification</span>, personalized pacing, and immediate feedback have all shown promise in helping students achieve this optimal state.</p>
+      </div>
+    </div>
+    <div class="question-box" id="q1">
+      <div class="q-label">📌 线索一</div>
+      <div class="q-text">根据本文，「心流」状态的关键因素是什么？</div>
+      <div class="options">
+        <div class="option" onclick="answerQ(this,0,false)"><span class="dot">A</span>任务的难度越高越好</div>
+        <div class="option" onclick="answerQ(this,0,true)"><span class="dot">B</span>挑战与技能的平衡</div>
+        <div class="option" onclick="answerQ(this,0,false)"><span class="dot">C</span>完全放松的状态</div>
+        <div class="option" onclick="answerQ(this,0,false)"><span class="dot">D</span>外部奖励的刺激</div>
+      </div>
+    </div>
+    <div class="question-box" id="q2">
+      <div class="q-label">📌 线索二</div>
+      <div class="q-text">文中提到哪些方法可以帮助学生达到心流状态？</div>
+      <div class="options">
+        <div class="option" onclick="answerQ(this,1,true)"><span class="dot">A</span>游戏化学习与即时反馈</div>
+        <div class="option" onclick="answerQ(this,1,false)"><span class="dot">B</span>延长学习时间</div>
+        <div class="option" onclick="answerQ(this,1,false)"><span class="dot">C</span>减少课程内容</div>
+        <div class="option" onclick="answerQ(this,1,false)"><span class="dot">D</span>单人独立学习</div>
+      </div>
+    </div>
+    <div class="unlock-chain">
+      <div class="link done">✓</div><div class="link done">✓</div><div class="link current">3</div>
+      <div class="link locked">4</div><div class="link locked">5</div><div class="link locked">🏆</div>
+    </div>
+    <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--dim)">收集 5 条线索打开档案馆 🏛️</div>
+  </div>
+  <div class="result-overlay" id="resultOverlay">
+    <div class="big-icon">🗝️</div>
+    <h2>密室逃脱成功！</h2>
+    <div class="sub">你收集了 5/5 条线索，打开了档案馆</div>
+    <div class="treasure"><div class="item">🏺</div><div class="label">获得「智慧卷轴」· 阅读速度 +10%</div></div>
+    <button class="btn btn-primary" onclick="closeResult()">进入下一间密室 🚪</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeResult()">回到地图</button>
+  </div>
+</div>
+<script>
+let answered=[false,false],cluesFound=2,ox=100;
+function revealClue(idx){const h=document.querySelectorAll('.highlight');if(h[idx]){h[idx].style.background='#fefce8';h[idx].style.borderBottomColor='var(--amber)'}}
+function answerQ(el,qIdx,isCorrect){
+  if(answered[qIdx])return;const box=el.closest('.question-box');
+  const options=box.querySelectorAll('.option');options.forEach(o=>o.classList.add('disabled'));answered[qIdx]=true;
+  if(isCorrect){
+    el.classList.add('correct');cluesFound++;
+    document.querySelector('.clues').textContent=`🔍 线索 ${cluesFound}/5`;
+    const keyItems=document.querySelectorAll('.key-item:not(.found)');
+    if(keyItems.length>0){keyItems[0].classList.add('found');keyItems[0].querySelector('.icon').textContent='🗝️'}
+    const links=document.querySelectorAll('.unlock-chain .link');
+    if(cluesFound<=5){links[cluesFound-1]?.classList.remove('current');if(cluesFound<5)links[cluesFound]?.classList.add('current');if(cluesFound>=3)links[cluesFound-1]?.classList.add('done')}
+    if(cluesFound>=5)setTimeout(()=>document.getElementById('resultOverlay').classList.add('show'),800);
+  }else{
+    el.classList.add('wrong');ox=Math.max(0,ox-25);
+    const oxFill=document.getElementById('oxFill');oxFill.style.width=ox+'%';
+    if(ox<=40)oxFill.classList.add('danger');document.getElementById('oxPercent').textContent=ox+'%';
+    el.closest('.question-box').style.animation='none';void el.closest('.question-box').offsetWidth;
+    el.closest('.question-box').style.animation='shake .5s ease';
+    if(ox<=0){document.querySelector('.result-overlay .big-icon').textContent='💀';document.querySelector('.result-overlay h2').textContent='氧气耗尽...';document.querySelector('.result-overlay .sub').textContent='别放弃，再来一次！';document.getElementById('resultOverlay').classList.add('show')}
+  }
+}
+function closeResult(){
+  document.getElementById('resultOverlay').classList.remove('show');
+  answered=[false,false];cluesFound=2;ox=100;
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('correct','wrong','disabled'));
+  document.getElementById('oxFill').style.width='100%';document.getElementById('oxFill').classList.remove('danger');document.getElementById('oxPercent').textContent='100%';
+  document.querySelector('.clues').textContent='🔍 线索 2/5';
+  document.querySelectorAll('.key-item.found').forEach(k=>{if(k.querySelector('.icon')&&!k.textContent.includes('钥匙')&&!k.textContent.includes('卷轴')){k.classList.remove('found');k.querySelector('.icon').textContent='❓'}});
+  const links=document.querySelectorAll('.unlock-chain .link');links.forEach((l,i)=>{l.classList.remove('done','current');if(i===2)l.classList.add('current');if(i<2)l.classList.add('done');if(i>2)l.classList.add('locked')});
+}
+</script>
+</body>
+</html>
