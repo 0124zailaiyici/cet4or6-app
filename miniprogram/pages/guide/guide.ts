@@ -1,15 +1,26 @@
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
+interface IQItem {
+  q: string
+  opts: string[]
+  answer: number
+}
+
 Page({
   data: {
-    current: 0,
-    touchX: 0,
+    step: 0,
     darkMode: false,
-    pages: [
-      { emoji: '🎧', title: '欢迎使用\n四级备考助手', desc: '一站式 CET-4 真题练习平台\n涵盖听力、阅读、翻译、写作四大模块' },
-      { emoji: '📖', title: '真题导入', desc: '支持 PDF 真题一键导入\n自动解析听力、阅读、翻译\n配合 AI 批改精准提升' },
-      { emoji: '🚀', title: '开始学习', desc: '设定每日目标，坚持打卡\n错题自动收集，薄弱点逐个击破' },
-    ],
+    questions: [
+      { q: '"The center of American automobile innovation has in the past decade moved 2,000 miles away."\n这句话的大意是？', opts: ['美国汽车价格涨了', '汽车创新中心转移了', '汽车工厂倒闭了', '高速公路修好了'], answer: 1 },
+      { q: '"It is a mistake to simply equate longevity with issues of old age."\n"equate" 最接近的意思是？', opts: ['等同', '计算', '争论', '解决'], answer: 0 },
+      { q: '四级听力 Section A 通常是什么题型？', opts: ['新闻报道选择题', '完形填空', '段落翻译', '命题作文'], answer: 0 },
+    ] as IQItem[],
+    answered: [] as number[],
+    showingResult: false,
+    resultEmoji: '',
+    resultTitle: '',
+    resultDesc: '',
+    resultCorrect: 0,
   },
 
   onShow() {
@@ -17,29 +28,38 @@ Page({
     this.setData({ darkMode: getDarkMode() })
   },
 
-  onTouchStart(e: WechatMiniprogram.TouchEvent) {
-    this.setData({ touchX: e.touches[0].clientX })
-  },
-
-  onTouchEnd(e: WechatMiniprogram.TouchEvent) {
-    const dx = e.changedTouches[0].clientX - this.data.touchX
-    if (dx > 50 && this.data.current > 0) {
-      this.setData({ current: this.data.current - 1 })
-    } else if (dx < -50 && this.data.current < 2) {
-      this.setData({ current: this.data.current + 1 })
-    }
-  },
-
-  next() {
-    if (this.data.current < 2) {
-      this.setData({ current: this.data.current + 1 })
-    } else {
-      this.finish()
-    }
-  },
-
   skip() {
-    this.finish()
+    wx.setStorageSync('hasGuided', true)
+    wx.reLaunch({ url: '/pages/index/index' })
+  },
+
+  nextStep() {
+    this.setData({ step: this.data.step + 1 })
+  },
+
+  onTapOpt(e: WechatMiniprogram.TouchEvent) {
+    const oi = Number(e.currentTarget.dataset.oi)
+    const step = this.data.step - 1
+    if (this.data.showingResult) return
+
+    const answered = [...this.data.answered]
+    answered[step] = oi
+    this.setData({ answered, showingResult: true })
+
+    setTimeout(() => {
+      if (step < this.data.questions.length - 1) {
+        this.setData({ step: this.data.step + 1, showingResult: false })
+      } else {
+        const correctCount = this.data.questions.filter((q, i) => answered[i] === q.answer).length
+        const result = [3, 1, 0].reduce((best, c) => Math.abs(c - correctCount) < Math.abs(best - correctCount) ? c : best, correctCount)
+        const r = result === 3
+          ? { emoji: '🏆', title: '满分！', desc: '你的基础很不错，开始系统备考吧！' }
+          : result >= 1
+            ? { emoji: '🎉', title: '不错的开始！', desc: '继续练习，坚持就是进步。' }
+            : { emoji: '💪', title: '第一步已经迈出了！', desc: '没关系，从基础开始，每天进步一点点。' }
+        this.setData({ step: 99, showingResult: false, resultEmoji: r.emoji, resultTitle: r.title, resultDesc: r.desc, resultCorrect: correctCount })
+      }
+    }, 800)
   },
 
   finish() {

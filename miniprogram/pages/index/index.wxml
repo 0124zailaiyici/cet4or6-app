@@ -1,85 +1,91 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <view class="hero-section">
-    <view class="hero-bg"></view>
-    <view class="hero-content">
-      <view class="hero-top">
-        <view class="hero-text">
-          <text class="hero-greeting">{{greeting}}</text>
-          <text class="hero-title">四级备考助手</text>
-        </view>
-        <view class="hero-actions">
-          <view class="hero-btn {{checkedIn ? 'done' : ''}}" catchtap="handleCheckIn">{{checkedIn ? '✓ 已打卡' : '📌 打卡'}}</view>
-        </view>
+  <!-- Hero -->
+  <view class="hero">
+    <view class="hero-stats">
+      <text class="greeting">{{greeting}}</text>
+      <view class="streak" wx:if="{{streak > 0}}">
+        <text>🔥</text>
+        <text>连续 {{streak}} 天</text>
       </view>
-      <view class="stats-banner">
-        <view class="stat-card">
-          <text class="stat-num">{{goalStats.overallPct}}%</text>
-          <text class="stat-label">今日完成</text>
-        </view>
-        <view class="stat-card">
-          <text class="stat-num">{{todayStats.listened + todayStats.sentences + todayStats.translations + todayStats.writings}}</text>
-          <text class="stat-label">今日题数</text>
-        </view>
-        <view class="stat-card">
-          <text class="stat-num">{{streak}}</text>
-          <text class="stat-label">连续天数</text>
-        </view>
+      <view class="streak" wx:else>
+        <text>💪</text>
+        <text>今天开始</text>
+      </view>
+    </view>
+    <view class="checkin {{checkedIn ? 'done' : ''}}" catchtap="handleCheckIn">{{checkedIn ? '✓ 已打卡' : '📌 打卡'}}</view>
+  </view>
+
+  <!-- Today's Mission -->
+  <view class="mission" catchtap="doMission">
+    <view class="mission-bg">
+      <text class="mission-label">📌 今日任务</text>
+      <text class="mission-title">{{missionTitle}}</text>
+      <text class="mission-sub">{{missionSub}}</text>
+      <view class="mission-btn">
+        <text>{{missionBtn}}</text>
+        <text> →</text>
       </view>
     </view>
   </view>
 
-  <view class="home-body">
-    <view class="exam-card" data-url="/pages/exam/exam" catchtap="goTo">
-      <view class="ec-left">
-        <text class="ec-icon">🎯</text>
-        <view class="ec-info">
-          <text class="ec-title">模拟考试</text>
-          <text class="ec-desc">125分钟 · 真考环境 · 自动评分</text>
-        </view>
-      </view>
-      <text class="ec-btn">开始</text>
-    </view>
-
-    <view class="sec">
-      <view class="sec-h"><text>📖 真题训练</text></view>
-      <view class="grid-3">
-        <view class="gi mc-listening" data-url="/pages/listening/listening" catchtap="goTo">
-          <text class="gi-e">🎵</text><text class="gi-n">听力</text><text class="gi-d">精听</text>
-        </view>
-        <view class="gi mc-reading" data-url="/pages/reading/reading" catchtap="goTo">
-          <text class="gi-e">📖</text><text class="gi-n">阅读</text><text class="gi-d">理解</text>
-        </view>
-        <view class="gi mc-translation" data-url="/pages/translation/translation" catchtap="goTo">
-          <text class="gi-e">🌟</text><text class="gi-n">翻译</text><text class="gi-d">练习</text>
-        </view>
-        <view class="gi mc-writing" data-url="/pages/writing/writing" catchtap="goTo">
-          <text class="gi-e">✍️</text><text class="gi-n">写作</text><text class="gi-d">教学</text>
-        </view>
-        <view class="gi mc-sentences" data-url="/pages/sentences/sentences" catchtap="goTo">
-          <text class="gi-e">💬</text><text class="gi-n">句子</text><text class="gi-d">语境</text>
-        </view>
+  <!-- Daily Sentence -->
+  <view class="ds" catchtap="playDailySentence">
+    <view class="ds-hd">
+      <text class="ds-tag">💬 每日一句</text>
+      <view class="ds-play {{dailyPlaying ? 'on' : ''}}">
+        <text wx:if="{{dailyPlaying}}">⏸</text>
+        <text wx:else>▶</text>
       </view>
     </view>
+    <text class="ds-en">{{dailyEn}}</text>
+    <text class="ds-zh">{{dailyZh}}</text>
+  </view>
 
-    <view class="sec">
-      <view class="sec-h"><text>📚 学习工具</text></view>
-      <view class="grid-3">
-        <view class="gi mc-vocab" data-url="/pages/vocab/vocab" catchtap="goTo">
-          <text class="gi-e">📕</text><text class="gi-n">单词本</text><text class="gi-d">闯关</text>
-        </view>
-        <view class="gi mc-errors" data-url="/pages/errors/errors" catchtap="goTo">
-          <text class="gi-e">📝</text><text class="gi-n">错题本</text><text class="gi-d">查漏</text>
-        </view>
-        <view class="gi mc-favorites" data-url="/pages/favorites/favorites" catchtap="goTo">
-          <text class="gi-e">⭐</text><text class="gi-n">收藏</text><text class="gi-d">管理</text>
-        </view>
-        <view class="gi mc-dict" data-url="/pages/dictionary/dictionary" catchtap="goTo">
-          <text class="gi-e">📖</text><text class="gi-n">词典</text><text class="gi-d">查询</text>
-        </view>
-        <view class="gi mc-statistics" data-url="/pages/statistics/statistics" catchtap="goTo">
-          <text class="gi-e">📊</text><text class="gi-n">统计</text><text class="gi-d">进度</text>
-        </view>
-      </view>
+  <!-- Quick Actions -->
+  <view class="qa-row">
+    <view class="qa" catchtap="quickListen">
+      <text class="qa-e">🎧</text>
+      <text class="qa-t">听一句</text>
+    </view>
+    <view class="qa" catchtap="quickVocab">
+      <text class="qa-e">📖</text>
+      <text class="qa-t">背一词</text>
+    </view>
+    <view class="qa" catchtap="quickReading">
+      <text class="qa-e">📝</text>
+      <text class="qa-t">读一篇</text>
+    </view>
+  </view>
+
+  <!-- Modules -->
+  <view class="sec-h"><text>📚 真题训练</text></view>
+  <view class="grid">
+    <view class="gi mc-listening" data-url="/pages/listening/listening" catchtap="goTo">
+      <text class="gi-e">🎵</text><text class="gi-n">听力</text>
+    </view>
+    <view class="gi mc-reading" data-url="/pages/reading/reading" catchtap="goTo">
+      <text class="gi-e">📖</text><text class="gi-n">阅读</text>
+    </view>
+    <view class="gi mc-translation" data-url="/pages/translation/translation" catchtap="goTo">
+      <text class="gi-e">✏️</text><text class="gi-n">翻译</text>
+    </view>
+    <view class="gi mc-writing" data-url="/pages/writing/writing" catchtap="goTo">
+      <text class="gi-e">📝</text><text class="gi-n">写作</text>
+    </view>
+    <view class="gi mc-sentences" data-url="/pages/sentences/sentences" catchtap="goTo">
+      <text class="gi-e">💬</text><text class="gi-n">句子</text>
+    </view>
+    <view class="gi mc-vocab" data-url="/pages/vocab/vocab" catchtap="goTo">
+      <text class="gi-e">📕</text><text class="gi-n">单词本</text>
+    </view>
+    <view class="gi mc-errors" data-url="/pages/errors/errors" catchtap="goTo">
+      <text class="gi-e">📌</text><text class="gi-n">错题本</text>
+    </view>
+    <view class="gi mc-statistics" data-url="/pages/statistics/statistics" catchtap="goTo">
+      <text class="gi-e">📊</text><text class="gi-n">统计</text>
+    </view>
+    <view class="gi mc-exam" data-url="/pages/exam/exam" catchtap="goTo">
+      <text class="gi-e">📋</text><text class="gi-n">模拟考</text>
     </view>
   </view>
 </view>

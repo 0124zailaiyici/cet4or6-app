@@ -1,16 +1,40 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
-  <text class="skip" catchtap="skip">跳过</text>
-  <view class="swipe-wrap" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
-    <view class="swipe" style="transform: translateX(-{{current}}00vw)">
-      <view class="gp" wx:for="{{pages}}" wx:key="*this" wx:for-item="p">
-        <text class="emoji">{{p.emoji}}</text>
-        <text class="title">{{p.title}}</text>
-        <text class="desc">{{p.desc}}</text>
+  <text class="skip" catchtap="skip">跳过 →</text>
+
+  <!-- Welcome -->
+  <view class="gw" wx:if="{{step === 0}}">
+    <text class="gw-emoji">🎯</text>
+    <text class="gw-title">先测一下？</text>
+    <text class="gw-desc">3 道题，看看你的起点在哪。不管对错，有个开始就行。</text>
+    <view class="gw-btn" catchtap="nextStep">好，来吧 →</view>
+  </view>
+
+  <!-- Quiz -->
+  <view class="gq" wx:elif="{{step <= questions.length}}">
+    <view class="gq-progress">第 {{step}} / {{questions.length}} 题</view>
+    <view class="gq-text">{{questions[step - 1].q}}</view>
+    <view class="gq-opts">
+      <view
+        class="gq-opt {{answered[step - 1] === oi ? 'sel' : ''}} {{showingResult && oi === questions[step - 1].answer ? 'ok' : ''}} {{showingResult && answered[step - 1] === oi && oi !== questions[step - 1].answer ? 'bad' : ''}}"
+        wx:for="{{questions[step - 1].opts}}"
+        wx:key="*this"
+        wx:for-index="oi"
+        data-oi="{{oi}}"
+        catchtap="onTapOpt"
+      >
+        <text class="gq-ltr">{{['A','B','C','D'][oi]}}</text>
+        <text>{{item}}</text>
       </view>
     </view>
   </view>
-  <view class="dots">
-    <view class="dot {{i === current ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
+
+  <!-- Result -->
+  <view class="gr" wx:else>
+    <text class="gr-emoji">{{resultEmoji}}</text>
+    <text class="gr-title">{{resultTitle}}</text>
+    <text class="gr-score">{{resultCorrect}}/{{questions.length}}</text>
+    <text class="gr-label">正确</text>
+    <text class="gr-desc">{{resultDesc}}</text>
+    <view class="gw-btn" catchtap="finish">开始学习 →</view>
   </view>
-  <view class="btn" catchtap="next">{{current === 2 ? '进入首页' : '下一步'}}</view>
 </view>
