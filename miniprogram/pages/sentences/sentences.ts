@@ -21,7 +21,7 @@ interface ISentencesData {
   favoriteIds: number[]
   searchQuery: string
   darkMode: boolean
-  viewMode: 'list' | 'immersion'
+  viewMode: 'list' | 'immersion' | 'puzzle'
   immersionIndex: number
   scrollHeight: number
   showGenModal: boolean
@@ -34,6 +34,17 @@ interface ISentencesData {
   parsing: boolean
   favTexts: string[]
   masterTexts: string[]
+  // Puzzle mode
+  puzzleWords: string[]
+  puzzleSelected: number[]
+  puzzleAnswers: number[]
+  puzzleScore: number
+  puzzleCombo: number
+  puzzleIndex: number
+  puzzleTotal: number
+  puzzleTime: number
+  puzzleFinished: boolean
+  puzzleStars: number
 }
 
 interface ISentencesMethods {
@@ -48,6 +59,13 @@ interface ISentencesMethods {
   switchMode(e: WechatMiniprogram.TouchEvent): void
   prevSentence(): void
   nextSentence(): void
+  startPuzzle(): void
+  loadPuzzleSentence(sentences: ISentence[]): void
+  tapPuzzleWord(e: WechatMiniprogram.TouchEvent): void
+  untapPuzzleWord(e: WechatMiniprogram.TouchEvent): void
+  checkPuzzleAnswer(): void
+  finishPuzzle(): void
+  restartPuzzle(): void
   openGenModal(): void
   closeGenModal(): void
   onGenInput(e: WechatMiniprogram.Input): void
@@ -84,6 +102,16 @@ Page<ISentencesData, ISentencesMethods>({
     parsing: false,
     favTexts: [],
     masterTexts: [],
+    puzzleWords: [],
+    puzzleSelected: [],
+    puzzleAnswers: [],
+    puzzleScore: 0,
+    puzzleCombo: 0,
+    puzzleIndex: 0,
+    puzzleTotal: 0,
+    puzzleTime: 30,
+    puzzleFinished: false,
+    puzzleStars: 0,
   },
 
   onLoad(options: { id?: string }) {
@@ -226,8 +254,11 @@ Page<ISentencesData, ISentencesMethods>({
   noop() {},
 
   switchMode(e: WechatMiniprogram.TouchEvent) {
-    const mode = e.currentTarget.dataset.mode as 'list' | 'immersion'
-    this.setData({ viewMode: mode, immersionIndex: 0 })
+    const mode = e.currentTarget.dataset.mode as 'list' | 'immersion' | 'puzzle'
+    this.setData({ viewMode: mode, immersionIndex: 0 } as any)
+    if (mode === 'puzzle') {
+      this.startPuzzle()
+    }
   },
 
   prevSentence() {
@@ -241,6 +272,123 @@ Page<ISentencesData, ISentencesMethods>({
     if (this.data.immersionIndex < max) {
       this.setData({ immersionIndex: this.data.immersionIndex + 1 })
     }
+  },
+
+  startPuzzle() {
+    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 8)
+    if (sentences.length === 0) {
+      wx.showToast({ title: '没有适合拼图的句子', icon: 'none' })
+      this.setData({ viewMode: 'list' } as any)
+      return
+    }
+    this.setData({
+      puzzleTotal: Math.min(sentences.length, 8),
+      puzzleIndex: 0,
+      puzzleScore: 0,
+      puzzleCombo: 0,
+      puzzleTime: 30,
+      puzzleFinished: false,
+      puzzleStars: 0,
+    } as any)
+    this.loadPuzzleSentence(sentences)
+  },
+
+  loadPuzzleSentence(sentences: ISentence[]) {
+    const idx = this.data.puzzleIndex
+    if (idx >= sentences.length || idx >= this.data.puzzleTotal) {
+      this.finishPuzzle()
+      return
+    }
+    const s = sentences[idx]
+    const words = s.english.replace(/[.,!?;:'"]/g, '').split(/\s+/).filter(w => w.length > 0)
+    const correct = words.map((_, i) => i)
+    const shuffled = words.map((w, i) => ({ w, i })).sort(() => Math.random() - 0.5).map(x => x.i)
+
+    this.setData({
+      puzzleWords: shuffled.map(i => words[i]),
+      puzzleAnswers: correct,
+      puzzleSelected: [],
+      puzzleTime: Math.max(15, 30 - idx * 2),
+      puzzleFinished: false,
+    } as any)
+  },
+
+  tapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.puzzleFinished) return
+    const wi = Number(e.currentTarget.dataset.wi)
+    const selected = this.data.puzzleSelected
+    if (selected.indexOf(wi) >= 0) return
+    selected.push(wi)
+    this.setData({ puzzleSelected: selected } as any)
+
+    if (selected.length === this.data.puzzleAnswers.length) {
+      this.checkPuzzleAnswer()
+    }
+  },
+
+  untapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.puzzleFinished) return
+    const wi = Number(e.currentTarget.dataset.wi)
+    let selected = this.data.puzzleSelected
+    selected = selected.filter(i => i !== wi)
+    this.setData({ puzzleSelected: selected } as any)
+  },
+
+  checkPuzzleAnswer() {
+    const selected = this.data.puzzleSelected
+    const answers = this.data.puzzleAnswers
+    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 8)
+    let allCorrect = true
+    for (let i = 0; i < answers.length; i++) {
+      if (selected[i] !== answers[i]) {
+        allCorrect = false
+        break
+      }
+    }
+    if (allCorrect) {
+      const combo = this.data.puzzleCombo + 1
+      const bonus = combo > 1 ? combo * 5 : 0
+      const timeBonus = this.data.puzzleTime
+      const score = this.data.puzzleScore + 10 + bonus + timeBonus
+      this.setData({
+        puzzleCombo: combo,
+        puzzleScore: score,
+        puzzleFinished: true,
+      } as any)
+      wx.showToast({ title: `✓ 正确！+${10 + bonus + timeBonus}分`, icon: 'none', duration: 1000 })
+      setTimeout(() => {
+        this.setData({
+          puzzleIndex: this.data.puzzleIndex + 1,
+          puzzleFinished: false,
+        } as any)
+        this.loadPuzzleSentence(sentences)
+      }, 1200)
+    } else {
+      this.setData({ puzzleCombo: 0, puzzleFinished: true } as any)
+      wx.showToast({ title: '✗ 顺序不对，再试试', icon: 'none', duration: 1000 })
+      setTimeout(() => {
+        this.setData({
+          puzzleSelected: [],
+          puzzleFinished: false,
+        } as any)
+      }, 800)
+    }
+  },
+
+  finishPuzzle() {
+    const total = Math.min(this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 8).length, this.data.puzzleTotal)
+    const maxScore = total * 50 + 100
+    const ratio = this.data.puzzleScore / maxScore
+    let stars = 0
+    if (ratio >= 0.8) stars = 3
+    else if (ratio >= 0.5) stars = 2
+    else if (ratio > 0) stars = 1
+    this.setData({ puzzleFinished: true, puzzleStars: stars } as any)
+  },
+
+  restartPuzzle() {
+    this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0 } as any)
+    this.startPuzzle()
   },
 
   openGenModal() {

@@ -31,8 +31,9 @@
   </view>
 
   <view class="mode-bar">
-    <view class="mode-btn {{viewMode === 'list' ? 'active' : ''}}" data-mode="list" catchtap="switchMode">📋 列表浏览</view>
-    <view class="mode-btn {{viewMode === 'immersion' ? 'active' : ''}}" data-mode="immersion" catchtap="switchMode">🎯 沉浸学习</view>
+    <view class="mode-btn {{viewMode === 'list' ? 'active' : ''}}" data-mode="list" catchtap="switchMode">📋 列表</view>
+    <view class="mode-btn {{viewMode === 'immersion' ? 'active' : ''}}" data-mode="immersion" catchtap="switchMode">🎯 沉浸</view>
+    <view class="mode-btn {{viewMode === 'puzzle' ? 'active' : ''}}" data-mode="puzzle" catchtap="switchMode">🧩 拼图</view>
   </view>
 
   <scroll-view class="card-scroll" scroll-y wx:if="{{viewMode === 'list'}}" style="height: {{scrollHeight}}px;">
@@ -85,6 +86,78 @@
       <text class="imm-progress">{{immersionIndex + 1}} / {{filteredSentences.length}}</text>
       <view class="nav-btn {{immersionIndex === filteredSentences.length - 1 ? 'disabled' : ''}}" catchtap="nextSentence">›</view>
     </view>
+  </view>
+
+  <!-- Puzzle Mode -->
+  <view class="puzzle-area" wx:if="{{viewMode === 'puzzle'}}">
+    <view class="pz-header">
+      <view class="pz-h-left">
+        <text class="pz-title">🧩 句子拼图</text>
+        <text class="pz-progress">{{puzzleIndex + 1}} / {{puzzleTotal}}</text>
+      </view>
+      <view class="pz-stats">
+        <text class="pz-score">★ {{puzzleScore}}</text>
+        <text class="pz-combo">🔥 x{{puzzleCombo}}</text>
+      </view>
+    </view>
+
+    <block wx:if="{{!puzzleFinished || puzzleStars === 0}}">
+      <view class="pz-hint">
+        <text class="pz-hint-cn">{{filteredSentences[puzzleIndex]?.chinese || ''}}</text>
+        <text class="pz-hint-en">按正确顺序点击单词拼成句子</text>
+      </view>
+
+      <view class="pz-drop">
+        <text
+          class="pz-drop-word {{puzzleFinished ? 'done' : ''}}"
+          wx:for="{{puzzleSelected}}" wx:key="*this"
+          data-wi="{{item}}"
+          catchtap="{{puzzleFinished ? '' : 'untapPuzzleWord'}}"
+        >
+          {{puzzleWords[item]}}
+        </text>
+        <text class="pz-drop-empty" wx:if="{{puzzleSelected.length === 0}}">点击下方单词开始拼图</text>
+      </view>
+
+      <view class="pz-bank">
+        <text
+          class="pz-bank-word {{puzzleSelected.indexOf(index) >= 0 ? 'used' : ''}}"
+          wx:for="{{puzzleWords}}" wx:key="*this" wx:for-index="index"
+          data-wi="{{index}}"
+          catchtap="tapPuzzleWord"
+        >
+          {{item}}
+        </text>
+      </view>
+
+      <view class="pz-timer">
+        <text class="pz-timer-icon">⏱️</text>
+        <view class="pz-timer-track">
+          <view class="pz-timer-fill" style="width:{{(puzzleTime / 30) * 100}}%"></view>
+        </view>
+      </view>
+    </block>
+
+    <!-- Puzzle Result -->
+    <view class="pz-result" wx:if="{{puzzleFinished && puzzleStars > 0}}">
+      <text class="pz-r-icon">🎉</text>
+      <text class="pz-r-title">拼图完成！</text>
+      <view class="pz-r-stars">
+        <text class="pz-star {{puzzleStars >= 1 ? 'lit' : ''}}">★</text>
+        <text class="pz-star {{puzzleStars >= 2 ? 'lit' : ''}}">★</text>
+        <text class="pz-star {{puzzleStars >= 3 ? 'lit' : ''}}">★</text>
+      </view>
+      <view class="pz-r-stats">
+        <view class="pz-rs-item"><text class="pz-rs-num">{{puzzleScore}}</text><text class="pz-rs-lbl">得分</text></view>
+        <view class="pz-rs-item"><text class="pz-rs-num">{{puzzleCombo}}</text><text class="pz-rs-lbl">最高连击</text></view>
+      </view>
+      <view class="pz-r-actions">
+        <view class="pz-r-btn primary" catchtap="restartPuzzle">🔄 再来一次</view>
+        <view class="pz-r-btn" catchtap="switchMode" data-mode="list">📋 返回列表</view>
+      </view>
+    </view>
+
+    <view class="pz-tip">💡 从左边开始按顺序点击单词，拼出完整句子</view>
   </view>
 
   <view class="immersion-area" wx:if="{{viewMode === 'immersion' && filteredSentences.length === 0}}">
