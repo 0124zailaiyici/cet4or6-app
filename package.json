@@ -1,7 +1,0 @@
-{
-  "name": "cet4-or6-app",
-  "scripts": {
-    "build": "cd server && npm install",
-    "start": "cd server && node server.js"
-  }
-}
