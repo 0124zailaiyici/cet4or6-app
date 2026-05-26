@@ -44,6 +44,6 @@
       { "pagePath": "pages/vocab/vocab", "text": "单词本", "iconPath": "icons/vocab.png", "selectedIconPath": "icons/vocab_active.png" },
       { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "icons/mine.png", "selectedIconPath": "icons/mine_active.png" }
     ]
-  },
-
+  }
 }
+
