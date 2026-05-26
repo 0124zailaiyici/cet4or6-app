@@ -1,67 +1,182 @@
 <view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar">
-    <h1>错题本</h1>
-    <text class="tag">{{totalAttempted}} 题已答</text>
-  </view>
-
-  <view class="stats">
-    <view class="s">
-      <text class="n">{{totalAttempted}}</text>
-      <text class="l">已答</text>
-    </view>
-    <view class="s">
-      <text class="n g">{{rightCount}}</text>
-      <text class="l">✓ 正确</text>
-    </view>
-    <view class="s">
-      <text class="n r">{{wrongCount}}</text>
-      <text class="l">✗ 错误</text>
+    <h1>错题 Boss</h1>
+    <view class="view-toggle">
+      <text class="vt-btn {{view === 'boss' ? 'on' : ''}}" data-view="boss" catchtap="switchView">⚔️ 讨伐</text>
+      <text class="vt-btn {{view === 'list' ? 'on' : ''}}" data-view="list" catchtap="switchView">📋 列表</text>
     </view>
   </view>
 
-  <view class="tabs">
-    <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="0" catchtap="switchTab">📖 阅读</view>
-    <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="1" catchtap="switchTab">🎵 听力</view>
-  </view>
+  <!-- ======== BOSS RUSH VIEW ======== -->
+  <block wx:if="{{view === 'boss'}}">
+    <view class="boss-stats-bar">
+      <view class="bs-item">
+        <text class="bs-num">{{totalCleared}}</text>
+        <text class="bs-lbl">已讨伐</text>
+      </view>
+      <view class="bs-item">
+        <text class="bs-num g">{{combo}}</text>
+        <text class="bs-lbl">连击</text>
+      </view>
+      <view class="bs-item">
+        <text class="bs-num p">{{totalErrors - totalCleared}}</text>
+        <text class="bs-lbl">剩余</text>
+      </view>
+    </view>
 
-  <scroll-view class="list" scroll-y>
-    <block wx:if="{{tab === 0}}">
-      <view class="empty" wx:if="{{readingErrors.length === 0}}">
-        <text>📖 还没有阅读记录</text>
-        <text class="hint">做几道阅读题试试</text>
-        <view class="empty-btn" catchtap="goReading">去做阅读题</view>
-      </view>
-      <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{readingErrors}}" wx:key="id" wx:for-item="item">
-        <view class="h">
-          <text class="src">{{item.source}}</text>
-          <text class="qn">{{item.qLabel}}</text>
-        </view>
-        <text class="q">{{item.question}}</text>
-        <view class="ansr">
-          <view class="ar user">你选的 {{item.userAnswer}}</view>
-          <view class="ar correct" wx:if="{{!item.isCorrect}}">答案 {{item.correctAnswer}}</view>
-          <view class="ar verdict {{item.isCorrect ? 'right' : 'wrong'}}">{{item.isCorrect ? '✓ 正确' : '✗ 错误'}}</view>
+    <!-- Tower -->
+    <scroll-view class="tower-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="tower">
+        <view
+          class="floor {{item.cleared ? 'cleared' : ''}} {{index === currentFloor && !item.cleared ? 'current' : ''}} {{item.locked ? 'locked' : ''}}"
+          wx:for="{{floors}}" wx:key="id" wx:for-index="idx"
+          data-idx="{{idx}}" catchtap="moveToFloor"
+        >
+          <text class="floor-icon">{{item.icon}}</text>
+          <text class="floor-name">{{item.name}}</text>
+          <text class="floor-status" wx:if="{{item.cleared}}">✓</text>
+          <text class="floor-status lk" wx:elif="{{item.locked}}">🔒</text>
         </view>
       </view>
-    </block>
-    <block wx:else>
-      <view class="empty" wx:if="{{listeningErrors.length === 0}}">
-        <text>🎵 还没有听力记录</text>
-        <text class="hint">做几道听力题试试</text>
-        <view class="empty-btn" catchtap="goListening">去做听力题</view>
-      </view>
-      <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{listeningErrors}}" wx:key="id" wx:for-item="item">
-        <view class="h">
-          <text class="src">{{item.source}}</text>
-          <text class="qn">{{item.qLabel}}</text>
-        </view>
-        <text class="q">{{item.question}}</text>
-        <view class="ansr">
-          <view class="ar user">你选的 {{item.userAnswer}}</view>
-          <view class="ar correct" wx:if="{{!item.isCorrect}}">答案 {{item.correctAnswer}}</view>
-          <view class="ar verdict {{item.isCorrect ? 'right' : 'wrong'}}">{{item.isCorrect ? '✓ 正确' : '✗ 错误'}}</view>
+    </scroll-view>
+
+    <!-- Arena -->
+    <view class="arena {{animating ? (bossDefeated ? 'defeated' : 'hit') : ''}}">
+      <!-- Boss -->
+      <view class="boss-sprite {{bossDefeated ? 'defeated' : ''}}">
+        <text class="monster {{animating && !bossDefeated ? 'hit' : ''}}">
+          {{bossDefeated ? '💫' : (currentFloor === 0 ? '👹' : '👾')}}
+        </text>
+        <view class="boss-name">
+          <text>{{floors[currentFloor]?.name || '???'}}</text>
+          <text class="boss-tag">{{currentFloor === 0 ? '🎵 LISTENING' : '📖 READING'}}</text>
         </view>
       </view>
-    </block>
-  </scroll-view>
+
+      <!-- HP Bar -->
+      <view class="hp-wrap">
+        <view class="hp-bar">
+          <view class="hp-fill" style="width:{{maxHP > 0 ? (bossHP / maxHP * 100) : 0}}%"></view>
+        </view>
+        <view class="hp-text">
+          <text class="hp-cur">HP {{bossHP}}</text>
+          <text>HP {{maxHP}}</text>
+        </view>
+      </view>
+
+      <!-- Combo -->
+      <view class="combo-bar">
+        <text class="c-label">连击</text>
+        <view class="c-track">
+          <view class="c-fill" style="width:{{Math.min(100, combo * 20)}}%"></view>
+        </view>
+        <text class="c-num">x{{combo}}</text>
+      </view>
+
+      <!-- Battle Log -->
+      <view class="battle-log">
+        <text wx:for="{{battleLog}}" wx:key="*this">{{item}}</text>
+      </view>
+
+      <!-- Question Card -->
+      <view class="battle-q" wx:if="{{currentError && !showResult}}">
+        <view class="q-header">
+          <text class="q-src">{{currentError.source}}</text>
+          <text class="q-label">{{currentError.section}} · {{currentError.qLabel}}</text>
+        </view>
+        <text class="q-text">{{currentError.question}}</text>
+
+        <!-- Quiz Options -->
+        <view class="q-options">
+          <view
+            class="q-opt {{answering ? 'disabled' : ''}}"
+            wx:for="{{quizOptions}}" wx:key="*this"
+            data-correct="{{item.isCorrect}}"
+            catchtap="attack"
+          >
+            <text class="q-opt-letter">{{item.letter}}</text>
+            <text class="q-opt-text">{{item.text}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Empty state -->
+      <view class="empty-boss" wx:if="{{totalErrors === 0 && floors.length > 0}}">
+        <text class="empty-icon">🎉</text>
+        <text class="empty-t">没有错题！</text>
+        <text class="empty-d">全部正确，继续保持！</text>
+      </view>
+    </view>
+
+    <!-- Result Overlay -->
+    <view class="result-overlay {{showResult ? 'show' : ''}}">
+      <text class="r-icon">🏆</text>
+      <text class="r-title">全部讨伐完成！</text>
+      <text class="r-sub">所有错题 Boss 已被击败</text>
+      <view class="r-loot">
+        <text class="loot-icon">⚔️</text>
+        <text class="loot-label">获得「错题终结者」称号</text>
+        <text class="loot-sub">错题不再可怕！</text>
+      </view>
+      <view class="r-stats">
+        <view class="rs-item">
+          <text class="rs-num g">{{totalCleared}}</text>
+          <text class="rs-lbl">已讨伐</text>
+        </view>
+        <view class="rs-item">
+          <text class="rs-num p">{{combo}}</text>
+          <text class="rs-lbl">最高连击</text>
+        </view>
+      </view>
+      <view class="btn btn-p" catchtap="restartBattle">再来一次 🔄</view>
+      <view class="btn btn-s" catchtap="switchView" data-view="list">查看错题列表</view>
+    </view>
+  </block>
+
+  <!-- ======== LIST VIEW ======== -->
+  <block wx:else>
+    <view class="stats">
+      <view class="s"><text class="n">{{totalAttempted}}</text><text class="l">已答</text></view>
+      <view class="s"><text class="n g">{{rightCount}}</text><text class="l">✓ 正确</text></view>
+      <view class="s"><text class="n r">{{wrongCount}}</text><text class="l">✗ 错误</text></view>
+    </view>
+    <view class="tabs">
+      <view class="tab {{tab === 0 ? 'on' : ''}}" data-tab="0" catchtap="switchTab">📖 阅读</view>
+      <view class="tab {{tab === 1 ? 'on' : ''}}" data-tab="1" catchtap="switchTab">🎵 听力</view>
+    </view>
+    <scroll-view class="list" scroll-y>
+      <block wx:if="{{tab === 0}}">
+        <view class="empty" wx:if="{{readingErrors.length === 0}}">
+          <text>📖 还没有阅读记录</text>
+          <text class="hint">做几道阅读题试试</text>
+          <view class="empty-btn" catchtap="goReading">去做阅读题</view>
+        </view>
+        <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{readingErrors}}" wx:key="id">
+          <view class="h"><text class="src">{{item.source}}</text><text class="qn">{{item.qLabel}}</text></view>
+          <text class="q">{{item.question}}</text>
+          <view class="ansr">
+            <view class="ar user">你选的 {{item.userAnswer}}</view>
+            <view class="ar correct" wx:if="{{!item.isCorrect}}">答案 {{item.correctAnswer}}</view>
+            <view class="ar verdict {{item.isCorrect ? 'right' : 'wrong'}}">{{item.isCorrect ? '✓ 正确' : '✗ 错误'}}</view>
+          </view>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="empty" wx:if="{{listeningErrors.length === 0}}">
+          <text>🎵 还没有听力记录</text>
+          <text class="hint">做几道听力题试试</text>
+          <view class="empty-btn" catchtap="goListening">去做听力题</view>
+        </view>
+        <view class="card {{item.isCorrect ? 'right' : 'wrong'}}" wx:for="{{listeningErrors}}" wx:key="id">
+          <view class="h"><text class="src">{{item.source}}</text><text class="qn">{{item.qLabel}}</text></view>
+          <text class="q">{{item.question}}</text>
+          <view class="ansr">
+            <view class="ar user">你选的 {{item.userAnswer}}</view>
+            <view class="ar correct" wx:if="{{!item.isCorrect}}">答案 {{item.correctAnswer}}</view>
+            <view class="ar verdict {{item.isCorrect ? 'right' : 'wrong'}}">{{item.isCorrect ? '✓ 正确' : '✗ 错误'}}</view>
+          </view>
+        </view>
+      </block>
+    </scroll-view>
+  </block>
 </view>
