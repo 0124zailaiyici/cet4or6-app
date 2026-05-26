@@ -214,9 +214,15 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
 
 // ===== AudioManager =====
 class AudioManager {
-  private ctx: WechatMiniprogram.InnerAudioContext | null = null
-  private pageRef: any = null
-  private customOnEnded: (() => void) | null = null
+  private ctx: WechatMiniprogram.InnerAudioContext | null
+  private pageRef: any
+  private customOnEnded: (() => void) | null
+
+  constructor() {
+    this.ctx = null
+    this.pageRef = null
+    this.customOnEnded = null
+  }
 
   attach(page: any) {
     this.pageRef = page
