@@ -406,6 +406,8 @@ Page<IListeningData, IListeningMethods>({
     summaryTotal: 0,
     summaryAnswered: 0,
     summaryMarked: 0,
+    summaryResults: [],
+    summaryCorrectCount: 0,
     focusSentences: [],
     focusSentenceMap: [],
     focusPageIndices: [],

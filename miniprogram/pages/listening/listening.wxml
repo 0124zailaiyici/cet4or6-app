@@ -64,6 +64,20 @@
         </view>
       </view>
 
+      <view class="sm-results" wx:if="{{summaryResults && summaryResults.length > 0}}">
+        <view class="sm-subtitle">📝 答题详情（{{summaryCorrectCount}}/{{summaryTotal}} 正确）</view>
+        <view class="sm-qitem" wx:for="{{summaryResults}}" wx:key="pi">
+          <view class="smq-hd">
+            <text class="smq-icon {{item.isCorrect ? 'ok' : (item.isAnswered ? 'bad' : 'miss')}}">{{item.isCorrect ? '✓' : (item.isAnswered ? '✗' : '—')}}</text>
+            <text class="smq-label">{{item.stem}}</text>
+            <text class="smq-sec">{{pages[item.pi].section}}</text>
+          </view>
+          <view wx:if="{{item.isAnswered}}" class="smq-line">你的: <text class="smq-ltr">{{item.userLetter}}</text> {{item.userText}}</view>
+          <view wx:if="{{!item.isCorrect && item.hasAnswerKey}}" class="smq-line correct">正确: <text class="smq-ltr">{{item.correctLetter}}</text> {{item.correctText}}</view>
+          <view wx:elif="{{!item.isCorrect && !item.hasAnswerKey}}" class="smq-line dim">无标准答案</view>
+        </view>
+      </view>
+
       <view class="sm-marked" wx:if="{{summaryMarked > 0}}">
         <view class="sm-subtitle">📌 标记需重听的题目</view>
         <view class="sm-mitem" wx:for="{{pages}}" wx:key="type" wx:for-index="pi" wx:if="{{markedFlags[pi] && item.type === 'q'}}">
