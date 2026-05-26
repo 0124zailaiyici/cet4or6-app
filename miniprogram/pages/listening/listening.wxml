@@ -125,7 +125,7 @@
           <view class="sent-item {{index === currentIndex ? 'current' : ''}} {{hardSentences.indexOf(focusSentenceMap[index]) !== -1 ? 'hard' : ''}}" wx:for="{{focusSentences}}" wx:key="*this" id="fs-{{index}}" data-index="{{index}}" catchtap="playSentence">
             <view class="sent-num">{{index + 1}}</view>
             <view class="sent-body">
-              <text class="sent-text">{{item}}</text>
+              <text class="sent-text" user-select>{{item}}</text>
             </view>
             <view class="sent-acts">
               <view class="sent-play {{index === currentIndex && isPlaying ? 'playing' : ''}}">{{index === currentIndex && loading ? '...' : '▶'}}</view>
@@ -170,7 +170,7 @@
 
         <!-- 数据警告 -->
         <view class="dwarn" wx:if="{{dataWarning}}">
-          <text>{{dataWarning}}</text>
+          <text user-select>{{dataWarning}}</text>
         </view>
 
         <!-- 题目卡片 -->
