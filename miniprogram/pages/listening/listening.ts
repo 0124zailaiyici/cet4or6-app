@@ -25,7 +25,6 @@ interface IListeningPage {
   stem?: string
   opts?: string[]
   transcriptText?: string
-  transcriptUrl?: string
 }
 
 interface IQuestionResult {
@@ -164,7 +163,6 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
       stem: currentQ.stem,
       opts: currentQ.opts.map(o => o.t),
       transcriptText: sent ? sent.text : '',
-      transcriptUrl: sentIdx >= 0 && sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
     })
     currentQ = null
   }
@@ -910,11 +908,14 @@ Page<IListeningData, IListeningMethods>({
     this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false })
   },
 
-  playTranscriptSentence(e: WechatMiniprogram.TouchEvent) {
-    const url = e.currentTarget.dataset.url as string
-    if (!url) return
+  playTranscriptSentence(_e: WechatMiniprogram.TouchEvent) {
+    const passage = this.data.currentPassage
+    if (!passage || !passage.audioUrl) return
+    const audioUrl = passage.audioUrl.startsWith('http')
+      ? passage.audioUrl
+      : `${API_BASE}${encodeURI(passage.audioUrl)}`
     if (this.data.transcriptPlaying) { audio.pause(); this.setData({ transcriptPlaying: false }); return }
-    audio.play(url, this.data.speed)
+    audio.play(audioUrl, this.data.speed)
     this.setData({ transcriptPlaying: true, isPlaying: true })
   },
 

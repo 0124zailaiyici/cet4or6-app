@@ -52,7 +52,6 @@ function buildPages(passage) {
             return m && parseInt(m[1]) === qNum;
         });
         const sent = sentIdx >= 0 ? passage.sentences[sentIdx] : null;
-        const audioUrl = passage.audioUrl.startsWith('http') ? passage.audioUrl : `${API_BASE}${encodeURI(passage.audioUrl)}`;
         pages.push({
             type: 'q',
             section: currentQ.section,
@@ -327,6 +326,7 @@ Page({
         focusSentences: [],
         focusSentenceMap: [],
         focusPageIndices: [],
+        transcriptPlaying: false,
     },
     onLoad(options) {
         if (options && options.examMode === '1')
@@ -605,6 +605,7 @@ Page({
                 focusSentences: [],
                 focusSentenceMap: [],
                 focusPageIndices: [],
+                transcriptPlaying: false,
                 currentIndex: 0,
                 currentPage: 0,
                 audioTime: 0,
@@ -804,7 +805,21 @@ Page({
         this.setData({ speed });
         audio.setRate(speed);
     },
-    toggleTranscript() { this.setData({ showTranscript: !this.data.showTranscript }); },
+    toggleTranscript() {
+        this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false });
+    },
+    playTranscriptSentence(e) {
+        const url = e.currentTarget.dataset.url;
+        if (!url)
+            return;
+        if (this.data.transcriptPlaying) {
+            audio.pause();
+            this.setData({ transcriptPlaying: false });
+            return;
+        }
+        audio.play(url, this.data.speed);
+        this.setData({ transcriptPlaying: true, isPlaying: true });
+    },
     toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }); },
     toggleHard(e) {
         const rawIndex = Number(e.currentTarget.dataset.index);
