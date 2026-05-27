@@ -189,7 +189,7 @@ const sentencesData = [
   {
     id: 19,
     english: "What matters most in education is not the score but the ability to solve practical problems independently.",
-    chinese: "教育中最重要的是分数，而是独立解决实际问题的能力。",
+    chinese: "教育中最重要的不是分数，而是独立解决实际问题的能力。",
     keywords: [
       "what matters most",
       "solve practical problems",
