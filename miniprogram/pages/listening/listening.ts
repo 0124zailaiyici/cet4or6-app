@@ -80,7 +80,7 @@ interface IListeningData {
   focusSentences: string[]
   focusSentenceMap: number[]
   focusPageIndices: number[]
-  _retried?: boolean
+  _retryCount?: number
 }
 
 interface IListeningMethods {
@@ -310,9 +310,10 @@ class AudioManager {
         const code = (res as any).errCode
         if (this.pageRef) {
           const d = this.pageRef.data
-          if (!d._retried) {
-            this.pageRef.setData({ _retried: true, loading: true })
-            setTimeout(() => { if (this.ctx && this.ctx.src) { this.ctx.play() } }, 2000)
+          const rt = d._retryCount || 0
+          if (rt < 3) {
+            this.pageRef.setData({ _retryCount: rt + 1, loading: true })
+            setTimeout(() => { if (this.ctx && this.ctx.src) { this.ctx.play() } }, (rt + 1) * 5000)
             return
           }
         }
@@ -339,7 +340,7 @@ class AudioManager {
     ctx.src = src
     ctx.playbackRate = rate
     ctx.play()
-    if (this.pageRef) this.pageRef.setData({ _retried: false })
+    if (this.pageRef) this.pageRef.setData({ _retryCount: 0 })
   }
 
   resume(rate: number = 1) {
@@ -515,7 +516,7 @@ Page<IListeningData, IListeningMethods>({
         markedFlags: new Array(pages.length).fill(false),
         loopSentence: fm,
         speed: fm ? 0.8 : 1,
-        _retried: false,
+        _retryCount: 0,
       })
       audio.setRate(fm ? 0.8 : 1)
     } else {
