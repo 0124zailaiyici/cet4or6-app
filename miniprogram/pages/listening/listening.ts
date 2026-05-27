@@ -2,7 +2,7 @@ import listeningData from '../../data/listening_generated'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
-const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'http://localhost:3001' } catch(_) { return 'http://localhost:3001' } })()
+const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
 
 interface ISentence {
   text: string
@@ -24,6 +24,8 @@ interface IListeningPage {
   section: string
   stem?: string
   opts?: string[]
+  transcriptText?: string
+  transcriptUrl?: string
 }
 
 interface IQuestionResult {
@@ -80,6 +82,7 @@ interface IListeningData {
   focusSentences: string[]
   focusSentenceMap: number[]
   focusPageIndices: number[]
+  transcriptPlaying: boolean
   _retryCount?: number
 }
 
@@ -112,6 +115,7 @@ interface IListeningMethods {
   retryPages(): void
   toggleFocus(): void
   seekFocusCurrent(): void
+  playTranscriptSentence(e: WechatMiniprogram.TouchEvent): void
 }
 
 const LABELS: Record<string, string> = {
@@ -148,11 +152,19 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     if (!currentQ) return
     pushDir()
     currentQ.opts.sort((a, b) => a.l.localeCompare(b.l))
+    const qNum = parseInt((currentQ.stem || '').replace(/^Q/i, ''))
+    const sentIdx = passage.sentences.findIndex(s => {
+      const m = s.text.match(/^(?:Q)?(\d+)\./)
+      return m && parseInt(m[1]) === qNum
+    })
+    const sent = sentIdx >= 0 ? passage.sentences[sentIdx] : null
     pages.push({
       type: 'q',
       section: currentQ.section,
       stem: currentQ.stem,
       opts: currentQ.opts.map(o => o.t),
+      transcriptText: sent ? sent.text : '',
+      transcriptUrl: sentIdx >= 0 && sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/split/${passage.id}_${sentIdx}.mp3` : undefined,
     })
     currentQ = null
   }
@@ -430,6 +442,7 @@ Page<IListeningData, IListeningMethods>({
     focusSentences: [],
     focusSentenceMap: [],
     focusPageIndices: [],
+    transcriptPlaying: false,
   },
 
   onLoad(options: { passageId?: string; examMode?: string }) {
@@ -705,7 +718,8 @@ Page<IListeningData, IListeningMethods>({
         isPlaying: false,
         focusSentences: [],
         focusSentenceMap: [],
-        focusPageIndices: [],
+    focusPageIndices: [],
+    transcriptPlaying: false,
         currentIndex: 0,
         currentPage: 0,
         audioTime: 0,
@@ -892,7 +906,17 @@ Page<IListeningData, IListeningMethods>({
     audio.setRate(speed)
   },
 
-  toggleTranscript() { this.setData({ showTranscript: !this.data.showTranscript }) },
+  toggleTranscript() {
+    this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false })
+  },
+
+  playTranscriptSentence(e: WechatMiniprogram.TouchEvent) {
+    const url = e.currentTarget.dataset.url as string
+    if (!url) return
+    if (this.data.transcriptPlaying) { audio.pause(); this.setData({ transcriptPlaying: false }); return }
+    audio.play(url, this.data.speed)
+    this.setData({ transcriptPlaying: true, isPlaying: true })
+  },
 
   toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }) },
 

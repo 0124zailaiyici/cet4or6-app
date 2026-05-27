@@ -36,11 +36,6 @@ interface IResultItem {
   userOptionIndex?: number
 }
 
-interface IAGroup {
-  locate: string
-  display: string
-}
-
 interface IReadingData {
   readings: IReadingItem[]
   current: IReadingItem | null
@@ -83,8 +78,8 @@ interface IReadingData {
   showHint: boolean
   locateMap: Record<string, string>
   currentQLocate: string
-  aParaGroups: IAGroup[]
   bStmtKeywords: string[]
+  activeBlankHint: string
 }
 
 interface IReadingMethods {
@@ -128,6 +123,7 @@ interface IReadingMethods {
   tokenizeToSegments(text: string, segs: ISegment[], vocab: Record<string, string>, paraIdx: number): void
   scrollToResultItem(e: WechatMiniprogram.TouchEvent): void
   toggleHint(): void
+  getBlankGrammarHint(num: string): string
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -173,8 +169,8 @@ Page<IReadingData, IReadingMethods>({
     showHint: false,
     locateMap: {},
     currentQLocate: '',
-    aParaGroups: [],
-    bStmtKeywords: []
+    bStmtKeywords: [],
+    activeBlankHint: ''
   },
 
   onLoad(options?: { examMode?: string }) {
@@ -231,29 +227,6 @@ Page<IReadingData, IReadingMethods>({
       const qLocate = annot && annot.qLocate || {}
       const locateMap: Record<string, string> = { ...qLocate }
       const currentQLocate = st === 'C' ? (qLocate[String(0)] || '') : ''
-      const aParaGroups: IAGroup[] = []
-      if (st === 'A') {
-        const blankKeys = item.correctAnswers ? Object.keys(item.correctAnswers) : []
-        const re = /\b(\d{2})\b/g
-        const groups: Record<string, string[]> = {}
-        for (let pi = 0; pi < paras.length; pi++) {
-          const text = paras[pi]
-          const localRe = new RegExp(re.source, 'g')
-          let m: RegExpExecArray | null
-          while ((m = localRe.exec(text)) !== null) {
-            const num = m[1]
-            if (blankKeys.includes(num)) {
-              const key = 'P' + (pi + 1)
-              if (!groups[key]) groups[key] = []
-              if (!groups[key].includes(num)) groups[key].push(num)
-            }
-          }
-        }
-        for (const [locate, blanks] of Object.entries(groups)) {
-          const sorted = blanks.sort((a, b) => parseInt(a) - parseInt(b))
-          aParaGroups.push({ locate, display: sorted.join(',') })
-        }
-      }
       const stopWords = new Set(['this','that','these','those','from','with','have','been','were','will','more','some','than','about','which','their','there','would','what','when','where','because','after','into','other','also','then','them','they','very','just','such','each','well','most','only','over','much','many','even','make','made','like','long','same','both','between','under','before','while','still','through','though','might','could','should','shall','first','second','third','last','next','another','being','doing','having','does'])
       const bStmtKeywords: string[] = []
       if (st === 'B') {
@@ -264,8 +237,9 @@ Page<IReadingData, IReadingMethods>({
             const pi = letter.charCodeAt(0) - 'A'.charCodeAt(0)
             const paraText = (paras[pi] || '').replace(/^[A-Z][\)）]\s*/, '')
             const words = paraText.toLowerCase().split(/\W+/).filter(w => w.length >= 4 && !stopWords.has(w))
-            const unique = [...new Set(words)].slice(0, 3)
-            bStmtKeywords.push(unique.join(', '))
+            const unique = [...new Set(words)].slice(0, 2)
+            const kw = unique.join(', ')
+            bStmtKeywords.push(kw.length > 16 ? kw.slice(0, 15) + '…' : kw)
           } else {
             bStmtKeywords.push('')
           }
@@ -302,8 +276,8 @@ Page<IReadingData, IReadingMethods>({
         showHint: false,
         locateMap,
         currentQLocate,
-        aParaGroups,
-        bStmtKeywords
+        bStmtKeywords,
+        activeBlankHint: ''
       })
       this.updatePageParas()
       this.updateCompact()
@@ -324,7 +298,33 @@ Page<IReadingData, IReadingMethods>({
   },
 
   toggleHint() {
-    this.setData({ showHint: !this.data.showHint })
+    const on = !this.data.showHint
+    this.setData({ showHint: on, highlightedPara: on ? this.data.highlightedPara : -1 })
+  },
+
+  getBlankGrammarHint(num: string): string {
+    const paras = this.data.passageParas
+    const annot = readingAnnotations[this.data.current?.id || 0]
+    const qHint = annot?.qHint || {}
+    if (qHint[num]) return qHint[num]
+    for (const para of paras) {
+      const idx = para.indexOf(num)
+      if (idx < 0) continue
+      const before = para.slice(0, idx).trim().split(/\s+/)
+      const b1 = before[before.length - 1]?.replace(/[^a-zA-Z]/g, '').toLowerCase() || ''
+      if (['a', 'an'].includes(b1)) return '需要: 名词 (前面有 ' + b1 + ')'
+      if (b1 === 'the') return '需要: 名词 (前面有 the)'
+      if (['has', 'have', 'had'].includes(b1)) return '需要: 过去分词 (前面有 ' + b1 + ')'
+      if (b1 === 'to') return '需要: 动词原形 (前面有 to)'
+      if (['is', 'are', 'was', 'were', 'been', 'being', 'am', 'be'].includes(b1)) return '需要: 形容词或过去分词 (前面有 ' + b1 + ')'
+      if (['more', 'most'].includes(b1)) return '需要: 形容词 (前面有 ' + b1 + ')'
+      if (['very', 'quite', 'rather', 'extremely', 'highly', 'deeply'].includes(b1)) return '需要: 形容词 (前面有 ' + b1 + ')'
+      if (['can', 'could', 'will', 'would', 'shall', 'should', 'may', 'might', 'must'].includes(b1)) return '需要: 动词原形 (前面有情态动词 ' + b1 + ')'
+      if (['of', 'for', 'in', 'on', 'at', 'by', 'with', 'from', 'about', 'into', 'during', 'since', 'without', 'between', 'under'].includes(b1)) return '需要: 名词 (前面有介词 ' + b1 + ')'
+      if (['and'].includes(b1)) return '注意: 与前面并列，看前面词性'
+      return '需要: 动词或名词 (根据上下文)'
+    }
+    return ''
   },
 
   onWordTap(e: WechatMiniprogram.TouchEvent) {
@@ -667,11 +667,13 @@ Page<IReadingData, IReadingMethods>({
       const used = [...this.data.usedFlags]
       const idx = this.data.current!.options.indexOf(word)
       if (idx > -1) used[idx] = false
-      this.setData({ blankAnswers: ba, usedFlags: used, activeBlank: null })
-      this.saveAnswers()
+      this.setData({ blankAnswers: ba, usedFlags: used, activeBlank: null, activeBlankHint: '' })
     } else {
-      this.setData({ activeBlank: this.data.activeBlank === num ? null : num })
+      const newActive = this.data.activeBlank === num ? null : num
+      const hint = newActive ? this.getBlankGrammarHint(num) : ''
+      this.setData({ activeBlank: newActive, activeBlankHint: hint })
     }
+    this.saveAnswers()
   },
 
   onOptionTap(e: WechatMiniprogram.TouchEvent) {

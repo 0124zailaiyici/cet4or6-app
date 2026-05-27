@@ -156,6 +156,20 @@
                       <view class="po-t">{{item}}</view>
                     </view>
                   </view>
+                  <!-- Transcript -->
+                  <view wx:if="{{item.transcriptText}}" class="ts-area">
+                    <view class="ts-toggle {{showTranscript ? 'open' : ''}}" catchtap="toggleTranscript">
+                      <text class="ts-label">📄 原文</text>
+                      <text class="ts-arrow">▼</text>
+                    </view>
+                    <view class="ts-body {{showTranscript ? 'open' : ''}}">
+                      <view class="ts-text">{{item.transcriptText}}</view>
+                      <view class="ts-play {{transcriptPlaying ? 'on' : ''}}" data-url="{{item.transcriptUrl}}" catchtap="playTranscriptSentence">
+                        <text wx:if="{{transcriptPlaying}}">⏸</text>
+                        <text wx:else>▶</text>
+                      </view>
+                    </view>
+                  </view>
                 </view>
               </view>
             </view>

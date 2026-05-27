@@ -7,10 +7,10 @@ const listening_generated_1 = __importDefault(require("../../data/listening_gene
 const checkin_1 = require("../../utils/checkin");
 const theme_1 = require("../../utils/theme");
 const API_BASE = (() => { try {
-    return wx.getStorageSync('api_base') || 'http://localhost:3001';
+    return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app';
 }
 catch (_) {
-    return 'http://localhost:3001';
+    return 'https://cet4or6-app-production.up.railway.app';
 } })();
 const LABELS = {
     sectionA: 'Section A  News Reports',
@@ -46,11 +46,20 @@ function buildPages(passage) {
             return;
         pushDir();
         currentQ.opts.sort((a, b) => a.l.localeCompare(b.l));
+        const qNum = parseInt((currentQ.stem || '').replace(/^Q/i, ''));
+        const sentIdx = passage.sentences.findIndex(s => {
+            const m = s.text.match(/^(?:Q)?(\d+)\./);
+            return m && parseInt(m[1]) === qNum;
+        });
+        const sent = sentIdx >= 0 ? passage.sentences[sentIdx] : null;
+        const audioUrl = passage.audioUrl.startsWith('http') ? passage.audioUrl : `${API_BASE}${encodeURI(passage.audioUrl)}`;
         pages.push({
             type: 'q',
             section: currentQ.section,
             stem: currentQ.stem,
             opts: currentQ.opts.map(o => o.t),
+            transcriptText: sent ? sent.text : '',
+            transcriptUrl: sentIdx >= 0 && sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/split/${passage.id}_${sentIdx}.mp3` : undefined,
         });
         currentQ = null;
     }

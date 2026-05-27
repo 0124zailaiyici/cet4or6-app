@@ -112,14 +112,13 @@
           <block wx:if="{{current.sectionType === 'A'}}">
             <view class="qz-label">
               📋 选词（15选10）
-              <text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 请选词填入第{{activeBlank}}空</text>
+              <text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 第{{activeBlank}}空</text>
               <view class="hint-btn {{showHint ? 'on' : ''}}" catchtap="toggleHint">💡 提示</view>
             </view>
-            <view class="hint-para-row" wx:if="{{showHint && aParaGroups.length}}">
-              <text class="hint-para-group" wx:for="{{aParaGroups}}" wx:key="locate" data-locate="{{item.locate}}" catchtap="jumpToParagraph">
-                📍 {{item.locate}}<text class="hint-para-blanks"> ({{item.display}})</text>
-              </text>
+            <view class="hint-body" wx:if="{{showHint && activeBlank && activeBlankHint}}">
+              <text class="hint-grammar">💡 {{activeBlankHint}}</text>
             </view>
+
             <scroll-view class="qz-chip-scroll" scroll-y enhanced="{{true}}">
               <view class="qz-chips">
                 <text class="qzc {{usedFlags[i] ? 'used' : ''}} {{submitted ? 'locked' : ''}}" wx:for="{{current.options}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" catchtap="onOptionTap">{{optionLetters[i]}}. {{item}}</text>
