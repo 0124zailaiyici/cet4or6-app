@@ -353,11 +353,37 @@ Page<ISentencesData, ISentencesMethods>({
     const shuffled = words.map((w, i) => ({ w, i })).sort(() => Math.random() - 0.5).map(x => x.i)
 
     // Auto-place keywords as hints based on sentence length
-    const keySet = new Set((s.keywords || []).map(k => k.toLowerCase()))
-    const keyOrigIndices = words.map(w => w.toLowerCase()).reduce<number[]>((acc, w, i) => {
-      if (keySet.has(w)) acc.push(i)
-      return acc
-    }, [])
+    // Match multi-word keyword phrases against sentence words
+    const keyOrigIndices: number[] = []
+    for (const kw of (s.keywords || [])) {
+      const kwWords = kw.toLowerCase().replace(/[!?;:'"]/g, '')
+        .split(/\.\.\.+|\s+/).map(w => w.replace(/[.,]/g, '')).filter(w => w.length > 0)
+      if (kwWords.length === 0) continue
+      let found = false
+      // Step 1: exact phrase match (consecutive words)
+      for (let i = 0; i <= words.length - kwWords.length; i++) {
+        let match = true
+        for (let j = 0; j < kwWords.length; j++) {
+          if (words[i + j].toLowerCase() !== kwWords[j]) { match = false; break }
+        }
+        if (match) {
+          for (let j = 0; j < kwWords.length; j++) {
+            if (keyOrigIndices.indexOf(i + j) < 0) keyOrigIndices.push(i + j)
+          }
+          found = true
+          break
+        }
+      }
+      // Step 2: individual word matching (handles inflected forms like "learning" vs "learn")
+      if (!found) {
+        for (const kww of kwWords) {
+          if (kww.length <= 2) continue
+          const idx = words.findIndex(w => w.toLowerCase() === kww || w.toLowerCase().startsWith(kww))
+          if (idx >= 0 && keyOrigIndices.indexOf(idx) < 0) keyOrigIndices.push(idx)
+        }
+      }
+    }
+    keyOrigIndices.sort((a, b) => a - b)
     let autoCount = 0
     const wlen = words.length
     if (wlen <= 4) autoCount = Math.min(1, keyOrigIndices.length)

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>翻译练习 v3 · UI 原型</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,"PingFang SC","Segoe UI",Roboto,sans-serif;background:#fdf2f8;display:flex;justify-content:center;padding:30px 16px;gap:20px;flex-wrap:wrap}
+  .phone{width:375px;border-radius:36px;overflow:hidden;background:#fff8fc;box-shadow:0 20px 60px rgba(244,114,182,0.1)}
+  .notch{height:40px;background:#fff8fc;display:flex;align-items:center;justify-content:center;font-size:9px;color:#f9a8d4;letter-spacing:4px;font-weight:600}
+  .page{min-height:600px;padding-bottom:110rpx}
+  
+  /* ── 共享组件 ── */
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 8px}
+  .nav-l{display:flex;align-items:center;gap:10px}
+  .nav-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f9a8d4,#f472b6);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 10px rgba(244,114,182,0.2)}
+  .nav-greeting{font-size:10px;color:#f9a8d4;font-weight:500}
+  .nav-title{font-size:15px;font-weight:700;color:#4a1a2e}
+  .nav-r{display:flex;gap:8px}
+  .nav-icon{width:34px;height:34px;border-radius:12px;background:rgba(244,114,182,0.06);display:flex;align-items:center;justify-content:center;font-size:14px}
+
+  .tabbar{position:sticky;bottom:0;display:flex;padding:6px 16px 10px;gap:2px;border-top:1px solid rgba(244,114,182,0.04);background:#fff8fc}
+  .tab{flex:1;text-align:center;padding:6px 0;font-size:10px;font-weight:600;border-radius:12px;color:#f9a8d4;cursor:pointer}
+  .tab.active{background:#fce4ec;color:#ec407a}
+  .tab .ico{display:block;font-size:18px;margin-bottom:2px}
+
+  .stitle{font-size:13px;font-weight:600;color:#4a1a2e;padding:12px 20px 8px;display:flex;align-items:center;gap:4px}
+
+  /* ═══════════ 新仪表盘 ═══════════ */
+  .gc{margin:0 16px 10px;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,#fce4ec,#fff3e0);display:flex;align-items:center;gap:14px}
+  .gc-ring{width:52px;height:52px;border-radius:50%;flex-shrink:0;background:conic-gradient(#f472b6 0deg 162deg,rgba(244,114,182,0.08)162deg 360deg);display:flex;align-items:center;justify-content:center}
+  .gc-ring-in{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gc-num{font-size:16px;font-weight:800;color:#ec407a;line-height:1}
+  .gc-lb{font-size:7px;color:#f9a8d4}
+  .gc-body{flex:1}
+  .gc-tip{display:block;font-size:13px;font-weight:600;color:#4a1a2e}
+  .gc-sub{display:block;font-size:10px;color:#f9a8d4;margin-top:2px}
+  .gc-badge{padding:4px 12px;border-radius:14px;background:rgba(255,202,40,0.12);font-size:18px;text-align:center}
+  .gc-badge .n{font-weight:800;color:#ff8f00;display:block;font-size:20px}
+  .gc-badge .l{font-size:8px;color:#ffa000}
+
+  /* ── 今日任务卡片 ── */
+  .today{margin:0 16px 10px;padding:14px 16px;border-radius:18px;background:#fff;border:1px solid rgba(102,187,106,0.12)}
+  .today-h{font-size:11px;font-weight:700;color:#388e3c;margin-bottom:10px;display:flex;align-items:center;gap:4px}
+  .today-h .sub{font-size:9px;font-weight:500;color:#81c784;margin-left:auto}
+  .today-items{display:flex;flex-direction:column;gap:6px}
+  .today-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f1f8e9;border-radius:10px;cursor:pointer}
+  .today-item:active{transform:scale(0.98)}
+  .today-item .emoji{font-size:14px}
+  .today-item .body{flex:1}
+  .today-item .text{display:block;font-size:11px;color:#2e7d32;font-weight:500}
+  .today-item .tag{font-size:8px;font-weight:600;padding:1px 6px;border-radius:4px;background:#e8f5e9;color:#388e3c;display:inline-block;margin-top:2px}
+  .today-item .status{font-size:14px;color:#66bb6a}
+
+  /* ── 推荐理由气泡（新增）── */
+  .today-reason{padding:8px 12px;margin-top:8px;background:#e8f5e9;border-radius:10px;font-size:10px;color:#558b2f;line-height:1.6;display:flex;align-items:flex-start;gap:6px}
+  .today-reason .icon{flex-shrink:0;font-size:12px;margin-top:1px}
+
+  /* ── 题目列表 ── */
+  .tasks{padding:4px 16px 20px}
+  .task{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer}
+  .task:active{transform:scale(0.98)}
+  .task .emoji{width:36px;height:36px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .task .emoji.exam{background:#fce4ec}.task .emoji.sim{background:#f3e8ff}.task .emoji.para{background:#e0f2e9}
+  .task .body{flex:1;min-width:0}
+  .task .text{display:block;font-size:12px;font-weight:500;color:#4a1a2e;line-height:1.5}
+  .task .tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+  .task .tag{font-size:8px;font-weight:600;padding:1px 6px;border-radius:4px}
+  .task .tag.l1{background:#e8f5e9;color:#388e3c}.task .tag.l2{background:#e3f2fd;color:#1976d2}
+  .task .tag.exam{background:#fce4ec;color:#d81b60}.task .tag.sim{background:#f3e8ff;color:#8e24aa}.task .tag.para{background:#e0f2e9;color:#00897b}
+  .task .right{text-align:right;flex-shrink:0}
+  .task .check{font-size:14px;display:block}
+  .task .check.done{color:#66bb6a}
+  .task .fav{font-size:12px;display:block;margin-top:2px;color:#ffca28}
+
+  /* ═══════════ 增强翻译提示 ═══════════ */
+  .ph{background:#fff;border-radius:20px;padding:20px;margin:0 16px 12px}
+  .ph-kws{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .ph-kw{padding:4px 10px;border-radius:8px;background:#fce4ec;font-size:11px;color:#4a1a2e;font-weight:500}
+  .ph-kw .en{color:#d81b60;font-weight:600}
+
+  .ph-section{margin-bottom:10px}
+  .ph-section:last-child{margin-bottom:0}
+  .ph-st{font-size:10px;font-weight:600;color:#ec407a;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+
+  .ph-struct{background:#f8f4ff;border-radius:10px;padding:10px 12px;font-size:11px;line-height:1.7}
+  .ph-struct .cn{color:#6d3352}
+  .ph-struct .en{color:#7c4d8a;font-weight:500;display:block;margin-top:4px}
+  .ph-struct .note{color:#ab47bc;font-size:10px;display:block;margin-top:4px;font-weight:500}
+
+  .ph-tips{background:#fff8e6;border-radius:10px;padding:10px 12px}
+  .ph-tips .line{font-size:11px;line-height:1.7;color:#6d4c2a;margin-bottom:4px;display:flex;gap:6px}
+  .ph-tips .line:last-child{margin-bottom:0}
+  .ph-tips .line .bul{color:#f57c00;flex-shrink:0}
+  .ph-tips .line b{color:#e65100}
+
+  /* ═══════════ 报告页改版 ═══════════ */
+  .rp-card{background:#fff;border-radius:18px;padding:16px;margin:0 16px 10px}
+  .rp-ct{font-size:11px;font-weight:600;color:#4a1a2e;margin-bottom:10px;display:flex;align-items:center;gap:4px}
+
+  .rp-stats{display:flex;gap:8px;margin-bottom:12px}
+  .rp-stat{flex:1;text-align:center;padding:10px;background:#fff8fc;border-radius:12px}
+  .rp-stat .n{display:block;font-size:20px;font-weight:800;color:#ec407a}
+  .rp-stat .l{display:block;font-size:9px;color:#f9a8d4;margin-top:2px}
+
+  .lv-compact{display:flex;flex-direction:column;gap:6px}
+  .lv-c{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8f9fc;border-radius:10px}
+  .lv-c .ico{font-size:14px;width:24px;text-align:center}
+  .lv-c .name{font-size:10px;color:#4a1a2e;width:50px;flex-shrink:0;font-weight:600}
+  .lv-c .bar{flex:1;height:6px;border-radius:3px;background:#f0f0f0;overflow:hidden}
+  .lv-c .fill{height:100%;border-radius:3px}
+  .lv-c .fill.g1{background:linear-gradient(90deg,#81c784,#66bb6a)}
+  .lv-c .fill.g2{background:linear-gradient(90deg,#64b5f6,#42a5f5)}
+  .lv-c .fill.g3{background:linear-gradient(90deg,#ffcc80,#ffa726)}
+  .lv-c .fill.g4{background:linear-gradient(90deg,#f48fb1,#ec407a)}
+  .lv-c .pct{font-size:9px;color:#999;font-weight:600;min-width:30px;text-align:right}
+
+  .wi-c{display:flex;flex-direction:column;gap:6px}
+  .wi-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff8fc;border-radius:10px}
+  .wi-item .ico{font-size:14px}
+  .wi-item .body{flex:1}
+  .wi-item .name{font-size:11px;font-weight:600;color:#4a1a2e}
+  .wi-item .desc{font-size:9px;color:#f9a8d4;margin-top:1px}
+  .wi-item .btn{padding:3px 10px;border-radius:8px;background:#fce4ec;font-size:9px;font-weight:600;color:#ec407a;cursor:pointer}
+
+  .rec-c{display:flex;flex-direction:column;gap:6px}
+  .rec-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border-radius:10px;cursor:pointer}
+  .rec-item .ico{font-size:14px}
+  .rec-item .body{flex:1}
+  .rec-item .tag{font-size:8px;font-weight:600;padding:1px 6px;border-radius:4px;background:#e8f5e9;color:#388e3c;display:inline-block}
+  .rec-item .text{display:block;font-size:10px;color:#4a1a2e;margin-top:2px}
+  .rec-item .arrow{color:#f9a8d4;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ═══════ 页面1: 新仪表盘 ═══════ -->
+<div class="phone">
+  <div class="notch">✦ DASHBOARD v3</div>
+  <div class="page">
+    <div class="nav">
+      <div class="nav-l"><div class="nav-avatar">🌟</div><div><div class="nav-greeting">✨ 翻译学习</div><div class="nav-title">每日一练</div></div></div>
+      <div class="nav-r"><div class="nav-icon">🔔</div><div class="nav-icon" style="background:rgba(244,114,182,0.1)">🤖</div></div>
+    </div>
+
+    <!-- 进度环（保留） -->
+    <div class="gc">
+      <div class="gc-ring"><div class="gc-ring-in"><span class="gc-num">7</span><span class="gc-lb">/11</span></div></div>
+      <div class="gc-body"><span class="gc-tip">今天已完成 <b>3</b> 题 ✨</span><span class="gc-sub">还剩 4 题 · 连续学习 🔥 7 天</span></div>
+      <div class="gc-badge"><span class="n">63%</span><span class="l">完成率</span></div>
+    </div>
+
+    <!-- 今日任务（新增推荐理由） -->
+    <div class="today">
+      <div class="today-h">🎯 今日任务 <span class="sub">3 题新学 · 2 题复习</span></div>
+      <div class="today-items">
+        <div class="today-item">
+          <span class="emoji">🌿</span>
+          <div class="body"><span class="text">越来越多的人意识到环境保护的重要性。</span><span class="tag">L2 环保</span></div>
+          <span class="status">⏳</span>
+        </div>
+        <div class="today-item" style="opacity:0.5">
+          <span class="emoji">📱</span>
+          <div class="body"><span class="text">随着互联网的发展，移动支付越来越普遍。</span><span class="tag">L2 科技</span></div>
+          <span class="status">⏳</span>
+        </div>
+        <div class="today-item" style="opacity:0.3">
+          <span class="emoji">🥗</span>
+          <div class="body"><span class="text">为了保持健康，我们应该多吃水果蔬菜。</span><span class="tag">L1 健康</span></div>
+          <span class="status">🔒</span>
+        </div>
+      </div>
+      <!-- 推荐理由 -->
+      <div class="today-reason">
+        <span class="icon">💡</span>
+        <span>你的 <b>环保</b> 主题已练习 2 题，<b>科技</b> 主题还没练过。建议先完成 L2 环保题，积累表达后再挑战科技主题。</span>
+      </div>
+    </div>
+
+    <div class="stitle">📋 全部题目</div>
+    <div class="tasks">
+      <div class="task"><div class="emoji exam">🇨🇳</div><div class="body"><span class="text">中国是一个历史悠久、文化丰富的国家。</span><div class="tags"><span class="tag l1">L1</span><span class="tag exam">真题</span></div></div><div class="right"><span class="check done">✅</span><span class="fav">☆</span></div></div>
+      <div class="task"><div class="emoji sim">🌿</div><div class="body"><span class="text">越来越多的人意识到环境保护的重要性。</span><div class="tags"><span class="tag l2">L2</span><span class="tag sim">模拟</span></div></div><div class="right"><span class="check done">✅</span><span class="fav">☆</span></div></div>
+      <div class="task"><div class="emoji exam">🧧</div><div class="body"><span class="text">春节是中国最重要的传统节日…</span><div class="tags"><span class="tag l2">L2</span><span class="tag exam">真题</span></div></div><div class="right"><span class="check"></span><span class="fav">⭐</span></div></div>
+      <div class="task"><div class="emoji exam">📱</div><div class="body"><span class="text">随着互联网的发展，移动支付…</span><div class="tags"><span class="tag l2">L2</span><span class="tag exam">真题</span></div></div><div class="right"><span class="check"></span><span class="fav">☆</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 页面2: 增强翻译提示 ═══════ -->
+<div class="phone">
+  <div class="notch">✦ ENHANCED HINTS</div>
+  <div class="page">
+
+    <div class="nav"><div class="nav-l"><div class="nav-avatar">🌟</div><div><div class="nav-greeting">✨ 准备阶段</div><div class="nav-title">翻译 · 环保 L2</div></div></div><div class="nav-r"></div></div>
+
+    <!-- 增强提示卡片 -->
+    <div class="ph">
+      <!-- 关键词（保留） -->
+      <div class="ph-kws">
+        <span class="ph-kw">越来越多 <span class="en">→ more and more</span></span>
+        <span class="ph-kw">意识到 <span class="en">→ realize</span></span>
+        <span class="ph-kw">重要性 <span class="en">→ importance</span></span>
+        <span class="ph-kw">环境保护 <span class="en">→ environmental protection</span></span>
+      </div>
+
+      <!-- 句式拆解（增强） -->
+      <div class="ph-section">
+        <div class="ph-st">🔍 句式拆解</div>
+        <div class="ph-struct">
+          <span class="cn">「越来越多的人」+「意识到」+「…的重要性」</span>
+          <span class="en">→ More and more people + have realized + the importance of ...</span>
+          <span class="note">💡 "越来越多" 还可以用：a growing number of / an increasing number of</span>
+        </div>
+      </div>
+
+      <!-- 逐词翻译建议（新增） -->
+      <div class="ph-section">
+        <div class="ph-st">📝 逐词建议</div>
+        <div class="ph-tips">
+          <div class="line"><span class="bul">❶</span> <b>越来越多</b> — more and more（最常用）/ increasingly（副词，放句首）/ a growing number of（后接名词）</div>
+          <div class="line"><span class="bul">❷</span> <b>意识到</b> — realize / become aware of / come to realize（更正式）</div>
+          <div class="line"><span class="bul">❸</span> <b>…的重要性</b> — the importance of + 名词/动名词（of 后接动词要 -ing 形式）</div>
+        </div>
+      </div>
+
+      <!-- 时态/语法提示（新增） -->
+      <div class="ph-section">
+        <div class="ph-st">⏰ 时态提示</div>
+        <div class="ph-tips">
+          <div class="line"><span class="bul">💡</span> 这句话描述的是一种<strong>已经发生的趋势</strong>，英文用 <b>现在完成时</b>（have realized）比一般现在时（realize）更准确。</div>
+        </div>
+      </div>
+
+      <!-- 常见错误（新增） -->
+      <div class="ph-section">
+        <div class="ph-st">⚠️ 常见错误</div>
+        <div class="ph-tips">
+          <div class="line"><span class="bul">✗</span> "environmental protect" — <b>protect</b> 是动词，"环境保护"要用名词形式 <b>protection</b></div>
+          <div class="line"><span class="bul">✗</span> "more and more people realize" — 注意时态，建议用 <b>have realized</b></div>
+        </div>
+      </div>
+
+      <!-- 佳句参考（新增） -->
+      <div class="ph-section">
+        <div class="ph-st">🏆 进阶写法</div>
+        <div class="ph-tips">
+          <div class="line"><span class="bul">→</span> <b>A growing number of individuals have become increasingly aware of the significance of environmental protection.</b></div>
+          <div class="line" style="color:#999;font-size:10px">（用词升级版：individuals→people，increasingly aware→逐渐意识到，significance→importance）</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ 页面3: 报告页改版 ═══════ -->
+<div class="phone">
+  <div class="notch">✦ REPORT v3</div>
+  <div class="page">
+    <div class="nav"><div class="nav-l"><div class="nav-avatar">🌟</div><div><div class="nav-greeting">✨ 学习报告</div><div class="nav-title">我的数据</div></div></div><div class="nav-r"><div class="nav-icon">📅</div></div></div>
+
+    <!-- 快捷统计 -->
+    <div class="rp-card">
+      <div class="rp-stats">
+        <div class="rp-stat"><span class="n">7</span><span class="l">总完成</span></div>
+        <div class="rp-stat"><span class="n">3</span><span class="l">今日</span></div>
+        <div class="rp-stat"><span class="n">7</span><span class="l">连续🔥</span></div>
+        <div class="rp-stat"><span class="n">63%</span><span class="l">完成率</span></div>
+      </div>
+    </div>
+
+    <!-- 等级进度（从仪表盘移过来） -->
+    <div class="rp-card">
+      <div class="rp-ct">📈 等级进度</div>
+      <div class="lv-compact">
+        <div class="lv-c"><span class="ico">🌱</span><span class="name">L1 短句</span><div class="bar"><div class="fill g1" style="width:100%"></div></div><span class="pct">5/5 ✅</span></div>
+        <div class="lv-c"><span class="ico">🌿</span><span class="name">L2 复合句</span><div class="bar"><div class="fill g2" style="width:40%"></div></div><span class="pct">2/5</span></div>
+        <div class="lv-c" style="opacity:0.4"><span class="ico">🔒</span><span class="name">L3 复杂句</span><div class="bar"><div class="fill g3" style="width:0%"></div></div><span class="pct">0/5</span></div>
+        <div class="lv-c" style="opacity:0.4"><span class="ico">🔒</span><span class="name">L4 段落</span><div class="bar"><div class="fill g4" style="width:0%"></div></div><span class="pct">0/3</span></div>
+      </div>
+    </div>
+
+    <!-- 弱项分析（从原来的占位变成真实内容） -->
+    <div class="rp-card">
+      <div class="rp-ct">🎯 弱项诊断</div>
+      <div class="wi-c">
+        <div class="wi-item"><span class="ico">📖</span><div class="body"><div class="name">词汇 · 65 分</div><div class="desc">关键词替换能力较弱，常用词单一</div></div><span class="btn">去练习</span></div>
+        <div class="wi-item"><span class="ico">✍️</span><div class="body"><div class="name">表达 · 62 分</div><div class="desc">句式不够地道，中式英语较明显</div></div><span class="btn">去练习</span></div>
+        <div class="wi-item"><span class="ico">🔗</span><div class="body"><div class="name">结构 · 70 分</div><div class="desc">从句使用较少，长句组织不够</div></div><span class="btn">去练习</span></div>
+      </div>
+    </div>
+
+    <!-- 推荐（从占位变真实） -->
+    <div class="rp-card">
+      <div class="rp-ct">💡 为你推荐</div>
+      <div class="rec-c">
+        <div class="rec-item"><span class="ico">📖</span><div class="body"><span class="tag">L1 词汇专项</span><span class="text">近义词替换练习 · 5 题</span></div><span class="arrow">→</span></div>
+        <div class="rec-item" style="opacity:0.5"><span class="ico">🔒</span><div class="body"><span class="tag">L2 表达提升</span><span class="text">完成 L1 词汇专项后解锁</span></div><span class="arrow" style="color:#ddd">🔒</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

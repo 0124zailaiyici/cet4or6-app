@@ -129,7 +129,7 @@ interface IVocabMethods {
   lookupWord(e: WechatMiniprogram.TouchEvent): void
   onWordAction(e: WechatMiniprogram.TouchEvent): void
   _doDailyReset(): void
-  _syncWordInList(word: string, updates: Partial<IVocabWord>): void
+  _hardRefresh(): void
   _incrAch(key: string): void
   _refreshAchProgress(): void
   _updateAchFromWords(): void
@@ -1108,8 +1108,6 @@ Page<IVocabData, IVocabMethods>({
     const newGrowth = Math.min(3, (sw ? sw.growth : 0) + 1)
     const newStars = Math.min(3, (sw ? sw.stars : 0) + 1)
     const today = new Date().toDateString()
-    // setData FIRST — filteredWords objects not yet modified in-place
-    this._syncWordInList(w.word, { correctStreak: newStreak, status: newStatus, growth: newGrowth, stars: newStars })
     if (sw) {
       sw.correctStreak = newStreak
       sw.status = newStatus
@@ -1117,6 +1115,7 @@ Page<IVocabData, IVocabMethods>({
       sw.stars = newStars
       sw.lastReviewDate = today
     }
+    this._hardRefresh()
     playSfx('correct')
     const streak = this.data.streak + 1
     this.setData({ streak, combo })
@@ -1152,19 +1151,19 @@ Page<IVocabData, IVocabMethods>({
       const newStreak = sw ? sw.correctStreak + 1 : 1
       const newStatus = newStreak >= 3 ? 'master' as const : 'learning' as const
       const newStars = Math.min(3, (sw ? sw.stars : 0) + 1)
-      this._syncWordInList(w.word, { correctStreak: newStreak, status: newStatus, stars: newStars })
       if (sw) {
         sw.correctStreak = newStreak
         sw.status = newStatus
         sw.stars = newStars
         sw.lastReviewDate = today
       }
+      this._hardRefresh()
       wx.setStorageSync('studyData', app.globalData.studyData)
       if (sw) this._checkPackCompletion(w.word)
       setTimeout(() => this.challengeNext(), 300)
     } else {
-      this._syncWordInList(w.word, { correctStreak: 0, status: 'review' })
       if (sw) { sw.correctStreak = 0; sw.status = 'review'; sw.lastReviewDate = today }
+      this._hardRefresh()
       playSfx('wrong')
       const streak = 0
       this.setData({ streak, combo: 0 })
@@ -1370,16 +1369,22 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ achProgress })
   },
 
-  _syncWordInList(word: string, updates: Partial<IVocabWord>) {
-    const fi = this.data.filteredWords.findIndex(v => v.word === word)
-    const wi = this.data.words.findIndex(v => v.word === word)
-    if (fi < 0 && wi < 0) return
-    const data: Record<string, any> = {}
-    for (const [k, v] of Object.entries(updates)) {
-      if (fi >= 0) data[`filteredWords[${fi}].${k}`] = v
-      if (wi >= 0) data[`words[${wi}].${k}`] = v
+  _hardRefresh() {
+    const app = getApp<IAppOption>()
+    const raw = app.globalData.studyData.vocabWords as IVocabWord[]
+    const tab = this.data.tab
+    const sq = (this.data.searchQuery || '').toLowerCase()
+    const words = raw.map(w => ({ ...w }))
+    const filtered: IVocabWord[] = []
+    for (const w of words) {
+      let pass = true
+      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq) || w.phonetic.includes(sq)
+      if (!pass) continue
+      if (tab === 0 && w.status !== 'master') filtered.push(w)
+      else if (tab === 1 && w.status === 'review') filtered.push(w)
+      else if (tab === 2 && w.status === 'master') filtered.push(w)
     }
-    this.setData(data)
+    this.setData({ words, filteredWords: filtered })
   },
 
   _updateAchFromWords() {
