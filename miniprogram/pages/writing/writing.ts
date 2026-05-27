@@ -1,28 +1,40 @@
-import { teachSentence, correctWriting, correctParagraph, checkHealth } from '../../utils/api'
+import { teachSentence, correctWriting, checkHealth } from '../../utils/api'
 import { doCheckIn } from '../../utils/checkin'
 import patternsData from '../../data/sentence_patterns'
 import writingsData from '../../data/writings'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
 interface IPattern {
-  id: number; pattern: string; example: string; chinese: string
+  id: number; pattern: string; example: string; trans: string; chinese: string
 }
 
 interface IWriting {
-  id: number; title: string; prompt: string; reference: string
+  id: number; title: string; prompt: string; reference: string; keywords: string[]; patterns: number[]
 }
 
 interface ITopic {
-  label: string; text: string; chinese: string
+  label: string; text: string; chinese: string; vocab: string[]; patterns: number[]
+}
+
+interface TransCard {
+  index: number; chinese: string; vocab: string[]; patterns: string[]; english: string; done: boolean
+}
+
+interface PolishStat {
+  words: number; sentences: number; patterns: number; score: number
+}
+
+interface PolishItem {
+  ok: boolean; text: string
 }
 
 const PARAGRAPH_TOPICS: ITopic[] = [
-  { label: '🌿 环保', text: 'Environmental protection is everyone\'s responsibility.', chinese: '环境保护是每个人的责任。' },
-  { label: '💻 科技', text: 'The rapid development of technology has brought great changes to our daily life.', chinese: '科技的快速发展给我们的日常生活带来了巨大变化。' },
-  { label: '📚 教育', text: 'Education plays a vital role in shaping a person\'s future.', chinese: '教育在塑造一个人的未来中起着至关重要的作用。' },
-  { label: '💪 健康', text: 'Health is the foundation of a happy and successful life.', chinese: '健康是幸福成功生活的基础。' },
-  { label: '🤝 社会', text: 'In modern society, people are facing increasing pressure from work and life.', chinese: '在现代社会，人们面临着来自工作和生活的日益增长的压力。' },
-  { label: '🏫 校园', text: 'College life is a wonderful journey full of challenges and opportunities.', chinese: '大学生活是一段充满挑战和机遇的精彩旅程。' },
+  { label: '🌿 环保', text: 'Environmental protection is everyone\'s responsibility.', chinese: '环境保护是每个人的责任。', vocab: ['environmental protection', 'sustainable', 'pollution', 'ecosystem', 'regulation'], patterns: [1, 2, 7] },
+  { label: '💻 科技', text: 'The rapid development of technology has brought great changes to our daily life.', chinese: '科技的快速发展给我们的日常生活带来了巨大变化。', vocab: ['technology', 'innovation', 'digital', 'artificial intelligence', 'impact'], patterns: [4, 9, 14] },
+  { label: '📚 教育', text: 'Education plays a vital role in shaping a person\'s future.', chinese: '教育在塑造一个人的未来中起着至关重要的作用。', vocab: ['education', 'knowledge', 'skill', 'learning', 'opportunity'], patterns: [1, 6, 12] },
+  { label: '💪 健康', text: 'Health is the foundation of a happy and successful life.', chinese: '健康是幸福成功生活的基础。', vocab: ['health', 'wellness', 'exercise', 'mental health', 'lifestyle'], patterns: [2, 6, 10] },
+  { label: '🤝 社会', text: 'In modern society, people are facing increasing pressure from work and life.', chinese: '在现代社会，人们面临着来自工作和生活的日益增长的压力。', vocab: ['society', 'pressure', 'balance', 'community', 'responsibility'], patterns: [5, 11, 15] },
+  { label: '🏫 校园', text: 'College life is a wonderful journey full of challenges and opportunities.', chinese: '大学生活是一段充满挑战和机遇的精彩旅程。', vocab: ['campus', 'college', 'extracurricular', 'internship', 'challenge'], patterns: [2, 5, 9] },
 ]
 
 const PATTERN_CATEGORIES: Record<number, string> = {
@@ -36,8 +48,6 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   '全部': '🔍', '开头': '🔥', '递进': '⚡', '转折': '🔄',
   '举例': '📊', '观点': '💭', '强调': '❗', '因果': '🔗', '建议': '💡', '结尾': '🏁',
 }
-
-let _wgTimer: number | null = null
 
 function countWords(s: string): number {
   return s.trim() ? s.trim().split(/\s+/).length : 0
@@ -84,29 +94,6 @@ function scoreSentenceLocal(text: string, pattern: string): string {
   return parts.join('\n')
 }
 
-interface ParagraphScore {
-  score: number; dimensions: { coherence: number; content: number; language: number }; suggestions: string
-}
-
-function scoreParagraphLocal(text: string, topic: ITopic): ParagraphScore {
-  const wc = countWords(text)
-  const sc = text.split(/[.!?]+/).filter(Boolean).length
-  let coherence = 60, content = 60, language = 60
-  const notes: string[] = []
-  if (wc < 30) { notes.push('段落太短，建议 60-120 词'); content = 40; coherence = 40 }
-  else if (wc >= 60 && wc <= 120) { notes.push('✅ 词数符合范围'); content = 75; coherence = 70 }
-  else { notes.push(`段落 ${wc} 词，建议 60-120 词`); content = wc > 120 ? 65 : 50 }
-  if (sc < 3) { notes.push('段落至少 3 个句子'); coherence = Math.min(coherence, 45) }
-  else if (sc >= 5) { notes.push(`✅ 包含 ${sc} 个句子`); coherence = Math.min(coherence + 10, 85) }
-  const topicWords = topic.text.toLowerCase().split(/\s+/)
-  const textWords = text.toLowerCase().split(/\s+/)
-  const overlap = topicWords.filter(w => w.length > 3 && textWords.includes(w)).length
-  if (overlap >= 2) { content = Math.min(content + 10, 85); notes.push('✅ 内容与主题相关') }
-  else notes.push('💡 尝试使用更多主题关键词')
-  const avgScore = Math.round((coherence + content + language) / 3)
-  return { score: avgScore, dimensions: { coherence, content, language }, suggestions: notes.join('\n') }
-}
-
 interface WritingScore {
   score: number; dimensions: { content: number; structure: number; language: number }; suggestions: string; reference: string
 }
@@ -137,67 +124,68 @@ function scoreWritingLocal(text: string, reference: string): WritingScore {
 }
 
 interface IWritingData {
+  /* tabs */
   tab: number; tabs: string[]
   patterns: IPattern[]; writings: IWriting[]
-  expandedPattern: number | null; selectedPattern: IPattern | null
-  userSentence: string; userParagraph: string; writingAnswer: string
-  currentWriting: IWriting | null
-  result: string | null; showResult: boolean; darkMode: boolean
-  paragraphTopics: ITopic[]; currentTopic: ITopic
-  sentenceWordCount: number; paragraphWordCount: number; writingWordCount: number
-  submitting: boolean; aiAvailable: boolean; aiEnabled: boolean; detailMode: boolean
+  detailMode: boolean; darkMode: boolean
 
-  /* 句型急救包 */
+  /* Tab 0 */
+  expandedPattern: number | null; selectedPattern: IPattern | null
+  userSentence: string; sentenceWordCount: number
   toolkitVisible: boolean; toolkitCategory: string; toolkitSearch: string
   categoryOptions: string[]; categoryEmojis: Record<string, string>
   patternCategories: Record<number, string>
   patternVisible: boolean[]
   recentPatterns: number[]; recentPatternData: IPattern[]
+
+  /* Tab 1 */
+  guideStep: number
+  paragraphTopics: ITopic[]; currentTopic: ITopic
+  cnInput: string
+  transCards: TransCard[]
+  assemblyInput: string; assemblyWordCount: number
+  polishStats: PolishStat; polishItems: PolishItem[]
+
+  /* Tab 2 */
+  currentWriting: IWriting | null
+  writingAnswer: string; writingWordCount: number
+  writingKeywords: string[]; writingPatternTags: string[]
   examTypeLabels: string[]
 
-  /* 引导写作 - 提纲 */
-  guideStep: number
-  outlineOpinion: string; outlineReasons: string[]; outlineReasonInput: string
-  outlineExamples: string[]; outlineExampleInput: string
-  outlineGenerated: string
-
-  /* 新手模式 */
-  sentence1: string; sentence2: string; sentence3: string; sentenceCount: number
-
-  /* 计时 */
-  timerRunning: boolean; timerRemaining: number; timerPhase: string
-  timerPhaseLabel: string; timerPercent: number
+  /* shared */
+  showResult: boolean; result: string | null
+  submitting: boolean; aiAvailable: boolean; aiEnabled: boolean
 }
 
 Page<IWritingData, Record<string, any>>({
   data: {
-    tab: 0, tabs: ['句型急救包', '引导写作', '考场模拟'],
+    tab: 0, tabs: ['句型急救包', '中英写作助手', '写作速查'],
     patterns: [], writings: [],
-    expandedPattern: null, selectedPattern: null,
-    userSentence: '', userParagraph: '', writingAnswer: '',
-    currentWriting: null, result: null, showResult: false, darkMode: false,
-    paragraphTopics: PARAGRAPH_TOPICS, currentTopic: PARAGRAPH_TOPICS[0],
-    sentenceWordCount: 0, paragraphWordCount: 0, writingWordCount: 0,
-    submitting: false, aiAvailable: false,
-    aiEnabled: wx.getStorageSync('writingAiEnabled') !== false,
-    detailMode: false,
+    detailMode: false, darkMode: false,
 
+    expandedPattern: null, selectedPattern: null,
+    userSentence: '', sentenceWordCount: 0,
     toolkitVisible: false, toolkitCategory: '全部', toolkitSearch: '',
     categoryOptions: CATEGORIES, categoryEmojis: CATEGORY_EMOJIS,
     patternCategories: PATTERN_CATEGORIES,
-    patternVisible: [],
-    recentPatterns: [], recentPatternData: [],
-    examTypeLabels: [],
+    patternVisible: [], recentPatterns: [], recentPatternData: [],
 
     guideStep: 1,
-    outlineOpinion: '', outlineReasons: [], outlineReasonInput: '',
-    outlineExamples: [], outlineExampleInput: '',
-    outlineGenerated: '',
+    paragraphTopics: PARAGRAPH_TOPICS, currentTopic: PARAGRAPH_TOPICS[0],
+    cnInput: '',
+    transCards: [],
+    assemblyInput: '', assemblyWordCount: 0,
+    polishStats: { words: 0, sentences: 0, patterns: 0, score: 0 },
+    polishItems: [],
 
-    sentence1: '', sentence2: '', sentence3: '', sentenceCount: 0,
+    currentWriting: null,
+    writingAnswer: '', writingWordCount: 0,
+    writingKeywords: [], writingPatternTags: [],
+    examTypeLabels: [],
 
-    timerRunning: false, timerRemaining: 1800, timerPhase: 'review',
-    timerPhaseLabel: '📋 审题', timerPercent: 100,
+    showResult: false, result: null,
+    submitting: false, aiAvailable: false,
+    aiEnabled: wx.getStorageSync('writingAiEnabled') !== false,
   },
 
   onLoad() {
@@ -208,15 +196,17 @@ Page<IWritingData, Record<string, any>>({
     const patternVisible = pats.map(() => true)
     const examTypeLabels = writes.map(w => w.prompt.indexOf('真题') > -1 ? '真题' : '模拟')
     this.setData({
-      patterns: pats,
-      writings: writes,
-      patternVisible,
-      examTypeLabels,
+      patterns: pats, writings: writes, patternVisible, examTypeLabels,
       darkMode: app.globalData.darkMode,
       recentPatterns: recent,
     })
     this.syncRecentPatterns()
     checkHealth().then(r => { if (r.apiKey) this.setData({ aiAvailable: true }) }).catch(() => {})
+  },
+
+  onShow() {
+    applyTheme(getDarkMode())
+    this.setData({ darkMode: getApp<IAppOption>().globalData.darkMode })
   },
 
   computePatternVisible(category: string, search: string) {
@@ -227,10 +217,6 @@ Page<IWritingData, Record<string, any>>({
       return true
     })
   },
-  onShow() {
-    applyTheme(getDarkMode())
-    this.setData({ darkMode: getApp<IAppOption>().globalData.darkMode })
-  },
 
   syncRecentPatterns() {
     const data: IPattern[] = []
@@ -240,34 +226,16 @@ Page<IWritingData, Record<string, any>>({
     }
     this.setData({ recentPatternData: data })
   },
+
   onSwitchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.tab as number
-    this.setData({ tab, detailMode: false, showResult: false, result: null, timerRunning: false })
-    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
+    this.setData({ tab, detailMode: false, showResult: false, result: null })
   },
 
-  /* ══ 句型急救包 ══ */
+  /* ══ Tab 0: 句型急救包 ══ */
   togglePattern(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
-    const pattern = this.data.patterns.find(p => p.id === id) || null
-    this.setData({
-      expandedPattern: this.data.expandedPattern === id ? null : id,
-      selectedPattern: pattern,
-    })
-  },
-  onSentenceInput(e: WechatMiniprogram.Input) {
-    const val = e.detail.value
-    this.setData({ userSentence: val, sentenceWordCount: val.trim() ? countWords(val) : 0 })
-  },
-  setToolkitCategory(e: WechatMiniprogram.TouchEvent) {
-    const toolkitCategory = e.currentTarget.dataset.cat as string
-    const patternVisible = this.computePatternVisible(toolkitCategory, this.data.toolkitSearch)
-    this.setData({ toolkitCategory, patternVisible })
-  },
-  onToolkitSearch(e: WechatMiniprogram.Input) {
-    const toolkitSearch = e.detail.value
-    const patternVisible = this.computePatternVisible(this.data.toolkitCategory, toolkitSearch)
-    this.setData({ toolkitSearch, patternVisible })
+    this.setData({ expandedPattern: this.data.expandedPattern === id ? null : id })
   },
   insertPattern(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
@@ -285,14 +253,29 @@ Page<IWritingData, Record<string, any>>({
     wx.setStorageSync('writingRecentPatterns', recent)
     wx.showToast({ title: '已选用 ' + pat.pattern, icon: 'none' })
   },
+  onSentenceInput(e: WechatMiniprogram.Input) {
+    const val = e.detail.value
+    this.setData({ userSentence: val, sentenceWordCount: val.trim() ? countWords(val) : 0 })
+  },
+  setToolkitCategory(e: WechatMiniprogram.TouchEvent) {
+    const toolkitCategory = e.currentTarget.dataset.cat as string
+    const patternVisible = this.computePatternVisible(toolkitCategory, this.data.toolkitSearch)
+    this.setData({ toolkitCategory, patternVisible })
+  },
+  onToolkitSearch(e: WechatMiniprogram.Input) {
+    const toolkitSearch = e.detail.value
+    const patternVisible = this.computePatternVisible(this.data.toolkitCategory, toolkitSearch)
+    this.setData({ toolkitSearch, patternVisible })
+  },
   async submitSentence() {
     const text = this.data.userSentence.trim()
     const pattern = this.data.selectedPattern
     if (!text) { wx.showToast({ title: '请输入句子', icon: 'none' }); return }
-    if (!pattern) { wx.showToast({ title: '请先点开一个句型', icon: 'none' }); return }
+    if (!pattern) { wx.showToast({ title: '请先选一个句型', icon: 'none' }); return }
     this.setData({ submitting: true, showResult: false, result: null })
     wx.showLoading({ title: '评审中...' })
     let result = scoreSentenceLocal(text, pattern.pattern)
+    result += `\n\n📝 参考例句：\n${pattern.example}\n${pattern.trans}`
     if (this.data.aiAvailable && this.data.aiEnabled) {
       try {
         const res = await Promise.race([
@@ -306,181 +289,129 @@ Page<IWritingData, Record<string, any>>({
     wx.hideLoading(); this.setData({ submitting: false })
   },
 
-  /* ══ 引导写作 ══ */
+  /* ══ Tab 1: 中英写作助手 ══ */
   selectTopic(e: WechatMiniprogram.TouchEvent) {
     const index = e.currentTarget.dataset.index as number
-    this.setData({
-      currentTopic: this.data.paragraphTopics[index],
-      showResult: false, result: null,
-    })
-  },
-  onParagraphInput(e: WechatMiniprogram.Input) {
-    const val = e.detail.value
-    this.setData({
-      userParagraph: val,
-      paragraphWordCount: val.trim() ? countWords(val) : 0,
-    })
+    this.setData({ currentTopic: this.data.paragraphTopics[index] })
   },
   setGuideStep(e: WechatMiniprogram.TouchEvent) {
     this.setData({ guideStep: e.currentTarget.dataset.step as number })
   },
 
-  /* 提纲 */
-  setOutlineOpinion(e: WechatMiniprogram.TouchEvent) {
-    this.setData({ outlineOpinion: e.currentTarget.dataset.val as string })
+  onCnInput(e: WechatMiniprogram.Input) {
+    this.setData({ cnInput: e.detail.value })
   },
-  onReasonInput(e: WechatMiniprogram.Input) {
-    this.setData({ outlineReasonInput: e.detail.value })
-  },
-  addReason() {
-    const v = this.data.outlineReasonInput.trim()
-    if (!v) return
-    this.setData({
-      outlineReasons: [...this.data.outlineReasons, v],
-      outlineReasonInput: '',
-    })
-  },
-  removeReason(e: WechatMiniprogram.TouchEvent) {
-    const i = e.currentTarget.dataset.index as number
-    const arr = [...this.data.outlineReasons]; arr.splice(i, 1)
-    this.setData({ outlineReasons: arr })
-  },
-  onExampleInput(e: WechatMiniprogram.Input) {
-    this.setData({ outlineExampleInput: e.detail.value })
-  },
-  addExample() {
-    const v = this.data.outlineExampleInput.trim()
-    if (!v) return
-    this.setData({
-      outlineExamples: [...this.data.outlineExamples, v],
-      outlineExampleInput: '',
-    })
-  },
-  removeExample(e: WechatMiniprogram.TouchEvent) {
-    const i = e.currentTarget.dataset.index as number
-    const arr = [...this.data.outlineExamples]; arr.splice(i, 1)
-    this.setData({ outlineExamples: arr })
-  },
-  generateOutline() {
-    const opinion = this.data.outlineOpinion || '中立'
-    const reasons = this.data.outlineReasons
-    const examples = this.data.outlineExamples
-    let outline = ''
-    outline += `第 1 段 · 引入观点\n我认为这个问题 ${opinion}。\n\n`
-    reasons.forEach((r, i) => {
-      outline += `第 ${i + 2} 段 · 理由 ${i + 1}\n首先${i > 0 ? '其次' : ''}，${r}。`
-      if (examples[i]) outline += ` 例如，${examples[i]}。`
-      outline += '\n\n'
-    })
-    outline += `第 ${reasons.length + 2} 段 · 总结\n总之，${reasons.length > 0 ? '基于以上理由，我认为' + opinion + '。在' + (reasons.join('、')) + '等方面都需要权衡。' : '需要综合考虑各方面因素。'}`
-    this.setData({ outlineGenerated: outline, guideStep: 3 })
-  },
-
-  /* 新手模式 */
-  onSentence1Input(e: WechatMiniprogram.Input) {
-    const s1 = e.detail.value
-    this.setData({
-      sentence1: s1,
-      sentenceCount: [s1, this.data.sentence2, this.data.sentence3].filter(s => s.trim()).length,
-    })
-  },
-  onSentence2Input(e: WechatMiniprogram.Input) {
-    const s2 = e.detail.value
-    this.setData({
-      sentence2: s2,
-      sentenceCount: [this.data.sentence1, s2, this.data.sentence3].filter(s => s.trim()).length,
-    })
-  },
-  onSentence3Input(e: WechatMiniprogram.Input) {
-    const s3 = e.detail.value
-    this.setData({
-      sentence3: s3,
-      sentenceCount: [this.data.sentence1, this.data.sentence2, s3].filter(s => s.trim()).length,
-    })
-  },
-
-  async submitParagraph() {
-    const text = this.data.userParagraph.trim()
+  goToStep2() {
+    const text = this.data.cnInput.trim()
+    if (!text) { wx.showToast({ title: '请先写中文要点', icon: 'none' }); return }
+    const points = text.split('\n').filter(s => s.trim())
+    if (points.length < 2) { wx.showToast({ title: '至少写 2 个要点', icon: 'none' }); return }
     const topic = this.data.currentTopic
-    if (!text) { wx.showToast({ title: '请先写点内容', icon: 'none' }); return }
-    this.setData({ submitting: true, showResult: false, result: null })
-    wx.showLoading({ title: '评审中...' })
-    let local = scoreParagraphLocal(text, topic)
-    let score = local.score, dimensions = local.dimensions, suggestions = local.suggestions
-    if (this.data.aiAvailable && this.data.aiEnabled) {
-      try {
-        const ai = await Promise.race([
-          correctParagraph(topic.text, text),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
-        ])
-        if (ai.dimensions) dimensions = ai.dimensions
-        if (ai.suggestions) suggestions = ai.suggestions
-        if (ai.score) score = Math.round((score + ai.score) / 2)
-      } catch { /* keep local */ }
-    }
-    this.setData({
-      showResult: true,
-      result: `评分：${score}分\n\n连贯性：${dimensions.coherence}分\n内容：${dimensions.content}分\n语言：${dimensions.language}分\n\n修改建议：\n${suggestions}`,
+    const cards: TransCard[] = points.map((cn, i) => {
+      const patternStrs: string[] = []
+      for (const id of topic.patterns) {
+        const p = this.data.patterns.find(pt => pt.id === id)
+        if (p) patternStrs.push(p.pattern)
+      }
+      return { index: i, chinese: cn, vocab: topic.vocab.slice(0, 5), patterns: patternStrs, english: '', done: false }
     })
-    wx.hideLoading(); this.setData({ submitting: false })
+    this.setData({ transCards: cards, guideStep: 2 })
+  },
+  onTransEnInput(e: WechatMiniprogram.Input) {
+    const index = e.currentTarget.dataset.index as number
+    const val = e.detail.value
+    const cards = [...this.data.transCards]
+    cards[index] = { ...cards[index], english: val, done: val.trim().length > 0 }
+    this.setData({ transCards: cards })
+  },
+  goToStep3() {
+    const filled = this.data.transCards.filter(c => c.done).length
+    if (filled < 2) { wx.showToast({ title: '至少翻译 2 个要点', icon: 'none' }); return }
+    this.setData({ guideStep: 3 })
+  },
+  appendSentence(e: WechatMiniprogram.TouchEvent) {
+    const i = e.currentTarget.dataset.index as number
+    const card = this.data.transCards[i]
+    if (!card || !card.english.trim()) return
+    const prev = this.data.assemblyInput
+    const text = prev + (prev ? ' ' : '') + card.english
+    this.setData({ assemblyInput: text, assemblyWordCount: countWords(text) })
+  },
+  insertLinker(e: WechatMiniprogram.TouchEvent) {
+    const linker = e.currentTarget.dataset.text as string
+    const prev = this.data.assemblyInput
+    const text = prev + linker
+    this.setData({ assemblyInput: text, assemblyWordCount: countWords(text) })
+  },
+  onAssemblyInput(e: WechatMiniprogram.Input) {
+    const val = e.detail.value
+    this.setData({ assemblyInput: val, assemblyWordCount: val.trim() ? countWords(val) : 0 })
+  },
+  goToStep4() {
+    const text = this.data.assemblyInput.trim()
+    if (!text) { wx.showToast({ title: '请先组装段落', icon: 'none' }); return }
+    const wc = countWords(text)
+    const sentences = text.split(/[.!?]+\s*/).filter(Boolean).length
+    let patternCount = 0
+    for (const p of this.data.patterns) {
+      const clean = p.pattern.toLowerCase().replace(/\.\.\./g, '').replace(/[()]/g, '').trim()
+      if (clean && text.toLowerCase().includes(clean)) patternCount++
+    }
+    let score = 60
+    if (wc >= 80 && wc <= 180) score += 15; else if (wc < 40) score -= 20
+    if (sentences >= 5) score += 10
+    if (patternCount >= 2) score += 10
+    score = Math.max(20, Math.min(100, score))
+
+    const items: PolishItem[] = []
+    if (wc < 80) items.push({ ok: false, text: `词数偏少（${wc} 词），建议 120-180 词` })
+    else if (wc > 200) items.push({ ok: false, text: `词数偏多（${wc} 词），建议精简` })
+    else items.push({ ok: true, text: `词数合适（${wc} 词）` })
+    if (sentences < 5) items.push({ ok: false, text: `句子偏少（${sentences} 句），建议 5-10 句` })
+    else items.push({ ok: true, text: `句子数量合适（${sentences} 句）` })
+    if (patternCount === 0) items.push({ ok: false, text: '未检测到高级句型，试试句型急救包' })
+    else items.push({ ok: true, text: `使用了 ${patternCount} 个高级句型` })
+    if (!/first|to begin/i.test(text)) items.push({ ok: false, text: '可添加连接词开头：Firstly / To begin with' })
+    if (!/in conclusion|to sum/i.test(text)) items.push({ ok: false, text: '可添加结尾词：In conclusion / To sum up' })
+
+    this.setData({ guideStep: 4, polishStats: { words: wc, sentences, patterns: patternCount, score }, polishItems: items })
+  },
+  resetAll() {
+    this.setData({
+      cnInput: '', transCards: [], assemblyInput: '', assemblyWordCount: 0,
+      polishStats: { words: 0, sentences: 0, patterns: 0, score: 0 },
+      polishItems: [], guideStep: 1, showResult: false, result: null,
+    })
   },
 
-  /* ══ 考场模拟 ══ */
+  /* ══ Tab 2: 写作速查 ══ */
   enterWriting(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as number
     const item = this.data.writings.find(w => w.id === id) || null
+    if (!item) return
+    const patternTags: string[] = []
+    for (const pid of item.patterns) {
+      const p = this.data.patterns.find(pt => pt.id === pid)
+      if (p) patternTags.push(p.pattern)
+    }
     this.setData({
       currentWriting: item, detailMode: true,
       writingAnswer: '', writingWordCount: 0, showResult: false, result: null,
-      timerRunning: false,
+      writingKeywords: item.keywords, writingPatternTags: patternTags,
     })
-    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
   },
   backToWritingList() {
     this.setData({ currentWriting: null, detailMode: false, writingAnswer: '', writingWordCount: 0, showResult: false, result: null })
-    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
-    this.setData({ timerRunning: false })
   },
   onWritingInput(e: WechatMiniprogram.Input) {
     const val = e.detail.value
     this.setData({ writingAnswer: val, writingWordCount: val.trim() ? countWords(val) : 0 })
   },
-
-  /* 计时 */
-  startTimer() {
-    if (this.data.timerRunning) return
-    this.setData({ timerRunning: true, timerRemaining: 1800, timerPhase: 'review', timerPhaseLabel: '📋 审题阶段', timerPercent: 100 })
-    if (_wgTimer) clearInterval(_wgTimer)
-    _wgTimer = setInterval(() => {
-      const rem = this.data.timerRemaining - 1
-      const pct = Math.round(rem / 1800 * 100)
-      let phase = this.data.timerPhase, label = this.data.timerPhaseLabel
-      if (rem <= 0) {
-        if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
-        this.setData({ timerRunning: false, timerRemaining: 0, timerPhase: 'done', timerPercent: 0 })
-        wx.showToast({ title: '时间到！', icon: 'none' })
-        return
-      }
-      const elapsed = 1800 - rem
-      if (elapsed < 120) { phase = 'review'; label = '📋 审题阶段' }
-      else if (elapsed < 300) { phase = 'outline'; label = '📝 列提纲阶段' }
-      else if (elapsed < 1680) { phase = 'writing'; label = '✍️ 写作阶段' }
-      else { phase = 'check'; label = '🔍 检查阶段' }
-      this.setData({ timerRemaining: rem, timerPercent: pct, timerPhase: phase, timerPhaseLabel: label })
-    }, 1000)
-  },
-  toggleTimer() {
-    if (this.data.timerRunning) {
-      if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
-      this.setData({ timerRunning: false })
-    } else {
-      this.startTimer()
-    }
-  },
   async submitWriting() {
     const text = this.data.writingAnswer.trim()
     const prompt = this.data.currentWriting && this.data.currentWriting.prompt || ''
     const reference = this.data.currentWriting && this.data.currentWriting.reference || ''
+    const keywords = this.data.writingKeywords || []
     if (!text) { wx.showToast({ title: '请输入作文', icon: 'none' }); return }
     this.setData({ submitting: true, showResult: false, result: null })
     wx.showLoading({ title: '评审中...' })
@@ -499,8 +430,14 @@ Page<IWritingData, Record<string, any>>({
       } catch { /* keep local */ }
     }
     const parsed = parseReference(ref)
-    let resultText = `评分：${score}分\n\n内容：${dimensions.content}分\n结构：${dimensions.structure}分\n语言：${dimensions.language}分\n\n修改建议：\n${suggestions}\n\n`
-    resultText += `📖 范文拆解\n${'-'.repeat(20)}\n`
+    let resultText = `评分：${score}分\n\n内容：${dimensions.content}分\n结构：${dimensions.structure}分\n语言：${dimensions.language}分\n\n修改建议：\n${suggestions}\n`
+    const usedKeywords: string[] = []
+    for (const kw of keywords) {
+      if (text.toLowerCase().includes(kw)) usedKeywords.push(kw)
+    }
+    if (usedKeywords.length > 0) resultText += `\n📌 关键词使用：✅ ${usedKeywords.join('、')}\n`
+    else if (keywords.length > 0) resultText += `\n📌 关键词提示：${keywords.slice(0, 5).join('、')}\n`
+    resultText += `\n📖 范文拆解\n${'-'.repeat(20)}\n`
     for (const sec of parsed) {
       resultText += `\n【${sec.label}】\n${sec.text}\n${sec.note}\n`
     }
@@ -511,8 +448,6 @@ Page<IWritingData, Record<string, any>>({
     wx.setStorageSync('studyData', app.globalData.studyData)
     doCheckIn('writing')
     wx.hideLoading(); this.setData({ submitting: false })
-    if (_wgTimer) { clearInterval(_wgTimer); _wgTimer = null }
-    this.setData({ timerRunning: false })
   },
 
   toggleAi() {
@@ -521,5 +456,3 @@ Page<IWritingData, Record<string, any>>({
     wx.setStorageSync('writingAiEnabled', val)
   },
 })
-
-
