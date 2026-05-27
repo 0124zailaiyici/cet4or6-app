@@ -518,6 +518,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   showAnswer() {
+    if (this.data.puzzleRevealed) return
     const answers = this.data.puzzleAnswers
     const allUsed = new Array(this.data.puzzleWords.length).fill(true)
     this.setData({
@@ -542,18 +543,19 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   skipSentence() {
+    if (this.data.puzzleSkipped) return
     this.setData({ puzzleSkipped: true, puzzleFinished: true, puzzleCombo: 0 } as any)
-    wx.showToast({ title: '⏭ 已跳过', icon: 'none', duration: 800 })
+    wx.showToast({ title: '⏭ 已跳过，进入下一题', icon: 'none', duration: 1500 })
     setTimeout(() => {
       const list = this.data.puzzleSentences
       const next = this.data.puzzleIndex + 1
       if (next >= list.length || next >= this.data.puzzleTotal) {
         this.finishPuzzle()
       } else {
-        this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
+        this.setData({ puzzleIndex: next, puzzleFinished: false, puzzleSkipped: false } as any)
         this.loadPuzzleSentence(list)
       }
-    }, 1000)
+    }, 1600)
   },
 
   openGenModal() {

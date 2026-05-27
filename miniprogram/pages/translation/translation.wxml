@@ -65,9 +65,25 @@
         <view class="btn-next" catchtap="goStep" data-step="2">准备好了 →</view>
       </block>
 
-      <!-- Step 2: 翻译 -->
+      <!-- Step 2: 翻译（可看提示） -->
       <block wx:if="{{step === 'translate'}}">
         <view class="qt"><view class="qt-l">📝 请翻译成英文</view><text class="qt-b">{{currentItem.chinese}}</text></view>
+        <!-- 提示折叠 -->
+        <view class="hint-fold" catchtap="toggleHints">
+          <text class="hf-icon">{{showHints ? '▼' : '▶'}}</text>
+          <text class="hf-text">{{showHints ? '收起提示' : '查看提示'}}</text>
+        </view>
+        <block wx:if="{{showHints && currentItem._hint}}">
+          <view class="ph" style="margin-bottom:14rpx">
+            <view class="ph-kws" wx:if="{{currentItem.keywords && currentItem.keywords.length > 0}}">
+              <text class="ph-kw" wx:for="{{currentItem.keywords}}" wx:for-index="i" wx:key="i">{{item}}</text>
+            </view>
+            <view class="ph-sec"><view class="ph-st">🔍 句式拆解</view><view class="ph-struct"><text>{{currentItem._hint.struct}}</text></view></view>
+            <view class="ph-sec"><view class="ph-st">📝 逐词建议</view><view class="ph-tip"><text class="ph-ti" wx:for="{{currentItem._hint.words}}" wx:for-index="i" wx:key="i">{{i+1}}. {{item}}</text></view></view>
+            <view class="ph-sec"><view class="ph-st">⏰ 时态提示</view><view class="ph-tip"><text class="ph-ti">{{currentItem._hint.tense}}</text></view></view>
+            <view class="ph-sec" wx:if="{{currentItem._hint.mistakes.length > 0}}"><view class="ph-st">⚠️ 常见错误</view><view class="ph-tip"><text class="ph-ti warn" wx:for="{{currentItem._hint.mistakes}}" wx:for-index="i" wx:key="i">{{item}}</text></view></view>
+          </view>
+        </block>
         <view class="ib"><textarea placeholder="写下你的翻译…" value="{{userAnswer}}" bindinput="onInput" maxlength="500" auto-height disabled="{{submitting}}"></textarea><view class="ib-foot"><text>{{wordCount}} / 500</text></view></view>
         <view class="btn-next {{submitting ? 'disabled' : ''}}" catchtap="submit">{{submitting ? '评分中～' : '✨ 提交评分'}}</view>
       </block>

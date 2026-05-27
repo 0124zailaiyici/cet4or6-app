@@ -169,7 +169,9 @@
           <text wx:else>🌳</text>
         </view>
         <view wx:elif="{{mode === 'card'}}" class="wmode">
-          <text wx:for="{{3}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < item.stars}}">⭐</text><text wx:else>☆</text></text>
+          <text wx:if="{{0 < item.stars}}">⭐</text><text wx:else>☆</text>
+          <text wx:if="{{1 < item.stars}}">⭐</text><text wx:else>☆</text>
+          <text wx:if="{{2 < item.stars}}">⭐</text><text wx:else>☆</text>
         </view>
         <view class="wact {{item.status === 'master' ? 'done' : ''}} {{!item.chn ? 'lookup' : ''}}" data-idx="{{idx}}" catchtap="onWordAction">
           {{item.status === 'master' ? '✓' : (item.chn ? '浏览' : '查词')}}

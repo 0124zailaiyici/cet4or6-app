@@ -152,6 +152,7 @@ Page({
     levels: [] as { total: number; done: number; pct: number }[],
     hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
     words: [] as { word: string; ok: boolean }[],
+    showHints: true,
     todayItem: null as any, todayItems: [] as any[], todayReason: '',
     weakPoints: [] as { key: string; label: string; avg: number; count: number }[],
   },
@@ -238,7 +239,7 @@ Page({
     const id = e.currentTarget.dataset.id as number
     const item = this.data.translations.find((t: any) => t.id === id) || null
     const questionHistory = this.data.history.filter(r => r.id === id)
-    this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [] })
+    this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [], showHints: true })
   },
 
   goStep(e: any) {
@@ -296,7 +297,7 @@ Page({
     if (!next) next = translations.slice(idx + 1).find((t: any) => !t._done)
     if (!next) next = translations.find((t: any) => !t._done)
     if (!next) { wx.showToast({ title: '全部完成啦 🎉', icon: 'none' }); this.setData({ page: 'dashboard', currentItem: null, result: null }); return }
-    this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [] })
+    this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [], showHints: true })
     wx.pageScrollTo({ scrollTop: 0 })
   },
 
@@ -312,4 +313,5 @@ Page({
   },
 
   toggleAi() { const v = !this.data.aiEnabled; this.setData({ aiEnabled: v }); wx.setStorageSync('translationAiEnabled', v) },
+  toggleHints() { this.setData({ showHints: !this.data.showHints }) },
 })

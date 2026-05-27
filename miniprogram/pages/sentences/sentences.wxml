@@ -109,15 +109,18 @@
       </view>
 
       <view class="pz-drop">
-        <block wx:for="{{puzzleSelected}}" wx:for-index="pos">
-          <text wx:if="{{item !== null}}"
-            class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
-            data-pos="{{pos}}" catchtap="untapPuzzleWord"
-          >
-            {{puzzleWords[item]}}
-          </text>
-          <text wx:else class="pz-drop-slot">___</text>
+        <block wx:if="{{!puzzleSkipped}}">
+          <block wx:for="{{puzzleSelected}}" wx:for-index="pos">
+            <text wx:if="{{item !== null}}"
+              class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
+              data-pos="{{pos}}" catchtap="untapPuzzleWord"
+            >
+              {{puzzleWords[item]}}
+            </text>
+            <text wx:else class="pz-drop-slot">___</text>
+          </block>
         </block>
+        <text wx:if="{{puzzleSkipped}}" class="pz-drop-skipped">⏭ 已跳过</text>
       </view>
 
       <view class="pz-error" wx:if="{{puzzleErrors > 0}}">

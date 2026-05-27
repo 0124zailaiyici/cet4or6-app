@@ -665,6 +665,7 @@
 }
 .pz-drop-word.done { opacity: 0.7; }
 .pz-drop-slot { font-size: 26rpx; color: #dcc5d0; font-weight: 600; padding: 10rpx 8rpx; letter-spacing: 2rpx; }
+.pz-drop-skipped { width: 100%; text-align: center; font-size: 28rpx; color: #f48fb1; font-weight: 700; padding: 20rpx 0; }
 
 .pz-error { display: flex; align-items: center; justify-content: center; gap: 6rpx; min-height: 32rpx; margin-bottom: 8rpx; }
 .pz-error-icon { font-size: 22rpx; }
@@ -721,6 +722,7 @@
 .dark-theme .pz-drop-word { background: linear-gradient(135deg, #4a3a5a, #3a2a4a) !important; color: #e0d0e8 !important; }
 .dark-theme .pz-drop-word.hint-glow { background: linear-gradient(135deg, #6a5a2a, #5a4a1a) !important; color: #fbbf24 !important; box-shadow: 0 0 16rpx rgba(251,191,36,0.3) !important; }
 .dark-theme .pz-drop-slot { color: #5a4a5a !important; }
+.dark-theme .pz-drop-skipped { color: #f48fb1 !important; }
 .dark-theme .pz-error-text { color: #e74c3c !important; }
 .dark-theme .pz-act-reveal { background: linear-gradient(135deg, #2a2a5a, #1a1a4a) !important; color: #818cf8 !important; }
 .dark-theme .pz-act-skip { background: linear-gradient(135deg, #4a2a3a, #3a1a2a) !important; color: #f48fb1 !important; }
