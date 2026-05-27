@@ -12,6 +12,7 @@ miniprogram/pages/sentences_orig.wxml
 *年*月CET4*/
 *年-*年真题资料*/
 tmp/
+transcript-*.html
 miniprogram/pages/reading/data/
 miniprogram/pages/reading/utils/
 miniprogram/pages/reading/pages/
