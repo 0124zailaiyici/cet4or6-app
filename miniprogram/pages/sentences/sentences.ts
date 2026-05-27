@@ -55,6 +55,7 @@ interface ISentencesData {
   puzzleHintIndices: number[]
   puzzleInitialSelected: (number | null)[]
   puzzleSentences: ISentence[]
+  puzzleDone: boolean
 }
 
 interface ISentencesMethods {
@@ -131,6 +132,7 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleErrors: 0,
     puzzleRevealed: false,
     puzzleSkipped: false,
+    puzzleDone: false,
     puzzleHintIndices: [],
     puzzleInitialSelected: [],
     puzzleSentences: [],
@@ -509,11 +511,11 @@ Page<ISentencesData, ISentencesMethods>({
     if (ratio >= 0.8) stars = 3
     else if (ratio >= 0.5) stars = 2
     else if (ratio > 0) stars = 1
-    this.setData({ puzzleFinished: true, puzzleStars: stars } as any)
+    this.setData({ puzzleDone: true, puzzleFinished: true, puzzleStars: stars } as any)
   },
 
   restartPuzzle() {
-    this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0 } as any)
+    this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0, puzzleDone: false } as any)
     this.startPuzzle()
   },
 

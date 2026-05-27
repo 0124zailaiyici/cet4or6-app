@@ -101,7 +101,7 @@
       </view>
     </view>
 
-    <block wx:if="{{!puzzleFinished || puzzleStars === 0}}">
+    <block wx:if="{{!puzzleDone}}">
       <view class="pz-hint">
         <text class="pz-hint-cn">{{puzzleSentences.length > puzzleIndex ? puzzleSentences[puzzleIndex].chinese : ''}}</text>
         <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词，<text class="pz-wc-hint">{{puzzleHintIndices.length}} 个已给出</text></text>
@@ -147,7 +147,7 @@
     </block>
 
     <!-- Puzzle Result -->
-    <view class="pz-result" wx:if="{{puzzleFinished && puzzleStars > 0}}">
+    <view class="pz-result" wx:if="{{puzzleDone}}">
       <text class="pz-r-icon">🎉</text>
       <text class="pz-r-title">拼图完成！</text>
       <view class="pz-r-stars">

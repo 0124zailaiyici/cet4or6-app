@@ -169,6 +169,7 @@ Page({
         levels: [],
         hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []),
         words: [],
+        showHints: true,
         todayItem: null, todayItems: [], todayReason: '',
         weakPoints: [],
     },
@@ -254,7 +255,7 @@ Page({
         const id = e.currentTarget.dataset.id;
         const item = this.data.translations.find((t) => t.id === id) || null;
         const questionHistory = this.data.history.filter(r => r.id === id);
-        this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [] });
+        this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [], showHints: true });
     },
     goStep(e) {
         const n = typeof e === 'number' ? e : parseInt(e.currentTarget.dataset.step);
@@ -326,7 +327,7 @@ Page({
             this.setData({ page: 'dashboard', currentItem: null, result: null });
             return;
         }
-        this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [] });
+        this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [], showHints: true });
         wx.pageScrollTo({ scrollTop: 0 });
     },
     retry() { this.setData({ userAnswer: '', result: null, wordCount: 0, step: 'translate', words: [] }); },
@@ -343,4 +344,5 @@ Page({
         this.setData({ favIds, translations: this.data.translations.map((t) => (Object.assign(Object.assign({}, t), { _fav: favSet.has(t.id) }))) });
     },
     toggleAi() { const v = !this.data.aiEnabled; this.setData({ aiEnabled: v }); wx.setStorageSync('translationAiEnabled', v); },
+    toggleHints() { this.setData({ showHints: !this.data.showHints }); },
 });

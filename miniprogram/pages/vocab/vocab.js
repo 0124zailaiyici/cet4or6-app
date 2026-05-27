@@ -1036,9 +1036,6 @@ Page({
         const combo = this.data.combo + 1;
         const app = getApp();
         const sw = app.globalData.studyData.vocabWords.find(v => v.word === w.word);
-        const wasMaster = sw && sw.status === 'master';
-        const oldStars = sw ? sw.stars : 0;
-        const oldGrowth = sw ? sw.growth : 0;
         const newStreak = sw ? sw.correctStreak + 1 : 1;
         const newStatus = newStreak >= 3 ? 'master' : 'learning';
         const newGrowth = Math.min(3, (sw ? sw.growth : 0) + 1);
@@ -1058,17 +1055,6 @@ Page({
         wx.setStorageSync('vocab_streak', streak);
         wx.setStorageSync('studyData', app.globalData.studyData);
         this._checkPackCompletion(w.word);
-        if (sw) {
-            if (!wasMaster && sw.status === 'master') {
-                this._incrAch('ach_words100');
-            }
-            if (oldStars < 3 && sw.stars >= 3) {
-                this._incrAch('ach_stars10');
-            }
-            if (oldGrowth < 3 && sw.growth >= 3) {
-                this._incrAch('ach_garden5');
-            }
-        }
         if (combo >= 10)
             this._incrAch('ach_combo10');
         if (this.data.challengeActive) {

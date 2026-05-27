@@ -57,6 +57,7 @@ Page({
         puzzleErrors: 0,
         puzzleRevealed: false,
         puzzleSkipped: false,
+        puzzleDone: false,
         puzzleHintIndices: [],
         puzzleInitialSelected: [],
         puzzleSentences: [],
@@ -430,13 +431,15 @@ Page({
             stars = 2;
         else if (ratio > 0)
             stars = 1;
-        this.setData({ puzzleFinished: true, puzzleStars: stars });
+        this.setData({ puzzleDone: true, puzzleFinished: true, puzzleStars: stars });
     },
     restartPuzzle() {
-        this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0 });
+        this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0, puzzleDone: false });
         this.startPuzzle();
     },
     showAnswer() {
+        if (this.data.puzzleRevealed)
+            return;
         const answers = this.data.puzzleAnswers;
         const allUsed = new Array(this.data.puzzleWords.length).fill(true);
         this.setData({
@@ -461,8 +464,10 @@ Page({
         }, 1800);
     },
     skipSentence() {
+        if (this.data.puzzleSkipped)
+            return;
         this.setData({ puzzleSkipped: true, puzzleFinished: true, puzzleCombo: 0 });
-        wx.showToast({ title: '⏭ 已跳过', icon: 'none', duration: 800 });
+        wx.showToast({ title: '⏭ 已跳过，进入下一题', icon: 'none', duration: 1500 });
         setTimeout(() => {
             const list = this.data.puzzleSentences;
             const next = this.data.puzzleIndex + 1;
@@ -470,10 +475,10 @@ Page({
                 this.finishPuzzle();
             }
             else {
-                this.setData({ puzzleIndex: next, puzzleFinished: false });
+                this.setData({ puzzleIndex: next, puzzleFinished: false, puzzleSkipped: false });
                 this.loadPuzzleSentence(list);
             }
-        }, 1000);
+        }, 1600);
     },
     openGenModal() {
         this.setData({ showGenModal: true, genInput: '' });
