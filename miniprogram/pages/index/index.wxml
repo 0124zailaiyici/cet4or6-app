@@ -91,6 +91,9 @@
     <view class="gi mc-vocab" data-url="/pages/vocab/vocab" catchtap="goTo">
       <text class="gi-e">📕</text><text class="gi-n">单词本</text>
     </view>
+    <view class="gi mc-dictionary" data-url="/pages/dictionary/dictionary" catchtap="goTo">
+      <text class="gi-e">📖</text><text class="gi-n">词典</text>
+    </view>
     <view class="gi mc-statistics" data-url="/pages/statistics/statistics" catchtap="goTo">
       <text class="gi-e">📊</text><text class="gi-n">统计</text>
     </view>

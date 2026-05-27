@@ -64,6 +64,7 @@
 .mc-writing { background:linear-gradient(135deg,#ce93d8,#9c27b0); }
 .mc-sentences { background:linear-gradient(135deg,#81c784,#4caf50); }
 .mc-vocab { background:linear-gradient(135deg,#7c4dff,#651fff); }
+.mc-dictionary { background:linear-gradient(135deg,#e57373,#d32f2f); }
 .mc-statistics { background:linear-gradient(135deg,#4db6ac,#00897b); }
 .mc-exam { background:linear-gradient(135deg,#4fc3f7,#0288d1); }
 
