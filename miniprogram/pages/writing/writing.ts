@@ -17,7 +17,7 @@ interface ITopic {
 }
 
 interface TransCard {
-  index: number; chinese: string; vocab: string[]; patterns: string[]; english: string; done: boolean
+  index: number; chinese: string; vocab: string[]; patterns: string[]; english: string; done: boolean; linkerIdx: number
 }
 
 interface PolishStat {
@@ -26,6 +26,86 @@ interface PolishStat {
 
 interface PolishItem {
   ok: boolean; text: string
+}
+
+/* 中文关键词 → 英文词汇映射 */
+const CN_VOCAB_MAP: Record<string, string[]> = {
+  '环保': ['environmental protection', 'sustainable development', 'green'],
+  '环境': ['environment', 'ecosystem', 'natural habitat'],
+  '污染': ['pollution', 'contamination', 'emissions'],
+  '生态': ['ecology', 'ecosystem', 'biodiversity'],
+  '教育': ['education', 'educational system'],
+  '学习': ['learning', 'study', 'acquire knowledge'],
+  '知识': ['knowledge', 'information', 'expertise'],
+  '学校': ['school', 'campus', 'academic institution'],
+  '政府': ['government', 'authorities', 'administration'],
+  '管理': ['management', 'regulation', 'governance'],
+  '措施': ['measure', 'step', 'action'],
+  '政策': ['policy', 'strategy', 'approach'],
+  '健康': ['health', 'well-being', 'fitness'],
+  '锻炼': ['exercise', 'workout', 'physical activity'],
+  '运动': ['sports', 'exercise', 'physical fitness'],
+  '身体': ['body', 'physical health', 'wellness'],
+  '科技': ['technology', 'science and technology'],
+  '创新': ['innovation', 'creativity', 'novelty'],
+  '网络': ['internet', 'online', 'digital'],
+  '社交': ['social media', 'social networking', 'interaction'],
+  '社会': ['society', 'community', 'social issues'],
+  '压力': ['pressure', 'stress', 'strain'],
+  '生活': ['life', 'lifestyle', 'daily life'],
+  '工作': ['work', 'career', 'job', 'employment'],
+  '大学': ['college', 'university', 'higher education'],
+  '学生': ['student', 'undergraduate', 'learner'],
+  '校园': ['campus', 'college life'],
+  '时间': ['time', 'schedule', 'time management'],
+  '重要': ['important', 'crucial', 'vital', 'significant'],
+  '帮助': ['help', 'assist', 'benefit', 'support'],
+  '发展': ['development', 'growth', 'progress', 'advancement'],
+  '改变': ['change', 'transform', 'alter', 'shift'],
+  '问题': ['problem', 'issue', 'challenge', 'concern'],
+  '机会': ['opportunity', 'chance', 'prospect'],
+  '提高': ['improve', 'enhance', 'boost', 'strengthen'],
+  '增加': ['increase', 'grow', 'rise', 'expand'],
+  '减少': ['reduce', 'decrease', 'cut down', 'lessen'],
+  '养成': ['develop', 'cultivate', 'form', 'establish'],
+  '平衡': ['balance', 'equilibrium', 'moderation'],
+}
+
+/* 中文句式 → 推荐句型 ID 映射 */
+const CN_PATTERN_MAP: Record<string, number[]> = {
+  '认为': [5, 15],
+  '觉得': [5, 15],
+  '观点': [5, 15],
+  '毫无疑问': [1],
+  '不可否认': [9],
+  '众所周知': [4],
+  '建议': [12, 13],
+  '应该': [7, 12],
+  '需要': [7, 12],
+  '必须': [7],
+  '因为': [11],
+  '所以': [11],
+  '原因': [11],
+  '导致': [11],
+  '越': [3],
+  '更': [3, 6],
+  '只有': [8],
+  '绝不能': [14],
+  '总之': [7, 8],
+  '首先': [1, 4],
+  '第一': [1, 4],
+}
+
+function matchVocab(cnPoint: string): { vocab: string[]; patternIds: number[] } {
+  const vSet: Set<string> = new Set()
+  const pSet: Set<number> = new Set()
+  for (const [kw, words] of Object.entries(CN_VOCAB_MAP)) {
+    if (cnPoint.indexOf(kw) > -1) for (const w of words) vSet.add(w)
+  }
+  for (const [indicator, ids] of Object.entries(CN_PATTERN_MAP)) {
+    if (cnPoint.indexOf(indicator) > -1) for (const id of ids) pSet.add(id)
+  }
+  return { vocab: [...vSet].slice(0, 6), patternIds: [...pSet] }
 }
 
 const PARAGRAPH_TOPICS: ITopic[] = [
@@ -119,6 +199,18 @@ function scoreWritingLocal(text: string, reference: string): WritingScore {
   if (hasConcl) structure = Math.min(structure + 10, 90)
   if (hasIntro && hasBody && hasConcl) notes.push('✅ 总—分—总结构清晰')
   else notes.push('💡 建议总—分—总结构')
+  const words = text.toLowerCase().split(/\s+/).filter(Boolean)
+  const avgLen = words.length ? words.reduce((s, w) => s + w.length, 0) / words.length : 0
+  if (avgLen >= 5) { language += 10; notes.push('✅ 词汇有难度') }
+  else if (avgLen >= 4) { language += 5; notes.push('词汇难度适中') }
+  else { language -= 5; notes.push('💡 建议多用高级词汇替换简单词') }
+  const longSents = text.split(/[.!?]+/).filter(s => s.trim().split(/\s+/).length > 15).length
+  if (longSents >= 2) { language += 8; notes.push('✅ 包含复合句，句式多样') }
+  else if (longSents === 1) { language += 3 }
+  else { language -= 5; notes.push('💡 尝试加入一些从句/复合句') }
+  const capErr = text.split(/[.!?]+\s*/).filter(s => s.trim()).filter(s => !/^[A-Z]/.test(s.trim())).length
+  if (capErr > 1) { language -= 8; notes.push(`⚠️ ${capErr} 句首未大写`) }
+  language = Math.max(30, Math.min(95, language))
   const avgScore = Math.round((content + structure + language) / 3)
   return { score: avgScore, dimensions: { content, structure, language }, suggestions: notes.join('\n'), reference }
 }
@@ -141,7 +233,7 @@ interface IWritingData {
   /* Tab 1 */
   guideStep: number
   paragraphTopics: ITopic[]; currentTopic: ITopic
-  cnInput: string
+  cnInput: string; cnPlaceholder: string; cnExampleLines: string[]
   transCards: TransCard[]
   assemblyInput: string; assemblyWordCount: number
   polishStats: PolishStat; polishItems: PolishItem[]
@@ -173,6 +265,8 @@ Page<IWritingData, Record<string, any>>({
     guideStep: 1,
     paragraphTopics: PARAGRAPH_TOPICS, currentTopic: PARAGRAPH_TOPICS[0],
     cnInput: '',
+    cnPlaceholder: '例：环保对每个人都很重要（每行一个要点）',
+    cnExampleLines: ['环保对每个人都很重要', '政府应该加强管理', '我们可以从小事做起'],
     transCards: [],
     assemblyInput: '', assemblyWordCount: 0,
     polishStats: { words: 0, sentences: 0, patterns: 0, score: 0 },
@@ -254,6 +348,7 @@ Page<IWritingData, Record<string, any>>({
     wx.showToast({ title: '已选用 ' + pat.pattern, icon: 'none' })
   },
   onSentenceInput(e: WechatMiniprogram.Input) {
+    if (this._composing) return
     const val = e.detail.value
     this.setData({ userSentence: val, sentenceWordCount: val.trim() ? countWords(val) : 0 })
   },
@@ -298,54 +393,112 @@ Page<IWritingData, Record<string, any>>({
     this.setData({ guideStep: e.currentTarget.dataset.step as number })
   },
 
+  _composing: false,
+  onCompStart() { this._composing = true },
+  onCompEnd() { this._composing = false },
+  onCnCompEnd(e: WechatMiniprogram.Input) {
+    this._composing = false; this.setData({ cnInput: e.detail.value })
+  },
   onCnInput(e: WechatMiniprogram.Input) {
-    this.setData({ cnInput: e.detail.value })
+    if (!this._composing) this.setData({ cnInput: e.detail.value })
   },
   goToStep2() {
     const text = this.data.cnInput.trim()
     if (!text) { wx.showToast({ title: '请先写中文要点', icon: 'none' }); return }
-    const points = text.split('\n').filter(s => s.trim())
+    const points = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean)
     if (points.length < 2) { wx.showToast({ title: '至少写 2 个要点', icon: 'none' }); return }
-    const topic = this.data.currentTopic
+    const patterns = this.data.patterns
     const cards: TransCard[] = points.map((cn, i) => {
-      const patternStrs: string[] = []
-      for (const id of topic.patterns) {
-        const p = this.data.patterns.find(pt => pt.id === id)
+      const matched = matchVocab(cn)
+      let vocab = matched.vocab
+      if (vocab.length === 0) vocab = this.data.currentTopic.vocab.slice(0, 6)
+      let patternStrs: string[] = []
+      for (const id of matched.patternIds) {
+        const p = patterns.find(pt => pt.id === id)
         if (p) patternStrs.push(p.pattern)
       }
-      return { index: i, chinese: cn, vocab: topic.vocab.slice(0, 5), patterns: patternStrs, english: '', done: false }
+      if (patternStrs.length === 0) {
+        for (const id of this.data.currentTopic.patterns) {
+          const p = patterns.find(pt => pt.id === id)
+          if (p) patternStrs.push(p.pattern)
+        }
+      }
+      return { index: i, chinese: cn, vocab, patterns: patternStrs, english: '', done: false, linkerIdx: i < 4 ? i : 3 }
     })
     this.setData({ transCards: cards, guideStep: 2 })
   },
   onTransEnInput(e: WechatMiniprogram.Input) {
+    if (this._composing) return
     const index = e.currentTarget.dataset.index as number
     const val = e.detail.value
     const cards = [...this.data.transCards]
     cards[index] = { ...cards[index], english: val, done: val.trim().length > 0 }
     this.setData({ transCards: cards })
   },
+  LINKERS: ['Firstly, ', 'Moreover, ', 'Furthermore, ', 'In addition, ', 'Additionally, ', 'Besides, ', 'However, ', 'Therefore, ', 'In conclusion, '],
+
+  buildAssembledText(): string {
+    const cards = this.data.transCards.filter(c => c.done && c.english.trim())
+    if (!cards.length) return ''
+    let text = ''
+    for (let i = 0; i < cards.length; i++) {
+      if (i > 0) text += ' '
+      text += (this.LINKERS[cards[i].linkerIdx] || 'Moreover, ') + cards[i].english.trim()
+    }
+    return text
+  },
+  rebuildPreview() {
+    const text = this.buildAssembledText()
+    this.setData({ assemblyInput: text, assemblyWordCount: text ? countWords(text) : 0 })
+  },
+
   goToStep3() {
     const filled = this.data.transCards.filter(c => c.done).length
     if (filled < 2) { wx.showToast({ title: '至少翻译 2 个要点', icon: 'none' }); return }
+    this.rebuildPreview()
     this.setData({ guideStep: 3 })
   },
-  appendSentence(e: WechatMiniprogram.TouchEvent) {
-    const i = e.currentTarget.dataset.index as number
-    const card = this.data.transCards[i]
-    if (!card || !card.english.trim()) return
-    const prev = this.data.assemblyInput
-    const text = prev + (prev ? ' ' : '') + card.english
-    this.setData({ assemblyInput: text, assemblyWordCount: countWords(text) })
-  },
-  insertLinker(e: WechatMiniprogram.TouchEvent) {
-    const linker = e.currentTarget.dataset.text as string
-    const prev = this.data.assemblyInput
-    const text = prev + linker
-    this.setData({ assemblyInput: text, assemblyWordCount: countWords(text) })
-  },
-  onAssemblyInput(e: WechatMiniprogram.Input) {
+  onCardEnInput(e: WechatMiniprogram.Input) {
+    if (this._composing) return
+    const index = e.currentTarget.dataset.index as number
     const val = e.detail.value
-    this.setData({ assemblyInput: val, assemblyWordCount: val.trim() ? countWords(val) : 0 })
+    const cards = [...this.data.transCards]
+    cards[index] = { ...cards[index], english: val, done: val.trim().length > 0 }
+    this.setData({ transCards: cards })
+    this.rebuildPreview()
+  },
+  setCardLinker(e: WechatMiniprogram.TouchEvent) {
+    const index = e.currentTarget.dataset.index as number
+    const li = e.currentTarget.dataset.linker as number
+    const cards = [...this.data.transCards]
+    cards[index] = { ...cards[index], linkerIdx: li }
+    this.setData({ transCards: cards })
+    this.rebuildPreview()
+  },
+  moveCard(e: WechatMiniprogram.TouchEvent) {
+    const index = e.currentTarget.dataset.index as number
+    const dir = e.currentTarget.dataset.dir as number
+    const to = index + dir
+    if (to < 0 || to >= this.data.transCards.length) return
+    const cards = [...this.data.transCards]
+    const tmp = cards[to]; cards[to] = cards[index]; cards[index] = tmp
+    cards.forEach((c, i) => c.index = i)
+    this.setData({ transCards: cards })
+    this.rebuildPreview()
+  },
+  removeCard(e: WechatMiniprogram.TouchEvent) {
+    const index = e.currentTarget.dataset.index as number
+    const cards = this.data.transCards.filter((_, i) => i !== index)
+    if (cards.length < 2) { wx.showToast({ title: '至少保留 2 个要点', icon: 'none' }); return }
+    cards.forEach((c, i) => c.index = i)
+    this.setData({ transCards: cards })
+    this.rebuildPreview()
+  },
+  addCard() {
+    const cards = [...this.data.transCards]
+    cards.push({ index: cards.length, chinese: '', vocab: [], patterns: [], english: '', done: false, linkerIdx: Math.min(cards.length, 8) })
+    this.setData({ transCards: cards })
+    this.rebuildPreview()
   },
   goToStep4() {
     const text = this.data.assemblyInput.trim()
@@ -381,6 +534,7 @@ Page<IWritingData, Record<string, any>>({
       cnInput: '', transCards: [], assemblyInput: '', assemblyWordCount: 0,
       polishStats: { words: 0, sentences: 0, patterns: 0, score: 0 },
       polishItems: [], guideStep: 1, showResult: false, result: null,
+      currentTopic: this.data.paragraphTopics[0],
     })
   },
 
@@ -404,6 +558,7 @@ Page<IWritingData, Record<string, any>>({
     this.setData({ currentWriting: null, detailMode: false, writingAnswer: '', writingWordCount: 0, showResult: false, result: null })
   },
   onWritingInput(e: WechatMiniprogram.Input) {
+    if (this._composing) return
     const val = e.detail.value
     this.setData({ writingAnswer: val, writingWordCount: val.trim() ? countWords(val) : 0 })
   },

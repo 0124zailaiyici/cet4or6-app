@@ -17,13 +17,94 @@ const checkin_1 = require("../../utils/checkin");
 const sentence_patterns_1 = __importDefault(require("../../data/sentence_patterns"));
 const writings_1 = __importDefault(require("../../data/writings"));
 const theme_1 = require("../../utils/theme");
+/* 中文关键词 → 英文词汇映射 */
+const CN_VOCAB_MAP = {
+    '环保': ['environmental protection', 'sustainable development', 'green'],
+    '环境': ['environment', 'ecosystem', 'natural habitat'],
+    '污染': ['pollution', 'contamination', 'emissions'],
+    '生态': ['ecology', 'ecosystem', 'biodiversity'],
+    '教育': ['education', 'educational system'],
+    '学习': ['learning', 'study', 'acquire knowledge'],
+    '知识': ['knowledge', 'information', 'expertise'],
+    '学校': ['school', 'campus', 'academic institution'],
+    '政府': ['government', 'authorities', 'administration'],
+    '管理': ['management', 'regulation', 'governance'],
+    '措施': ['measure', 'step', 'action'],
+    '政策': ['policy', 'strategy', 'approach'],
+    '健康': ['health', 'well-being', 'fitness'],
+    '锻炼': ['exercise', 'workout', 'physical activity'],
+    '运动': ['sports', 'exercise', 'physical fitness'],
+    '身体': ['body', 'physical health', 'wellness'],
+    '科技': ['technology', 'science and technology'],
+    '创新': ['innovation', 'creativity', 'novelty'],
+    '网络': ['internet', 'online', 'digital'],
+    '社交': ['social media', 'social networking', 'interaction'],
+    '社会': ['society', 'community', 'social issues'],
+    '压力': ['pressure', 'stress', 'strain'],
+    '生活': ['life', 'lifestyle', 'daily life'],
+    '工作': ['work', 'career', 'job', 'employment'],
+    '大学': ['college', 'university', 'higher education'],
+    '学生': ['student', 'undergraduate', 'learner'],
+    '校园': ['campus', 'college life'],
+    '时间': ['time', 'schedule', 'time management'],
+    '重要': ['important', 'crucial', 'vital', 'significant'],
+    '帮助': ['help', 'assist', 'benefit', 'support'],
+    '发展': ['development', 'growth', 'progress', 'advancement'],
+    '改变': ['change', 'transform', 'alter', 'shift'],
+    '问题': ['problem', 'issue', 'challenge', 'concern'],
+    '机会': ['opportunity', 'chance', 'prospect'],
+    '提高': ['improve', 'enhance', 'boost', 'strengthen'],
+    '增加': ['increase', 'grow', 'rise', 'expand'],
+    '减少': ['reduce', 'decrease', 'cut down', 'lessen'],
+    '养成': ['develop', 'cultivate', 'form', 'establish'],
+    '平衡': ['balance', 'equilibrium', 'moderation'],
+};
+/* 中文句式 → 推荐句型 ID 映射 */
+const CN_PATTERN_MAP = {
+    '认为': [5, 15],
+    '觉得': [5, 15],
+    '观点': [5, 15],
+    '毫无疑问': [1],
+    '不可否认': [9],
+    '众所周知': [4],
+    '建议': [12, 13],
+    '应该': [7, 12],
+    '需要': [7, 12],
+    '必须': [7],
+    '因为': [11],
+    '所以': [11],
+    '原因': [11],
+    '导致': [11],
+    '越': [3],
+    '更': [3, 6],
+    '只有': [8],
+    '绝不能': [14],
+    '总之': [7, 8],
+    '首先': [1, 4],
+    '第一': [1, 4],
+};
+function matchVocab(cnPoint) {
+    const vSet = new Set();
+    const pSet = new Set();
+    for (const [kw, words] of Object.entries(CN_VOCAB_MAP)) {
+        if (cnPoint.indexOf(kw) > -1)
+            for (const w of words)
+                vSet.add(w);
+    }
+    for (const [indicator, ids] of Object.entries(CN_PATTERN_MAP)) {
+        if (cnPoint.indexOf(indicator) > -1)
+            for (const id of ids)
+                pSet.add(id);
+    }
+    return { vocab: [...vSet].slice(0, 6), patternIds: [...pSet] };
+}
 const PARAGRAPH_TOPICS = [
-    { label: '🌿 环保', text: 'Environmental protection is everyone\'s responsibility.', chinese: '环境保护是每个人的责任。' },
-    { label: '💻 科技', text: 'The rapid development of technology has brought great changes to our daily life.', chinese: '科技的快速发展给我们的日常生活带来了巨大变化。' },
-    { label: '📚 教育', text: 'Education plays a vital role in shaping a person\'s future.', chinese: '教育在塑造一个人的未来中起着至关重要的作用。' },
-    { label: '💪 健康', text: 'Health is the foundation of a happy and successful life.', chinese: '健康是幸福成功生活的基础。' },
-    { label: '🤝 社会', text: 'In modern society, people are facing increasing pressure from work and life.', chinese: '在现代社会，人们面临着来自工作和生活的日益增长的压力。' },
-    { label: '🏫 校园', text: 'College life is a wonderful journey full of challenges and opportunities.', chinese: '大学生活是一段充满挑战和机遇的精彩旅程。' },
+    { label: '🌿 环保', text: 'Environmental protection is everyone\'s responsibility.', chinese: '环境保护是每个人的责任。', vocab: ['environmental protection', 'sustainable', 'pollution', 'ecosystem', 'regulation'], patterns: [1, 2, 7] },
+    { label: '💻 科技', text: 'The rapid development of technology has brought great changes to our daily life.', chinese: '科技的快速发展给我们的日常生活带来了巨大变化。', vocab: ['technology', 'innovation', 'digital', 'artificial intelligence', 'impact'], patterns: [4, 9, 14] },
+    { label: '📚 教育', text: 'Education plays a vital role in shaping a person\'s future.', chinese: '教育在塑造一个人的未来中起着至关重要的作用。', vocab: ['education', 'knowledge', 'skill', 'learning', 'opportunity'], patterns: [1, 6, 12] },
+    { label: '💪 健康', text: 'Health is the foundation of a happy and successful life.', chinese: '健康是幸福成功生活的基础。', vocab: ['health', 'wellness', 'exercise', 'mental health', 'lifestyle'], patterns: [2, 6, 10] },
+    { label: '🤝 社会', text: 'In modern society, people are facing increasing pressure from work and life.', chinese: '在现代社会，人们面临着来自工作和生活的日益增长的压力。', vocab: ['society', 'pressure', 'balance', 'community', 'responsibility'], patterns: [5, 11, 15] },
+    { label: '🏫 校园', text: 'College life is a wonderful journey full of challenges and opportunities.', chinese: '大学生活是一段充满挑战和机遇的精彩旅程。', vocab: ['campus', 'college', 'extracurricular', 'internship', 'challenge'], patterns: [2, 5, 9] },
 ];
 const PATTERN_CATEGORIES = {
     1: '开头', 2: '开头', 3: '递进', 4: '开头', 5: '观点',
@@ -35,7 +116,6 @@ const CATEGORY_EMOJIS = {
     '全部': '🔍', '开头': '🔥', '递进': '⚡', '转折': '🔄',
     '举例': '📊', '观点': '💭', '强调': '❗', '因果': '🔗', '建议': '💡', '结尾': '🏁',
 };
-let _wgTimer = null;
 function countWords(s) {
     return s.trim() ? s.trim().split(/\s+/).length : 0;
 }
@@ -82,45 +162,6 @@ function scoreSentenceLocal(text, pattern) {
     parts.push('');
     parts.push('💡 开启 AI 获得深度语法纠错');
     return parts.join('\n');
-}
-function scoreParagraphLocal(text, topic) {
-    const wc = countWords(text);
-    const sc = text.split(/[.!?]+/).filter(Boolean).length;
-    let coherence = 60, content = 60, language = 60;
-    const notes = [];
-    if (wc < 30) {
-        notes.push('段落太短，建议 60-120 词');
-        content = 40;
-        coherence = 40;
-    }
-    else if (wc >= 60 && wc <= 120) {
-        notes.push('✅ 词数符合范围');
-        content = 75;
-        coherence = 70;
-    }
-    else {
-        notes.push(`段落 ${wc} 词，建议 60-120 词`);
-        content = wc > 120 ? 65 : 50;
-    }
-    if (sc < 3) {
-        notes.push('段落至少 3 个句子');
-        coherence = Math.min(coherence, 45);
-    }
-    else if (sc >= 5) {
-        notes.push(`✅ 包含 ${sc} 个句子`);
-        coherence = Math.min(coherence + 10, 85);
-    }
-    const topicWords = topic.text.toLowerCase().split(/\s+/);
-    const textWords = text.toLowerCase().split(/\s+/);
-    const overlap = topicWords.filter(w => w.length > 3 && textWords.includes(w)).length;
-    if (overlap >= 2) {
-        content = Math.min(content + 10, 85);
-        notes.push('✅ 内容与主题相关');
-    }
-    else
-        notes.push('💡 尝试使用更多主题关键词');
-    const avgScore = Math.round((coherence + content + language) / 3);
-    return { score: avgScore, dimensions: { coherence, content, language }, suggestions: notes.join('\n') };
 }
 function scoreWritingLocal(text, reference) {
     const wc = countWords(text), sc = text.split(/[.!?]+/).filter(Boolean).length;
@@ -172,34 +213,68 @@ function scoreWritingLocal(text, reference) {
         notes.push('✅ 总—分—总结构清晰');
     else
         notes.push('💡 建议总—分—总结构');
+    const words = text.toLowerCase().split(/\s+/).filter(Boolean);
+    const avgLen = words.length ? words.reduce((s, w) => s + w.length, 0) / words.length : 0;
+    if (avgLen >= 5) {
+        language += 10;
+        notes.push('✅ 词汇有难度');
+    }
+    else if (avgLen >= 4) {
+        language += 5;
+        notes.push('词汇难度适中');
+    }
+    else {
+        language -= 5;
+        notes.push('💡 建议多用高级词汇替换简单词');
+    }
+    const longSents = text.split(/[.!?]+/).filter(s => s.trim().split(/\s+/).length > 15).length;
+    if (longSents >= 2) {
+        language += 8;
+        notes.push('✅ 包含复合句，句式多样');
+    }
+    else if (longSents === 1) {
+        language += 3;
+    }
+    else {
+        language -= 5;
+        notes.push('💡 尝试加入一些从句/复合句');
+    }
+    const capErr = text.split(/[.!?]+\s*/).filter(s => s.trim()).filter(s => !/^[A-Z]/.test(s.trim())).length;
+    if (capErr > 1) {
+        language -= 8;
+        notes.push(`⚠️ ${capErr} 句首未大写`);
+    }
+    language = Math.max(30, Math.min(95, language));
     const avgScore = Math.round((content + structure + language) / 3);
     return { score: avgScore, dimensions: { content, structure, language }, suggestions: notes.join('\n'), reference };
 }
 Page({
     data: {
-        tab: 0, tabs: ['句型急救包', '引导写作', '考场模拟'],
+        tab: 0, tabs: ['句型急救包', '中英写作助手', '写作速查'],
         patterns: [], writings: [],
+        detailMode: false, darkMode: false,
         expandedPattern: null, selectedPattern: null,
-        userSentence: '', userParagraph: '', writingAnswer: '',
-        currentWriting: null, result: null, showResult: false, darkMode: false,
-        paragraphTopics: PARAGRAPH_TOPICS, currentTopic: PARAGRAPH_TOPICS[0],
-        sentenceWordCount: 0, paragraphWordCount: 0, writingWordCount: 0,
-        submitting: false, aiAvailable: false,
-        aiEnabled: wx.getStorageSync('writingAiEnabled') !== false,
-        detailMode: false,
+        userSentence: '', sentenceWordCount: 0,
         toolkitVisible: false, toolkitCategory: '全部', toolkitSearch: '',
         categoryOptions: CATEGORIES, categoryEmojis: CATEGORY_EMOJIS,
         patternCategories: PATTERN_CATEGORIES,
-        patternVisible: [],
-        recentPatterns: [], recentPatternData: [],
-        examTypeLabels: [],
+        patternVisible: [], recentPatterns: [], recentPatternData: [],
         guideStep: 1,
-        outlineOpinion: '', outlineReasons: [], outlineReasonInput: '',
-        outlineExamples: [], outlineExampleInput: '',
-        outlineGenerated: '',
-        sentence1: '', sentence2: '', sentence3: '', sentenceCount: 0,
-        timerRunning: false, timerRemaining: 1800, timerPhase: 'review',
-        timerPhaseLabel: '📋 审题', timerPercent: 100,
+        paragraphTopics: PARAGRAPH_TOPICS, currentTopic: PARAGRAPH_TOPICS[0],
+        cnInput: '',
+        cnPlaceholder: '例：环保对每个人都很重要（每行一个要点）',
+        cnExampleLines: ['环保对每个人都很重要', '政府应该加强管理', '我们可以从小事做起'],
+        transCards: [],
+        assemblyInput: '', assemblyWordCount: 0,
+        polishStats: { words: 0, sentences: 0, patterns: 0, score: 0 },
+        polishItems: [],
+        currentWriting: null,
+        writingAnswer: '', writingWordCount: 0,
+        writingKeywords: [], writingPatternTags: [],
+        examTypeLabels: [],
+        showResult: false, result: null,
+        submitting: false, aiAvailable: false,
+        aiEnabled: wx.getStorageSync('writingAiEnabled') !== false,
     },
     onLoad() {
         const app = getApp();
@@ -209,16 +284,17 @@ Page({
         const patternVisible = pats.map(() => true);
         const examTypeLabels = writes.map(w => w.prompt.indexOf('真题') > -1 ? '真题' : '模拟');
         this.setData({
-            patterns: pats,
-            writings: writes,
-            patternVisible,
-            examTypeLabels,
+            patterns: pats, writings: writes, patternVisible, examTypeLabels,
             darkMode: app.globalData.darkMode,
             recentPatterns: recent,
         });
         this.syncRecentPatterns();
         (0, api_1.checkHealth)().then(r => { if (r.apiKey)
             this.setData({ aiAvailable: true }); }).catch(() => { });
+    },
+    onShow() {
+        (0, theme_1.applyTheme)((0, theme_1.getDarkMode)());
+        this.setData({ darkMode: getApp().globalData.darkMode });
     },
     computePatternVisible(category, search) {
         const q = search.toLowerCase().trim();
@@ -229,10 +305,6 @@ Page({
                 return false;
             return true;
         });
-    },
-    onShow() {
-        (0, theme_1.applyTheme)((0, theme_1.getDarkMode)());
-        this.setData({ darkMode: getApp().globalData.darkMode });
     },
     syncRecentPatterns() {
         const data = [];
@@ -245,34 +317,12 @@ Page({
     },
     onSwitchTab(e) {
         const tab = e.currentTarget.dataset.tab;
-        this.setData({ tab, detailMode: false, showResult: false, result: null, timerRunning: false });
-        if (_wgTimer) {
-            clearInterval(_wgTimer);
-            _wgTimer = null;
-        }
+        this.setData({ tab, detailMode: false, showResult: false, result: null });
     },
-    /* ══ 句型急救包 ══ */
+    /* ══ Tab 0: 句型急救包 ══ */
     togglePattern(e) {
         const id = e.currentTarget.dataset.id;
-        const pattern = this.data.patterns.find(p => p.id === id) || null;
-        this.setData({
-            expandedPattern: this.data.expandedPattern === id ? null : id,
-            selectedPattern: pattern,
-        });
-    },
-    onSentenceInput(e) {
-        const val = e.detail.value;
-        this.setData({ userSentence: val, sentenceWordCount: val.trim() ? countWords(val) : 0 });
-    },
-    setToolkitCategory(e) {
-        const toolkitCategory = e.currentTarget.dataset.cat;
-        const patternVisible = this.computePatternVisible(toolkitCategory, this.data.toolkitSearch);
-        this.setData({ toolkitCategory, patternVisible });
-    },
-    onToolkitSearch(e) {
-        const toolkitSearch = e.detail.value;
-        const patternVisible = this.computePatternVisible(this.data.toolkitCategory, toolkitSearch);
-        this.setData({ toolkitSearch, patternVisible });
+        this.setData({ expandedPattern: this.data.expandedPattern === id ? null : id });
     },
     insertPattern(e) {
         const id = e.currentTarget.dataset.id;
@@ -292,6 +342,22 @@ Page({
         wx.setStorageSync('writingRecentPatterns', recent);
         wx.showToast({ title: '已选用 ' + pat.pattern, icon: 'none' });
     },
+    onSentenceInput(e) {
+        if (this._composing)
+            return;
+        const val = e.detail.value;
+        this.setData({ userSentence: val, sentenceWordCount: val.trim() ? countWords(val) : 0 });
+    },
+    setToolkitCategory(e) {
+        const toolkitCategory = e.currentTarget.dataset.cat;
+        const patternVisible = this.computePatternVisible(toolkitCategory, this.data.toolkitSearch);
+        this.setData({ toolkitCategory, patternVisible });
+    },
+    onToolkitSearch(e) {
+        const toolkitSearch = e.detail.value;
+        const patternVisible = this.computePatternVisible(this.data.toolkitCategory, toolkitSearch);
+        this.setData({ toolkitSearch, patternVisible });
+    },
     submitSentence() {
         return __awaiter(this, void 0, void 0, function* () {
             const text = this.data.userSentence.trim();
@@ -301,12 +367,13 @@ Page({
                 return;
             }
             if (!pattern) {
-                wx.showToast({ title: '请先点开一个句型', icon: 'none' });
+                wx.showToast({ title: '请先选一个句型', icon: 'none' });
                 return;
             }
             this.setData({ submitting: true, showResult: false, result: null });
             wx.showLoading({ title: '评审中...' });
             let result = scoreSentenceLocal(text, pattern.pattern);
+            result += `\n\n📝 参考例句：\n${pattern.example}\n${pattern.trans}`;
             if (this.data.aiAvailable && this.data.aiEnabled) {
                 try {
                     const res = yield Promise.race([
@@ -322,219 +389,229 @@ Page({
             this.setData({ submitting: false });
         });
     },
-    /* ══ 引导写作 ══ */
+    /* ══ Tab 1: 中英写作助手 ══ */
     selectTopic(e) {
         const index = e.currentTarget.dataset.index;
-        this.setData({
-            currentTopic: this.data.paragraphTopics[index],
-            showResult: false, result: null,
-        });
-    },
-    onParagraphInput(e) {
-        const val = e.detail.value;
-        this.setData({
-            userParagraph: val,
-            paragraphWordCount: val.trim() ? countWords(val) : 0,
-        });
+        this.setData({ currentTopic: this.data.paragraphTopics[index] });
     },
     setGuideStep(e) {
         this.setData({ guideStep: e.currentTarget.dataset.step });
     },
-    /* 提纲 */
-    setOutlineOpinion(e) {
-        this.setData({ outlineOpinion: e.currentTarget.dataset.val });
+    _composing: false,
+    onCompStart() { this._composing = true; },
+    onCompEnd() { this._composing = false; },
+    onCnCompEnd(e) {
+        this._composing = false;
+        this.setData({ cnInput: e.detail.value });
     },
-    onReasonInput(e) {
-        this.setData({ outlineReasonInput: e.detail.value });
+    onCnInput(e) {
+        if (!this._composing)
+            this.setData({ cnInput: e.detail.value });
     },
-    addReason() {
-        const v = this.data.outlineReasonInput.trim();
-        if (!v)
+    goToStep2() {
+        const text = this.data.cnInput.trim();
+        if (!text) {
+            wx.showToast({ title: '请先写中文要点', icon: 'none' });
             return;
-        this.setData({
-            outlineReasons: [...this.data.outlineReasons, v],
-            outlineReasonInput: '',
-        });
-    },
-    removeReason(e) {
-        const i = e.currentTarget.dataset.index;
-        const arr = [...this.data.outlineReasons];
-        arr.splice(i, 1);
-        this.setData({ outlineReasons: arr });
-    },
-    onExampleInput(e) {
-        this.setData({ outlineExampleInput: e.detail.value });
-    },
-    addExample() {
-        const v = this.data.outlineExampleInput.trim();
-        if (!v)
+        }
+        const points = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        if (points.length < 2) {
+            wx.showToast({ title: '至少写 2 个要点', icon: 'none' });
             return;
-        this.setData({
-            outlineExamples: [...this.data.outlineExamples, v],
-            outlineExampleInput: '',
-        });
-    },
-    removeExample(e) {
-        const i = e.currentTarget.dataset.index;
-        const arr = [...this.data.outlineExamples];
-        arr.splice(i, 1);
-        this.setData({ outlineExamples: arr });
-    },
-    generateOutline() {
-        const opinion = this.data.outlineOpinion || '中立';
-        const reasons = this.data.outlineReasons;
-        const examples = this.data.outlineExamples;
-        let outline = '';
-        outline += `第 1 段 · 引入观点\n我认为这个问题 ${opinion}。\n\n`;
-        reasons.forEach((r, i) => {
-            outline += `第 ${i + 2} 段 · 理由 ${i + 1}\n首先${i > 0 ? '其次' : ''}，${r}。`;
-            if (examples[i])
-                outline += ` 例如，${examples[i]}。`;
-            outline += '\n\n';
-        });
-        outline += `第 ${reasons.length + 2} 段 · 总结\n总之，${reasons.length > 0 ? '基于以上理由，我认为' + opinion + '。在' + (reasons.join('、')) + '等方面都需要权衡。' : '需要综合考虑各方面因素。'}`;
-        this.setData({ outlineGenerated: outline, guideStep: 3 });
-    },
-    /* 新手模式 */
-    onSentence1Input(e) {
-        const s1 = e.detail.value;
-        this.setData({
-            sentence1: s1,
-            sentenceCount: [s1, this.data.sentence2, this.data.sentence3].filter(s => s.trim()).length,
-        });
-    },
-    onSentence2Input(e) {
-        const s2 = e.detail.value;
-        this.setData({
-            sentence2: s2,
-            sentenceCount: [this.data.sentence1, s2, this.data.sentence3].filter(s => s.trim()).length,
-        });
-    },
-    onSentence3Input(e) {
-        const s3 = e.detail.value;
-        this.setData({
-            sentence3: s3,
-            sentenceCount: [this.data.sentence1, this.data.sentence2, s3].filter(s => s.trim()).length,
-        });
-    },
-    submitParagraph() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const text = this.data.userParagraph.trim();
-            const topic = this.data.currentTopic;
-            if (!text) {
-                wx.showToast({ title: '请先写点内容', icon: 'none' });
-                return;
+        }
+        const patterns = this.data.patterns;
+        const cards = points.map((cn, i) => {
+            const matched = matchVocab(cn);
+            let vocab = matched.vocab;
+            if (vocab.length === 0)
+                vocab = this.data.currentTopic.vocab.slice(0, 6);
+            let patternStrs = [];
+            for (const id of matched.patternIds) {
+                const p = patterns.find(pt => pt.id === id);
+                if (p)
+                    patternStrs.push(p.pattern);
             }
-            this.setData({ submitting: true, showResult: false, result: null });
-            wx.showLoading({ title: '评审中...' });
-            let local = scoreParagraphLocal(text, topic);
-            let score = local.score, dimensions = local.dimensions, suggestions = local.suggestions;
-            if (this.data.aiAvailable && this.data.aiEnabled) {
-                try {
-                    const ai = yield Promise.race([
-                        (0, api_1.correctParagraph)(topic.text, text),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
-                    ]);
-                    if (ai.dimensions)
-                        dimensions = ai.dimensions;
-                    if (ai.suggestions)
-                        suggestions = ai.suggestions;
-                    if (ai.score)
-                        score = Math.round((score + ai.score) / 2);
+            if (patternStrs.length === 0) {
+                for (const id of this.data.currentTopic.patterns) {
+                    const p = patterns.find(pt => pt.id === id);
+                    if (p)
+                        patternStrs.push(p.pattern);
                 }
-                catch ( /* keep local */_a) { /* keep local */ }
             }
-            this.setData({
-                showResult: true,
-                result: `评分：${score}分\n\n连贯性：${dimensions.coherence}分\n内容：${dimensions.content}分\n语言：${dimensions.language}分\n\n修改建议：\n${suggestions}`,
-            });
-            wx.hideLoading();
-            this.setData({ submitting: false });
+            return { index: i, chinese: cn, vocab, patterns: patternStrs, english: '', done: false, linkerIdx: i < 4 ? i : 3 };
+        });
+        this.setData({ transCards: cards, guideStep: 2 });
+    },
+    onTransEnInput(e) {
+        if (this._composing)
+            return;
+        const index = e.currentTarget.dataset.index;
+        const val = e.detail.value;
+        const cards = [...this.data.transCards];
+        cards[index] = Object.assign(Object.assign({}, cards[index]), { english: val, done: val.trim().length > 0 });
+        this.setData({ transCards: cards });
+    },
+    LINKERS: ['Firstly, ', 'Moreover, ', 'Furthermore, ', 'In addition, ', 'Additionally, ', 'Besides, ', 'However, ', 'Therefore, ', 'In conclusion, '],
+    buildAssembledText() {
+        const cards = this.data.transCards.filter(c => c.done && c.english.trim());
+        if (!cards.length)
+            return '';
+        let text = '';
+        for (let i = 0; i < cards.length; i++) {
+            if (i > 0)
+                text += ' ';
+            text += (this.LINKERS[cards[i].linkerIdx] || 'Moreover, ') + cards[i].english.trim();
+        }
+        return text;
+    },
+    rebuildPreview() {
+        const text = this.buildAssembledText();
+        this.setData({ assemblyInput: text, assemblyWordCount: text ? countWords(text) : 0 });
+    },
+    goToStep3() {
+        const filled = this.data.transCards.filter(c => c.done).length;
+        if (filled < 2) {
+            wx.showToast({ title: '至少翻译 2 个要点', icon: 'none' });
+            return;
+        }
+        this.rebuildPreview();
+        this.setData({ guideStep: 3 });
+    },
+    onCardEnInput(e) {
+        if (this._composing)
+            return;
+        const index = e.currentTarget.dataset.index;
+        const val = e.detail.value;
+        const cards = [...this.data.transCards];
+        cards[index] = Object.assign(Object.assign({}, cards[index]), { english: val, done: val.trim().length > 0 });
+        this.setData({ transCards: cards });
+        this.rebuildPreview();
+    },
+    setCardLinker(e) {
+        const index = e.currentTarget.dataset.index;
+        const li = e.currentTarget.dataset.linker;
+        const cards = [...this.data.transCards];
+        cards[index] = Object.assign(Object.assign({}, cards[index]), { linkerIdx: li });
+        this.setData({ transCards: cards });
+        this.rebuildPreview();
+    },
+    moveCard(e) {
+        const index = e.currentTarget.dataset.index;
+        const dir = e.currentTarget.dataset.dir;
+        const to = index + dir;
+        if (to < 0 || to >= this.data.transCards.length)
+            return;
+        const cards = [...this.data.transCards];
+        const tmp = cards[to];
+        cards[to] = cards[index];
+        cards[index] = tmp;
+        cards.forEach((c, i) => c.index = i);
+        this.setData({ transCards: cards });
+        this.rebuildPreview();
+    },
+    removeCard(e) {
+        const index = e.currentTarget.dataset.index;
+        const cards = this.data.transCards.filter((_, i) => i !== index);
+        if (cards.length < 2) {
+            wx.showToast({ title: '至少保留 2 个要点', icon: 'none' });
+            return;
+        }
+        cards.forEach((c, i) => c.index = i);
+        this.setData({ transCards: cards });
+        this.rebuildPreview();
+    },
+    addCard() {
+        const cards = [...this.data.transCards];
+        cards.push({ index: cards.length, chinese: '', vocab: [], patterns: [], english: '', done: false, linkerIdx: Math.min(cards.length, 8) });
+        this.setData({ transCards: cards });
+        this.rebuildPreview();
+    },
+    goToStep4() {
+        const text = this.data.assemblyInput.trim();
+        if (!text) {
+            wx.showToast({ title: '请先组装段落', icon: 'none' });
+            return;
+        }
+        const wc = countWords(text);
+        const sentences = text.split(/[.!?]+\s*/).filter(Boolean).length;
+        let patternCount = 0;
+        for (const p of this.data.patterns) {
+            const clean = p.pattern.toLowerCase().replace(/\.\.\./g, '').replace(/[()]/g, '').trim();
+            if (clean && text.toLowerCase().includes(clean))
+                patternCount++;
+        }
+        let score = 60;
+        if (wc >= 80 && wc <= 180)
+            score += 15;
+        else if (wc < 40)
+            score -= 20;
+        if (sentences >= 5)
+            score += 10;
+        if (patternCount >= 2)
+            score += 10;
+        score = Math.max(20, Math.min(100, score));
+        const items = [];
+        if (wc < 80)
+            items.push({ ok: false, text: `词数偏少（${wc} 词），建议 120-180 词` });
+        else if (wc > 200)
+            items.push({ ok: false, text: `词数偏多（${wc} 词），建议精简` });
+        else
+            items.push({ ok: true, text: `词数合适（${wc} 词）` });
+        if (sentences < 5)
+            items.push({ ok: false, text: `句子偏少（${sentences} 句），建议 5-10 句` });
+        else
+            items.push({ ok: true, text: `句子数量合适（${sentences} 句）` });
+        if (patternCount === 0)
+            items.push({ ok: false, text: '未检测到高级句型，试试句型急救包' });
+        else
+            items.push({ ok: true, text: `使用了 ${patternCount} 个高级句型` });
+        if (!/first|to begin/i.test(text))
+            items.push({ ok: false, text: '可添加连接词开头：Firstly / To begin with' });
+        if (!/in conclusion|to sum/i.test(text))
+            items.push({ ok: false, text: '可添加结尾词：In conclusion / To sum up' });
+        this.setData({ guideStep: 4, polishStats: { words: wc, sentences, patterns: patternCount, score }, polishItems: items });
+    },
+    resetAll() {
+        this.setData({
+            cnInput: '', transCards: [], assemblyInput: '', assemblyWordCount: 0,
+            polishStats: { words: 0, sentences: 0, patterns: 0, score: 0 },
+            polishItems: [], guideStep: 1, showResult: false, result: null,
+            currentTopic: this.data.paragraphTopics[0],
         });
     },
-    /* ══ 考场模拟 ══ */
+    /* ══ Tab 2: 写作速查 ══ */
     enterWriting(e) {
         const id = e.currentTarget.dataset.id;
         const item = this.data.writings.find(w => w.id === id) || null;
+        if (!item)
+            return;
+        const patternTags = [];
+        for (const pid of item.patterns) {
+            const p = this.data.patterns.find(pt => pt.id === pid);
+            if (p)
+                patternTags.push(p.pattern);
+        }
         this.setData({
             currentWriting: item, detailMode: true,
             writingAnswer: '', writingWordCount: 0, showResult: false, result: null,
-            timerRunning: false,
+            writingKeywords: item.keywords, writingPatternTags: patternTags,
         });
-        if (_wgTimer) {
-            clearInterval(_wgTimer);
-            _wgTimer = null;
-        }
     },
     backToWritingList() {
         this.setData({ currentWriting: null, detailMode: false, writingAnswer: '', writingWordCount: 0, showResult: false, result: null });
-        if (_wgTimer) {
-            clearInterval(_wgTimer);
-            _wgTimer = null;
-        }
-        this.setData({ timerRunning: false });
     },
     onWritingInput(e) {
+        if (this._composing)
+            return;
         const val = e.detail.value;
         this.setData({ writingAnswer: val, writingWordCount: val.trim() ? countWords(val) : 0 });
-    },
-    /* 计时 */
-    startTimer() {
-        if (this.data.timerRunning)
-            return;
-        this.setData({ timerRunning: true, timerRemaining: 1800, timerPhase: 'review', timerPhaseLabel: '📋 审题阶段', timerPercent: 100 });
-        if (_wgTimer)
-            clearInterval(_wgTimer);
-        _wgTimer = setInterval(() => {
-            const rem = this.data.timerRemaining - 1;
-            const pct = Math.round(rem / 1800 * 100);
-            let phase = this.data.timerPhase, label = this.data.timerPhaseLabel;
-            if (rem <= 0) {
-                if (_wgTimer) {
-                    clearInterval(_wgTimer);
-                    _wgTimer = null;
-                }
-                this.setData({ timerRunning: false, timerRemaining: 0, timerPhase: 'done', timerPercent: 0 });
-                wx.showToast({ title: '时间到！', icon: 'none' });
-                return;
-            }
-            const elapsed = 1800 - rem;
-            if (elapsed < 120) {
-                phase = 'review';
-                label = '📋 审题阶段';
-            }
-            else if (elapsed < 300) {
-                phase = 'outline';
-                label = '📝 列提纲阶段';
-            }
-            else if (elapsed < 1680) {
-                phase = 'writing';
-                label = '✍️ 写作阶段';
-            }
-            else {
-                phase = 'check';
-                label = '🔍 检查阶段';
-            }
-            this.setData({ timerRemaining: rem, timerPercent: pct, timerPhase: phase, timerPhaseLabel: label });
-        }, 1000);
-    },
-    toggleTimer() {
-        if (this.data.timerRunning) {
-            if (_wgTimer) {
-                clearInterval(_wgTimer);
-                _wgTimer = null;
-            }
-            this.setData({ timerRunning: false });
-        }
-        else {
-            this.startTimer();
-        }
     },
     submitWriting() {
         return __awaiter(this, void 0, void 0, function* () {
             const text = this.data.writingAnswer.trim();
             const prompt = this.data.currentWriting && this.data.currentWriting.prompt || '';
             const reference = this.data.currentWriting && this.data.currentWriting.reference || '';
+            const keywords = this.data.writingKeywords || [];
             if (!text) {
                 wx.showToast({ title: '请输入作文', icon: 'none' });
                 return;
@@ -561,8 +638,17 @@ Page({
                 catch ( /* keep local */_a) { /* keep local */ }
             }
             const parsed = parseReference(ref);
-            let resultText = `评分：${score}分\n\n内容：${dimensions.content}分\n结构：${dimensions.structure}分\n语言：${dimensions.language}分\n\n修改建议：\n${suggestions}\n\n`;
-            resultText += `📖 范文拆解\n${'-'.repeat(20)}\n`;
+            let resultText = `评分：${score}分\n\n内容：${dimensions.content}分\n结构：${dimensions.structure}分\n语言：${dimensions.language}分\n\n修改建议：\n${suggestions}\n`;
+            const usedKeywords = [];
+            for (const kw of keywords) {
+                if (text.toLowerCase().includes(kw))
+                    usedKeywords.push(kw);
+            }
+            if (usedKeywords.length > 0)
+                resultText += `\n📌 关键词使用：✅ ${usedKeywords.join('、')}\n`;
+            else if (keywords.length > 0)
+                resultText += `\n📌 关键词提示：${keywords.slice(0, 5).join('、')}\n`;
+            resultText += `\n📖 范文拆解\n${'-'.repeat(20)}\n`;
             for (const sec of parsed) {
                 resultText += `\n【${sec.label}】\n${sec.text}\n${sec.note}\n`;
             }
@@ -574,11 +660,6 @@ Page({
             (0, checkin_1.doCheckIn)('writing');
             wx.hideLoading();
             this.setData({ submitting: false });
-            if (_wgTimer) {
-                clearInterval(_wgTimer);
-                _wgTimer = null;
-            }
-            this.setData({ timerRunning: false });
         });
     },
     toggleAi() {

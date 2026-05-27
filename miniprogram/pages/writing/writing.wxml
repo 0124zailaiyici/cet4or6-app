@@ -83,7 +83,7 @@
         <view class="ref-trans">{{selectedPattern.trans}}</view>
       </view>
       <view class="pi-wrap">
-        <textarea class="pi" placeholder="{{selectedPattern ? '用「' + selectedPattern.pattern + '」写一个句子…' : '请先在句型列表中选用一个句型'}}" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}"></textarea>
+        <textarea class="pi" placeholder="{{selectedPattern ? '用「' + selectedPattern.pattern + '」写一个句子…' : '请先在句型列表中选用一个句型'}}" value="{{userSentence}}" bindinput="onSentenceInput" maxlength="300" auto-height disabled="{{submitting}}" bindcompositionstart="onCompStart" bindcompositionend="onCompEnd"></textarea>
         <text class="pi-wc {{sentenceWordCount > 0 ? 'on' : ''}}">{{sentenceWordCount}} 词</text>
       </view>
       <view class="btn btn-primary {{submitting ? 'disabled' : ''}}" catchtap="submitSentence">{{submitting ? '提交中…' : '提交练习'}}</view>
@@ -112,7 +112,11 @@
       <view class="cn-step">
         <view class="cn-step-title">✍️ 用中文写 3-5 个要点</view>
         <view class="cn-step-desc">围绕"{{currentTopic.label}}"，每行写一个你想说的要点</view>
-        <textarea class="cn-input" placeholder="例如：&#10;环保对每个人都很重要&#10;政府应该加强管理&#10;我们可以从小事做起" value="{{cnInput}}" bindinput="onCnInput"></textarea>
+        <view class="cn-example">
+          <view class="cn-example-label">💡 参考示例</view>
+          <view class="cn-example-line" wx:for="{{cnExampleLines}}" wx:key="*this">{{item}}</view>
+        </view>
+        <textarea class="cn-input" placeholder="{{cnPlaceholder}}" value="{{cnInput}}" bindinput="onCnInput" bindcompositionstart="onCompStart" bindcompositionend="onCnCompEnd"></textarea>
       </view>
       <view class="pills">
         <view class="pill {{currentTopic.label === item.label ? 'on' : ''}}" wx:for="{{paragraphTopics}}" wx:key="label" data-index="{{index}}" catchtap="selectTopic">{{item.label}}</view>
@@ -135,7 +139,7 @@
             <text>🔗 可用句型：</text>
             <text wx:for="{{card.patterns}}" wx:for-item="pt" wx:key="*this" class="pat-tag">{{pt}}</text>
           </view>
-          <textarea class="trans-en {{card.done ? 'done' : ''}}" placeholder="写英文句子……" value="{{card.english}}" bindinput="onTransEnInput" data-index="{{card.index}}"></textarea>
+          <textarea class="trans-en {{card.done ? 'done' : ''}}" placeholder="写英文句子……" value="{{card.english}}" bindinput="onTransEnInput" data-index="{{card.index}}" bindcompositionstart="onCompStart" bindcompositionend="onCompEnd"></textarea>
           <text wx:if="{{card.done}}" class="trans-done-label">✅ 已完成</text>
         </view>
       </block>
@@ -145,26 +149,38 @@
 
     <!-- Step 3: 组装 -->
     <block wx:if="{{guideStep === 3}}">
-      <view class="hint">💡 点击句子添加到正文区，也可以用连接词串联</view>
-      <view class="linker-hint">
-        <view class="linker" catchtap="insertLinker" data-text="Firstly, ">Firstly</view>
-        <view class="linker" catchtap="insertLinker" data-text="To begin with, ">To begin with</view>
-        <view class="linker" catchtap="insertLinker" data-text="Moreover, ">Moreover</view>
-        <view class="linker" catchtap="insertLinker" data-text="Furthermore, ">Furthermore</view>
-        <view class="linker" catchtap="insertLinker" data-text="However, ">However</view>
-        <view class="linker" catchtap="insertLinker" data-text="Therefore, ">Therefore</view>
-        <view class="linker" catchtap="insertLinker" data-text="In addition, ">In addition</view>
-        <view class="linker" catchtap="insertLinker" data-text="In conclusion, ">In conclusion</view>
-      </view>
-      <view class="assembly">
-        <block wx:for="{{transCards}}" wx:for-item="card" wx:key="index">
-          <view wx:if="{{card.done}}" class="assembly-sent" catchtap="appendSentence" data-index="{{card.index}}">{{card.index + 1}}. {{card.english}}</view>
-        </block>
-        <view wx:if="{{transCards.length === 0}}" class="assembly-empty">还没有翻译好的句子</view>
-      </view>
-      <view class="pi-wrap">
-        <textarea class="pi" placeholder="在此编辑段落……" value="{{assemblyInput}}" bindinput="onAssemblyInput" auto-height></textarea>
-        <text class="pi-wc {{assemblyWordCount > 0 ? 'on' : ''}}">{{assemblyWordCount}} 词</text>
+      <view class="hint">💡 调整句子顺序、连接词，完成段落组装</view>
+      <block wx:for="{{transCards}}" wx:for-item="card" wx:key="index">
+        <view class="asm-card">
+          <view class="asm-card-hd">
+            <view class="asm-card-num">{{index + 1}}</view>
+            <view class="asm-card-actions">
+              <view class="asm-btn" catchtap="moveCard" data-index="{{index}}" data-dir="{{-1}}">↑</view>
+              <view class="asm-btn" catchtap="moveCard" data-index="{{index}}" data-dir="{{1}}">↓</view>
+              <view class="asm-btn asm-btn-del" catchtap="removeCard" data-index="{{index}}">✕</view>
+            </view>
+          </view>
+          <view class="asm-card-cn" wx:if="{{card.chinese}}">🀄 {{card.chinese}}</view>
+          <view class="asm-card-cn asm-card-cn-dim" wx:else>🀄 新要点</view>
+          <view class="asm-linkers">
+            <view class="asm-linker {{card.linkerIdx === 0 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{0}}">Firstly</view>
+            <view class="asm-linker {{card.linkerIdx === 1 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{1}}">Moreover</view>
+            <view class="asm-linker {{card.linkerIdx === 2 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{2}}">Furthermore</view>
+            <view class="asm-linker {{card.linkerIdx === 3 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{3}}">In addition</view>
+            <view class="asm-linker {{card.linkerIdx === 4 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{4}}">Additionally</view>
+            <view class="asm-linker {{card.linkerIdx === 5 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{5}}">Besides</view>
+            <view class="asm-linker {{card.linkerIdx === 6 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{6}}">However</view>
+            <view class="asm-linker {{card.linkerIdx === 7 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{7}}">Therefore</view>
+            <view class="asm-linker {{card.linkerIdx === 8 ? 'on' : ''}}" catchtap="setCardLinker" data-index="{{index}}" data-linker="{{8}}">In conclusion</view>
+          </view>
+          <textarea class="asm-card-en" placeholder="写英文句子……" value="{{card.english}}" bindinput="onCardEnInput" data-index="{{index}}" bindcompositionstart="onCompStart" bindcompositionend="onCompEnd"></textarea>
+        </view>
+      </block>
+      <view class="asm-add" catchtap="addCard">+ 追加一个要点</view>
+      <view class="asm-preview">
+        <view class="asm-preview-label">📄 段落预览</view>
+        <view class="asm-preview-text" wx:if="{{assemblyInput}}">{{assemblyInput}}</view>
+        <view class="asm-preview-text asm-preview-dim" wx:else>调整上方卡片，这里会实时显示完整段落…</view>
       </view>
       <view class="btn btn-primary" catchtap="goToStep4">提交检查 →</view>
       <view class="btn btn-secondary" data-step="{{2}}" catchtap="setGuideStep">← 回上一步</view>
@@ -173,16 +189,21 @@
     <!-- Step 4: 润色 -->
     <block wx:if="{{guideStep === 4}}">
       <view class="polish-card">
-        <view class="polish-stat">
-          <view class="stat-item"><view class="stat-num">{{polishStats.words}}</view><view class="stat-label">词数</view></view>
-          <view class="stat-item"><view class="stat-num">{{polishStats.sentences}}</view><view class="stat-label">句子数</view></view>
-          <view class="stat-item"><view class="stat-num">{{polishStats.patterns}}</view><view class="stat-label">句型使用</view></view>
-          <view class="stat-item"><view class="stat-num">{{polishStats.score}}</view><view class="stat-label">建议</view></view>
+        <view class="polish-score">{{polishStats.score}}<text class="polish-score-label">/100</text></view>
+        <view class="polish-dims">
+          <view class="dim-item"><text class="dim-num">{{polishStats.words}}</text><text class="dim-label">词数 目标120-180</text></view>
+          <view class="dim-item"><text class="dim-num">{{polishStats.sentences}}</text><text class="dim-label">句子数</text></view>
+          <view class="dim-item"><text class="dim-num">{{polishStats.patterns}}</text><text class="dim-label">句型数</text></view>
         </view>
+        <view class="polish-divider"></view>
         <view wx:for="{{polishItems}}" wx:key="index" class="polish-item">
           <text class="{{item.ok ? 'polish-ok' : 'polish-warn'}}">{{item.ok ? '✅' : '💡'}}</text>
           <text>{{item.text}}</text>
         </view>
+      </view>
+      <view class="polish-text" wx:if="{{assemblyInput}}">
+        <view class="polish-text-label">📄 你的段落</view>
+        <view class="polish-text-body">{{assemblyInput}}</view>
       </view>
       <view class="btn btn-secondary" data-step="{{3}}" catchtap="setGuideStep">← 回编辑修改</view>
       <view class="btn btn-primary" style="margin-top:16rpx" catchtap="resetAll">🔄 重新写一篇</view>
@@ -231,7 +252,7 @@
         <text class="wa-label">✍️ 你的作文</text>
         <text class="wa-hint">120–180 词</text>
       </view>
-      <textarea class="wa-input" placeholder="直接在这里写你的作文……" value="{{writingAnswer}}" bindinput="onWritingInput" auto-height></textarea>
+      <textarea class="wa-input" placeholder="直接在这里写你的作文……" value="{{writingAnswer}}" bindinput="onWritingInput" auto-height bindcompositionstart="onCompStart" bindcompositionend="onCompEnd"></textarea>
 
       <view class="wc-info">
         <text>词数</text>
