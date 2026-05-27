@@ -352,7 +352,12 @@ Page<IReadingData, IReadingMethods>({
           definition: zh,
           chn: zh,
           source: this.data.current && this.data.current.title || '阅读理解',
-          context: '',
+          context: (() => {
+            const p = this.data.current && this.data.current.passage
+            if (!p) return ''
+            const sents = p.split(/(?<=[.?!])\s+/)
+            return (sents.find(s => s.toLowerCase().includes(word.toLowerCase())) || '').replace(/[\s\u00A0]+/g, ' ').trim()
+          })(),
           contextCn: '',
           audioUrl: '',
           status: 'new',
