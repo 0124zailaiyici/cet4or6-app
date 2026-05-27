@@ -57,7 +57,9 @@
 .task-fav{font-size:22rpx;display:block;margin-top:4rpx;color:#ffca28}
 .empty-tip{padding:60rpx 40rpx;text-align:center;font-size:24rpx;color:#f9a8d4;line-height:1.8}
 /* ── 答题导航 ── */
-.d-nav{display:flex;align-items:center;padding:14rpx 24rpx 10rpx}
+.d-nav{display:flex;align-items:center;gap:10rpx;padding:14rpx 24rpx 10rpx}
+.d-back{width:48rpx;height:48rpx;border-radius:18rpx;background:rgba(244,114,182,0.06);display:flex;align-items:center;justify-content:center;font-size:24rpx;color:#f472b6;flex-shrink:0}
+.d-back.hidden{display:none}
 .d-title{flex:1;font-size:26rpx;font-weight:700;color:#4a1a2e}
 .d-step{font-size:20rpx;font-weight:600;padding:6rpx 16rpx;border-radius:14rpx;background:#fce4ec;color:#ec407a}
 .si{display:flex;align-items:center;justify-content:center;gap:8rpx;padding:4rpx 24rpx 14rpx}
@@ -179,6 +181,7 @@
 .dark-theme .task{background:#201628}
 .dark-theme .task-text{color:#e8d0e0}
 .dark-theme .stitle{color:#e8d0e0}
+.dark-theme .d-back{background:rgba(244,114,182,0.08)}
 .dark-theme .d-title{color:#f0e0ec}
 .dark-theme .pc{background:#201628}
 .dark-theme .qt{background:#201628}
