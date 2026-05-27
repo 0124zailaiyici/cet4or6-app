@@ -233,9 +233,12 @@ Page({
         wx.showModal({
             title: word,
             content: zh || '暂无释义',
-            showCancel: false,
-            confirmText: '确认',
-            success: () => {
+            showCancel: true,
+            success: (res) => {
+                if (!res.confirm) {
+                    wx.showToast({ title: '已取消', icon: 'none' });
+                    return;
+                }
                 const vw = app.globalData.studyData.vocabWords || [];
                 vw.push({
                     word,

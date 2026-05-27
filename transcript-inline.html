@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>听力 · 原文面板</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:#f5f0f3;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+.phone{width:390px;height:780px;background:#fff;border-radius:44px;box-shadow:0 24px 80px rgba(0,0,0,.08);overflow:hidden;display:flex;flex-direction:column;position:relative}
+
+.header{display:flex;align-items:center;gap:10px;padding:20px 24px 12px;flex-shrink:0;border-bottom:1px solid #f0ebee}
+.header .back{width:36px;height:36px;border-radius:50%;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:18px;color:#8a7a82;cursor:pointer}
+.header .title{flex:1;font-size:16px;font-weight:800;color:#4a3a42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header .actions{display:flex;gap:4px}
+.header .act{padding:8px 16px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.header .act:active{transform:scale(.95)}
+.header .act.outline{background:#f5eef2;color:#8a7a82}
+.header .act.solid{background:linear-gradient(135deg,#ff8fab,#d4b5ff);color:#fff;box-shadow:0 3px 10px rgba(255,143,171,.2)}
+.header .act.highlight{background:#fff0f3;color:#e86a8a}
+
+/* Progress bar */
+.seek-wrap{padding:8px 24px 4px;flex-shrink:0}
+.seek-bar{height:6px;border-radius:3px;background:#f0ebee;position:relative;cursor:pointer}
+.seek-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f5a0b8,#d4b5ff);width:35%}
+.seek-time{display:flex;justify-content:space-between;font-size:11px;color:#b0a0a8;font-weight:600;font-family:monospace;padding:3px 2px 0}
+
+/* Controls */
+.controls{display:flex;align-items:center;gap:6px;padding:2px 24px 10px;flex-shrink:0;flex-wrap:wrap}
+.pill{padding:6px 16px;border-radius:14px;font-size:12px;font-weight:700;background:#f5eef2;color:#8a7a82;cursor:pointer}
+.pill.on{background:#f5a0b8;color:#fff}
+.pill.play{margin-left:auto;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:linear-gradient(135deg,#f5a0b8,#d4b5ff);color:#fff;box-shadow:0 4px 12px rgba(245,160,184,.25);padding:0}
+.pill.play:active{transform:scale(.92)}
+
+/* Main area */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0 20px}
+
+/* Question card */
+.q-area{flex-shrink:0;overflow-y:auto;max-height:50%}
+.q-area::-webkit-scrollbar{width:3px}
+.q-area::-webkit-scrollbar-thumb{background:#ede2e8;border-radius:2px}
+.q-section{font-size:12px;font-weight:700;color:#e86a8a;margin-bottom:4px}
+.q-stem{font-size:16px;font-weight:800;color:#4a3a42;line-height:1.6;margin-bottom:14px;padding-bottom:10px;border-bottom:2px dashed #f0ebee}
+.q-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.qo{display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:12px;font-size:13px;color:#8a7a82;line-height:1.5;font-weight:600;background:#fff;border:2px solid #f0ebee;cursor:pointer;transition:.12s}
+.qo:active{background:#faf5f7}
+.qo .l{width:28px;height:28px;border-radius:8px;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#c0a8b0;flex-shrink:0}
+.qo.on{border-color:#f5a0b8;background:linear-gradient(135deg,#fff0f3,#fff5f7)}
+.qo.on .l{background:#f5a0b8;color:#fff}
+
+/* Transcript toggle */
+.ts-toggle{display:flex;align-items:center;gap:6px;padding:12px 14px;margin:10px 0;border-radius:12px;cursor:pointer;transition:.15s;background:#faf5f7;border:2px solid #f5eef0}
+.ts-toggle:active{background:#f5eef2}
+.ts-toggle .label{font-size:13px;font-weight:700;color:#4a3a42;flex:1}
+.ts-toggle .arrow{font-size:14px;color:#8a7a82;transition:.2s}
+.ts-toggle.open .arrow{transform:rotate(180deg)}
+.ts-toggle .count{font-size:11px;font-weight:600;color:#b0a0a8}
+
+/* Transcript list */
+.ts-panel{flex:1;overflow-y:auto;display:none;padding-bottom:100px}
+.ts-panel.open{display:block}
+.ts-panel::-webkit-scrollbar{width:3px}
+.ts-panel::-webkit-scrollbar-thumb{background:#ede2e8;border-radius:2px}
+.ts-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 4px}
+.ts-header .play-all{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#f5a0b8,#d4b5ff);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 3px 10px rgba(245,160,184,.2);cursor:pointer;flex-shrink:0}
+.ts-header .play-all:active{transform:scale(.92)}
+.ts-header .info{font-size:12px;font-weight:600;color:#b0a0a8}
+.sent{display:flex;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:6px;cursor:pointer;transition:.12s;border:2px solid transparent}
+.sent:active{background:#faf5f7}
+.sent.playing{background:linear-gradient(135deg,#fff0f3,#fff5f7);border-color:#ffc0cc}
+.sent .num{width:28px;height:28px;border-radius:7px;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#c0a8b0;flex-shrink:0;transition:.12s}
+.sent.playing .num{background:linear-gradient(135deg,#f5a0b8,#d4b5ff);color:#fff}
+.sent .body{flex:1;min-width:0}
+.sent .body .text{font-size:13px;line-height:1.6;color:#4a3a42;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sent.playing .body .text{color:#e86a8a}
+.sent .body .ts{font-size:10px;color:#c0a8b0;font-family:monospace;display:block;margin-top:1px}
+.sent .splay{width:28px;height:28px;border-radius:50%;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a7a82;flex-shrink:0;align-self:center}
+.sent.playing .splay{background:rgba(255,143,171,.15);color:#e86a8a}
+
+/* Player bar */
+.pbar{position:absolute;bottom:0;left:0;right:0;padding:10px 24px 28px;background:#fff;border-top:1px solid #f0ebee;display:flex;align-items:center;gap:10px}
+.pbar .btn{width:36px;height:36px;border-radius:50%;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8a7a82;cursor:pointer;flex-shrink:0}
+.pbar .btn:active{transform:scale(.92)}
+.pbar .btn.big{width:48px;height:48px;background:linear-gradient(135deg,#f5a0b8,#d4b5ff);color:#fff;font-size:18px;box-shadow:0 3px 12px rgba(245,160,184,.2)}
+.pbar .prog{flex:1;height:3px;border-radius:2px;background:#f0ebee;overflow:hidden}
+.pbar .prog .fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#f5a0b8,#d4b5ff);width:0%}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <div class="back">←</div>
+    <div class="title">2019.06 四级真题 第1套</div>
+    <div class="actions">
+      <div class="act solid" onclick="alert('精听模式')">✨ 精听</div>
+      <div class="act outline" onclick="alert('总结')">📊</div>
+    </div>
+  </div>
+
+  <div class="seek-wrap">
+    <div class="seek-bar"><div class="seek-fill"></div></div>
+    <div class="seek-time"><span>6:49</span><span>23:27</span></div>
+  </div>
+
+  <div class="controls">
+    <div class="pill on">0.8x</div>
+    <div class="pill on">🔁 循环</div>
+    <div class="pill play" id="playBtn">▶</div>
+  </div>
+
+  <div class="main">
+    <div class="q-area">
+      <div class="q-section">Section A  News Reports</div>
+      <div class="q-stem">Q1.</div>
+      <div class="q-opts">
+        <div class="qo"><span class="l">A</span>He set a record by swimming to and from an island.</div>
+        <div class="qo on"><span class="l">B</span>He celebrated his ninth birthday on a small island.</div>
+        <div class="qo"><span class="l">C</span>He visited a prison located on a faraway island.</div>
+        <div class="qo"><span class="l">D</span>He swam around an island near San Francisco.</div>
+      </div>
+    </div>
+
+    <!-- Transcript Toggle -->
+    <div class="ts-toggle" id="tsToggle" onclick="toggleTranscript()">
+      <span class="label">📄 听力原文</span>
+      <span class="count">22 句</span>
+      <span class="arrow">▼</span>
+    </div>
+
+    <!-- Transcript Panel -->
+    <div class="ts-panel" id="tsPanel">
+      <div class="ts-header">
+        <div class="play-all" onclick="playAll()">▶</div>
+        <div class="info">点击句子播放对应音频片段</div>
+      </div>
+
+      <div class="sent" onclick="playSent(0)">
+        <div class="num">1</div>
+        <div class="body">
+          <div class="text">Part II Listening Comprehension (25 minutes)</div>
+          <span class="ts">0:00</span>
+        </div>
+        <div class="splay">▶</div>
+      </div>
+      <div class="sent" onclick="playSent(1)">
+        <div class="num">2</div>
+        <div class="body">
+          <div class="text">Section A Directions: In this section, you will hear three news reports...</div>
+          <span class="ts">0:00</span>
+        </div>
+        <div class="splay">▶</div>
+      </div>
+      <div class="sent playing" onclick="playSent(2)">
+        <div class="num">3</div>
+        <div class="body">
+          <div class="text">1. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday on a small island...</div>
+          <span class="ts">6:49 - 9:31</span>
+        </div>
+        <div class="splay">▶</div>
+      </div>
+      <div class="sent" onclick="playSent(3)">
+        <div class="num">4</div>
+        <div class="body">
+          <div class="text">3. A) To end the one-child policy. B) To encourage late marriage...</div>
+          <span class="ts">9:31 - 10:27</span>
+        </div>
+        <div class="splay">▶</div>
+      </div>
+      <div class="sent" onclick="playSent(4)">
+        <div class="num">5</div>
+        <div class="body">
+          <div class="text">8. A) He had a driving lesson. B) He got his driver's license...</div>
+          <span class="ts">10:27 - 13:32</span>
+        </div>
+        <div class="splay">▶</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pbar">
+    <div class="btn">◀</div>
+    <div class="btn big" onclick="togglePlay()">▶</div>
+    <div class="btn">▶</div>
+    <div class="prog"><div class="fill"></div></div>
+  </div>
+</div>
+
+<script>
+let tsOpen = false
+function toggleTranscript() {
+  tsOpen = !tsOpen
+  document.getElementById('tsPanel').classList.toggle('open', tsOpen)
+  document.getElementById('tsToggle').classList.toggle('open', tsOpen)
+}
+function togglePlay() {}
+function playAll() {}
+function playSent(n) {
+  document.querySelectorAll('.sent').forEach((e,i) => e.classList.toggle('playing', i===n))
+}
+</script>
+</body>
+</html>

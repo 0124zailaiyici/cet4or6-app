@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>听力 · 原文回看</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:#f5f0f3;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+.phone{width:390px;height:780px;background:#fff;border-radius:44px;box-shadow:0 24px 80px rgba(0,0,0,.08);overflow:hidden;display:flex;flex-direction:column;position:relative}
+
+/* Header */
+.header{display:flex;align-items:center;gap:10px;padding:20px 24px 12px;flex-shrink:0;border-bottom:1px solid #f0ebee}
+.header .back{width:36px;height:36px;border-radius:50%;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:18px;color:#8a7a82;cursor:pointer}
+.header .title{flex:1;font-size:16px;font-weight:800;color:#4a3a42}
+.header .badge{padding:6px 14px;border-radius:14px;font-size:12px;font-weight:700;background:#fee8ee;color:#e86a8a}
+
+/* Tabs */
+.tabs{display:flex;padding:12px 24px 0;gap:4px;flex-shrink:0}
+.tab{padding:10px 20px;border-radius:10px 10px 0 0;font-size:13px;font-weight:700;color:#8a7a82;background:transparent;cursor:pointer;transition:.15s}
+.tab.active{background:#fff5f7;color:#e86a8a}
+.tab:not(.active):hover{background:#faf5f7}
+
+/* Content */
+.content{flex:1;overflow-y:auto;padding:16px 20px 140px}
+.content::-webkit-scrollbar{width:3px}
+.content::-webkit-scrollbar-thumb{background:#e8dce2;border-radius:2px}
+
+/* Answer list */
+.answer-item{padding:16px 18px;border-radius:16px;margin-bottom:10px;background:#fff;border:2px solid #f5eef0;transition:.15s}
+.answer-item:hover{border-color:#e8dce2}
+.answer-item .q-stem{font-size:15px;font-weight:700;color:#4a3a42;margin-bottom:8px}
+.answer-item .q-row{display:flex;gap:10px;font-size:13px;font-weight:600}
+.answer-item .q-row .label{color:#8a7a82}
+.answer-item .q-row .val{font-weight:700}
+.answer-item .q-row .val.correct{color:#4caf50}
+.answer-item .q-row .val.wrong{color:#f44336}
+
+/* Transcript section */
+.transcript{display:none}
+.transcript.show{display:block}
+.ts-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ts-header .play-all{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#ff8fab,#d4b5ff);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 4px 12px rgba(255,143,171,.25);cursor:pointer;flex-shrink:0}
+.ts-header .play-all:active{transform:scale(.92)}
+.ts-header .info{font-size:13px;font-weight:600;color:#8a7a82}
+
+/* Sentence list */
+.sent-item{display:flex;gap:10px;padding:14px 16px;border-radius:14px;margin-bottom:8px;cursor:pointer;transition:.15s;border:2px solid transparent}
+.sent-item:hover{background:#faf5f7}
+.sent-item.playing{background:linear-gradient(135deg,#fff0f3,#fff5f7);border-color:#ffc0cc}
+.sent-item .num{width:30px;height:30px;border-radius:8px;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#c0a8b0;flex-shrink:0;transition:.15s}
+.sent-item.playing .num{background:linear-gradient(135deg,#ff8fab,#d4b5ff);color:#fff}
+.sent-item .body{flex:1}
+.sent-item .body .text{font-size:14px;line-height:1.7;color:#4a3a42;font-weight:600}
+.sent-item.playing .body .text{color:#e86a8a}
+.sent-item .body .ts{font-size:11px;color:#c0a8b0;font-family:monospace;margin-top:2px;display:block}
+.sent-item .play-btn{width:32px;height:32px;border-radius:50%;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8a7a82;flex-shrink:0;align-self:center;transition:.15s}
+.sent-item.playing .play-btn{background:rgba(255,143,171,.15);color:#e86a8a}
+.sent-item .play-btn:active{transform:scale(.9)}
+
+/* Player bar */
+.player-bar{position:absolute;bottom:0;left:0;right:0;padding:12px 24px 28px;background:#fff;border-top:1px solid #f0ebee;display:flex;align-items:center;gap:12px}
+.player-bar .btn{width:40px;height:40px;border-radius:50%;background:#f5eef2;display:flex;align-items:center;justify-content:center;font-size:16px;color:#8a7a82;cursor:pointer}
+.player-bar .btn:active{transform:scale(.92)}
+.player-bar .btn.big{width:52px;height:52px;background:linear-gradient(135deg,#ff8fab,#d4b5ff);color:#fff;font-size:20px;box-shadow:0 4px 14px rgba(255,143,171,.2)}
+.player-bar .progress{flex:1;height:4px;border-radius:2px;background:#f0ebee;overflow:hidden}
+.player-bar .progress .fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#ff8fab,#d4b5ff);width:0%}
+.player-bar .time{font-size:11px;color:#8a7a82;font-family:monospace;font-weight:600;min-width:36px;text-align:right}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <div class="back">←</div>
+    <div class="title">2019.06 四级真题 第1套</div>
+    <div class="badge">📊 总结</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">📝 答题详情</div>
+    <div class="tab" onclick="switchTab(1)">📄 听力原文</div>
+  </div>
+
+  <div class="content" id="content">
+    <!-- Answer Details -->
+    <div id="tabAnswers">
+      <div class="answer-item">
+        <div class="q-stem">Q1. A) He set a record... B) He celebrated... C) He visited... D) He swam...</div>
+        <div class="q-row"><span class="label">你的答案:</span><span class="val wrong">A</span></div>
+        <div class="q-row"><span class="label">正确答案:</span><span class="val correct">B</span></div>
+      </div>
+      <div class="answer-item">
+        <div class="q-stem">Q2. A) He doubled... B) He set... C) He cheered... D) He had...</div>
+        <div class="q-row"><span class="label">你的答案:</span><span class="val correct">C</span></div>
+        <div class="q-row"><span class="label">正确答案:</span><span class="val correct">C</span></div>
+      </div>
+      <div class="answer-item">
+        <div class="q-stem">Q3. A) To end... B) To encourage... C) To increase... D) To give...</div>
+        <div class="q-row"><span class="label">你的答案:</span><span class="val wrong">D</span></div>
+        <div class="q-row"><span class="label">正确答案:</span><span class="val correct">A</span></div>
+      </div>
+    </div>
+
+    <!-- Transcript -->
+    <div class="transcript" id="tabTranscript">
+      <div class="ts-header">
+        <div class="play-all" onclick="playAll()">▶</div>
+        <div class="info">点击句子播放对应音频片段</div>
+      </div>
+
+      <div class="sent-item playing" onclick="playSentence(0)">
+        <div class="num">1</div>
+        <div class="body">
+          <div class="text">Part II Listening Comprehension (25 minutes)</div>
+          <span class="ts">0:00</span>
+        </div>
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="sent-item" onclick="playSentence(1)">
+        <div class="num">2</div>
+        <div class="body">
+          <div class="text">Section A Directions: In this section, you will hear three news reports...</div>
+          <span class="ts">0:00</span>
+        </div>
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="sent-item" onclick="playSentence(3)">
+        <div class="num">3</div>
+        <div class="body">
+          <div class="text">1. A) He set a record by swimming to and from an island. B) He celebrated his ninth birthday...</div>
+          <span class="ts">6:49 - 9:31</span>
+        </div>
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="sent-item" onclick="playSentence(4)">
+        <div class="num">4</div>
+        <div class="body">
+          <div class="text">3. A) To end the one-child policy. B) To encourage late marriage...</div>
+          <span class="ts">9:31 - 10:27</span>
+        </div>
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="sent-item" onclick="playSentence(5)">
+        <div class="num">5</div>
+        <div class="body">
+          <div class="text">8. A) He had a driving lesson. B) He got his driver's license...</div>
+          <span class="ts">10:27 - 13:32</span>
+        </div>
+        <div class="play-btn">▶</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="player-bar">
+    <div class="btn">◀</div>
+    <div class="btn big" id="playBtn" onclick="togglePlay()">▶</div>
+    <div class="btn">▶</div>
+    <div class="progress"><div class="fill" id="progressFill" style="width:35%"></div></div>
+    <span class="time" id="timeDisplay">1:12 / 3:15</span>
+  </div>
+</div>
+
+<script>
+let currentTab = 0;
+let playing = false;
+let currentSent = 0;
+
+function switchTab(n) {
+  currentTab = n;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  document.getElementById('tabAnswers').style.display = n===0 ? 'block' : 'none';
+  document.getElementById('tabTranscript').classList.toggle('show', n===1);
+}
+
+function playAll() {
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+}
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+}
+
+function playSentence(idx) {
+  document.querySelectorAll('.sent-item').forEach((el,i) => el.classList.toggle('playing', i===idx));
+  currentSent = idx;
+  playing = true;
+  document.getElementById('playBtn').textContent = '⏸';
+}
+
+// Init
+switchTab(1);
+</script>
+</body>
+</html>
