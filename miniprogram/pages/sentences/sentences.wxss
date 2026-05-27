@@ -652,23 +652,6 @@
   background: #e8f5e9; padding: 2rpx 16rpx; border-radius: 30rpx;
 }
 
-/* Adjust controls */
-.pz-adj {
-  display: flex; align-items: center; justify-content: center;
-  gap: 6rpx; margin-bottom: 12rpx; padding: 4rpx 0;
-}
-.pz-adj-lbl { font-size: 20rpx; color: #a5d6a7; font-weight: 600; margin: 0 4rpx; }
-.pz-adj-btn {
-  font-size: 28rpx; font-weight: 800; color: #66bb6a;
-  background: #e8f5e9; width: 36rpx; height: 36rpx; line-height: 36rpx;
-  text-align: center; border-radius: 50%; cursor: pointer;
-}
-.pz-adj-btn:active { transform: scale(.85); background: #c8e6c9; }
-.pz-adj-val {
-  font-size: 20rpx; font-weight: 700; color: #388e3c;
-  min-width: 48rpx; text-align: center;
-}
-
 .pz-hint { text-align: center; margin-bottom: 14rpx; background: #e8f5e9; border-radius: 28rpx; padding: 16rpx 18rpx; }
 .pz-hint-label { display: inline-block; font-size: 20rpx; color: #388e3c; font-weight: 600; background: #c8e6c9; padding: 2rpx 18rpx; border-radius: 20rpx; margin-bottom: 6rpx; }
 .pz-hint-cn { display: block; font-size: 32rpx; color: #1b5e20; font-weight: 700; line-height: 1.5; margin-bottom: 4rpx; }
@@ -681,19 +664,20 @@
 .pz-drop {
   background: #e8f5e9; border: 3rpx dashed #a5d6a7;
   border-radius: 28rpx; padding: 14rpx 12rpx;
+  display: flex; flex-wrap: wrap; gap: 4rpx;
+  align-items: flex-end; justify-content: center;
   min-height: 60rpx; margin-bottom: 8rpx;
 }
 .pz-drop-word {
-  display: inline; font-size: 30rpx; font-weight: 600; color: #1b5e20;
-  line-height: 1; margin: 0 3rpx;
+  font-size: 30rpx; font-weight: 600; color: #1b5e20;
+  line-height: 1;
   animation: popIn .2s ease;
 }
 .pz-drop-word.hint-glow { color: #b45309 !important; }
 .pz-drop-word.done { opacity: .6; }
 .pz-drop-slot {
-  display: inline-block; width: 36rpx;
-  border-bottom: 3rpx solid #a5d6a7; margin: 0 3rpx;
-  vertical-align: bottom;
+  width: 36rpx; height: 30rpx;
+  border-bottom: 4rpx solid #a5d6a7; box-sizing: border-box;
 }
 .pz-drop-skipped { width: 100%; text-align: center; font-size: 28rpx; color: #388e3c; font-weight: 700; padding: 20rpx 0; }
 

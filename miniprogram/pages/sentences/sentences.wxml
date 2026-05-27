@@ -61,17 +61,7 @@
               <view class="sc-actions">
                 <view class="fav-btn {{favStatus[index] ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleFavorite">{{favTexts[index]}}</view>
                 <view class="master-btn {{masterStatus[index] ? 'on' : ''}}" data-id="{{item.id}}" catchtap="toggleMaster">{{masterTexts[index]}}</view>
-    </view>
-    <view class="pz-adj">
-      <text class="pz-adj-lbl">间距</text>
-      <text class="pz-adj-btn" catchtap="adjPad" data-d="-1">−</text>
-      <text class="pz-adj-val">{{pzPad}}rpx</text>
-      <text class="pz-adj-btn" catchtap="adjPad" data-d="1">+</text>
-      <text class="pz-adj-lbl">字号</text>
-      <text class="pz-adj-btn" catchtap="adjFs" data-d="-1">−</text>
-      <text class="pz-adj-val">{{pzFs}}rpx</text>
-      <text class="pz-adj-btn" catchtap="adjFs" data-d="1">+</text>
-    </view>
+              </view>
             </view>
           </view>
         </view>
