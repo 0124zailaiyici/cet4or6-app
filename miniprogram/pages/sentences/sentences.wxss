@@ -686,7 +686,7 @@
 }
 .pz-drop-word {
   font-size: 30rpx; font-weight: 600; color: #1b5e20;
-  padding: 0; line-height: 1.5;
+  line-height: 1.5;
   animation: popIn .2s ease;
 }
 .pz-drop-word.hint-glow {
@@ -694,8 +694,8 @@
 }
 .pz-drop-word.done { opacity: .6; }
 .pz-drop-slot {
-  display: inline-block; width: 48rpx;
-  border-bottom: 4rpx solid #a5d6a7; margin: 0 2rpx;
+  font-size: 30rpx; font-weight: 400; color: #a5d6a7;
+  line-height: 1.5; letter-spacing: 4rpx;
 }
 .pz-drop-skipped { width: 100%; text-align: center; font-size: 28rpx; color: #388e3c; font-weight: 700; padding: 20rpx 0; }
 
