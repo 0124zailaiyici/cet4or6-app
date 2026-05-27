@@ -676,7 +676,7 @@
 .pz-drop-word.hint-glow { color: #b45309 !important; }
 .pz-drop-word.done { opacity: .6; }
 .pz-drop-slot {
-  width: 36rpx; height: 30rpx;
+  display: inline-block; width: 36rpx; height: 30rpx;
   border-bottom: 4rpx solid #a5d6a7; box-sizing: border-box;
 }
 .pz-drop-skipped { width: 100%; text-align: center; font-size: 28rpx; color: #388e3c; font-weight: 700; padding: 20rpx 0; }

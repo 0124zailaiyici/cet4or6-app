@@ -118,7 +118,7 @@
             >
               {{puzzleWords[item]}}
             </text>
-            <text wx:else class="pz-drop-slot"></text>
+            <view wx:else class="pz-drop-slot"></view>
           </block>
         </block>
         <text wx:if="{{puzzleSkipped}}" class="pz-drop-skipped">⏭ 已跳过</text>
