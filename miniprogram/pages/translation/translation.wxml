@@ -44,7 +44,6 @@
   <!-- ═══ 答题（三步）+ 增强提示 ═══ -->
   <block wx:if="{{page === 'practice'}}">
     <view class="d-nav">
-      <view class="d-back {{step === 'prepare' ? 'hidden' : ''}}" catchtap="goStep" data-step="1">←</view>
       <text class="d-title">{{currentItem._topic || '练习'}} · L{{currentItem._level || ''}}</text>
       <text class="d-step">{{step === 'prepare' ? '准备' : step === 'translate' ? '翻译' : '对比'}}</text>
     </view>
