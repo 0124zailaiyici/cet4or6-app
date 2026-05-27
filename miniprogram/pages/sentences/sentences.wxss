@@ -665,9 +665,10 @@
   background: #e8f5e9; border: 3rpx dashed #a5d6a7;
   border-radius: 28rpx; padding: 14rpx 12rpx;
   display: flex; flex-wrap: wrap; gap: 4rpx;
-  align-items: flex-end; justify-content: center;
+  align-items: stretch; justify-content: center;
   min-height: 60rpx; margin-bottom: 8rpx;
 }
+.pz-drop-word, .pz-drop-slot { margin-top: auto; }
 .pz-drop-word {
   font-size: 30rpx; font-weight: 600; color: #1b5e20;
   line-height: 1;
