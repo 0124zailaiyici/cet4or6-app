@@ -14,7 +14,6 @@ Page({
         currentQ: 0,
         passagePage: 0,
         passagePages: [],
-        passageSeg: [],
         formattedPages: [],
         blankAnswers: {},
         usedFlags: [],
@@ -46,7 +45,6 @@ Page({
         showTrans: false,
         pageParas: [],
         pageWordSegments: [],
-        showResultNav: false,
         scrollToResult: '',
         examMode: false
     },
@@ -85,10 +83,6 @@ Page({
             const pages = item.sectionType === 'B'
                 ? this.formatBPassage(item.passage)
                 : this.splitPassage(item.passage);
-            const segs = item.sectionType === 'A' ? pages.map(p => this.parseSegments(p)) : [];
-            const formatted = item.sectionType !== 'B'
-                ? pages.map(p => `<p style="margin:0 0 0.6em 0;line-height:1.9">${this.annotatePage(p, vocab)}</p>`)
-                : [];
             const paras = item.sectionType === 'B' ? this.formatBPassage(item.passage) : this.getPassageParas(item.passage);
             const vocabList = Object.entries(vocab).map(([word, zh]) => ({ word, zh }));
             const fullTranslation = annot && annot.translation || '';
@@ -106,7 +100,7 @@ Page({
             const maxScore = st === 'A' ? 10 : st === 'B' ? 10 : 5;
             this.setData({
                 current: item, currentQ: 0, passagePage: 0, passagePages: pages,
-                passageSeg: segs, formattedPages: formatted,
+                formattedPages: [],
                 blankAnswers: saved && saved.blankAnswers || {},
                 usedFlags: saved && saved.usedFlags || [],
                 activeBlank: null,
@@ -131,32 +125,9 @@ Page({
                 highlightedPara: -1,
                 fullTranslation,
                 showTrans: false,
-                pageParas: (() => {
-                    const step = st === 'B' ? 1 : 2;
-                    return paras.slice(0, step).map((t, i) => ({ text: t, paraIdx: i }));
-                })(),
-                pageWordSegments: (() => {
-                    const segs = [];
-                    for (const p of paras.slice(0, st === 'B' ? 1 : 2)) {
-                        if (st === 'A') {
-                            const re = /\b(\d{2})\b/g;
-                            let last = 0, m;
-                            while ((m = re.exec(p)) !== null) {
-                                if (m.index > last)
-                                    this.tokenizeToSegments(p.slice(last, m.index), segs, vocab);
-                                segs.push({ type: 'blank', text: m[1], num: m[1], word: m[1] });
-                                last = re.lastIndex;
-                            }
-                            if (last < p.length)
-                                this.tokenizeToSegments(p.slice(last), segs, vocab);
-                        }
-                        else {
-                            this.tokenizeToSegments(p, segs, vocab);
-                        }
-                    }
-                    return segs;
-                })(),
+                scrollToResult: ''
             });
+            this.updatePageParas();
             this.updateCompact();
         }
     },
@@ -165,7 +136,7 @@ Page({
             wx.navigateBack();
             return;
         }
-        this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], passageSeg: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [] });
+        this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [], scrollToResult: '' });
     },
     toggleVocab() {
         this.setData({ showVocab: !this.data.showVocab });
@@ -182,14 +153,16 @@ Page({
         const app = getApp();
         const existing = app.globalData.studyData.vocabWords || [];
         const already = existing.some((w) => w.word === word);
+        if (already) {
+            wx.showToast({ title: '已在单词本中', icon: 'none' });
+            return;
+        }
         wx.showModal({
             title: word,
-            content: already ? '已在单词本中' : (zh || '暂无释义'),
-            confirmText: already ? '知道了' : '加入单词本',
-            cancelText: already ? '' : '取消',
-            success: (res) => {
-                if (!res.confirm || already)
-                    return;
+            content: zh || '暂无释义',
+            showCancel: false,
+            confirmText: '确认',
+            success: () => {
                 const vw = app.globalData.studyData.vocabWords || [];
                 vw.push({
                     word,
@@ -215,51 +188,39 @@ Page({
         const result = slice.map((text, i) => ({ text, paraIdx: start + i }));
         const vocab = reading_annotations_1.default[this.data.current && this.data.current.id || 0] && reading_annotations_1.default[this.data.current && this.data.current.id || 0].vocab || {};
         const segments = [];
-        for (const para of slice) {
-            // Section A: split passageSeg-style to preserve blanks
+        for (let i = 0; i < slice.length; i++) {
+            const para = slice[i];
+            const paraIdx = start + i;
             if (st === 'A') {
                 const re = /\b(\d{2})\b/g;
                 let last = 0, m;
                 while ((m = re.exec(para)) !== null) {
-                    if (m.index > last) {
-                        const textSeg = para.slice(last, m.index);
-                        this.tokenizeToSegments(textSeg, segments, vocab);
-                    }
-                    segments.push({ type: 'blank', text: m[1], num: m[1], word: m[1] });
+                    if (m.index > last)
+                        this.tokenizeToSegments(para.slice(last, m.index), segments, vocab, paraIdx);
+                    segments.push({ type: 'blank', text: m[1], num: m[1], word: m[1], paraIdx });
                     last = re.lastIndex;
                 }
                 if (last < para.length)
-                    this.tokenizeToSegments(para.slice(last), segments, vocab);
+                    this.tokenizeToSegments(para.slice(last), segments, vocab, paraIdx);
             }
             else {
-                this.tokenizeToSegments(para, segments, vocab);
+                this.tokenizeToSegments(para, segments, vocab, paraIdx);
             }
         }
         this.setData({ pageParas: result, pageWordSegments: segments });
     },
-    tokenizeToSegments(text, segs, vocab) {
+    tokenizeToSegments(text, segs, vocab, paraIdx) {
         const tokens = text.split(/(\s+)/).filter((t) => t);
         for (const token of tokens) {
             const clean = token.replace(/[^a-zA-Z'-]+/g, '');
             if (clean.length >= 2 && /^[a-zA-Z]/.test(clean)) {
                 const key = clean.toLowerCase();
-                segs.push({ type: 'word', text: token, word: clean, zh: vocab[key] || '' });
+                segs.push({ type: 'word', text: token, word: clean, zh: vocab[key] || '', paraIdx });
             }
             else {
-                segs.push({ type: 'sep', text: token });
+                segs.push({ type: 'sep', text: token, paraIdx });
             }
         }
-    },
-    annotatePage(text, vocab) {
-        if (!text)
-            return '';
-        let annotated = text;
-        if (Object.keys(vocab).length > 0) {
-            const words = Object.keys(vocab);
-            const pattern = new RegExp('\\b(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'gi');
-            annotated = annotated.replace(pattern, '<span style="color:#e65100;border-bottom:1px dashed #e65100">$1</span>');
-        }
-        return annotated;
     },
     getPassageParas(text) {
         if (!text)
@@ -286,27 +247,6 @@ Page({
         if (currentPara)
             paras.push(currentPara.trim() + '.');
         return paras.length > 0 ? paras : [text];
-    },
-    rebuildFormatted(vocab, highlightIdx) {
-        const paras = this.data.passageParas;
-        if (!paras.length)
-            return;
-        const isB = this.data.current && this.data.current.sectionType === 'B';
-        const pages = [];
-        const step = isB ? 1 : 2;
-        for (let i = 0; i < paras.length; i += step) {
-            const slice = paras.slice(i, i + step);
-            const html = slice.map((p, j) => {
-                const idx = i + j;
-                const inner = this.annotatePage(p, vocab);
-                if (idx === highlightIdx) {
-                    return `<span style="display:block;background:rgba(56,142,60,0.12);border-left:3px solid #388e3c;padding:4px 8px;border-radius:4px;margin:0 0 0.6em 0">${inner}</span>`;
-                }
-                return inner;
-            }).join('\n\n');
-            pages.push(`<p style="margin:0 0 0.6em 0;line-height:1.9">${html}</p>`);
-        }
-        this.setData({ formattedPages: pages, highlightedPara: highlightIdx });
     },
     // ===== Submission & Scoring =====
     checkAllAnswered() {
@@ -420,7 +360,8 @@ Page({
             score: correctCount,
             totalScore: totalCount,
             showResult: true,
-            resultItems: results
+            resultItems: results,
+            scrollToResult: ''
         });
         const id = this.data.current && this.data.current.id;
         if (id) {
@@ -438,10 +379,7 @@ Page({
         (0, checkin_1.doCheckIn)('reading');
     },
     hideResult() {
-        const annot = reading_annotations_1.default[this.data.current && this.data.current.id || 0];
-        const vocab = annot && annot.vocab || {};
-        this.rebuildFormatted(vocab, -1);
-        this.setData({ showResult: false });
+        this.setData({ showResult: false, highlightedPara: -1 });
     },
     showResultAgain() {
         this.setData({ showResult: true });
@@ -461,7 +399,6 @@ Page({
         if (!locate)
             return;
         const st = this.data.current && this.data.current.sectionType;
-        // Section B: locate is like "A段", "I段" → letter index
         let paraIdx = -1;
         if (st === 'B') {
             const letter = locate.charAt(0);
@@ -475,14 +412,12 @@ Page({
         if (paraIdx < 0)
             return;
         const page = st === 'B' ? paraIdx : Math.floor(paraIdx / 2);
-        const annot = reading_annotations_1.default[this.data.current && this.data.current.id || 0];
-        const vocab = annot && annot.vocab || {};
-        this.rebuildFormatted(vocab, paraIdx);
         this.setData({
             passagePage: page,
             bStmtPage: 0,
             currentQ: 0,
-            scrollTop: Date.now() % 100
+            scrollTop: Date.now() % 100,
+            highlightedPara: paraIdx
         });
         this.updatePageParas();
     },
@@ -508,7 +443,8 @@ Page({
                     matchAnswers: {}, matchCount: 0, activeStmt: null,
                     availLetters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'],
                     cAnswers: {}, cSelIdx: -1,
-                    highlightedPara: -1
+                    highlightedPara: -1,
+                    scrollToResult: ''
                 });
             }
         });
@@ -545,20 +481,6 @@ Page({
         for (let i = 0; i < paras.length; i += 2)
             pages.push(paras.slice(i, i + 2).join('\n\n'));
         return pages.length > 0 ? pages : [text];
-    },
-    parseSegments(page) {
-        const segs = [];
-        const re = /\b(\d{2})\b/g;
-        let last = 0, m;
-        while ((m = re.exec(page)) !== null) {
-            if (m.index > last)
-                segs.push({ type: 'text', text: page.slice(last, m.index) });
-            segs.push({ type: 'blank', text: m[1], num: m[1] });
-            last = re.lastIndex;
-        }
-        if (last < page.length)
-            segs.push({ type: 'text', text: page.slice(last) });
-        return segs;
     },
     onBlankTap(e) {
         if (this.data.submitted)
@@ -638,27 +560,24 @@ Page({
     },
     prevPassage() {
         if (this.data.passagePage > 0) {
-            this.setData({ passagePage: this.data.passagePage - 1 });
+            this.setData({ passagePage: this.data.passagePage - 1, highlightedPara: -1 });
             this.updatePageParas();
         }
     },
     nextPassage() {
         if (this.data.passagePage < this.data.passagePages.length - 1) {
-            this.setData({ passagePage: this.data.passagePage + 1 });
+            this.setData({ passagePage: this.data.passagePage + 1, highlightedPara: -1 });
             this.updatePageParas();
         }
     },
     onTouchStart(e) {
         this.setData({ touchStartX: e.touches[0].clientX });
     },
-    toggleResultNav() {
-        this.setData({ showResultNav: !this.data.showResultNav });
-    },
     scrollToResultItem(e) {
         const idx = e.currentTarget.dataset.idx;
         if (!idx)
             return;
-        this.setData({ scrollToResult: 'r-' + idx, showResultNav: false });
+        this.setData({ scrollToResult: 'r-' + idx });
     },
     onPassageTouchEnd(e) {
         const dx = e.changedTouches[0].clientX - this.data.touchStartX;

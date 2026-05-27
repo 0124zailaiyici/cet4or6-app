@@ -50,6 +50,7 @@ Page({
         puzzleWordUsed: [],
         puzzleScore: 0,
         puzzleCombo: 0,
+        puzzleMaxCombo: 0,
         puzzleIndex: 0,
         puzzleTotal: 0,
         puzzleFinished: false,
@@ -171,7 +172,6 @@ Page({
             masterStatus,
             immMasterStatus,
             topicCounts: Object.assign(Object.assign({}, this.data.topicCounts), { '已掌握': masteredArr.length, '未掌握': this.data.allSentences.length - masteredArr.length }),
-            filteredSentences: this.data.filteredSentences.slice(),
         });
         this.doFilter();
         const app = getApp();
@@ -246,11 +246,13 @@ Page({
             puzzleIndex: 0,
             puzzleScore: 0,
             puzzleCombo: 0,
+            puzzleMaxCombo: 0,
             puzzleFinished: false,
             puzzleStars: 0,
             puzzleErrors: 0,
             puzzleRevealed: false,
             puzzleSkipped: false,
+            puzzleDone: false,
             puzzleHintIndices: [],
             puzzleInitialSelected: [],
             puzzleSentences: sentences,
@@ -384,10 +386,12 @@ Page({
         }
         if (allCorrect) {
             const combo = this.data.puzzleCombo + 1;
+            const maxCombo = Math.max(this.data.puzzleMaxCombo, combo);
             const bonus = combo > 1 ? combo * 5 : 0;
             const score = this.data.puzzleScore + 10 + bonus;
             this.setData({
                 puzzleCombo: combo,
+                puzzleMaxCombo: maxCombo,
                 puzzleScore: score,
                 puzzleFinished: true,
             });
@@ -412,6 +416,7 @@ Page({
             }
             this.setData({
                 puzzleCombo: 0,
+                puzzleMaxCombo: 0,
                 puzzleErrors: errors,
                 puzzleFinished: true,
                 puzzleSelected: [...init],
@@ -420,7 +425,7 @@ Page({
             wx.showToast({ title: '✗ 顺序不对，再试试', icon: 'none', duration: 1000 });
             setTimeout(() => {
                 this.setData({ puzzleFinished: false });
-            }, 800);
+            }, 1200);
         }
     },
     finishPuzzle() {
@@ -437,7 +442,7 @@ Page({
         this.setData({ puzzleDone: true, puzzleFinished: true, puzzleStars: stars });
     },
     restartPuzzle() {
-        this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0, puzzleDone: false });
+        this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleMaxCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0, puzzleDone: false });
         this.startPuzzle();
     },
     showAnswer() {
@@ -454,21 +459,23 @@ Page({
             puzzleCombo: 0,
         });
         wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 });
-        setTimeout(() => {
+    },
+    skipSentence() {
+        if (this.data.puzzleSkipped)
+            return;
+        // 已查看答案 → 直接进入下一题，不显示"已跳过"
+        if (this.data.puzzleRevealed) {
             const list = this.data.puzzleSentences;
             const next = this.data.puzzleIndex + 1;
             if (next >= list.length || next >= this.data.puzzleTotal) {
                 this.finishPuzzle();
             }
             else {
-                this.setData({ puzzleIndex: next, puzzleFinished: false });
+                this.setData({ puzzleIndex: next, puzzleFinished: false, puzzleRevealed: false });
                 this.loadPuzzleSentence(list);
             }
-        }, 1800);
-    },
-    skipSentence() {
-        if (this.data.puzzleSkipped)
             return;
+        }
         this.setData({ puzzleSkipped: true, puzzleFinished: true, puzzleCombo: 0 });
         wx.showToast({ title: '⏭ 已跳过，进入下一题', icon: 'none', duration: 1500 });
         setTimeout(() => {

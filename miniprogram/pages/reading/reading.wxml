@@ -42,16 +42,16 @@
 
       <!-- 文章区（始终显示，提交后锁定） -->
       <view class="pass-zone" bindtouchstart="onTouchStart" bindtouchend="onPassageTouchEnd">
-        <scroll-view class="pz-scroll" scroll-y enhanced="{{true}}" scroll-top="{{scrollTop}}" show-scrollbar="{{false}}">
+        <scroll-view class="pz-scroll" scroll-y scroll-top="{{scrollTop}}">
           <block wx:if="{{pageWordSegments.length > 0}}">
-            <text class="pz-text">
-              <block wx:for="{{pageWordSegments}}" wx:key="*this" wx:for-item="seg">
+            <view class="pz-text">
+              <block wx:for="{{pageWordSegments}}" wx:key="index" wx:for-item="seg">
                 <text wx:if="{{seg.type === 'sep'}}">{{seg.text}}</text>
-                <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{blankAnswers[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}}" data-num="{{seg.num}}" catchtap="onBlankTap">{{blankAnswers[seg.num] || seg.num}}</text>
-                <text wx:elif="{{seg.type === 'word'}}" class="{{seg.zh ? 'pz-vocab' : 'pz-word'}}" data-word="{{seg.word}}" data-zh="{{seg.zh}}" catchtap="onWordTap">{{seg.text}}</text>
+                <text wx:elif="{{seg.type === 'blank'}}" class="bk-tag {{blankAnswers[seg.num] ? 'filled' : ''}} {{activeBlank === seg.num ? 'active' : ''}} {{seg.paraIdx === highlightedPara ? 'pz-hl' : ''}}" data-num="{{seg.num}}" catchtap="onBlankTap">{{blankAnswers[seg.num] || seg.num}}</text>
+                <text wx:elif="{{seg.type === 'word'}}" class="{{seg.zh ? 'pz-vocab' : 'pz-word'}} {{seg.paraIdx === highlightedPara ? 'pz-hl' : ''}}" data-word="{{seg.word}}" data-zh="{{seg.zh}}" bindtap="onWordTap">{{seg.text}}</text>
                 <text wx:else>{{seg.text}}</text>
               </block>
-            </text>
+            </view>
           </block>
           <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
           <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>

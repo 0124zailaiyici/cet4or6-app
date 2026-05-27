@@ -482,7 +482,6 @@ Page<IListeningData, IListeningMethods>({
         ? passage.audioUrl!
         : `${API_BASE}${encodeURI(passage.audioUrl!)}`
       audio.stop()
-      this.setData({ loading: true })
       audio.play(audioUrl)
 
       const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}

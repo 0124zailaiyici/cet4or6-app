@@ -118,7 +118,11 @@
   flex: 1; overflow: hidden;
   background: #eef1f3; border-radius: 18rpx; padding: 20rpx 24rpx;
 }
+.pz-scroll::-webkit-scrollbar { width: 0; height: 0; }
 .pz-text { font-size: 28rpx; line-height: 1.9; color: #2d3a4a; }
+
+/* Highlighted paragraph */
+.pz-hl { background: rgba(56,142,60,0.12); border-radius: 4rpx; }
 
 /* Tappable words in passage */
 .pz-word {
