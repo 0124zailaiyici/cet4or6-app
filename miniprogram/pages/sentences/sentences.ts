@@ -54,6 +54,7 @@ interface ISentencesData {
   puzzleSkipped: boolean
   puzzleHintIndices: number[]
   puzzleInitialSelected: (number | null)[]
+  puzzleSentences: ISentence[]
 }
 
 interface ISentencesMethods {
@@ -132,6 +133,7 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleSkipped: false,
     puzzleHintIndices: [],
     puzzleInitialSelected: [],
+    puzzleSentences: [],
   },
 
   onLoad(options: { id?: string }) {
@@ -338,6 +340,7 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleSkipped: false,
       puzzleHintIndices: [],
       puzzleInitialSelected: [],
+      puzzleSentences: sentences,
     } as any)
     this.loadPuzzleSentence(sentences)
   },
@@ -449,7 +452,7 @@ Page<ISentencesData, ISentencesMethods>({
   checkPuzzleAnswer() {
     const selected = this.data.puzzleSelected
     const answers = this.data.puzzleAnswers
-    const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
+    const sentences = this.data.puzzleSentences
     let allCorrect = true
     for (let i = 0; i < answers.length; i++) {
       if (selected[i] !== answers[i]) {
@@ -499,7 +502,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   finishPuzzle() {
-    const total = Math.min(this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12).length, this.data.puzzleTotal)
+    const total = this.data.puzzleTotal
     const maxScore = total * 50 + 100
     const ratio = this.data.puzzleScore / maxScore
     let stars = 0
@@ -527,7 +530,7 @@ Page<ISentencesData, ISentencesMethods>({
     } as any)
     wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 })
     setTimeout(() => {
-      const list = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
+      const list = this.data.puzzleSentences
       const next = this.data.puzzleIndex + 1
       if (next >= list.length || next >= this.data.puzzleTotal) {
         this.finishPuzzle()
@@ -542,7 +545,7 @@ Page<ISentencesData, ISentencesMethods>({
     this.setData({ puzzleSkipped: true, puzzleFinished: true, puzzleCombo: 0 } as any)
     wx.showToast({ title: '⏭ 已跳过', icon: 'none', duration: 800 })
     setTimeout(() => {
-      const list = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
+      const list = this.data.puzzleSentences
       const next = this.data.puzzleIndex + 1
       if (next >= list.length || next >= this.data.puzzleTotal) {
         this.finishPuzzle()

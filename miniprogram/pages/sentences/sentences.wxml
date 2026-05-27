@@ -103,7 +103,7 @@
 
     <block wx:if="{{!puzzleFinished || puzzleStars === 0}}">
       <view class="pz-hint">
-        <text class="pz-hint-cn">{{filteredSentences.length > puzzleIndex ? filteredSentences[puzzleIndex].chinese : ''}}</text>
+        <text class="pz-hint-cn">{{puzzleSentences.length > puzzleIndex ? puzzleSentences[puzzleIndex].chinese : ''}}</text>
         <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词，<text class="pz-wc-hint">{{puzzleHintIndices.length}} 个已给出</text></text>
         <text class="pz-hint-progress warn" wx:if="{{puzzleErrors >= 3}}">需要帮助？试试 👁答案 或 ⏭跳过</text>
       </view>

@@ -1189,8 +1189,9 @@ Page<IVocabData, IVocabMethods>({
   },
 
   closeGame() {
-    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameFlipped: false, streak: 0, combo: 0, challengeActive: false })
-    this.loadWords()
+    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameFlipped: false, streak: 0, combo: 0, challengeActive: false }, () => {
+      this.loadWords()
+    })
   },
 
   setMode(e: WechatMiniprogram.TouchEvent) {
@@ -1384,7 +1385,7 @@ Page<IVocabData, IVocabMethods>({
       else if (tab === 1 && w.status === 'review') filtered.push(w)
       else if (tab === 2 && w.status === 'master') filtered.push(w)
     }
-    this.setData({ words, filteredWords: filtered })
+    this.setData({ words, filteredWords: filtered, _tick: Date.now() })
   },
 
   _updateAchFromWords() {
