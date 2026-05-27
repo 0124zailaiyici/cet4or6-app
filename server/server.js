@@ -36,6 +36,9 @@ const PASSAGE_DATA = (() => {
 app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
   const { passageId, sentenceIdx } = req.params;
   const idx = parseInt(sentenceIdx);
+  const segFile = path.join(SPLIT_DIR, `${passageId}_${idx}.mp3`);
+  if (fs.existsSync(segFile)) return res.sendFile(segFile);
+
   const passage = PASSAGE_DATA.find(p => p.id === passageId);
   if (!passage) return res.status(404).json({ error: 'passage not found' });
 
@@ -43,14 +46,9 @@ app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
   if (!sent || (sent.start === 0 && sent.end === 0))
     return res.status(404).json({ error: 'no timestamp for this sentence' });
 
-  const segFile = path.join(SPLIT_DIR, `${passageId}_${idx}.mp3`);
-
-  if (fs.existsSync(segFile)) return res.sendFile(segFile);
-
   const audioPath = path.join(__dirname, passage.audioFile);
   if (!fs.existsSync(audioPath)) return res.status(404).json({ error: 'audio file not found' });
 
-  // Extract segment with ffmpeg
   let start = sent.start, end = sent.end;
   if (end === 0 && start > 0) {
     let nextStart = null;

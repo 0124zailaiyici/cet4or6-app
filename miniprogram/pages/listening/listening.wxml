@@ -164,7 +164,7 @@
                     </view>
                     <view class="ts-body {{showTranscript ? 'open' : ''}}">
                       <view class="ts-text">{{item.transcriptText}}</view>
-                      <view class="ts-play {{transcriptPlaying ? 'on' : ''}}" catchtap="playTranscriptSentence">
+                      <view class="ts-play {{transcriptPlaying ? 'on' : ''}}" data-url="{{item.transcriptUrl}}" catchtap="playTranscriptSentence">
                         <text wx:if="{{transcriptPlaying}}">⏸</text>
                         <text wx:else>▶</text>
                       </view>

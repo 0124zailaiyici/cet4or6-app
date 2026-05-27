@@ -25,6 +25,7 @@ interface IListeningPage {
   stem?: string
   opts?: string[]
   transcriptText?: string
+  transcriptUrl?: string
 }
 
 interface IQuestionResult {
@@ -163,6 +164,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
       stem: currentQ.stem,
       opts: currentQ.opts.map(o => o.t),
       transcriptText: sent ? sent.text : '',
+      transcriptUrl: sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
     })
     currentQ = null
   }
