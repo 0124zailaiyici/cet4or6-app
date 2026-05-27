@@ -66,10 +66,14 @@ function wordCompare(user: string, ref: string): { word: string; ok: boolean }[]
 interface ITranslation { id: number; chinese: string; reference: string; source: string; keywords?: string[]; acceptableAnswers?: string[] }
 interface IDimensions { vocabulary: number; grammar: number; semantics: number; expression: number }
 interface ITranslationRecord { id: number; userAnswer: string; score: number; dimensions: IDimensions; suggestions?: string; reference: string; date: string }
+interface ITranslationItem extends ITranslation {
+  _display: string; _emoji: string; _tag: { type: string; label: string }
+  _level: number; _topic: string; _done: boolean; _fav: boolean; _hint: string
+}
 
 Page({
   data: {
-    page: 'dashboard', step: 'list', translations: [], currentItem: null as ITranslation | null,
+    page: 'dashboard', step: 'list', translations: [] as ITranslationItem[], currentItem: null as ITranslation | null,
     userAnswer: '', result: null as { score: number; dimensions: IDimensions; suggestions: string; reference: string; show: boolean } | null,
     history: [] as ITranslationRecord[], questionHistory: [] as ITranslationRecord[], completedIds: [] as number[],
     submitting: false, aiAvailable: false, aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
@@ -175,7 +179,7 @@ Page({
     const words = wordCompare(answer, reference)
     const record: ITranslationRecord = { id: currentItem.id, userAnswer: answer, score, dimensions, suggestions, reference, date: new Date().toISOString().slice(0, 10) }
     const app = getApp<IAppOption>()
-    const records = [...(app.globalData.studyData.translationRecords || []), record]
+    const records = [...(app.globalData.studyData.translationRecords || []), record] as ITranslationRecord[]
     app.globalData.studyData.translationRecords = records
     wx.setStorageSync('studyData', app.globalData.studyData)
     doCheckIn('translation')
@@ -188,7 +192,7 @@ Page({
 
     this.setData({
       result: { score, dimensions, suggestions, reference, show: true },
-      submitting: false, step: 'compare', history: records, completedIds: allIds, questionHistory,
+      submitting: false, step: 'compare', history: records as ITranslationRecord[], completedIds: allIds, questionHistory,
       hMax: Math.max(...hScores, score), hMin: Math.min(...hScores, score),
       hTrend: questionHistory.length >= 1 && score >= hScores[hScores.length - 1] ? 'up' : 'down',
       translations: this.data.translations.map((t: any) => ({ ...t, _done: doneSet.has(t.id) })),

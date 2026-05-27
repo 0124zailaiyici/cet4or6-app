@@ -5,7 +5,7 @@ interface IStudyData {
   todayActivity: { date: string; listen: number; sentence: number; translation: number; writing: number; total: number }
   vocabWords: { word: string; phonetic: string; definition: string; source: string; status: string; correctStreak: number }[]
   masteredSentences: number[]
-  translationRecords: { id: number; userAnswer: string; score: number; date: string }[]
+  translationRecords: { id: number; userAnswer: string; score: number; dimensions: { vocabulary: number; grammar: number; semantics: number; expression: number }; reference: string; suggestions?: string; date: string }[]
   writingRecords: { id: number; score: number; date: string }[]
   checkInDates: string[]
   favoriteSentenceIds: number[]

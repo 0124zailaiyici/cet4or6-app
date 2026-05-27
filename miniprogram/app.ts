@@ -5,7 +5,7 @@ const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https:/
 const defaults = {
   completedListens: [] as number[],
   masteredSentences: [] as number[],
-  translationRecords: [] as { id: number; userAnswer: string; score: number; date: string }[],
+  translationRecords: [] as { id: number; userAnswer: string; score: number; dimensions: { vocabulary: number; grammar: number; semantics: number; expression: number }; reference: string; suggestions?: string; date: string }[],
   writingRecords: [] as { id: number; score: number; date: string }[],
   checkInDates: [] as string[],
   favoriteSentenceIds: [] as number[],
