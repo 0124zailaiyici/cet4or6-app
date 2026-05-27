@@ -233,6 +233,7 @@ Page<ISentencesData, ISentencesMethods>({
     const topic = e.currentTarget.dataset.topic as string
     this.setData({ currentTopic: topic })
     this.doFilter()
+    if (this.data.viewMode === 'puzzle') this.startPuzzle()
   },
 
   toggleMaster(e: WechatMiniprogram.TouchEvent) {

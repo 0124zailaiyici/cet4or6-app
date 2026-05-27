@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>句子拼图 · 可爱风</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #fdf0f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 20px;
+}
+
+/* ===== Phone Frame ===== */
+.phone {
+  width: 375px; background: #fff5f9;
+  border-radius: 36px; padding: 24px 18px 28px;
+  box-shadow: 0 12px 48px rgba(244,143,177,.18);
+  position: relative; overflow: hidden;
+}
+
+/* ===== Header ===== */
+.pz-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.pz-title {
+  font-size: 16px; font-weight: 800;
+  background: linear-gradient(135deg, #f472b6, #e879f9);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.pz-title span {
+  font-size: 12px; color: #f9a8d4; -webkit-text-fill-color: #f9a8d4;
+  font-weight: 600; margin-left: 6px;
+}
+.pz-stats { display: flex; gap: 10px; align-items: center; }
+.pz-score {
+  font-size: 14px; font-weight: 800; color: #f59e0b;
+  background: #fef3c7; padding: 2px 10px; border-radius: 20px;
+}
+.pz-combo {
+  font-size: 13px; font-weight: 700; color: #ec4899;
+  background: #fce4ec; padding: 2px 10px; border-radius: 20px;
+}
+
+/* ===== Hint ===== */
+.pz-hint {
+  text-align: center; margin-bottom: 14px;
+  background: #fdf2f8; border-radius: 18px; padding: 12px 14px;
+}
+.pz-hint-cn {
+  font-size: 17px; color: #831843; font-weight: 700; line-height: 1.5;
+  display: block;
+}
+.pz-hint-label {
+  display: inline-block; font-size: 11px; color: #f472b6; font-weight: 600;
+  background: #fce4ec; padding: 1px 10px; border-radius: 12px; margin-bottom: 6px;
+}
+.pz-word-count {
+  font-size: 12px; color: #f9a8d4; display: block; margin-top: 4px;
+}
+.pz-wc-num { font-weight: 700; color: #ec4899; }
+
+/* ===== Drop Zone ===== */
+.pz-drop {
+  background: #fdf2f8; border: 2.5px dashed #f9a8d4;
+  border-radius: 20px; padding: 14px 12px;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  justify-content: center; min-height: 80px; margin-bottom: 8px;
+}
+.pz-drop-word {
+  padding: 5px 14px; border-radius: 30px;
+  font-size: 16px; font-weight: 600; line-height: 1.5;
+  background: linear-gradient(135deg, #fbcfe8, #f9a8d4);
+  color: #831843; cursor: default; user-select: none;
+  box-shadow: 0 2px 6px rgba(244,114,182,.15);
+  animation: popIn .25s ease;
+}
+.pz-drop-word.hint {
+  background: linear-gradient(135deg, #fde68a, #fbbf24);
+  color: #78350f;
+  box-shadow: 0 2px 8px rgba(251,191,36,.25);
+}
+.pz-drop-word.done { opacity: .6; }
+.pz-drop-slot {
+  font-size: 16px; font-weight: 700; color: #fbcfe8;
+  padding: 5px 2px; letter-spacing: 2px;
+  text-decoration: underline; text-decoration-thickness: 3px;
+  text-underline-offset: 4px; text-decoration-color: #fbcfe8;
+}
+
+/* ===== Error ===== */
+.pz-error {
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px; min-height: 24px; margin-bottom: 6px;
+  font-size: 12px; color: #f43f5e; font-weight: 600;
+}
+
+/* ===== Actions ===== */
+.pz-actions {
+  display: flex; gap: 8px; margin: 10px 0 14px;
+}
+.pz-act {
+  flex: 1; padding: 10px 0; border-radius: 40px;
+  font-size: 14px; font-weight: 700; text-align: center;
+  cursor: pointer; transition: all .12s; user-select: none;
+  letter-spacing: .5px;
+}
+.pz-act:active { transform: scale(.92); }
+.pz-act-reveal {
+  background: linear-gradient(135deg, #e0e7ff, #a5b4fc);
+  color: #fff; box-shadow: 0 3px 10px rgba(165,180,252,.3);
+}
+.pz-act-skip {
+  background: linear-gradient(135deg, #fce4ec, #f9a8d4);
+  color: #fff; box-shadow: 0 3px 10px rgba(249,168,212,.3);
+}
+
+/* ===== Bank ===== */
+.pz-bank-label {
+  font-size: 12px; color: #f9a8d4; font-weight: 700;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 4px;
+}
+.pz-bank {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  padding: 2px 0;
+}
+.pz-bank-word {
+  padding: 5px 14px; border-radius: 30px;
+  font-size: 16px; font-weight: 500; line-height: 1.5;
+  background: #fff; border: 1.5px solid #fbcfe8;
+  color: #831843; cursor: pointer; transition: all .1s;
+  user-select: none; box-shadow: 0 1px 4px rgba(244,114,182,.08);
+}
+.pz-bank-word:active { transform: scale(.88); background: #fdf2f8; }
+.pz-bank-word.used { opacity: .15; pointer-events: none; transform: scale(.85); }
+
+/* ===== Result ===== */
+.pz-result {
+  text-align: center; padding: 20px 0;
+}
+.pz-r-icon { font-size: 44px; display: block; margin-bottom: 6px; }
+.pz-r-title {
+  font-size: 19px; font-weight: 800;
+  background: linear-gradient(135deg, #f472b6, #e879f9);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; display: block; margin-bottom: 10px;
+}
+.pz-r-stars { display: flex; gap: 4px; justify-content: center; margin-bottom: 14px; }
+.pz-star { font-size: 28px; color: #fce4ec; }
+.pz-star.lit { color: #fbbf24; text-shadow: 0 0 10px rgba(251,191,36,.3); }
+.pz-r-stats { display: flex; gap: 20px; justify-content: center; margin-bottom: 16px; }
+.pz-rs-item { text-align: center; }
+.pz-rs-num { display: block; font-size: 24px; font-weight: 800; color: #831843; }
+.pz-rs-lbl { display: block; font-size: 11px; color: #f9a8d4; margin-top: 2px; }
+.pz-r-actions { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.pz-r-btn {
+  padding: 11px 44px; border-radius: 40px; font-size: 15px;
+  font-weight: 700; cursor: pointer; transition: all .12s; user-select: none;
+}
+.pz-r-btn:active { transform: scale(.94); }
+.pz-r-btn.primary {
+  background: linear-gradient(135deg, #fbcfe8, #f9a8d4);
+  color: #fff; box-shadow: 0 3px 12px rgba(249,168,212,.35);
+}
+.pz-r-btn.snd {
+  background: #fdf2f8; color: #f472b6;
+  border: 1.5px solid #fbcfe8;
+}
+
+/* ===== Animations ===== */
+@keyframes popIn {
+  0% { transform: scale(.4); opacity: 0; }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== Section Divider ===== */
+.divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #fce4ec, #f9a8d4, #fce4ec, transparent);
+  margin: 18px 0;
+}
+
+/* ===== Comparison label ===== */
+.comp-label {
+  font-size: 12px; font-weight: 700; color: #f9a8d4;
+  display: block; margin-bottom: 10px;
+}
+
+/* ===== Old style ref ===== */
+.old-box {
+  background: #fdf2f8; border-radius: 16px; padding: 14px;
+}
+.old-box .ob-word {
+  display: inline-block;
+  padding: 14px 28px; font-size: 14px; border-radius: 14px;
+  background: #fff; border: 1.5px solid #fbcfe8; color: #831843;
+  margin: 3px;
+}
+.old-box .ob-dw {
+  display: inline-block;
+  padding: 10px 24px; font-size: 14px; border-radius: 12px;
+  background: linear-gradient(135deg,#fbcfe8,#f9a8d4); color: #831843;
+  margin: 3px;
+}
+.old-box .ob-slot {
+  font-size: 14px; color: #fbcfe8; margin: 3px;
+  display: inline-block;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ============ Header ============ -->
+  <view class="pz-header">
+    <view class="pz-h-left">
+      <text class="pz-title">🧩 句子拼图 <span>2 / 8</span></text>
+    </view>
+    <view class="pz-stats">
+      <text class="pz-score">★ 45</text>
+      <text class="pz-combo">🔥 x3</text>
+    </view>
+  </view>
+
+  <!-- ============ Hint ============ -->
+  <view class="pz-hint">
+    <text class="pz-hint-label">💡 中文提示</text>
+    <text class="pz-hint-cn">人工智能正在彻底改变我们生活和工作方式的方方面面。</text>
+    <text class="pz-word-count">共 <text class="pz-wc-num">17</text> 个单词 · <text class="pz-wc-num">3</text> 个已给出</text>
+  </view>
+
+  <!-- ============ Drop Zone ============ -->
+  <view class="pz-drop">
+    <text class="pz-drop-word hint">Artificial</text>
+    <text class="pz-drop-word hint">intelligence</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-word">revolutionizing</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-word hint">every</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-word">our</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+    <text class="pz-drop-slot">＿＿＿</text>
+  </view>
+
+  <!-- ============ Error ============ -->
+  <view class="pz-error">
+    <text>❌ 已尝试 2 次</text>
+  </view>
+
+  <!-- ============ Actions ============ -->
+  <view class="pz-actions">
+    <view class="pz-act pz-act-reveal">👁 答案</view>
+    <view class="pz-act pz-act-skip">⏭ 跳过</view>
+  </view>
+
+  <!-- ============ Word Bank ============ -->
+  <text class="pz-bank-label">🌸 点选单词放入上方</text>
+
+  <view class="pz-bank">
+    <text class="pz-bank-word used">revolutionizing</text>
+    <text class="pz-bank-word used">our</text>
+    <text class="pz-bank-word">is</text>
+    <text class="pz-bank-word">of</text>
+    <text class="pz-bank-word">the</text>
+    <text class="pz-bank-word">aspects</text>
+    <text class="pz-bank-word">way</text>
+    <text class="pz-bank-word">live</text>
+    <text class="pz-bank-word">and</text>
+    <text class="pz-bank-word">work</text>
+  </view>
+
+  <!-- ============ Divider ============ -->
+  <view class="divider"></view>
+
+  <!-- ============ Old Reference ============ -->
+  <text class="comp-label">⬇ 旧版（块大字小）</text>
+  <view class="old-box">
+    <view style="margin-bottom:8px;">
+      <text class="ob-word">revolutionizing</text>
+      <text class="ob-word">our</text>
+      <text class="ob-word">is</text>
+      <text class="ob-word">aspects</text>
+    </view>
+    <view>
+      <text class="ob-dw">Artificial</text>
+      <text class="ob-slot">___</text>
+      <text class="ob-dw">revolutionizing</text>
+    </view>
+  </view>
+
+  <!-- ============ Divider ============ -->
+  <view class="divider"></view>
+
+  <!-- ============ Result ============ -->
+  <text class="comp-label">⬇ 结果面板（0 星可见）</text>
+  <view class="pz-result">
+    <text class="pz-r-icon">🎉</text>
+    <text class="pz-r-title">拼图完成！</text>
+    <view class="pz-r-stars">
+      <text class="pz-star lit">★</text>
+      <text class="pz-star lit">★</text>
+      <text class="pz-star">★</text>
+    </view>
+    <view class="pz-r-stats">
+      <view class="pz-rs-item">
+        <text class="pz-rs-num">120</text>
+        <text class="pz-rs-lbl">得分</text>
+      </view>
+      <view class="pz-rs-item">
+        <text class="pz-rs-num">5</text>
+        <text class="pz-rs-lbl">连击</text>
+      </view>
+    </view>
+    <view class="pz-r-actions">
+      <view class="pz-r-btn primary">🔄 再来一次</view>
+      <view class="pz-r-btn snd">📋 返回列表</view>
+    </view>
+  </view>
+
+</div>
+
+</body>
+</html>

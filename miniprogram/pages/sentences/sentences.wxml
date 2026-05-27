@@ -103,8 +103,9 @@
 
     <block wx:if="{{!puzzleDone}}">
       <view class="pz-hint">
+        <text class="pz-hint-label">💡 中文提示</text>
         <text class="pz-hint-cn">{{puzzleSentences.length > puzzleIndex ? puzzleSentences[puzzleIndex].chinese : ''}}</text>
-        <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词，<text class="pz-wc-hint">{{puzzleHintIndices.length}} 个已给出</text></text>
+        <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词 · <text class="pz-wc-hint">{{puzzleHintIndices.length}}</text> 个已给出</text>
         <text class="pz-hint-progress warn" wx:if="{{puzzleErrors >= 3}}">需要帮助？试试 👁答案 或 ⏭跳过</text>
       </view>
 
@@ -117,7 +118,7 @@
             >
               {{puzzleWords[item]}}
             </text>
-            <text wx:else class="pz-drop-slot">___</text>
+            <text wx:else class="pz-drop-slot">＿＿＿</text>
           </block>
         </block>
         <text wx:if="{{puzzleSkipped}}" class="pz-drop-skipped">⏭ 已跳过</text>
@@ -133,6 +134,7 @@
         <view class="pz-act pz-act-skip" catchtap="skipSentence">⏭ 跳过</view>
       </view>
 
+      <text class="pz-bank-label">🌸 点选单词放入上方</text>
       <view class="pz-bank">
         <text
           class="pz-bank-word {{puzzleWordUsed[index] ? 'used' : ''}}"

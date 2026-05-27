@@ -147,6 +147,8 @@ Page({
         const topic = e.currentTarget.dataset.topic;
         this.setData({ currentTopic: topic });
         this.doFilter();
+        if (this.data.viewMode === 'puzzle')
+            this.startPuzzle();
     },
     toggleMaster(e) {
         const id = e.currentTarget.dataset.id;
