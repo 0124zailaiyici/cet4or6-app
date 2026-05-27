@@ -112,6 +112,16 @@
     </view>
 
     <block wx:if="{{!puzzleDone}}">
+      <view class="pz-adj">
+        <text class="pz-adj-lbl">间距</text>
+        <text class="pz-adj-btn" catchtap="adjPad" data-d="-1">−</text>
+        <text class="pz-adj-val">{{pzPad}}rpx</text>
+        <text class="pz-adj-btn" catchtap="adjPad" data-d="1">+</text>
+        <text class="pz-adj-lbl">字号</text>
+        <text class="pz-adj-btn" catchtap="adjFs" data-d="-1">−</text>
+        <text class="pz-adj-val">{{pzFs}}rpx</text>
+        <text class="pz-adj-btn" catchtap="adjFs" data-d="1">+</text>
+      </view>
       <view class="pz-hint">
         <text class="pz-hint-label">💡 中文提示</text>
         <text class="pz-hint-cn">{{puzzleSentences.length > puzzleIndex ? puzzleSentences[puzzleIndex].chinese : ''}}</text>
