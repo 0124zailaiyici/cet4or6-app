@@ -534,16 +534,6 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleCombo: 0,
     } as any)
     wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 })
-    setTimeout(() => {
-      const list = this.data.puzzleSentences
-      const next = this.data.puzzleIndex + 1
-      if (next >= list.length || next >= this.data.puzzleTotal) {
-        this.finishPuzzle()
-      } else {
-        this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
-        this.loadPuzzleSentence(list)
-      }
-    }, 1800)
   },
 
   skipSentence() {
