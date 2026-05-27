@@ -104,12 +104,14 @@
     <block wx:if="{{!puzzleFinished || puzzleStars === 0}}">
       <view class="pz-hint">
         <text class="pz-hint-cn">{{filteredSentences.length > puzzleIndex ? filteredSentences[puzzleIndex].chinese : ''}}</text>
-        <text class="pz-hint-en">按正确顺序点击单词拼成句子</text>
+        <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词</text>
+        <text class="pz-hint-progress" wx:if="{{puzzleErrors >= 2 && puzzleHintCount === 0}}">💡 第一个单词是 <text class="pz-hp-word">{{puzzleWords.length > 0 ? puzzleWords[puzzleAnswers[0]] : ''}}</text></text>
+        <text class="pz-hint-progress warn" wx:if="{{puzzleErrors >= 4 && puzzleHintCount === 0}}">需要帮助？试试 💡提示 或 👁答案</text>
       </view>
 
       <view class="pz-drop">
         <text
-          class="pz-drop-word {{puzzleFinished ? 'done' : ''}}"
+          class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
           wx:for="{{puzzleSelected}}" wx:key="*this"
           data-wi="{{item}}"
           catchtap="untapPuzzleWord"
@@ -117,6 +119,17 @@
           {{puzzleWords[item]}}
         </text>
         <text class="pz-drop-empty" wx:if="{{puzzleSelected.length === 0}}">点击下方单词开始拼图</text>
+      </view>
+
+      <view class="pz-error" wx:if="{{puzzleErrors > 0}}">
+        <text class="pz-error-icon">❌</text>
+        <text class="pz-error-text">已尝试 {{puzzleErrors}} 次</text>
+      </view>
+
+      <view class="pz-actions">
+        <view class="pz-act pz-act-hint" catchtap="giveHint">💡 提示</view>
+        <view class="pz-act pz-act-reveal" catchtap="showAnswer">👁 答案</view>
+        <view class="pz-act pz-act-skip" catchtap="skipSentence">⏭ 跳过</view>
       </view>
 
       <view class="pz-bank">
@@ -157,7 +170,7 @@
       </view>
     </view>
 
-    <view class="pz-tip">💡 从左边开始按顺序点击单词，拼出完整句子</view>
+    <view class="pz-tip">💡 点击单词拼成句子 · 提示消耗连击 · 答案不计分</view>
   </view>
 
   <view class="immersion-area" wx:if="{{viewMode === 'immersion' && filteredSentences.length === 0}}">

@@ -53,6 +53,7 @@ interface IVocabData {
   savedSents: any[]
   achProgress: number[]
   sentFontSize: number
+  dailyReviewCount: number
   gameWord: IVocabWord | null
   gameWordIdx: number
   gameTotal: number
@@ -127,6 +128,12 @@ interface IVocabMethods {
   loadWords(skipTranslate?: boolean): void
   lookupWord(e: WechatMiniprogram.TouchEvent): void
   onWordAction(e: WechatMiniprogram.TouchEvent): void
+  _doDailyReset(): void
+  _syncWordInList(word: string): void
+  _incrAch(key: string): void
+  _refreshAchProgress(): void
+  _updateAchFromWords(): void
+  goReading(): void
 }
 
 const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
@@ -1109,6 +1116,7 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ streak, combo })
     wx.setStorageSync('vocab_streak', streak)
     wx.setStorageSync('studyData', app.globalData.studyData)
+    this._syncWordInList(w.word)
     this._checkPackCompletion(w.word)
     if (sw) {
       if (!wasMaster && sw.status === 'master') {
@@ -1144,6 +1152,7 @@ Page<IVocabData, IVocabMethods>({
       }
       wx.setStorageSync('studyData', app.globalData.studyData)
       if (sw) this._checkPackCompletion(w.word)
+      this._syncWordInList(w.word)
       setTimeout(() => this.challengeNext(), 300)
     } else {
       if (sw) { sw.correctStreak = 0; sw.status = 'review'; sw.lastReviewDate = new Date().toDateString() }
@@ -1151,7 +1160,7 @@ Page<IVocabData, IVocabMethods>({
       const streak = 0
       this.setData({ streak, combo: 0 })
       wx.setStorageSync('vocab_streak', streak)
-      wx.setStorageSync('studyData', app.globalData.studyData)
+      this._syncWordInList(w.word)
       setTimeout(() => this.nextGame(), 300)
     }
   },
@@ -1290,9 +1299,11 @@ Page<IVocabData, IVocabMethods>({
     const streak = (wx.getStorageSync('challenge_streak') as number || 0) + 1
     wx.setStorageSync('challenge_date', today)
     wx.setStorageSync('challenge_streak', streak)
+    const prevWeek = (wx.getStorageSync('ach_week') as number) || 0
+    if (streak > prevWeek) wx.setStorageSync('ach_week', streak)
+    this._refreshAchProgress()
     this.setData({ challengeDone: true, challengeActive: false, challengeStreak: streak, gameWord: null })
     wx.showToast({ title: '🔥 今日挑战完成！', icon: 'success' })
-    if (streak >= 7) this._incrAch('ach_week')
     this._unlockStory()
   },
 
@@ -1349,6 +1360,17 @@ Page<IVocabData, IVocabMethods>({
   _refreshAchProgress() {
     const achProgress = ACHS.map(a => (wx.getStorageSync(a.key) as number) || 0)
     this.setData({ achProgress })
+  },
+
+  _syncWordInList(word: string) {
+    const app = getApp<IAppOption>()
+    const fw = this.data.filteredWords.slice()
+    const fi = fw.findIndex(v => v.word === word)
+    if (fi >= 0) {
+      const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === word)
+      if (sw) fw[fi] = { ...sw }
+    }
+    this.setData({ filteredWords: fw })
   },
 
   _updateAchFromWords() {

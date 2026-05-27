@@ -50,6 +50,11 @@ interface ISentencesData {
   puzzleTime: number
   puzzleFinished: boolean
   puzzleStars: number
+  puzzleErrors: number
+  puzzleHintCount: number
+  puzzleRevealed: boolean
+  puzzleSkipped: boolean
+  puzzleHintIndices: number[]
 }
 
 interface ISentencesMethods {
@@ -69,8 +74,12 @@ interface ISentencesMethods {
   tapPuzzleWord(e: WechatMiniprogram.TouchEvent): void
   untapPuzzleWord(e: WechatMiniprogram.TouchEvent): void
   checkPuzzleAnswer(): void
+  startPuzzleTimer(): void
   finishPuzzle(): void
   restartPuzzle(): void
+  giveHint(): void
+  showAnswer(): void
+  skipSentence(): void
   openGenModal(): void
   closeGenModal(): void
   onGenInput(e: WechatMiniprogram.Input): void
@@ -122,6 +131,11 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleTime: 30,
     puzzleFinished: false,
     puzzleStars: 0,
+    puzzleErrors: 0,
+    puzzleHintCount: 0,
+    puzzleRevealed: false,
+    puzzleSkipped: false,
+    puzzleHintIndices: [],
   },
 
   onLoad(options: { id?: string }) {
@@ -327,6 +341,11 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleTime: 30,
       puzzleFinished: false,
       puzzleStars: 0,
+      puzzleErrors: 0,
+      puzzleHintCount: 0,
+      puzzleRevealed: false,
+      puzzleSkipped: false,
+      puzzleHintIndices: [],
     } as any)
     this.loadPuzzleSentence(sentences)
   },
@@ -339,38 +358,23 @@ Page<ISentencesData, ISentencesMethods>({
     }
     const s = sentences[idx]
     const words = s.english.replace(/[.,!?;:'"]/g, '').split(/\s+/).filter(w => w.length > 0)
-    const correct = words.map((_, i) => i)
     const shuffled = words.map((w, i) => ({ w, i })).sort(() => Math.random() - 0.5).map(x => x.i)
 
     this.setData({
       puzzleWords: shuffled.map(i => words[i]),
-      puzzleAnswers: correct,
+      puzzleAnswers: words.map((_, j) => shuffled.indexOf(j)),
       puzzleSelected: [],
       puzzleWordUsed: shuffled.map(() => false),
       puzzleTime: Math.max(15, 30 - idx * 2),
       puzzleFinished: false,
+      puzzleErrors: 0,
+      puzzleHintCount: 0,
+      puzzleRevealed: false,
+      puzzleSkipped: false,
+      puzzleHintIndices: [],
     } as any)
 
-    stopPuzzleTimer()
-    puzzleTimer = setInterval(() => {
-      let t = this.data.puzzleTime - 1
-      if (t <= 0) {
-        stopPuzzleTimer()
-        this.setData({ puzzleTime: 0, puzzleCombo: 0, puzzleFinished: true } as any)
-        wx.showToast({ title: '⏰ 时间到！', icon: 'none', duration: 1000 })
-        setTimeout(() => {
-          const next = this.data.puzzleIndex + 1
-          if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
-            this.finishPuzzle()
-          } else {
-            this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
-            this.loadPuzzleSentence(puzzleSentenceList)
-          }
-        }, 1200)
-      } else {
-        this.setData({ puzzleTime: t } as any)
-      }
-    }, 1000)
+    this.startPuzzleTimer()
   },
 
   tapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
@@ -406,6 +410,7 @@ Page<ISentencesData, ISentencesMethods>({
     const selected = this.data.puzzleSelected
     const answers = this.data.puzzleAnswers
     const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
+    const hintUsed = this.data.puzzleHintCount > 0
     let allCorrect = true
     for (let i = 0; i < answers.length; i++) {
       if (selected[i] !== answers[i]) {
@@ -414,9 +419,9 @@ Page<ISentencesData, ISentencesMethods>({
       }
     }
     if (allCorrect) {
-      const combo = this.data.puzzleCombo + 1
+      const combo = this.data.puzzleCombo + (hintUsed ? 0 : 1)
       const bonus = combo > 1 ? combo * 5 : 0
-      const timeBonus = this.data.puzzleTime
+      const timeBonus = hintUsed ? 0 : this.data.puzzleTime
       const score = this.data.puzzleScore + 10 + bonus + timeBonus
       this.setData({
         puzzleCombo: combo,
@@ -432,15 +437,44 @@ Page<ISentencesData, ISentencesMethods>({
         this.loadPuzzleSentence(sentences)
       }, 1200)
     } else {
-      this.setData({ puzzleCombo: 0, puzzleFinished: true } as any)
+      const errors = this.data.puzzleErrors + 1
+      const used = [...this.data.puzzleWordUsed]
+      selected.forEach(wi => { used[wi] = false })
+      this.setData({ puzzleCombo: 0, puzzleErrors: errors, puzzleFinished: true, puzzleSelected: [], puzzleWordUsed: used } as any)
       wx.showToast({ title: '✗ 顺序不对，再试试', icon: 'none', duration: 1000 })
       setTimeout(() => {
-        this.setData({
-          puzzleSelected: [],
-          puzzleFinished: false,
-        } as any)
+        this.setData({ puzzleFinished: false } as any)
+        this.startPuzzleTimer()
       }, 800)
     }
+  },
+
+  startPuzzleTimer() {
+    stopPuzzleTimer()
+    puzzleTimer = setInterval(() => {
+      let t = this.data.puzzleTime - 1
+      if (t <= 0) {
+        stopPuzzleTimer()
+        this.setData({ puzzleTime: 0, puzzleFinished: true } as any)
+        wx.showToast({ title: '⏰ 时间到！', icon: 'none', duration: 1000 })
+        setTimeout(() => {
+          const next = this.data.puzzleIndex + 1
+          if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
+            this.finishPuzzle()
+          } else {
+            this.setData({
+              puzzleIndex: next,
+              puzzleCombo: 0,
+              puzzleFinished: false,
+              puzzleErrors: this.data.puzzleErrors + 1,
+            } as any)
+            this.loadPuzzleSentence(puzzleSentenceList)
+          }
+        }, 1200)
+      } else {
+        this.setData({ puzzleTime: t } as any)
+      }
+    }, 1000)
   },
 
   finishPuzzle() {
@@ -458,6 +492,69 @@ Page<ISentencesData, ISentencesMethods>({
   restartPuzzle() {
     this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0 } as any)
     this.startPuzzle()
+  },
+
+  giveHint() {
+    if (this.data.puzzleFinished) return
+    const hintCount = this.data.puzzleHintCount + 1
+    const answers = this.data.puzzleAnswers
+    const allUsed = new Array(this.data.puzzleWords.length).fill(false)
+    const newSelected: number[] = []
+    const hintIndices: number[] = []
+    for (let i = 0; i < hintCount && i < answers.length; i++) {
+      newSelected.push(answers[i])
+      allUsed[answers[i]] = true
+      hintIndices.push(answers[i])
+    }
+    this.setData({
+      puzzleSelected: newSelected,
+      puzzleWordUsed: allUsed,
+      puzzleHintCount: hintCount,
+      puzzleHintIndices: hintIndices,
+      puzzleCombo: 0,
+    } as any)
+    if (newSelected.length === answers.length) {
+      this.checkPuzzleAnswer()
+    }
+  },
+
+  showAnswer() {
+    stopPuzzleTimer()
+    const answers = this.data.puzzleAnswers
+    const allUsed = new Array(this.data.puzzleWords.length).fill(true)
+    this.setData({
+      puzzleSelected: answers,
+      puzzleWordUsed: allUsed,
+      puzzleRevealed: true,
+      puzzleFinished: true,
+      puzzleHintIndices: answers,
+      puzzleCombo: 0,
+    } as any)
+    wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 })
+    setTimeout(() => {
+      const next = this.data.puzzleIndex + 1
+      if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
+        this.finishPuzzle()
+      } else {
+        this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
+        this.loadPuzzleSentence(puzzleSentenceList)
+      }
+    }, 1800)
+  },
+
+  skipSentence() {
+    stopPuzzleTimer()
+    this.setData({ puzzleSkipped: true, puzzleFinished: true, puzzleCombo: 0 } as any)
+    wx.showToast({ title: '⏭ 已跳过', icon: 'none', duration: 800 })
+    setTimeout(() => {
+      const next = this.data.puzzleIndex + 1
+      if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
+        this.finishPuzzle()
+      } else {
+        this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
+        this.loadPuzzleSentence(puzzleSentenceList)
+      }
+    }, 1000)
   },
 
   openGenModal() {
