@@ -58,8 +58,6 @@ Page({
         puzzleRevealed: false,
         puzzleSkipped: false,
         puzzleDone: false,
-        pzPad: 4,
-        pzFs: 34,
         puzzleHintIndices: [],
         puzzleInitialSelected: [],
         puzzleSentences: [],
@@ -441,16 +439,6 @@ Page({
     restartPuzzle() {
         this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0, puzzleDone: false });
         this.startPuzzle();
-    },
-    adjPad(e) {
-        const d = Number(e.currentTarget.dataset.d) || 1;
-        const v = Math.max(0, this.data.pzPad + d);
-        this.setData({ pzPad: v });
-    },
-    adjFs(e) {
-        const d = Number(e.currentTarget.dataset.d) || 1;
-        const v = Math.max(14, Math.min(60, this.data.pzFs + d));
-        this.setData({ pzFs: v });
     },
     showAnswer() {
         if (this.data.puzzleRevealed)

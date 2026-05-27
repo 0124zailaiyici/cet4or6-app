@@ -112,16 +112,6 @@
     </view>
 
     <block wx:if="{{!puzzleDone}}">
-      <view class="pz-adj">
-        <text class="pz-adj-lbl">间距</text>
-        <text class="pz-adj-btn" catchtap="adjPad" data-d="-1">−</text>
-        <text class="pz-adj-val">{{pzPad}}rpx</text>
-        <text class="pz-adj-btn" catchtap="adjPad" data-d="1">+</text>
-        <text class="pz-adj-lbl">字号</text>
-        <text class="pz-adj-btn" catchtap="adjFs" data-d="-1">−</text>
-        <text class="pz-adj-val">{{pzFs}}rpx</text>
-        <text class="pz-adj-btn" catchtap="adjFs" data-d="1">+</text>
-      </view>
       <view class="pz-hint">
         <text class="pz-hint-label">💡 中文提示</text>
         <text class="pz-hint-cn">{{puzzleSentences.length > puzzleIndex ? puzzleSentences[puzzleIndex].chinese : ''}}</text>
@@ -135,11 +125,10 @@
             <text wx:if="{{item !== null}}"
               class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
               data-pos="{{pos}}" catchtap="untapPuzzleWord"
-              style="padding: {{pzPad}}rpx {{pzPad*3.5}}rpx; font-size: {{pzFs}}rpx;"
             >
               {{puzzleWords[item]}}
             </text>
-            <text wx:else class="pz-drop-slot" style="font-size: {{pzFs}}rpx; padding: {{pzPad}}rpx 2rpx;">＿＿＿</text>
+            <text wx:else class="pz-drop-slot">＿＿＿</text>
           </block>
         </block>
         <text wx:if="{{puzzleSkipped}}" class="pz-drop-skipped">⏭ 已跳过</text>
@@ -162,7 +151,6 @@
           wx:for="{{puzzleWords}}" wx:key="*this" wx:for-index="index"
           data-wi="{{index}}"
           catchtap="tapPuzzleWord"
-          style="padding: {{pzPad}}rpx {{pzPad*3.5}}rpx; font-size: {{pzFs}}rpx;"
         >
           {{item}}
         </text>
