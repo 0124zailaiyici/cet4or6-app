@@ -12,9 +12,8 @@ body {
   padding: 20px;
 }
 .phone {
-  width: 375px; min-height: 812px; background: #fff; border-radius: 40px;
-  overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  position: relative;
+  width: 375px; background: #fff; border-radius: 40px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 /* ── Header ── */
@@ -52,11 +51,12 @@ body {
 .tab.active { background: #fff; color: #9c27b0; font-weight: 700; }
 
 /* ── Tab Content ── */
-.content { padding: 20px 20px 40px; display: none; }
+.content { padding: 20px 20px 60px; display: none; }
 .content.on { display: block; }
 
-/* ── Common ── */
 .hint { font-size: 13px; color: #b09bc0; margin-bottom: 14px; }
+
+/* ── Search ── */
 .srch-wrap { margin-bottom: 10px; }
 .srch {
   width: 100%; padding: 12px 14px; border-radius: 10px;
@@ -69,7 +69,7 @@ body {
 .cat {
   padding: 6px 14px; border-radius: 14px; font-size: 12px;
   background: #f5f0f8; color: #b09bc0; white-space: nowrap; flex-shrink: 0;
-  cursor: pointer;
+  cursor: pointer; user-select: none;
 }
 .cat.on { background: rgba(156,39,176,0.08); color: #9c27b0; font-weight: 600; }
 
@@ -93,17 +93,18 @@ body {
   font-size: 12px; line-height: 1.6; color: #504060;
 }
 .tki-example .en { color: #3a2a4a; font-weight: 500; }
-.tki-example .zh { color: #b09bc0; margin-top: 3px; }
+.tki-example .trans { color: #b09bc0; margin-top: 4px; font-size: 11px; }
 .tki-btn {
   display: inline-block; margin-top: 8px; padding: 4px 14px; border-radius: 10px;
   background: rgba(156,39,176,0.08); color: #9c27b0; font-size: 11px;
   cursor: pointer; user-select: none;
 }
-.tki-btn:active { background: rgba(156,39,176,0.15); }
 
 /* ── Practice Area ── */
 .practice { margin: 16px 0; }
-.practice-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.practice-h {
+  display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;
+}
 .practice-label { font-size: 14px; font-weight: 600; color: #504060; }
 .practice-hint { font-size: 12px; color: #c0b0cc; }
 .practice-ref {
@@ -131,10 +132,7 @@ body {
 }
 .btn-primary { background: linear-gradient(135deg, #d4a0dc, #9c27b0); color: #fff; }
 .btn-primary:active { opacity: 0.85; }
-.btn-secondary {
-  background: rgba(156,39,176,0.06); color: #9c27b0; margin-top: 8px;
-}
-.btn-secondary:active { opacity: 0.7; }
+.btn-secondary { background: rgba(156,39,176,0.06); color: #9c27b0; margin-top: 8px; }
 
 /* ── Result ── */
 .result {
@@ -153,7 +151,7 @@ body {
 .step.done { background: rgba(156,39,176,0.08); color: #9c27b0; font-weight: 600; }
 .step.active { background: #9c27b0; color: #fff; font-weight: 600; }
 
-/* ── Step 1: 中文要点 ── */
+/* ── Step 1 ── */
 .topic-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .pill {
   padding: 6px 16px; border-radius: 16px; font-size: 12px;
@@ -173,7 +171,7 @@ body {
 .cn-input:focus { border-color: #d4a0dc; }
 .cn-input::placeholder { color: #d0c0d8; }
 
-/* ── Step 2: 逐句翻译 ── */
+/* ── Step 2 ── */
 .trans-card {
   background: #fff; border-radius: 12px; padding: 14px 16px;
   border: 1.5px solid #ede4f0; margin-bottom: 10px;
@@ -205,39 +203,32 @@ body {
 }
 .trans-en:focus { border-color: #ce93d8; }
 .trans-en::placeholder { color: #d0c0d8; }
-.trans-en.done {
-  border-color: #c8e6c9; background: rgba(76,175,80,0.02);
-}
+.trans-en.done { border-color: #c8e6c9; background: rgba(76,175,80,0.02); }
 .trans-done-label { font-size: 10px; color: #43a047; margin-top: 4px; }
 
-/* ── Assembly Step ── */
+/* ── Step 3 ── */
 .assembly {
   padding: 12px 16px; background: #f9f5fc; border-radius: 10px;
   font-size: 13px; line-height: 1.8; color: #504060; margin-bottom: 12px;
 }
 .assembly-empty { color: #c0b0cc; font-style: italic; }
-.assembly-sent {
-  padding: 4px 0; cursor: pointer;
-}
+.assembly-sent { padding: 4px 0; cursor: pointer; }
 .assembly-sent:active { color: #9c27b0; }
-.linker-hint {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
-}
+.linker-hint { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .linker {
   padding: 4px 12px; border-radius: 8px; font-size: 11px;
   background: rgba(156,39,176,0.04); color: #9c27b0; cursor: pointer;
   border: 1.5px solid transparent; user-select: none;
 }
-.linker:active { border-color: #d4a0dc; }
 
-/* ── Polish Step ── */
+/* ── Step 4 ── */
 .polish-card {
   background: #fff; border-radius: 12px; padding: 14px 16px;
   border: 1.5px solid #ede4f0; margin-bottom: 10px;
 }
-.polish-stat { display: flex; gap: 16px; margin-bottom: 10px; }
+.polish-stat { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
 .stat-item { text-align: center; }
-.stat-num { font-size: 20px; font-weight: 700; color: #9c27b0; }
+.stat-num { font-size: 18px; font-weight: 700; color: #9c27b0; }
 .stat-label { font-size: 10px; color: #b09bc0; margin-top: 2px; }
 .polish-item {
   padding: 8px 0; border-bottom: 1px solid #f0e4f8; font-size: 12px; color: #504060;
@@ -247,7 +238,90 @@ body {
 .polish-ok { color: #43a047; }
 .polish-warn { color: #e65100; }
 
-/* ── Tab 2: Quick Ref ── */
+/* ══════════════════════════════════
+   TAB 2 — 重新设计：大输入区 + 侧边提示
+   ══════════════════════════════════ */
+/* 题目卡片 */
+.prompt-card {
+  background: linear-gradient(135deg, #faf5fc 0%, #f5f0f8 100%);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+  border-left: 4px solid #d4a0dc;
+}
+.prompt-icon { font-size: 11px; color: #9c27b0; font-weight: 600; margin-bottom: 4px; }
+.prompt-text { font-size: 13px; line-height: 1.7; color: #3a2a4a; }
+
+/* 提示条：关键词 + 句型合并到一行快速浏览 */
+.ref-strip {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+  padding: 10px 14px; background: #fff; border-radius: 10px;
+  border: 1.5px solid #ede4f0;
+}
+.ref-strip-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ref-strip-label { font-size: 10px; color: #b09bc0; margin-right: 4px; }
+.kw-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  background: rgba(76,175,80,0.06); color: #388e3c; font-size: 10px;
+}
+.pat-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  background: rgba(156,39,176,0.05); color: #9c27b0; font-size: 10px;
+  font-family: monospace;
+}
+.ref-strip-divider {
+  width: 100%; height: 0; margin: 4px 0;
+}
+
+/* 大写作区 - 使用全部剩余空间 */
+.writing-area {
+  margin-top: 0;
+}
+.writing-area .wa-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.wa-label { font-size: 13px; font-weight: 600; color: #504060; }
+.wa-hint { font-size: 11px; color: #b09bc0; }
+.wa-input {
+  width: 100%; min-height: 240px; padding: 14px 16px;
+  border-radius: 14px; border: 2px solid #ede4f0;
+  font-size: 14px; line-height: 1.8; color: #3a2a4a;
+  resize: none; outline: none; font-family: inherit;
+  overflow: hidden;
+}
+.wa-input:focus { border-color: #ce93d8; }
+.wa-input::placeholder { color: #d0c0d8; }
+
+/* 词数统计条 */
+.wc-info {
+  display: flex; align-items: center; gap: 10px;
+  margin: 8px 0 14px; font-size: 11px; color: #b09bc0;
+}
+.wc-info .wc-num { color: #9c27b0; font-weight: 700; font-size: 16px; }
+.wc-info .wc-num.under { color: #ef6c00; }
+.wc-info .wc-num.over { color: #f44336; }
+.wc-bar-track {
+  flex: 1; height: 4px; border-radius: 2px; background: #f0e4f8; overflow: hidden;
+}
+.wc-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg,#d4a0dc,#9c27b0);
+  width: 0%; transition: width 0.2s;
+}
+.wc-bar-fill.under { background: linear-gradient(90deg,#ffcc80,#ef6c00); }
+.wc-bar-fill.over { background: linear-gradient(90deg,#ef9a9a,#f44336); }
+
+/* 底部操作栏 */
+.action-row {
+  display: flex; gap: 8px;
+}
+.action-row .btn { margin-top: 0; }
+.btn-outline {
+  flex: 0 0 auto; height: 46px; padding: 0 20px; border-radius: 23px;
+  font-size: 13px; font-weight: 500; align-items: center; justify-content: center;
+  background: rgba(156,39,176,0.05); color: #9c27b0; border: none; cursor: pointer;
+}
+
+/* ── Writing List ── */
 .wl-item {
   display: flex; align-items: center; gap: 12px; padding: 14px 16px;
   background: #fff; border-radius: 14px; border-left: 4px solid #d4a0dc;
@@ -262,48 +336,7 @@ body {
 .wl-body { flex: 1; min-width: 0; }
 .wl-title { font-size: 14px; font-weight: 600; color: #504060; }
 .wl-meta { font-size: 11px; color: #c0b0cc; margin-top: 2px; }
-.ref-card {
-  background: #fff; border-radius: 12px; padding: 14px 16px;
-  border-left: 4px solid #d4a0dc; margin-bottom: 12px;
-}
-.ref-card-tag { font-size: 10px; color: #9c27b0; font-weight: 600; margin-bottom: 6px; }
-.kw-tag {
-  display: inline-block; padding: 2px 10px; border-radius: 4px;
-  background: rgba(76,175,80,0.06); color: #43a047; font-size: 11px; margin: 2px 3px;
-}
-.pat-tag {
-  display: inline-block; padding: 2px 10px; border-radius: 4px;
-  background: rgba(156,39,176,0.05); color: #9c27b0; font-size: 10px; margin: 2px 3px;
-  font-family: monospace;
-}
 
-/* ── WC Bar ── */
-.wc-bar { margin-bottom: 10px; }
-.wc-bar-h { display: flex; justify-content: space-between; font-size: 11px; color: #c0b0cc; margin-bottom: 4px; }
-.wc-bar-n { color: #9c27b0; font-weight: 700; }
-.wc-bar-t { height: 4px; border-radius: 2px; background: #f0e4f8; overflow: hidden; }
-.wc-bar-f {
-  height: 100%; border-radius: 2px;
-  background: linear-gradient(90deg,#d4a0dc,#9c27b0);
-  width: 0%;
-}
-.wc-bar-f.under { background: linear-gradient(90deg,#ffcc80,#ef6c00); }
-.wc-bar-f.over { background: linear-gradient(90deg,#ef9a9a,#f44336); }
-.wc-bar-m { display: flex; justify-content: space-between; font-size: 10px; color: #e0d0e8; margin-top: 2px; }
-
-/* ── Bubble ── */
-.bubble {
-  background: #fff; border-radius: 14px; padding: 18px;
-  border: 2px solid #f0e4f8; position: relative; margin-bottom: 16px;
-}
-.bubble-icon {
-  position: absolute; top: -10px; left: 14px;
-  font-size: 14px; background: #fff; padding: 0 6px;
-}
-.bubble-h { font-size: 11px; color: #c0b0cc; margin-bottom: 4px; }
-.bubble-text { font-size: 13px; line-height: 1.6; color: #504060; }
-
-/* ── Nav hint ── */
 .nav-hint {
   text-align: center; padding: 8px 0; font-size: 11px; color: #c0b0cc;
   border-top: 1px solid #f0e4f8; margin-top: 8px;
@@ -330,34 +363,31 @@ body {
 
   <!-- Tabs -->
   <div class="tabs">
-    <div class="tab active" data-tab="0" onclick="switchTab(0)">📖 句型急救包</div>
-    <div class="tab" data-tab="1" onclick="switchTab(1)">📝 中英写作助手</div>
-    <div class="tab" data-tab="2" onclick="switchTab(2)">📄 写作速查</div>
+    <div class="tab active" onclick="switchTab(0)">📖 句型急救包</div>
+    <div class="tab" onclick="switchTab(1)">📝 中英写作助手</div>
+    <div class="tab" onclick="switchTab(2)">📄 写作速查</div>
   </div>
 
-  <!-- ══════════════ TAB 0: 句型急救包 ══════════════ -->
+  <!-- ══════════════ TAB 0 ══════════════ -->
   <div class="content on" id="tab0">
     <div class="hint">💡 三步走：选分类 → 看例句 → 选用练习</div>
 
     <div class="srch-wrap">
-      <input class="srch" placeholder="🔍 搜索句型（如 environment）…" id="search0" oninput="filterPatterns()">
+      <input class="srch" placeholder="🔍 搜索句型 …" id="search0" oninput="filterPatterns()">
     </div>
 
     <div class="cats" id="cats0"></div>
     <div class="tkl" id="tkl0"></div>
 
-    <!-- 练习区 -->
     <div class="practice">
       <div class="practice-h">
         <div class="practice-label">造句练习</div>
         <div class="practice-hint" id="ph0">请先选一个句型</div>
       </div>
-
       <div class="practice-ref" id="refEx" style="display:none">
         <div class="ref-label">📝 参考例句</div>
         <div id="refExText"></div>
       </div>
-
       <div class="pi-wrap">
         <textarea class="pi" id="input0" placeholder="选中句型后在这里造句…" maxlength="300" style="min-height:80px"></textarea>
         <div class="pi-wc" id="wc0">0 词</div>
@@ -371,11 +401,9 @@ body {
     </div>
   </div>
 
-  <!-- ══════════════ TAB 1: 中英写作助手 ══════════════ -->
+  <!-- ══════════════ TAB 1 ══════════════ -->
   <div class="content" id="tab1">
     <div class="hint">🎯 中文构思 → 逐句翻译 → 组装成段</div>
-
-    <!-- Step Nav -->
     <div class="steps" id="steps1">
       <div class="step active" onclick="setStep(1)">① 写中文</div>
       <div class="step" onclick="setStep(2)">② 翻译</div>
@@ -383,28 +411,28 @@ body {
       <div class="step" onclick="setStep(4)">④ 润色</div>
     </div>
 
-    <!-- ======= Step 1: 写中文 ======= -->
+    <!-- Step 1 -->
     <div id="step1area">
       <div class="topic-pills" id="topicPills1"></div>
       <div class="cn-step">
         <div class="cn-step-title">✍️ 用中文写 3-5 个要点</div>
-        <div class="cn-step-desc">围绕主题，把你想说的先写下来。每行一个要点。</div>
+        <div class="cn-step-desc">围绕主题写你想说的，每行一个</div>
         <textarea class="cn-input" id="cnInput" placeholder="例如：&#10;环保对每个人都很重要&#10;政府应该加强管理&#10;我们可以从小事做起&#10;教育下一代也很关键"></textarea>
       </div>
       <div class="btn btn-primary" onclick="goToStep2()">写好了，去翻译 →</div>
     </div>
 
-    <!-- ======= Step 2: 逐句翻译 ======= -->
+    <!-- Step 2 -->
     <div id="step2area" style="display:none">
-      <div class="hint">💡 对每个中文要点，参考推荐词汇和句型写出英文句子</div>
+      <div class="hint">💡 对每个要点，参考词汇和句型写出英文</div>
       <div id="transList"></div>
       <div class="btn btn-primary" id="toStep3Btn" onclick="goToStep3()">全部写完了，去组装 →</div>
-      <div class="btn btn-secondary" onclick="setStep(1)">← 回中文修改</div>
+      <div class="btn btn-secondary" onclick="setStep(1)">← 回上一步</div>
     </div>
 
-    <!-- ======= Step 3: 组装 ======= -->
+    <!-- Step 3 -->
     <div id="step3area" style="display:none">
-      <div class="hint">💡 点击句子添加到正文区，也可以用连接词串联</div>
+      <div class="hint">💡 点击句子 + 连接词，组合成段落</div>
       <div class="linker-hint">
         <div class="linker" onclick="insertLinker('Firstly, ')">Firstly</div>
         <div class="linker" onclick="insertLinker('To begin with, ')">To begin with</div>
@@ -417,14 +445,14 @@ body {
       </div>
       <div class="assembly" id="assemblySentList"></div>
       <div class="pi-wrap">
-        <textarea class="pi" id="assemblyInput" placeholder="在这里编辑你的段落……" style="min-height:120px"></textarea>
+        <textarea class="pi" id="assemblyInput" placeholder="在此编辑段落……" style="min-height:120px"></textarea>
         <div class="pi-wc" id="wc1">0 词</div>
       </div>
       <div class="btn btn-primary" onclick="goToStep4()">提交检查 →</div>
-      <div class="btn btn-secondary" onclick="setStep(2)">← 回翻译修改</div>
+      <div class="btn btn-secondary" onclick="setStep(2)">← 回上一步</div>
     </div>
 
-    <!-- ======= Step 4: 润色 ======= -->
+    <!-- Step 4 -->
     <div id="step4area" style="display:none">
       <div class="hint">📊 看看写得怎么样</div>
       <div class="polish-card">
@@ -441,51 +469,52 @@ body {
     </div>
   </div>
 
-  <!-- ══════════════ TAB 2: 写作速查 ══════════════ -->
+  <!-- ══════════════ TAB 2 ══════════════ -->
   <div class="content" id="tab2">
-    <div class="hint">📝 选一道题，参考关键词提示进行写作</div>
+    <div class="hint">📝 选一道题，参考提示进行写作</div>
 
     <!-- 题目列表 -->
     <div id="writingList"></div>
 
-    <!-- 写作详情 -->
+    <!-- 写作详情 — 重新设计：大输入区 -->
     <div id="writingDetail" style="display:none">
-      <div class="bubble">
-        <div class="bubble-icon">📋</div>
-        <div class="bubble-h">题目</div>
-        <div class="bubble-text" id="wdPrompt"></div>
+
+      <!-- 题目 + 关键词/句型 集成在一个卡片 -->
+      <div class="prompt-card">
+        <div class="prompt-icon">📋 题目</div>
+        <div class="prompt-text" id="wdPrompt"></div>
       </div>
 
-      <div class="ref-card">
-        <div class="ref-card-tag">📌 关键词提示</div>
-        <div id="wdKeywords"></div>
+      <div class="ref-strip">
+        <div class="ref-strip-group">
+          <span class="ref-strip-label">🔑 词汇：</span>
+          <span id="wdKeywords"></span>
+        </div>
+        <div class="ref-strip-divider"></div>
+        <div class="ref-strip-group">
+          <span class="ref-strip-label">🔗 句型：</span>
+          <span id="wdPatterns"></span>
+        </div>
       </div>
 
-      <div class="ref-card">
-        <div class="ref-card-tag">🔗 推荐句型</div>
-        <div id="wdPatterns"></div>
-        <div style="font-size:11px;color:#b09bc0;margin-top:6px">💡 在「句型急救包」中查看完整例句</div>
-      </div>
+      <!-- 大写作区 -->
+      <div class="writing-area">
+        <div class="wa-header">
+          <span class="wa-label">✍️ 你的作文</span>
+          <span class="wa-hint">120–180 词</span>
+        </div>
+        <textarea class="wa-input" id="wdInput" placeholder="直接在这里写你的作文……"></textarea>
 
-      <div class="practice" style="margin-top:0">
-        <div class="practice-h">
-          <div class="practice-label">你的作文</div>
-          <div class="practice-hint">120–180 词</div>
+        <div class="wc-info">
+          <span>词数</span>
+          <div class="wc-bar-track"><div class="wc-bar-fill" id="wdBar"></div></div>
+          <span><span class="wc-num" id="wdWc">0</span> / 180</span>
         </div>
-        <div class="wc-bar">
-          <div class="wc-bar-h">
-            <span>词数</span>
-            <span><span class="wc-bar-n" id="wdWc">0</span> / 120–180</span>
-          </div>
-          <div class="wc-bar-t"><div class="wc-bar-f" id="wdBar" style="width:0%"></div></div>
-          <div class="wc-bar-m"><span>0</span><span>120</span><span>180</span></div>
+
+        <div class="action-row">
+          <div class="btn btn-primary" onclick="submitWriting2()" style="flex:1">📤 交卷评分</div>
+          <div class="btn-outline" onclick="backToList()">← 返回</div>
         </div>
-        <div class="pi-wrap">
-          <textarea class="pi" id="wdInput" placeholder="在此输入你的作文……" style="min-height:120px"></textarea>
-          <div class="pi-wc" id="wdWcLabel">0 词</div>
-        </div>
-        <div class="btn btn-primary" onclick="submitWriting2()">📤 交卷评分</div>
-        <div class="btn btn-secondary" onclick="backToList()">← 返回题目列表</div>
       </div>
 
       <div class="result" id="result2" style="display:none">
@@ -499,93 +528,130 @@ body {
 </div>
 
 <script>
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  数据
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 const patternsData = [
-  { id:1, pattern:"There is no doubt that...", example:"There is no doubt that education plays a vital role in personal development.", chinese:"毫无疑问……", cat:"开头" },
-  { id:2, pattern:"It is + adj. + for sb. to do...", example:"It is important for college students to learn a second language.", chinese:"对某人来说做某事是……的", cat:"开头" },
-  { id:3, pattern:"The more..., the more...", example:"The more we practice, the more fluent our English will become.", chinese:"越……就越……", cat:"递进" },
-  { id:4, pattern:"It is universally acknowledged that...", example:"It is universally acknowledged that health is more important than wealth.", chinese:"众所周知……", cat:"开头" },
-  { id:5, pattern:"From my perspective,...", example:"From my perspective, social media has both advantages and disadvantages.", chinese:"在我看来……", cat:"观点" },
-  { id:6, pattern:"Nothing is more + adj. + than...", example:"Nothing is more important than receiving a good education.", chinese:"没有什么比……更……", cat:"强调" },
-  { id:7, pattern:"It is high time that sb. did...", example:"It is high time that we took effective measures to reduce carbon emissions.", chinese:"该是某人做……的时候了", cat:"建议" },
-  { id:8, pattern:"Only by... can we...", example:"Only by working together can we solve the problem of global warming.", chinese:"只有……我们才能……", cat:"结尾" },
-  { id:9, pattern:"There is no denying that...", example:"There is no denying that the Internet has changed our lives greatly.", chinese:"不可否认……", cat:"开头" },
-  { id:10, pattern:"It is no exaggeration to say that...", example:"It is no exaggeration to say that a healthy lifestyle can extend our life expectancy.", chinese:"可以毫不夸张地说……", cat:"强调" },
-  { id:11, pattern:"The reason why... is that...", example:"The reason why many young people are addicted to online games is that they lack self-discipline.", chinese:"……的原因是……", cat:"因果" },
-  { id:12, pattern:"We are supposed to...", example:"We are supposed to strike a balance between work and leisure.", chinese:"我们应该……", cat:"建议" },
-  { id:13, pattern:"It is advisable that sb. (should) do...", example:"It is advisable that we form the habit of reading every day.", chinese:"建议某人做……", cat:"建议" },
-  { id:14, pattern:"On no account should we...", example:"On no account should we sacrifice the environment for economic growth.", chinese:"我们绝不应该……", cat:"强调" },
-  { id:15, pattern:"I hold the view that...", example:"I hold the view that failure is the mother of success.", chinese:"我认为……", cat:"观点" },
+  { id:1, pattern:"There is no doubt that...",
+    example:"There is no doubt that education plays a vital role in personal development.",
+    trans:"毫无疑问，教育在个人发展中起着至关重要的作用。",
+    chinese:"毫无疑问……", cat:"开头" },
+  { id:2, pattern:"It is + adj. + for sb. to do...",
+    example:"It is important for college students to learn a second language.",
+    trans:"对大学生来说，学习一门外语是很重要的。",
+    chinese:"对某人来说做某事是……的", cat:"开头" },
+  { id:3, pattern:"The more..., the more...",
+    example:"The more we practice, the more fluent our English will become.",
+    trans:"我们练习得越多，英语就会越流利。",
+    chinese:"越……就越……", cat:"递进" },
+  { id:4, pattern:"It is universally acknowledged that...",
+    example:"It is universally acknowledged that health is more important than wealth.",
+    trans:"众所周知，健康比财富更重要。",
+    chinese:"众所周知……", cat:"开头" },
+  { id:5, pattern:"From my perspective,...",
+    example:"From my perspective, social media has both advantages and disadvantages.",
+    trans:"在我看来，社交媒体既有优点也有缺点。",
+    chinese:"在我看来……", cat:"观点" },
+  { id:6, pattern:"Nothing is more + adj. + than...",
+    example:"Nothing is more important than receiving a good education.",
+    trans:"没有什么比接受良好教育更重要的了。",
+    chinese:"没有什么比……更……", cat:"强调" },
+  { id:7, pattern:"It is high time that sb. did...",
+    example:"It is high time that we took effective measures to reduce carbon emissions.",
+    trans:"该是我们采取有效措施减少碳排放的时候了。",
+    chinese:"该是某人做……的时候了", cat:"建议" },
+  { id:8, pattern:"Only by... can we...",
+    example:"Only by working together can we solve the problem of global warming.",
+    trans:"只有共同努力，我们才能解决全球变暖的问题。",
+    chinese:"只有……我们才能……", cat:"结尾" },
+  { id:9, pattern:"There is no denying that...",
+    example:"There is no denying that the Internet has changed our lives greatly.",
+    trans:"不可否认，互联网极大地改变了我们的生活。",
+    chinese:"不可否认……", cat:"开头" },
+  { id:10, pattern:"It is no exaggeration to say that...",
+    example:"It is no exaggeration to say that a healthy lifestyle can extend our life expectancy.",
+    trans:"可以毫不夸张地说，健康的生活方式可以延长我们的寿命。",
+    chinese:"可以毫不夸张地说……", cat:"强调" },
+  { id:11, pattern:"The reason why... is that...",
+    example:"The reason why many young people are addicted to online games is that they lack self-discipline.",
+    trans:"许多年轻人沉迷网络游戏的原因是他们缺乏自律。",
+    chinese:"……的原因是……", cat:"因果" },
+  { id:12, pattern:"We are supposed to...",
+    example:"We are supposed to strike a balance between work and leisure.",
+    trans:"我们应该在工作和休闲之间取得平衡。",
+    chinese:"我们应该……", cat:"建议" },
+  { id:13, pattern:"It is advisable that sb. (should) do...",
+    example:"It is advisable that we form the habit of reading every day.",
+    trans:"建议我们养成每天阅读的习惯。",
+    chinese:"建议某人做……", cat:"建议" },
+  { id:14, pattern:"On no account should we...",
+    example:"On no account should we sacrifice the environment for economic growth.",
+    trans:"我们绝不应该为了经济增长而牺牲环境。",
+    chinese:"我们绝不应该……", cat:"强调" },
+  { id:15, pattern:"I hold the view that...",
+    example:"I hold the view that failure is the mother of success.",
+    trans:"我认为失败是成功之母。",
+    chinese:"我认为……", cat:"观点" },
 ]
 const CATEGORIES = ["全部","开头","递进","转折","举例","观点","强调","因果","建议","结尾"]
 const CAT_EMOJI = {"全部":"🔍","开头":"🔥","递进":"⚡","转折":"🔄","举例":"📊","观点":"💭","强调":"❗","因果":"🔗","建议":"💡","结尾":"🏁"}
 
 const topics = [
-  { label:"🌿 环保", vocab:["environmental protection","sustainable","pollution","ecosystem","regulation","emission","governance"], patterns:[1,2,7] },
-  { label:"💻 科技", vocab:["technology","innovation","digital","artificial intelligence","impact","progress"], patterns:[4,9,14] },
-  { label:"📚 教育", vocab:["education","knowledge","skill","learning","opportunity","curriculum"], patterns:[1,6,12] },
-  { label:"💪 健康", vocab:["health","wellness","exercise","mental health","lifestyle","fitness"], patterns:[2,6,10] },
-  { label:"🤝 社会", vocab:["society","pressure","balance","community","responsibility","cooperation"], patterns:[5,11,15] },
-  { label:"🏫 校园", vocab:["campus","college","extracurricular","internship","challenge","growth"], patterns:[2,5,9] },
+  { label:"🌿 环保", vocab:["environmental protection","sustainable","pollution","ecosystem","regulation"], patterns:[1,2,7] },
+  { label:"💻 科技", vocab:["technology","innovation","digital","AI","impact"], patterns:[4,9,14] },
+  { label:"📚 教育", vocab:["education","knowledge","skill","learning","opportunity"], patterns:[1,6,12] },
+  { label:"💪 健康", vocab:["health","wellness","exercise","mental health","lifestyle"], patterns:[2,6,10] },
+  { label:"🤝 社会", vocab:["society","pressure","balance","community","responsibility"], patterns:[5,11,15] },
+  { label:"🏫 校园", vocab:["campus","college","extracurricular","internship","challenge"], patterns:[2,5,9] },
 ]
 
 const writings = [
   { id:1, title:"Time Management",
-    prompt:"Directions: Write a composition on 'The Importance of Time Management for College Students'. (120-180 words)",
-    keywords:["time management","schedule","priority","productivity","balance","efficiency","deadline","academic","extracurricular","procrastination"],
+    prompt:"Write a composition on 'The Importance of Time Management for College Students'. (120-180 words)",
+    keywords:["time management","schedule","priority","productivity","balance","efficiency","deadline","extracurricular"],
     patterns:[1,8,12] },
-  { id:2, title:"Part-time Jobs for Students",
-    prompt:"Directions: Write a short essay on 'Should College Students Take Part-time Jobs?'. (120-180 words)",
-    keywords:["part-time job","practical experience","income","academic performance","work-life balance","skill","responsibility"],
+  { id:2, title:"Part-time Jobs",
+    prompt:"Write a short essay on 'Should College Students Take Part-time Jobs?'. (120-180 words)",
+    keywords:["part-time job","practical experience","income","academic performance","skill","responsibility"],
     patterns:[4,5,11] },
   { id:3, title:"Social Media & Communication",
-    prompt:"Directions: Write a composition on 'The Impact of Social Media on Interpersonal Communication'. (120-180 words)",
-    keywords:["social media","interpersonal","communication","face-to-face","convenient","over-reliance","online","relationship"],
+    prompt:"Write on 'The Impact of Social Media on Interpersonal Communication'. (120-180 words)",
+    keywords:["social media","interpersonal","face-to-face","convenient","over-reliance","relationship"],
     patterns:[4,9,14] },
   { id:4, title:"Lifelong Learning",
-    prompt:"Directions: Write a short essay on 'My View on Lifelong Learning'. (120-180 words)",
-    keywords:["lifelong learning","knowledge","competitive","skill","self-improvement","career","adapt","growth"],
+    prompt:"Write a short essay on 'My View on Lifelong Learning'. (120-180 words)",
+    keywords:["lifelong learning","knowledge","competitive","self-improvement","career","adapt","growth"],
     patterns:[1,6,13] },
   { id:5, title:"Relieve Stress",
-    prompt:"Directions: Write a composition on 'How to Relieve Stress in Modern Life'. (120-180 words)",
-    keywords:["stress relief","exercise","positive attitude","communication","relaxation","mental health","hobby","support"],
+    prompt:"Write on 'How to Relieve Stress in Modern Life'. (120-180 words)",
+    keywords:["stress relief","exercise","positive attitude","communication","relaxation","mental health","hobby"],
     patterns:[2,7,12] },
 ]
 
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  状态
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 const S = {
-  tab: 0,
-  selectedPattern: null,
-  expandedPattern: null,
-  toolkitCategory: "全部",
-  toolkitSearch: "",
+  tab: 0, selectedPattern: null, expandedPattern: null,
+  toolkitCategory: "全部", toolkitSearch: "",
   currentTopic: topics[0],
-  cnPoints: [],
-  enSentences: [],
-  guideStep: 1,
+  cnPoints: [], enSentences: [], guideStep: 1,
   currentWriting: null,
 }
 
-// ════════════════════════════════════════════════
-//  工具
-// ════════════════════════════════════════════════
 function countWords(s) { return s.trim() ? s.trim().split(/\s+/).length : 0 }
 
 function showToast(msg) {
   const el = document.createElement("div")
-  el.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.78);color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;z-index:999;pointer-events:none;transition:opacity 0.3s;max-width:280px;text-align:center"
+  el.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.78);color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;z-index:999;pointer-events:none"
   el.textContent = msg
   document.body.appendChild(el)
-  setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 300) }, 1400)
+  setTimeout(() => { el.style.opacity="0"; setTimeout(()=>el.remove(),300) }, 1400)
 }
 
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  Tab 切换
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function switchTab(n) {
   S.tab = n
   document.querySelectorAll(".tab").forEach((t,i)=>t.className="tab"+(i===n?" active":""))
@@ -595,42 +661,28 @@ function switchTab(n) {
   if (n===2) renderWritingList()
 }
 
-function toggleAi() {
-  document.getElementById("aiBtn").classList.toggle("off")
-}
+function toggleAi() { document.getElementById("aiBtn").classList.toggle("off") }
 
-// ════════════════════════════════════════════════
-//  TAB 0 - 句型急救包
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  TAB 0
+// ═══════════════════════════════════════════
 function renderCats() {
-  const el = document.getElementById("cats0")
-  el.innerHTML = CATEGORIES.map(c =>
+  document.getElementById("cats0").innerHTML = CATEGORIES.map(c =>
     `<div class="cat${S.toolkitCategory===c?" on":""}" onclick="setCat('${c}')">${CAT_EMOJI[c]} ${c}</div>`
   ).join("")
 }
-
-function setCat(c) {
-  S.toolkitCategory = c
-  renderCats()
-  renderPatterns()
-}
-
-function filterPatterns() {
-  S.toolkitSearch = document.getElementById("search0").value.toLowerCase()
-  renderPatterns()
-}
+function setCat(c) { S.toolkitCategory=c; renderCats(); renderPatterns() }
+function filterPatterns() { S.toolkitSearch=document.getElementById("search0").value.toLowerCase(); renderPatterns() }
 
 function renderPatterns() {
   renderCats()
-  const el = document.getElementById("tkl0")
-  const q = S.toolkitSearch
-  const cat = S.toolkitCategory
-  const filtered = patternsData.filter(p => {
+  const q=S.toolkitSearch, cat=S.toolkitCategory
+  const f = patternsData.filter(p => {
     if (cat!=="全部" && p.cat!==cat) return false
     if (q && p.pattern.toLowerCase().indexOf(q)===-1 && p.chinese.indexOf(q)===-1) return false
     return true
   })
-  el.innerHTML = filtered.map(p => {
+  document.getElementById("tkl0").innerHTML = f.map(p => {
     const exp = S.expandedPattern === p.id
     return `<div class="tki">
       <div class="tki-header" onclick="toggleExpand(${p.id})">
@@ -642,27 +694,25 @@ function renderPatterns() {
       </div>
       ${exp ? `<div class="tki-example">
         <div class="en">📝 ${p.example}</div>
-        <div class="zh">${p.chinese}</div>
+        <div class="trans">${p.trans}</div>
         <div class="tki-btn" onclick="event.stopPropagation();selectPattern(${p.id})">✅ 选用此句型</div>
       </div>` : ""}
     </div>`
   }).join("")
 }
 
-function toggleExpand(id) {
-  S.expandedPattern = S.expandedPattern === id ? null : id
-  renderPatterns()
-}
+function toggleExpand(id) { S.expandedPattern=S.expandedPattern===id?null:id; renderPatterns() }
 
 function selectPattern(id) {
-  const p = patternsData.find(x => x.id === id)
+  const p = patternsData.find(x=>x.id===id)
   S.selectedPattern = p
   document.getElementById("ph0").textContent = `✅ 已选用：${p.pattern}`
   const ref = document.getElementById("refEx")
   ref.style.display = "block"
-  document.getElementById("refExText").innerHTML = `<div style="color:#3a2a4a;font-weight:500">${p.example}</div>`
+  document.getElementById("refExText").innerHTML =
+    `<div style="color:#3a2a4a;font-weight:500">${p.example}</div>
+     <div style="color:#b09bc0;margin-top:4px;font-size:11px">${p.trans}</div>`
   document.getElementById("input0").placeholder = `用「${p.pattern}」写一个句子…`
-  document.getElementById("practice0")?.scrollIntoView({ behavior: "smooth" })
 }
 
 function submitPractice() {
@@ -676,43 +726,38 @@ function submitPractice() {
   else r += "✅ 长度适中\n"
   r += /^[A-Z]/.test(text) ? "✅ 首字母大写\n" : "⚠️ 首字母应大写\n"
   r += /[.!?]$/.test(text) ? "✅ 句末标点正确\n" : "⚠️ 缺少句末标点\n"
-  r += "\n📝 参考：\n" + S.selectedPattern.example
+  r += "\n📝 参考例句：\n" + S.selectedPattern.example + "\n" + S.selectedPattern.trans
   document.getElementById("result0").style.display = "block"
   document.getElementById("result0Text").textContent = r
   document.getElementById("input0").value = ""
   document.getElementById("wc0").textContent = "0 词"
 }
-
 document.getElementById("input0")?.addEventListener("input", function() {
+  autoResize(this)
   document.getElementById("wc0").textContent = countWords(this.value) + " 词"
 })
 
-// ════════════════════════════════════════════════
-//  TAB 1 - 中英写作助手
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  TAB 1
+// ═══════════════════════════════════════════
 function renderTopicPills() {
-  const el = document.getElementById("topicPills1")
-  el.innerHTML = topics.map((t,i) =>
+  document.getElementById("topicPills1").innerHTML = topics.map((t,i) =>
     `<div class="pill${S.currentTopic===t?" on":""}" onclick="selTopic(${i})">${t.label}</div>`
   ).join("")
 }
-
-function selTopic(i) {
-  S.currentTopic = topics[i]
-  renderTopicPills()
-}
+function selTopic(i) { S.currentTopic=topics[i]; renderTopicPills() }
 
 function setStep(n) {
   S.guideStep = n
   document.querySelectorAll("#steps1 .step").forEach((s,i)=>{
-    s.className = "step"
-    if (i+1 < n) s.classList.add("done")
-    if (i+1 === n) s.classList.add("active")
+    s.className="step"
+    if (i+1<n) s.classList.add("done")
+    if (i+1===n) s.classList.add("active")
   })
-  document.getElementById("step1area").style.display = n===1 ? "block" : "none"
-  document.getElementById("step2area").style.display = n===2 ? "block" : "none"
-  document.getElementById("step3area").style.display = n===3 ? "block" : "none"
-  document.getElementById("step4area").style.display = n===4 ? "block" : "none"
+  document.getElementById("step1area").style.display = n===1?"block":"none"
+  document.getElementById("step2area").style.display = n===2?"block":"none"
+  document.getElementById("step3area").style.display = n===3?"block":"none"
+  document.getElementById("step4area").style.display = n===4?"block":"none"
   if (n===2) renderTransList()
   if (n===3) renderAssembly()
   if (n===4) renderPolish()
@@ -723,65 +768,48 @@ function goToStep2() {
   if (!text) { showToast("请先写一些中文要点"); return }
   const points = text.split("\n").filter(s => s.trim())
   if (points.length < 2) { showToast("至少写 2 个要点"); return }
-  S.cnPoints = points.map(s => s.trim())
-  S.enSentences = points.map(() => "")
+  S.cnPoints = points.map(s=>s.trim())
+  S.enSentences = points.map(()=>"")
   setStep(2)
 }
 
 function renderTransList() {
-  const el = document.getElementById("transList")
-  el.innerHTML = S.cnPoints.map((cn, i) => {
+  document.getElementById("transList").innerHTML = S.cnPoints.map((cn,i) => {
     const en = S.enSentences[i] || ""
     const done = en.trim().length > 0
     const topic = S.currentTopic
-    const vocab = topic.vocab.slice(0, 5)
-    const pats = topic.patterns.map(id => patternsData.find(p => p.id === id)).filter(Boolean)
+    const vocab = topic.vocab.slice(0,5)
+    const pats = topic.patterns.map(id=>patternsData.find(p=>p.id===id)).filter(Boolean)
     return `<div class="trans-card">
       <div class="trans-num">${i+1}</div>
       <div class="trans-cn">🀄 ${cn}</div>
-      <div class="trans-kw">🔑 推荐词汇：${vocab.map(v => `<kw>${v}</kw>`).join("")}</div>
-      <div class="trans-pat">
-        🔗 可用句型：
-        ${pats.map(p => `<ref onclick="event.stopPropagation();switchTab(0);showToast('切到句型急救包查看')">${p.pattern}</ref>`).join("")}
-      </div>
+      <div class="trans-kw">🔑 推荐词汇：${vocab.map(v=>`<kw>${v}</kw>`).join("")}</div>
+      <div class="trans-pat">🔗 可用句型：${pats.map(p=>`<ref>${p.pattern}</ref>`).join("")}</div>
       <textarea class="trans-en${done?' done':''}" placeholder="写英文句子……"
         oninput="updateEn(${i},this.value)">${en}</textarea>
       ${done ? '<div class="trans-done-label">✅ 已完成</div>' : ''}
     </div>`
   }).join("")
-  const allDone = S.enSentences.every(s => s.trim().length > 0)
-  document.getElementById("toStep3Btn").textContent = allDone
-    ? "✅ 全部完成，去组装 →"
-    : "全部写完了，去组装 →"
+  const all = S.enSentences.every(s=>s.trim().length>0)
+  document.getElementById("toStep3Btn").textContent = all ? "✅ 全部完成，去组装 →" : "全部写完了，去组装 →"
 }
-
-function updateEn(i, val) {
-  S.enSentences[i] = val
-  renderTransList()
-}
-
+function updateEn(i,val) { S.enSentences[i]=val; renderTransList() }
 function goToStep3() {
-  const filled = S.enSentences.filter(s => s.trim()).length
-  if (filled < 2) { showToast("至少翻译 2 个要点"); return }
+  if (S.enSentences.filter(s=>s.trim()).length<2) { showToast("至少翻译 2 个要点"); return }
   setStep(3)
 }
 
 function renderAssembly() {
   const el = document.getElementById("assemblySentList")
-  const sents = S.enSentences.filter(s => s.trim())
-  if (!sents.length) {
-    el.innerHTML = '<span class="assembly-empty">还没有翻译好的句子，回上一步</span>'
-    return
-  }
-  // 找到哪些句子有内容
-  let idx = 0
-  el.innerHTML = S.enSentences.map((s, i) => {
+  const sents = S.enSentences.filter(s=>s.trim())
+  if (!sents.length) { el.innerHTML='<span class="assembly-empty">还没有翻译好的句子</span>'; return }
+  let idx=0
+  el.innerHTML = S.enSentences.map((s,i)=>{
     if (!s.trim()) return ""
-    const cur = idx++
+    const cur=idx++
     return `<div class="assembly-sent" onclick="appendSent(${i})">${cur+1}. ${s}</div>`
   }).filter(Boolean).join("")
 }
-
 function appendSent(i) {
   const input = document.getElementById("assemblyInput")
   const s = S.enSentences[i]
@@ -789,26 +817,18 @@ function appendSent(i) {
   input.value += (input.value ? " " : "") + s
   updateWc1()
 }
-
 function insertLinker(text) {
   const input = document.getElementById("assemblyInput")
   const start = input.selectionStart
-  input.value = input.value.substring(0, start) + text + input.value.substring(start)
-  input.focus()
-  input.selectionStart = input.selectionEnd = start + text.length
+  input.value = input.value.substring(0,start) + text + input.value.substring(start)
   updateWc1()
 }
-
-function updateWc1() {
-  document.getElementById("wc1").textContent = countWords(document.getElementById("assemblyInput").value) + " 词"
-}
-
-document.getElementById("assemblyInput")?.addEventListener("input", updateWc1)
-
+function updateWc1() { document.getElementById("wc1").textContent = countWords(document.getElementById("assemblyInput").value)+" 词" }
+document.getElementById("assemblyInput")?.addEventListener("input", function() {
+  autoResize(this); updateWc1()
+})
 function goToStep4() {
-  if (!document.getElementById("assemblyInput").value.trim()) {
-    showToast("请先组装你的段落"); return
-  }
+  if (!document.getElementById("assemblyInput").value.trim()) { showToast("请先组装段落"); return }
   setStep(4)
 }
 
@@ -816,62 +836,47 @@ function renderPolish() {
   const text = document.getElementById("assemblyInput").value.trim()
   const wc = countWords(text)
   const sentences = text.split(/[.!?]+\s*/).filter(Boolean).length
-
-  let patternCount = 0
-  const usedPats = []
+  let patternCount=0
   for (const p of patternsData) {
     const clean = p.pattern.toLowerCase().replace(/\.\.\./g,"").replace(/[()]/g,"").trim()
-    if (clean && text.toLowerCase().includes(clean)) {
-      patternCount++
-      usedPats.push(p.pattern)
-    }
+    if (clean && text.toLowerCase().includes(clean)) patternCount++
   }
-
   document.getElementById("polishWords").textContent = wc
   document.getElementById("polishSentences").textContent = sentences
   document.getElementById("polishPatterns").textContent = patternCount
-
   let score = 60
-  if (wc >= 80 && wc <= 180) score += 15; else if (wc < 40) score -= 20
-  if (sentences >= 5) score += 10
-  if (patternCount >= 2) score += 10
-  score = Math.max(20, Math.min(100, score))
+  if (wc>=80&&wc<=180) score+=15; else if (wc<40) score-=20
+  if (sentences>=5) score+=10
+  if (patternCount>=2) score+=10
+  score = Math.max(20,Math.min(100,score))
   document.getElementById("polishScore").textContent = score
 
-  const d = document.getElementById("polishDetails")
   let html = ""
-  if (wc < 80) html += `<div class="polish-item"><span class="polish-warn">⚠️</span> 词数偏少（${wc} 词），建议 120-180 词</div>`
-  else if (wc > 200) html += `<div class="polish-item"><span class="polish-warn">⚠️</span> 词数偏多（${wc} 词），建议精简</div>`
-  else html += `<div class="polish-item"><span class="polish-ok">✅</span> 词数合适（${wc} 词）</div>`
-
-  if (sentences < 5) html += `<div class="polish-item"><span class="polish-warn">⚠️</span> 句子偏少（${sentences} 句），建议 5-10 句</div>`
-  else html += `<div class="polish-item"><span class="polish-ok">✅</span> 句子数量合适（${sentences} 句）</div>`
-
-  if (!patternCount) html += `<div class="polish-item"><span class="polish-warn">💡</span> 未检测到高级句型，试试：It is + adj. + to do... / There is no doubt that...</div>`
-  else html += `<div class="polish-item"><span class="polish-ok">✅</span> 使用了 ${patternCount} 个高级句型</div>`
-
-  if (!/first/i.test(text) && !/to begin/i.test(text))
-    html += `<div class="polish-item"><span class="polish-warn">💡</span> 可添加连接词开头：Firstly / To begin with</div>`
-  if (!/in conclusion|to sum/i.test(text))
-    html += `<div class="polish-item"><span class="polish-warn">💡</span> 可添加结尾词：In conclusion / To sum up</div>`
-
-  d.innerHTML = html
+  if (wc<80) html+=`<div class="polish-item"><span class="polish-warn">⚠️</span> 词数偏少（${wc} 词），建议 120-180 词</div>`
+  else if (wc>200) html+=`<div class="polish-item"><span class="polish-warn">⚠️</span> 词数偏多（${wc} 词），建议精简</div>`
+  else html+=`<div class="polish-item"><span class="polish-ok">✅</span> 词数合适（${wc} 词）</div>`
+  if (sentences<5) html+=`<div class="polish-item"><span class="polish-warn">⚠️</span> 句子偏少（${sentences} 句），建议 5-10 句</div>`
+  else html+=`<div class="polish-item"><span class="polish-ok">✅</span> 句子数量合适（${sentences} 句）</div>`
+  if (!patternCount) html+=`<div class="polish-item"><span class="polish-warn">💡</span> 未检测到高级句型，试试开头的句型急救包</div>`
+  else html+=`<div class="polish-item"><span class="polish-ok">✅</span> 使用了 ${patternCount} 个高级句型</div>`
+  if (!/first|to begin/i.test(text)) html+=`<div class="polish-item"><span class="polish-warn">💡</span> 可添加连接词开头：Firstly / To begin with</div>`
+  if (!/in conclusion|to sum/i.test(text)) html+=`<div class="polish-item"><span class="polish-warn">💡</span> 可添加结尾词：In conclusion / To sum up</div>`
+  document.getElementById("polishDetails").innerHTML = html
 }
 
 function resetAll() {
-  S.cnPoints = []; S.enSentences = []
-  document.getElementById("cnInput").value = ""
-  document.getElementById("assemblyInput").value = ""
-  document.getElementById("wc1").textContent = "0 词"
+  S.cnPoints=[]; S.enSentences=[]
+  document.getElementById("cnInput").value=""
+  document.getElementById("assemblyInput").value=""
+  document.getElementById("wc1").textContent="0 词"
   setStep(1)
 }
 
-// ════════════════════════════════════════════════
-//  TAB 2 - 写作速查
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  TAB 2
+// ═══════════════════════════════════════════
 function renderWritingList() {
-  const el = document.getElementById("writingList")
-  el.innerHTML = writings.map(w =>
+  document.getElementById("writingList").innerHTML = writings.map(w =>
     `<div class="wl-item" onclick="enterWriting(${w.id})">
       <div class="wl-icon">📄</div>
       <div class="wl-body">
@@ -883,33 +888,40 @@ function renderWritingList() {
 }
 
 function enterWriting(id) {
-  S.currentWriting = writings.find(x => x.id === id)
+  S.currentWriting = writings.find(x=>x.id===id)
   const w = S.currentWriting
   document.getElementById("writingList").style.display = "none"
   document.getElementById("writingDetail").style.display = "block"
   document.getElementById("wdPrompt").textContent = w.prompt
-  document.getElementById("wdKeywords").innerHTML = w.keywords.map(k => `<span class="kw-tag">${k}</span>`).join("")
-  const pats = (w.patterns||[]).map(id => patternsData.find(p => p.id === id)).filter(Boolean)
-  document.getElementById("wdPatterns").innerHTML = pats.map(p => `<span class="pat-tag">${p.pattern}</span>`).join("")
-}
-
-function backToList() {
-  S.currentWriting = null
-  document.getElementById("writingList").style.display = "block"
-  document.getElementById("writingDetail").style.display = "none"
+  document.getElementById("wdKeywords").innerHTML = w.keywords.map(k=>`<span class="kw-tag">${k}</span>`).join("")
+  const pats = (w.patterns||[]).map(id=>patternsData.find(p=>p.id===id)).filter(Boolean)
+  document.getElementById("wdPatterns").innerHTML = pats.map(p=>`<span class="pat-tag">${p.pattern}</span>`).join("")
   document.getElementById("result2").style.display = "none"
 }
 
+function backToList() {
+  S.currentWriting=null
+  document.getElementById("writingList").style.display="block"
+  document.getElementById("writingDetail").style.display="none"
+}
+
+function autoResize(el) {
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
+
 document.getElementById("wdInput")?.addEventListener("input", function() {
+  autoResize(this)
   const wc = countWords(this.value)
   document.getElementById("wdWc").textContent = wc
-  document.getElementById("wdWcLabel").textContent = wc + " 词"
   const bar = document.getElementById("wdBar")
   let pct = wc > 180 ? 100 : (wc / 180 * 100)
   bar.style.width = pct + "%"
-  bar.className = "wc-bar-f"
+  bar.className = "wc-bar-fill"
   if (wc > 0 && wc < 120) bar.classList.add("under")
   if (wc > 180) bar.classList.add("over")
+  const num = document.querySelector("#wdWc")
+  num.className = "wc-num" + (wc>0&&wc<120?" under":"") + (wc>180?" over":"")
 })
 
 function submitWriting2() {
@@ -918,30 +930,27 @@ function submitWriting2() {
   const wc = countWords(text)
   const sc = text.split(/[.!?]+/).filter(Boolean).length
   let score = 60
-  if (wc >= 120 && wc <= 180) score += 20; else if (wc < 80) score -= 15
-  if (sc >= 8) score += 10; else if (sc < 5) score -= 10
-  if (/first|to begin/i.test(text)) score += 5
-  if (/second|furthermore|moreover|in addition/i.test(text)) score += 5
-  if (/in conclusion|to sum/i.test(text)) score += 8
-  score = Math.max(20, Math.min(100, score))
+  if (wc>=120&&wc<=180) score+=20; else if (wc<80) score-=15
+  if (sc>=8) score+=10; else if (sc<5) score-=10
+  if (/first|to begin/i.test(text)) score+=5
+  if (/second|furthermore|moreover|in addition/i.test(text)) score+=5
+  if (/in conclusion|to sum/i.test(text)) score+=8
+  score = Math.max(20,Math.min(100,score))
 
   let r = `评分：${score} 分\n\n词数：${wc} 词${wc>=120&&wc<=180?" ✅":" ⚠️"}\n句子数：${sc} 句\n\n`
-  r += `📌 关键词使用建议：\n`
+  r += `📌 关键词使用：\n`
   if (S.currentWriting) {
-    const used = S.currentWriting.keywords.filter(k => text.toLowerCase().includes(k))
+    const used = S.currentWriting.keywords.filter(k=>text.toLowerCase().includes(k))
     if (used.length) r += `✅ 用到了：${used.join("、")}\n`
     else r += `💡 建议使用：${S.currentWriting.keywords.slice(0,5).join("、")}\n`
   }
-  if (!/first|to begin/i.test(text)) r += `\n💡 建议开头使用：Firstly / To begin with`
-  if (!/in conclusion|to sum/i.test(text)) r += `\n💡 建议结尾使用：In conclusion / To sum up`
-
-  document.getElementById("result2").style.display = "block"
-  document.getElementById("result2Text").textContent = r
+  if (!/first|to begin/i.test(text)) r += `\n💡 建议开头：Firstly / To begin with`
+  if (!/in conclusion|to sum/i.test(text)) r += `\n💡 建议结尾：In conclusion / To sum up`
+  document.getElementById("result2").style.display="block"
+  document.getElementById("result2Text").textContent=r
 }
 
-// ════════════════════════════════════════════════
-//  Init
-// ════════════════════════════════════════════════
+// Init
 renderPatterns()
 renderTopicPills()
 renderWritingList()

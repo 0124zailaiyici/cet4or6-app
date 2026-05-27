@@ -694,8 +694,8 @@
 }
 .pz-drop-word.done { opacity: .6; }
 .pz-drop-slot {
-  font-size: 30rpx; font-weight: 700; color: #a5d6a7;
-  padding: 0; line-height: 1.5; letter-spacing: 2rpx;
+  display: inline-block; width: 48rpx;
+  border-bottom: 4rpx solid #a5d6a7; margin: 0 2rpx;
 }
 .pz-drop-skipped { width: 100%; text-align: center; font-size: 28rpx; color: #388e3c; font-weight: 700; padding: 20rpx 0; }
 
