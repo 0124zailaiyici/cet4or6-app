@@ -129,7 +129,7 @@ interface IVocabMethods {
   lookupWord(e: WechatMiniprogram.TouchEvent): void
   onWordAction(e: WechatMiniprogram.TouchEvent): void
   _doDailyReset(): void
-  _syncWordInList(word: string): void
+  _syncWordInList(word: string, updates: Partial<IVocabWord>): void
   _incrAch(key: string): void
   _refreshAchProgress(): void
   _updateAchFromWords(): void
@@ -1103,20 +1103,25 @@ Page<IVocabData, IVocabMethods>({
     const wasMaster = sw && sw.status === 'master'
     const oldStars = sw ? sw.stars : 0
     const oldGrowth = sw ? sw.growth : 0
+    const newStreak = sw ? sw.correctStreak + 1 : 1
+    const newStatus = newStreak >= 3 ? 'master' as const : 'learning' as const
+    const newGrowth = Math.min(3, (sw ? sw.growth : 0) + 1)
+    const newStars = Math.min(3, (sw ? sw.stars : 0) + 1)
+    const today = new Date().toDateString()
+    // setData FIRST — filteredWords objects not yet modified in-place
+    this._syncWordInList(w.word, { correctStreak: newStreak, status: newStatus, growth: newGrowth, stars: newStars })
     if (sw) {
-      sw.correctStreak++
-      if (sw.correctStreak >= 3) sw.status = 'master'
-      else sw.status = 'learning'
-      sw.growth = Math.min(3, (sw.growth || 0) + 1)
-      sw.stars = Math.min(3, (sw.stars || 0) + 1)
-      sw.lastReviewDate = new Date().toDateString()
+      sw.correctStreak = newStreak
+      sw.status = newStatus
+      sw.growth = newGrowth
+      sw.stars = newStars
+      sw.lastReviewDate = today
     }
     playSfx('correct')
     const streak = this.data.streak + 1
     this.setData({ streak, combo })
     wx.setStorageSync('vocab_streak', streak)
     wx.setStorageSync('studyData', app.globalData.studyData)
-    this._syncWordInList(w.word)
     this._checkPackCompletion(w.word)
     if (sw) {
       if (!wasMaster && sw.status === 'master') {
@@ -1142,25 +1147,28 @@ Page<IVocabData, IVocabMethods>({
     if (!w) return
     const app = getApp<IAppOption>()
     const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
+    const today = new Date().toDateString()
     if (this.data.challengeActive) {
+      const newStreak = sw ? sw.correctStreak + 1 : 1
+      const newStatus = newStreak >= 3 ? 'master' as const : 'learning' as const
+      const newStars = Math.min(3, (sw ? sw.stars : 0) + 1)
+      this._syncWordInList(w.word, { correctStreak: newStreak, status: newStatus, stars: newStars })
       if (sw) {
-        sw.correctStreak++
-        if (sw.correctStreak >= 3) sw.status = 'master'
-        else sw.status = 'learning'
-        sw.stars = Math.min(3, (sw.stars || 0) + 1)
-        sw.lastReviewDate = new Date().toDateString()
+        sw.correctStreak = newStreak
+        sw.status = newStatus
+        sw.stars = newStars
+        sw.lastReviewDate = today
       }
       wx.setStorageSync('studyData', app.globalData.studyData)
       if (sw) this._checkPackCompletion(w.word)
-      this._syncWordInList(w.word)
       setTimeout(() => this.challengeNext(), 300)
     } else {
-      if (sw) { sw.correctStreak = 0; sw.status = 'review'; sw.lastReviewDate = new Date().toDateString() }
+      this._syncWordInList(w.word, { correctStreak: 0, status: 'review' })
+      if (sw) { sw.correctStreak = 0; sw.status = 'review'; sw.lastReviewDate = today }
       playSfx('wrong')
       const streak = 0
       this.setData({ streak, combo: 0 })
       wx.setStorageSync('vocab_streak', streak)
-      this._syncWordInList(w.word)
       setTimeout(() => this.nextGame(), 300)
     }
   },
@@ -1362,15 +1370,16 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ achProgress })
   },
 
-  _syncWordInList(word: string) {
-    const app = getApp<IAppOption>()
-    const fw = this.data.filteredWords.slice()
-    const fi = fw.findIndex(v => v.word === word)
-    if (fi >= 0) {
-      const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === word)
-      if (sw) fw[fi] = { ...sw }
+  _syncWordInList(word: string, updates: Partial<IVocabWord>) {
+    const fi = this.data.filteredWords.findIndex(v => v.word === word)
+    const wi = this.data.words.findIndex(v => v.word === word)
+    if (fi < 0 && wi < 0) return
+    const data: Record<string, any> = {}
+    for (const [k, v] of Object.entries(updates)) {
+      if (fi >= 0) data[`filteredWords[${fi}].${k}`] = v
+      if (wi >= 0) data[`words[${wi}].${k}`] = v
     }
-    this.setData({ filteredWords: fw })
+    this.setData(data)
   },
 
   _updateAchFromWords() {

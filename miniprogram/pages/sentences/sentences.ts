@@ -40,21 +40,20 @@ interface ISentencesData {
   immMasterStatus: boolean
   // Puzzle mode
   puzzleWords: string[]
-  puzzleSelected: number[]
+  puzzleSelected: (number | null)[]
   puzzleAnswers: number[]
   puzzleWordUsed: boolean[]
   puzzleScore: number
   puzzleCombo: number
   puzzleIndex: number
   puzzleTotal: number
-  puzzleTime: number
   puzzleFinished: boolean
   puzzleStars: number
   puzzleErrors: number
-  puzzleHintCount: number
   puzzleRevealed: boolean
   puzzleSkipped: boolean
   puzzleHintIndices: number[]
+  puzzleInitialSelected: (number | null)[]
 }
 
 interface ISentencesMethods {
@@ -74,10 +73,8 @@ interface ISentencesMethods {
   tapPuzzleWord(e: WechatMiniprogram.TouchEvent): void
   untapPuzzleWord(e: WechatMiniprogram.TouchEvent): void
   checkPuzzleAnswer(): void
-  startPuzzleTimer(): void
   finishPuzzle(): void
   restartPuzzle(): void
-  giveHint(): void
   showAnswer(): void
   skipSentence(): void
   openGenModal(): void
@@ -128,14 +125,13 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleCombo: 0,
     puzzleIndex: 0,
     puzzleTotal: 0,
-    puzzleTime: 30,
     puzzleFinished: false,
     puzzleStars: 0,
     puzzleErrors: 0,
-    puzzleHintCount: 0,
     puzzleRevealed: false,
     puzzleSkipped: false,
     puzzleHintIndices: [],
+    puzzleInitialSelected: [],
   },
 
   onLoad(options: { id?: string }) {
@@ -292,7 +288,6 @@ Page<ISentencesData, ISentencesMethods>({
 
   switchMode(e: WechatMiniprogram.TouchEvent) {
     const mode = e.currentTarget.dataset.mode as 'list' | 'immersion' | 'puzzle'
-    if (this.data.viewMode === 'puzzle') stopPuzzleTimer()
     this.setData({ viewMode: mode, immersionIndex: 0 } as any)
     if (mode === 'puzzle') {
       this.startPuzzle()
@@ -331,21 +326,18 @@ Page<ISentencesData, ISentencesMethods>({
       this.setData({ viewMode: 'list' } as any)
       return
     }
-    stopPuzzleTimer()
-    puzzleSentenceList = sentences
     this.setData({
       puzzleTotal: Math.min(sentences.length, 8),
       puzzleIndex: 0,
       puzzleScore: 0,
       puzzleCombo: 0,
-      puzzleTime: 30,
       puzzleFinished: false,
       puzzleStars: 0,
       puzzleErrors: 0,
-      puzzleHintCount: 0,
       puzzleRevealed: false,
       puzzleSkipped: false,
       puzzleHintIndices: [],
+      puzzleInitialSelected: [],
     } as any)
     this.loadPuzzleSentence(sentences)
   },
@@ -360,21 +352,42 @@ Page<ISentencesData, ISentencesMethods>({
     const words = s.english.replace(/[.,!?;:'"]/g, '').split(/\s+/).filter(w => w.length > 0)
     const shuffled = words.map((w, i) => ({ w, i })).sort(() => Math.random() - 0.5).map(x => x.i)
 
+    // Auto-place keywords as hints based on sentence length
+    const keySet = new Set((s.keywords || []).map(k => k.toLowerCase()))
+    const keyOrigIndices = words.map(w => w.toLowerCase()).reduce<number[]>((acc, w, i) => {
+      if (keySet.has(w)) acc.push(i)
+      return acc
+    }, [])
+    let autoCount = 0
+    const wlen = words.length
+    if (wlen <= 4) autoCount = Math.min(1, keyOrigIndices.length)
+    else if (wlen <= 6) autoCount = Math.min(2, keyOrigIndices.length)
+    else if (wlen <= 8) autoCount = Math.min(3, keyOrigIndices.length)
+    else autoCount = Math.min(4, keyOrigIndices.length)
+
+    const selected: (number | null)[] = new Array(words.length).fill(null)
+    const used: boolean[] = shuffled.map(() => false)
+    const hintIndices: number[] = []
+    for (let k = 0; k < autoCount; k++) {
+      const origIdx = keyOrigIndices[k]
+      const pwIdx = shuffled.indexOf(origIdx)
+      selected[origIdx] = pwIdx
+      used[pwIdx] = true
+      hintIndices.push(pwIdx)
+    }
+
     this.setData({
       puzzleWords: shuffled.map(i => words[i]),
       puzzleAnswers: words.map((_, j) => shuffled.indexOf(j)),
-      puzzleSelected: [],
-      puzzleWordUsed: shuffled.map(() => false),
-      puzzleTime: Math.max(15, 30 - idx * 2),
+      puzzleSelected: selected,
+      puzzleWordUsed: used,
       puzzleFinished: false,
       puzzleErrors: 0,
-      puzzleHintCount: 0,
       puzzleRevealed: false,
       puzzleSkipped: false,
-      puzzleHintIndices: [],
+      puzzleHintIndices: hintIndices,
+      puzzleInitialSelected: [...selected],
     } as any)
-
-    this.startPuzzleTimer()
   },
 
   tapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
@@ -382,35 +395,35 @@ Page<ISentencesData, ISentencesMethods>({
     const wi = Number(e.currentTarget.dataset.wi)
     const used = this.data.puzzleWordUsed
     if (used[wi]) return
-    const selected = this.data.puzzleSelected
-    selected.push(wi)
+    const selected = [...this.data.puzzleSelected]
+    const emptyIdx = selected.indexOf(null)
+    if (emptyIdx < 0) return
+    selected[emptyIdx] = wi
     used[wi] = true
     this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
 
-    if (selected.length === this.data.puzzleAnswers.length) {
+    if (selected.indexOf(null) < 0) {
       this.checkPuzzleAnswer()
     }
   },
 
   untapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
     if (this.data.puzzleFinished) return
-    const wi = Number(e.currentTarget.dataset.wi)
-    let selected = this.data.puzzleSelected
-    const used = this.data.puzzleWordUsed
-    const idx = selected.indexOf(wi)
-    if (idx >= 0) {
-      selected.splice(idx, 1)
-      used[wi] = false
-      this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
-    }
+    const pos = Number(e.currentTarget.dataset.pos)
+    const selected = [...this.data.puzzleSelected]
+    const wi = selected[pos]
+    if (wi === null) return
+    if (this.data.puzzleHintIndices.indexOf(wi) >= 0) return
+    const used = [...this.data.puzzleWordUsed]
+    selected[pos] = null
+    used[wi] = false
+    this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
   },
 
   checkPuzzleAnswer() {
-    stopPuzzleTimer()
     const selected = this.data.puzzleSelected
     const answers = this.data.puzzleAnswers
     const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
-    const hintUsed = this.data.puzzleHintCount > 0
     let allCorrect = true
     for (let i = 0; i < answers.length; i++) {
       if (selected[i] !== answers[i]) {
@@ -419,16 +432,15 @@ Page<ISentencesData, ISentencesMethods>({
       }
     }
     if (allCorrect) {
-      const combo = this.data.puzzleCombo + (hintUsed ? 0 : 1)
+      const combo = this.data.puzzleCombo + 1
       const bonus = combo > 1 ? combo * 5 : 0
-      const timeBonus = hintUsed ? 0 : this.data.puzzleTime
-      const score = this.data.puzzleScore + 10 + bonus + timeBonus
+      const score = this.data.puzzleScore + 10 + bonus
       this.setData({
         puzzleCombo: combo,
         puzzleScore: score,
         puzzleFinished: true,
       } as any)
-      wx.showToast({ title: `✓ 正确！+${10 + bonus + timeBonus}分`, icon: 'none', duration: 1000 })
+      wx.showToast({ title: `✓ 正确！+${10 + bonus}分`, icon: 'none', duration: 1000 })
       setTimeout(() => {
         this.setData({
           puzzleIndex: this.data.puzzleIndex + 1,
@@ -438,47 +450,29 @@ Page<ISentencesData, ISentencesMethods>({
       }, 1200)
     } else {
       const errors = this.data.puzzleErrors + 1
+      const init = this.data.puzzleInitialSelected
       const used = [...this.data.puzzleWordUsed]
-      selected.forEach(wi => { used[wi] = false })
-      this.setData({ puzzleCombo: 0, puzzleErrors: errors, puzzleFinished: true, puzzleSelected: [], puzzleWordUsed: used } as any)
+      // Reset to initial state (keep auto-placed keywords)
+      for (let i = 0; i < init.length; i++) {
+        if (selected[i] !== null && (init[i] === null || selected[i] !== init[i])) {
+          used[selected[i] as number] = false
+        }
+      }
+      this.setData({
+        puzzleCombo: 0,
+        puzzleErrors: errors,
+        puzzleFinished: true,
+        puzzleSelected: [...init],
+        puzzleWordUsed: used,
+      } as any)
       wx.showToast({ title: '✗ 顺序不对，再试试', icon: 'none', duration: 1000 })
       setTimeout(() => {
         this.setData({ puzzleFinished: false } as any)
-        this.startPuzzleTimer()
       }, 800)
     }
   },
 
-  startPuzzleTimer() {
-    stopPuzzleTimer()
-    puzzleTimer = setInterval(() => {
-      let t = this.data.puzzleTime - 1
-      if (t <= 0) {
-        stopPuzzleTimer()
-        this.setData({ puzzleTime: 0, puzzleFinished: true } as any)
-        wx.showToast({ title: '⏰ 时间到！', icon: 'none', duration: 1000 })
-        setTimeout(() => {
-          const next = this.data.puzzleIndex + 1
-          if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
-            this.finishPuzzle()
-          } else {
-            this.setData({
-              puzzleIndex: next,
-              puzzleCombo: 0,
-              puzzleFinished: false,
-              puzzleErrors: this.data.puzzleErrors + 1,
-            } as any)
-            this.loadPuzzleSentence(puzzleSentenceList)
-          }
-        }, 1200)
-      } else {
-        this.setData({ puzzleTime: t } as any)
-      }
-    }, 1000)
-  },
-
   finishPuzzle() {
-    stopPuzzleTimer()
     const total = Math.min(this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12).length, this.data.puzzleTotal)
     const maxScore = total * 50 + 100
     const ratio = this.data.puzzleScore / maxScore
@@ -494,32 +488,7 @@ Page<ISentencesData, ISentencesMethods>({
     this.startPuzzle()
   },
 
-  giveHint() {
-    if (this.data.puzzleFinished) return
-    const hintCount = this.data.puzzleHintCount + 1
-    const answers = this.data.puzzleAnswers
-    const allUsed = new Array(this.data.puzzleWords.length).fill(false)
-    const newSelected: number[] = []
-    const hintIndices: number[] = []
-    for (let i = 0; i < hintCount && i < answers.length; i++) {
-      newSelected.push(answers[i])
-      allUsed[answers[i]] = true
-      hintIndices.push(answers[i])
-    }
-    this.setData({
-      puzzleSelected: newSelected,
-      puzzleWordUsed: allUsed,
-      puzzleHintCount: hintCount,
-      puzzleHintIndices: hintIndices,
-      puzzleCombo: 0,
-    } as any)
-    if (newSelected.length === answers.length) {
-      this.checkPuzzleAnswer()
-    }
-  },
-
   showAnswer() {
-    stopPuzzleTimer()
     const answers = this.data.puzzleAnswers
     const allUsed = new Array(this.data.puzzleWords.length).fill(true)
     this.setData({
@@ -532,27 +501,28 @@ Page<ISentencesData, ISentencesMethods>({
     } as any)
     wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 })
     setTimeout(() => {
+      const list = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
       const next = this.data.puzzleIndex + 1
-      if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
+      if (next >= list.length || next >= this.data.puzzleTotal) {
         this.finishPuzzle()
       } else {
         this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
-        this.loadPuzzleSentence(puzzleSentenceList)
+        this.loadPuzzleSentence(list)
       }
     }, 1800)
   },
 
   skipSentence() {
-    stopPuzzleTimer()
     this.setData({ puzzleSkipped: true, puzzleFinished: true, puzzleCombo: 0 } as any)
     wx.showToast({ title: '⏭ 已跳过', icon: 'none', duration: 800 })
     setTimeout(() => {
+      const list = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
       const next = this.data.puzzleIndex + 1
-      if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
+      if (next >= list.length || next >= this.data.puzzleTotal) {
         this.finishPuzzle()
       } else {
         this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
-        this.loadPuzzleSentence(puzzleSentenceList)
+        this.loadPuzzleSentence(list)
       }
     }, 1000)
   },
@@ -719,10 +689,3 @@ Page<ISentencesData, ISentencesMethods>({
     }
   },
 })
-
-let puzzleTimer: ReturnType<typeof setInterval> | null = null
-let puzzleSentenceList: ISentence[] = []
-
-function stopPuzzleTimer() {
-  if (puzzleTimer) { clearInterval(puzzleTimer); puzzleTimer = null }
-}

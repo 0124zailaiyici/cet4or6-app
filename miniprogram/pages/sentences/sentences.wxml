@@ -104,21 +104,20 @@
     <block wx:if="{{!puzzleFinished || puzzleStars === 0}}">
       <view class="pz-hint">
         <text class="pz-hint-cn">{{filteredSentences.length > puzzleIndex ? filteredSentences[puzzleIndex].chinese : ''}}</text>
-        <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词</text>
-        <text class="pz-hint-progress" wx:if="{{puzzleErrors >= 2 && puzzleHintCount === 0}}">💡 第一个单词是 <text class="pz-hp-word">{{puzzleWords.length > 0 ? puzzleWords[puzzleAnswers[0]] : ''}}</text></text>
-        <text class="pz-hint-progress warn" wx:if="{{puzzleErrors >= 4 && puzzleHintCount === 0}}">需要帮助？试试 💡提示 或 👁答案</text>
+        <text class="pz-word-count" wx:if="{{puzzleAnswers.length > 0}}">共 <text class="pz-wc-num">{{puzzleAnswers.length}}</text> 个单词，<text class="pz-wc-hint">{{puzzleHintIndices.length}} 个已给出</text></text>
+        <text class="pz-hint-progress warn" wx:if="{{puzzleErrors >= 3}}">需要帮助？试试 👁答案 或 ⏭跳过</text>
       </view>
 
       <view class="pz-drop">
-        <text
-          class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
-          wx:for="{{puzzleSelected}}" wx:key="*this"
-          data-wi="{{item}}"
-          catchtap="untapPuzzleWord"
-        >
-          {{puzzleWords[item]}}
-        </text>
-        <text class="pz-drop-empty" wx:if="{{puzzleSelected.length === 0}}">点击下方单词开始拼图</text>
+        <block wx:for="{{puzzleSelected}}" wx:for-index="pos">
+          <text wx:if="{{item !== null}}"
+            class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
+            data-pos="{{pos}}" catchtap="untapPuzzleWord"
+          >
+            {{puzzleWords[item]}}
+          </text>
+          <text wx:else class="pz-drop-slot">___</text>
+        </block>
       </view>
 
       <view class="pz-error" wx:if="{{puzzleErrors > 0}}">
@@ -127,7 +126,6 @@
       </view>
 
       <view class="pz-actions">
-        <view class="pz-act pz-act-hint" catchtap="giveHint">💡 提示</view>
         <view class="pz-act pz-act-reveal" catchtap="showAnswer">👁 答案</view>
         <view class="pz-act pz-act-skip" catchtap="skipSentence">⏭ 跳过</view>
       </view>
@@ -143,12 +141,6 @@
         </text>
       </view>
 
-      <view class="pz-timer">
-        <text class="pz-timer-icon">⏱️</text>
-        <view class="pz-timer-track">
-          <view class="pz-timer-fill" style="width:{{(puzzleTime / 30) * 100}}%"></view>
-        </view>
-      </view>
     </block>
 
     <!-- Puzzle Result -->
