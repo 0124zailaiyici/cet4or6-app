@@ -56,6 +56,8 @@ interface ISentencesData {
   puzzleInitialSelected: (number | null)[]
   puzzleSentences: ISentence[]
   puzzleDone: boolean
+  pzPad: number
+  pzFs: number
 }
 
 interface ISentencesMethods {
@@ -79,6 +81,8 @@ interface ISentencesMethods {
   restartPuzzle(): void
   showAnswer(): void
   skipSentence(): void
+  adjPad(e: WechatMiniprogram.TouchEvent): void
+  adjFs(e: WechatMiniprogram.TouchEvent): void
   openGenModal(): void
   closeGenModal(): void
   onGenInput(e: WechatMiniprogram.Input): void
@@ -133,6 +137,8 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleRevealed: false,
     puzzleSkipped: false,
     puzzleDone: false,
+    pzPad: 4,
+    pzFs: 34,
     puzzleHintIndices: [],
     puzzleInitialSelected: [],
     puzzleSentences: [],
@@ -519,6 +525,17 @@ Page<ISentencesData, ISentencesMethods>({
   restartPuzzle() {
     this.setData({ puzzleScore: 0, puzzleCombo: 0, puzzleIndex: 0, puzzleFinished: false, puzzleStars: 0, puzzleDone: false } as any)
     this.startPuzzle()
+  },
+
+  adjPad(e: WechatMiniprogram.TouchEvent) {
+    const d = Number(e.currentTarget.dataset.d) || 1
+    const v = Math.max(0, this.data.pzPad + d)
+    this.setData({ pzPad: v } as any)
+  },
+  adjFs(e: WechatMiniprogram.TouchEvent) {
+    const d = Number(e.currentTarget.dataset.d) || 1
+    const v = Math.max(14, Math.min(60, this.data.pzFs + d))
+    this.setData({ pzFs: v } as any)
   },
 
   showAnswer() {
