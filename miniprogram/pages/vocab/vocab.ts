@@ -15,6 +15,7 @@ interface IVocabWord {
   correctStreak: number
   growth: number
   stars: number
+  lastReviewDate: string
 }
 
 interface IVocabData {
@@ -123,7 +124,7 @@ interface IVocabMethods {
   _completeChallenge(): void
   _doAddWord(w: string): Promise<void>
   _saveAddedWord(w: string, phonetic: string, chn: string, context: string, contextCn: string, words: IVocabWord[]): void
-  loadWords(): void
+  loadWords(skipTranslate?: boolean): void
   lookupWord(e: WechatMiniprogram.TouchEvent): void
   onWordAction(e: WechatMiniprogram.TouchEvent): void
 }
@@ -794,6 +795,7 @@ function extractWords(): IVocabWord[] {
         correctStreak: 0,
         growth: 0,
         stars: 0,
+        lastReviewDate: '',
       }
     }
   }
@@ -860,6 +862,7 @@ Page<IVocabData, IVocabMethods>({
     challengeWords: [],
     challengeIdx: 0,
     packStats: [],
+    dailyReviewCount: 0,
     _tick: 0,
   },
 
@@ -876,10 +879,18 @@ Page<IVocabData, IVocabMethods>({
     const savedSents = wx.getStorageSync('saved_sentences') || []
     const sentFontSize = wx.getStorageSync('sent_font_size') || 16
     this.setData({ darkMode: getDarkMode(), mode, theme, challengeDone, challengeStreak, packStats, achProgress, savedSents, sentFontSize })
+    const streak = wx.getStorageSync('vocab_streak') || 0
+    this.setData({ streak })
+    const lastReset = wx.getStorageSync('vocab_review_date')
+    if (lastReset !== today) {
+      this.loadWords(true)
+      this._doDailyReset()
+      wx.setStorageSync('vocab_review_date', today)
+    }
     this.loadWords()
   },
 
-  loadWords() {
+  loadWords(skipTranslate?: boolean) {
     const app = getApp<IAppOption>()
     const ver = wx.getStorageSync(EXTRACTED_VER_KEY) as number | undefined
     let stored = app.globalData.studyData.vocabWords as IVocabWord[]
@@ -906,7 +917,7 @@ Page<IVocabData, IVocabMethods>({
       if (w.status === 'master') stats.mastered++
       else stats.learning++
       let pass = true
-      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq)
+      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq) || w.phonetic.includes(sq)
       if (!pass) continue
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
@@ -919,7 +930,7 @@ Page<IVocabData, IVocabMethods>({
       streak: this.data.streak,
       loading: false,
     })
-    this.preTranslateContexts()
+    if (!skipTranslate) this.preTranslateContexts()
   },
 
   switchTab(e: WechatMiniprogram.TouchEvent) {
@@ -1045,7 +1056,7 @@ Page<IVocabData, IVocabMethods>({
       const ok = await this.fetchChinese(word)
       if (ok) await this.persistChn(word)
       if (!word.chn) {
-        this.setData({ gameLoading: false })
+        this.setData({ gameLoading: false, gameWordIdx: idx })
         wx.showToast({ title: `跳过「${word.word}」`, icon: 'none' })
         return this.nextGame(skipFrom != null ? skipFrom : idx)
       }
@@ -1082,18 +1093,40 @@ Page<IVocabData, IVocabMethods>({
     const combo = this.data.combo + 1
     const app = getApp<IAppOption>()
     const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
+    const wasMaster = sw && sw.status === 'master'
+    const oldStars = sw ? sw.stars : 0
+    const oldGrowth = sw ? sw.growth : 0
     if (sw) {
       sw.correctStreak++
       if (sw.correctStreak >= 3) sw.status = 'master'
       else sw.status = 'learning'
       sw.growth = Math.min(3, (sw.growth || 0) + 1)
       sw.stars = Math.min(3, (sw.stars || 0) + 1)
+      sw.lastReviewDate = new Date().toDateString()
     }
     playSfx('correct')
-    this.setData({ streak: this.data.streak + 1, combo })
+    const streak = this.data.streak + 1
+    this.setData({ streak, combo })
+    wx.setStorageSync('vocab_streak', streak)
     wx.setStorageSync('studyData', app.globalData.studyData)
     this._checkPackCompletion(w.word)
-    setTimeout(() => this.nextGame(), 300)
+    if (sw) {
+      if (!wasMaster && sw.status === 'master') {
+        this._incrAch('ach_words100')
+      }
+      if (oldStars < 3 && sw.stars >= 3) {
+        this._incrAch('ach_stars10')
+      }
+      if (oldGrowth < 3 && sw.growth >= 3) {
+        this._incrAch('ach_garden5')
+      }
+    }
+    if (combo >= 10) this._incrAch('ach_combo10')
+    if (this.data.challengeActive) {
+      setTimeout(() => this.challengeNext(), 300)
+    } else {
+      setTimeout(() => this.nextGame(), 300)
+    }
   },
 
   markHard() {
@@ -1101,11 +1134,26 @@ Page<IVocabData, IVocabMethods>({
     if (!w) return
     const app = getApp<IAppOption>()
     const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w.word)
-    if (sw) { sw.correctStreak = 0; sw.status = 'review' }
-    playSfx('wrong')
-    this.setData({ streak: 0, combo: 0 })
-    wx.setStorageSync('studyData', app.globalData.studyData)
-    setTimeout(() => this.nextGame(), 300)
+    if (this.data.challengeActive) {
+      if (sw) {
+        sw.correctStreak++
+        if (sw.correctStreak >= 3) sw.status = 'master'
+        else sw.status = 'learning'
+        sw.stars = Math.min(3, (sw.stars || 0) + 1)
+        sw.lastReviewDate = new Date().toDateString()
+      }
+      wx.setStorageSync('studyData', app.globalData.studyData)
+      if (sw) this._checkPackCompletion(w.word)
+      setTimeout(() => this.challengeNext(), 300)
+    } else {
+      if (sw) { sw.correctStreak = 0; sw.status = 'review'; sw.lastReviewDate = new Date().toDateString() }
+      playSfx('wrong')
+      const streak = 0
+      this.setData({ streak, combo: 0 })
+      wx.setStorageSync('vocab_streak', streak)
+      wx.setStorageSync('studyData', app.globalData.studyData)
+      setTimeout(() => this.nextGame(), 300)
+    }
   },
 
   nextGame(skipFrom?: number) {
@@ -1125,7 +1173,8 @@ Page<IVocabData, IVocabMethods>({
   },
 
   closeGame() {
-    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameFlipped: false })
+    this.setData({ gameWord: null, gameWordIdx: 0, gameTotal: 0, gameFlipped: false, streak: 0, combo: 0, challengeActive: false })
+    this.loadWords()
   },
 
   setMode(e: WechatMiniprogram.TouchEvent) {
@@ -1142,7 +1191,7 @@ Page<IVocabData, IVocabMethods>({
 
   onSearchInput(e: WechatMiniprogram.Input) {
     this.setData({ searchQuery: e.detail.value })
-    this.loadWords()
+    this.loadWords(true)
   },
 
   openAch() {
@@ -1231,7 +1280,7 @@ Page<IVocabData, IVocabMethods>({
     const word: IVocabWord = {
       word: wordStr, phonetic: known && known.phonetic || '', definition: '', chn: known && known.definition || '',
       source: '每日挑战', context: '', contextCn: '', audioUrl: '',
-      status: 'new', correctStreak: 0, growth: 0, stars: 0,
+      status: 'new', correctStreak: 0, growth: 0, stars: 0, lastReviewDate: '',
     }
     this.setData({ gameWord: word, gameWordIdx: idx, gameTotal: words.length, gameFlipped: false, gameLoading: false })
   },
@@ -1243,18 +1292,11 @@ Page<IVocabData, IVocabMethods>({
     wx.setStorageSync('challenge_streak', streak)
     this.setData({ challengeDone: true, challengeActive: false, challengeStreak: streak, gameWord: null })
     wx.showToast({ title: '🔥 今日挑战完成！', icon: 'success' })
+    if (streak >= 7) this._incrAch('ach_week')
     this._unlockStory()
   },
 
   challengeNext() {
-    const w = this.data.gameWord && this.data.gameWord.word
-    if (w) {
-      const app = getApp<IAppOption>()
-      const sw = (app.globalData.studyData.vocabWords as IVocabWord[]).find(v => v.word === w)
-      if (sw) { sw.correctStreak++; if (sw.correctStreak >= 3) sw.status = 'master'; else sw.status = 'learning'; sw.growth = Math.min(3, (sw.growth||0)+1); sw.stars = Math.min(3, (sw.stars||0)+1) }
-      wx.setStorageSync('studyData', app.globalData.studyData)
-      this._checkPackCompletion(w)
-    }
     this.setData({ challengeIdx: this.data.challengeIdx + 1, gameWord: null })
     setTimeout(() => this._showChallengeWord(), 200)
   },
@@ -1276,7 +1318,7 @@ Page<IVocabData, IVocabMethods>({
       if (wi === -1) continue
       const key = 'pack_' + p.id
       const cur = wx.getStorageSync(key) as number || 0
-      if (wi < cur) continue // already counted
+      if (wi < cur) continue
       const nv = Math.max(cur, wi + 1)
       wx.setStorageSync(key, nv)
       this._updatePackStats()
@@ -1288,11 +1330,63 @@ Page<IVocabData, IVocabMethods>({
         }
       }
     }
+    const completePacks = PACKS.filter(p => (wx.getStorageSync('pack_' + p.id) as number || 0) >= p.words.length).length
+    wx.setStorageSync('ach_packs3', completePacks)
+    this._refreshAchProgress()
   },
 
   _updatePackStats() {
     const packStats = PACKS.map(p => (wx.getStorageSync('pack_' + p.id) as number) || 0)
     this.setData({ packStats })
+  },
+
+  _incrAch(key: string) {
+    const cur = (wx.getStorageSync(key) as number) || 0
+    wx.setStorageSync(key, cur + 1)
+    this._refreshAchProgress()
+  },
+
+  _refreshAchProgress() {
+    const achProgress = ACHS.map(a => (wx.getStorageSync(a.key) as number) || 0)
+    this.setData({ achProgress })
+  },
+
+  _updateAchFromWords() {
+    const app = getApp<IAppOption>()
+    const words = app.globalData.studyData.vocabWords as IVocabWord[]
+    wx.setStorageSync('ach_stars10', words.filter(w => w.stars >= 3).length)
+    wx.setStorageSync('ach_garden5', words.filter(w => w.growth >= 3).length)
+    wx.setStorageSync('ach_words100', words.filter(w => w.status === 'master').length)
+    this._refreshAchProgress()
+  },
+
+  _doDailyReset() {
+    const DAILY_LIMIT = 15
+    const app = getApp<IAppOption>()
+    const words = app.globalData.studyData.vocabWords as IVocabWord[]
+    const today = new Date().toDateString()
+    const mastered = words
+      .filter(w => w.status === 'master')
+      .sort((a, b) => {
+        if (!a.lastReviewDate) return -1
+        if (!b.lastReviewDate) return 1
+        return a.lastReviewDate.localeCompare(b.lastReviewDate)
+      })
+    const toReview = mastered.slice(0, DAILY_LIMIT)
+    for (const w of toReview) {
+      w.status = 'review'
+      w.correctStreak = 0
+      w.lastReviewDate = today
+    }
+    wx.setStorageSync('studyData', app.globalData.studyData)
+    this.setData({ dailyReviewCount: toReview.length })
+    if (toReview.length > 0) {
+      wx.showToast({ title: `📚 今日 ${toReview.length} 词待复习`, icon: 'none' })
+    }
+  },
+
+  goReading() {
+    wx.navigateTo({ url: '../reading/reading' })
   },
 
   async _fetchAudioUrl(word: IVocabWord) {
@@ -1359,6 +1453,9 @@ Page<IVocabData, IVocabMethods>({
   closeCelebrate() {
     this.stopConfetti()
     this.setData({ celebrateShow: false })
+    this._incrAch('ach_first')
+    this._incrAch('ach_total50')
+    this._updateAchFromWords()
     this.loadWords()
   },
 
@@ -1436,7 +1533,7 @@ Page<IVocabData, IVocabMethods>({
     const newWord: IVocabWord = {
       word: w, phonetic, definition: '', chn,
       source: '手动添加', context, contextCn,
-      audioUrl: '', status: 'new', correctStreak: 0, growth: 0, stars: 0,
+      audioUrl: '', status: 'new', correctStreak: 0, growth: 0, stars: 0, lastReviewDate: '',
     }
     words.unshift(newWord)
     const a = getApp<IAppOption>()

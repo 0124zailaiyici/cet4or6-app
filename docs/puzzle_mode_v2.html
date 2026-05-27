@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>拼图模式 v2 · UI 方案</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;transition:all .2s}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6f8;color:#2d2d3a;max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,#66bb6a,#388e3c);padding:44px 20px 16px;color:#fff;border-radius:0 0 32px 32px}
+.h-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.h-title{font-size:26px;font-weight:800}
+.h-progress{font-size:13px;background:rgba(255,255,255,.18);padding:6px 16px;border-radius:20px;font-weight:600}
+.h-stats{display:flex;gap:12px;font-size:13px}
+.h-score{background:rgba(255,255,255,.18);padding:6px 14px;border-radius:20px;font-weight:700}
+.h-combo{background:rgba(255,255,255,.18);padding:6px 14px;border-radius:20px;font-weight:700}
+
+.hint-area{text-align:center;padding:20px 20px 12px}
+.hint-cn{font-size:18px;font-weight:700;margin-bottom:6px;color:#2d2d3a}
+.hint-word-count{font-size:13px;color:#8a7a9a;margin-bottom:4px}
+.hint-progressive{font-size:13px;color:#f97316;font-weight:600;margin-top:4px;min-height:20px}
+
+.drop-zone{min-height:70px;background:#fff;border:3px dashed #fcd5d5;border-radius:16px;margin:0 20px 6px;padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.drop-word{padding:8px 18px;background:linear-gradient(135deg,#fdba74,#fb923c);color:#fff;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+.drop-word.hint-glow{background:linear-gradient(135deg,#fde68a,#fbbf24);color:#5a4050;box-shadow:0 0 12px rgba(251,191,36,.4)}
+.drop-word.done{opacity:.6}
+.drop-empty{font-size:13px;color:#c4a5b4}
+
+.error-row{display:flex;justify-content:center;align-items:center;gap:8px;min-height:28px;margin:0 20px 8px;padding:0 4px}
+.error-text{font-size:13px;color:#e74c3c;font-weight:600}
+
+.action-buttons{display:flex;gap:8px;margin:0 20px 14px;justify-content:center}
+.action-btn{flex:1;padding:10px 0;border-radius:14px;border:none;font-size:14px;font-weight:700;cursor:pointer;text-align:center}
+.action-btn:active{transform:scale(.95)}
+.action-btn.hint{background:linear-gradient(135deg,#fef3c7,#fbbf24);color:#5a4050}
+.action-btn.reveal{background:linear-gradient(135deg,#e0e7ff,#818cf8);color:#fff}
+.action-btn.skip{background:linear-gradient(135deg,#fce4ec,#f48fb1);color:#fff}
+
+.word-bank{display:flex;flex-wrap:wrap;gap:8px;margin:0 20px 14px;justify-content:center}
+.bank-word{padding:10px 22px;background:#fff;border:2px solid #fcd5d5;border-radius:12px;font-size:15px;font-weight:500;color:#5a4050;cursor:pointer}
+.bank-word:active{transform:scale(.93)}
+.bank-word.used{opacity:.2;pointer-events:none;transform:scale(.9)}
+
+.timer-row{display:flex;align-items:center;gap:10px;margin:0 20px 14px}
+.timer-icon{font-size:15px}
+.timer-track{flex:1;height:6px;background:#f0e6ea;border-radius:3px;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,#fdba74,#f97316);border-radius:3px;width:65%}
+
+.bottom-tip{text-align:center;font-size:12px;color:#c4a5b4;padding-bottom:20px}
+
+.separator{height:1px;background:rgba(0,0,0,.06);margin:16px 20px}
+
+/* Label tags */
+.tag{display:inline-block;font-size:11px;padding:2px 10px;border-radius:12px;font-weight:600}
+.tag-new{background:#e8f5e9;color:#388e3c}
+.tag-fix{background:#fff3e0;color:#f57c00}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 20px 16px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
+
+.result-panel{text-align:center;padding:50px 20px}
+.result-icon{font-size:55px;display:block;margin-bottom:10px}
+.result-title{font-size:20px;font-weight:800;margin-bottom:12px}
+.result-stars{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.result-star{font-size:32px;color:#e0d6e0}
+.result-star.lit{color:#fbbf24;text-shadow:0 0 16px rgba(251,191,36,.3)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="h-row">
+    <div class="h-title">🧩 句子拼图</div>
+    <div class="h-progress">3 / 8</div>
+    <div class="h-stats">
+      <span class="h-score">★ 85</span>
+      <span class="h-combo">🔥 x2</span>
+    </div>
+  </div>
+</div>
+
+<!-- === Hint Area === -->
+<div class="hint-area">
+  <div class="hint-cn">他们在公园里愉快地玩了一整天。</div>
+  <div class="hint-word-count">共 <strong>6</strong> 个单词</div>
+  <div class="hint-progressive">💡 第一个单词是 <strong>They</strong></div>
+</div>
+
+<!-- === Drop Zone === -->
+<div class="drop-zone">
+  <span class="drop-word">They</span>
+  <span class="drop-word hint-glow">enjoyed</span>
+  <span class="drop-word">a</span>
+  <span class="drop-word">playing</span>
+  <span class="drop-word">day</span>
+</div>
+
+<!-- === Error Count === -->
+<div class="error-row">
+  <span class="error-text">❌ 已尝试 2 次</span>
+</div>
+
+<!-- === Action Buttons === -->
+<div class="action-buttons">
+  <div class="action-btn hint">💡 提示</div>
+  <div class="action-btn reveal">👁 答案</div>
+  <div class="action-btn skip">⏭ 跳过</div>
+</div>
+
+<!-- === Word Bank === -->
+<div class="word-bank">
+  <span class="bank-word">They</span>
+  <span class="bank-word">a</span>
+  <span class="bank-word used">enjoyed</span>
+  <span class="bank-word">playing</span>
+  <span class="bank-word">at</span>
+  <span class="bank-word">day</span>
+  <span class="bank-word">the</span>
+  <span class="bank-word">park</span>
+</div>
+
+<!-- === Timer === -->
+<div class="timer-row">
+  <span class="timer-icon">⏱️</span>
+  <div class="timer-track"><div class="timer-fill"></div></div>
+  <span style="font-size:13px;color:#8a7a9a;font-weight:600">19s</span>
+</div>
+
+<div class="bottom-tip">💡 点击单词拼成句子 · 提示会消耗连击 · 答案不计分</div>
+
+<div class="separator"></div>
+
+<!-- === Legend === -->
+<div class="legend">
+  <div><span class="tag tag-new">新增</span> 3 个操作按钮</div>
+  <div><span class="tag tag-fix">优化</span> 倒计时生效</div>
+  <div><span class="tag tag-new">新增</span> 错误次数显示</div>
+  <div><span class="tag tag-new">新增</span> 渐进提示</div>
+  <div><span class="tag tag-fix">优化</span> 单词数量提示</div>
+</div>
+
+<!-- === Behavior Description === -->
+<div style="margin:0 20px 30px;font-size:13px;color:#666;line-height:1.8">
+  <strong style="color:#2d2d3a">交互规则：</strong><br>
+  <strong>💡 提示</strong> — 从前往后自动填入一个正确单词到放置区，连击归零<br>
+  <strong>👁 显示答案</strong> — 展示完整正确句子，本题不得分，点击"下一题"继续<br>
+  <strong>⏭ 跳过</strong> — 放弃本题，零分进入下一题，combo 归零<br><br>
+  <strong style="color:#2d2d3a">渐进提示：</strong><br>
+  • 第 1 次失败 → 提示区无变化<br>
+  • 第 2 次失败 → 提示区显示"第一个单词是 XXX"<br>
+  • 第 3 次失败 → 提示区按钮高亮闪烁，建议使用提示<br>
+  • 第 4 次失败 → 自动弹出"是否使用答案？"<br><br>
+  <strong style="color:#2d2d3a">倒计时：</strong><br>
+  • 每题 30 秒起，逐题递减 2 秒<br>
+  • 归零自动判错 → 跳下一题，combo 归零<br><br>
+  <strong style="color:#e74c3c">注意：</strong>倒计时已在 <strong>Fix 1</strong> 中实现为功能代码，倒计时归零自动跳过
+</div>
+
+</body>
+</html>

@@ -158,7 +158,7 @@
           <text class="wsrc" wx:if="{{item.source}}">📖 {{item.source}}</text>
         </view>
         <view class="wmode" wx:if="{{mode === 'battle'}}">
-          <text wx:for="{{5}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < 4 && i < item.correctStreak}}">🖤</text><text wx:else>❤️</text></text>
+          <text wx:for="{{3}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < item.correctStreak}}">🖤</text><text wx:else>❤️</text></text>
         </view>
         <view wx:elif="{{mode === 'garden'}}" class="wmode">
           <text wx:if="{{item.growth <= 0}}">🌱</text>
@@ -190,7 +190,7 @@
           <view wx:if="{{mode === 'battle'}}">
             <text class="gcombo" wx:if="{{combo > 1}}">🔥 {{combo}} 连击</text>
             <text class="gmonster"><text wx:if="{{(gameWordIdx - gameSessionStart) % 5 === 0}}">👹</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 1}}">🐉</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 2}}">👾</text><text wx:elif="{{(gameWordIdx - gameSessionStart) % 5 === 3}}">🧟</text><text wx:else>🐺</text></text>
-            <view class="gmonster-hp"><text wx:for="{{5}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < 4 && i < gameWord.correctStreak}}">🖤</text><text wx:else>❤️</text></text></view>
+            <view class="gmonster-hp"><text wx:for="{{3}}" wx:key="*this" wx:for-index="i"><text wx:if="{{i < gameWord.correctStreak}}">🖤</text><text wx:else>❤️</text></text></view>
           </view>
           <view wx:elif="{{mode === 'garden'}}" class="ggarden">
             <text class="gplant"><text wx:if="{{gameWord.growth <= 0}}">🌱</text><text wx:elif="{{gameWord.growth <= 1}}">🌿</text><text wx:elif="{{gameWord.growth <= 2}}">🌹</text><text wx:else>🌳</text></text>

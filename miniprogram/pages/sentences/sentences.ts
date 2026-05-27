@@ -173,6 +173,7 @@ Page<ISentencesData, ISentencesMethods>({
     applyTheme(getDarkMode())
     const app = getApp<IAppOption>()
     this.setData({ darkMode: app.globalData.darkMode })
+    this.doFilter()
   },
 
   doFilter() {
@@ -277,6 +278,7 @@ Page<ISentencesData, ISentencesMethods>({
 
   switchMode(e: WechatMiniprogram.TouchEvent) {
     const mode = e.currentTarget.dataset.mode as 'list' | 'immersion' | 'puzzle'
+    if (this.data.viewMode === 'puzzle') stopPuzzleTimer()
     this.setData({ viewMode: mode, immersionIndex: 0 } as any)
     if (mode === 'puzzle') {
       this.startPuzzle()
@@ -315,6 +317,8 @@ Page<ISentencesData, ISentencesMethods>({
       this.setData({ viewMode: 'list' } as any)
       return
     }
+    stopPuzzleTimer()
+    puzzleSentenceList = sentences
     this.setData({
       puzzleTotal: Math.min(sentences.length, 8),
       puzzleIndex: 0,
@@ -346,6 +350,27 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleTime: Math.max(15, 30 - idx * 2),
       puzzleFinished: false,
     } as any)
+
+    stopPuzzleTimer()
+    puzzleTimer = setInterval(() => {
+      let t = this.data.puzzleTime - 1
+      if (t <= 0) {
+        stopPuzzleTimer()
+        this.setData({ puzzleTime: 0, puzzleCombo: 0, puzzleFinished: true } as any)
+        wx.showToast({ title: '⏰ 时间到！', icon: 'none', duration: 1000 })
+        setTimeout(() => {
+          const next = this.data.puzzleIndex + 1
+          if (next >= puzzleSentenceList.length || next >= this.data.puzzleTotal) {
+            this.finishPuzzle()
+          } else {
+            this.setData({ puzzleIndex: next, puzzleFinished: false } as any)
+            this.loadPuzzleSentence(puzzleSentenceList)
+          }
+        }, 1200)
+      } else {
+        this.setData({ puzzleTime: t } as any)
+      }
+    }, 1000)
   },
 
   tapPuzzleWord(e: WechatMiniprogram.TouchEvent) {
@@ -377,6 +402,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   checkPuzzleAnswer() {
+    stopPuzzleTimer()
     const selected = this.data.puzzleSelected
     const answers = this.data.puzzleAnswers
     const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12)
@@ -418,6 +444,7 @@ Page<ISentencesData, ISentencesMethods>({
   },
 
   finishPuzzle() {
+    stopPuzzleTimer()
     const total = Math.min(this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12).length, this.data.puzzleTotal)
     const maxScore = total * 50 + 100
     const ratio = this.data.puzzleScore / maxScore
@@ -513,8 +540,6 @@ Page<ISentencesData, ISentencesMethods>({
         generating: false,
       })
       this.doFilter()
-      const hash = allSentences.length + '|' + allSentences[0] && allSentences[0].english + '|' + allSentences[allSentences.length - 1] && allSentences[allSentences.length - 1].english
-      wx.setStorageSync('sentenceHash', hash)
 
       wx.showToast({ title: `已生成 ${results.length} 个句子`, icon: 'success' })
     } catch (err: any) {
@@ -582,8 +607,6 @@ Page<ISentencesData, ISentencesMethods>({
         parsing: false,
       })
       this.doFilter()
-      const hash = allSentences.length + '|' + allSentences[0] && allSentences[0].english + '|' + allSentences[allSentences.length - 1] && allSentences[allSentences.length - 1].english
-      wx.setStorageSync('sentenceHash', hash)
 
       wx.showToast({ title: `已导入 ${results.length} 个句子`, icon: 'success' })
     } catch (err: any) {
@@ -599,3 +622,10 @@ Page<ISentencesData, ISentencesMethods>({
     }
   },
 })
+
+let puzzleTimer: ReturnType<typeof setInterval> | null = null
+let puzzleSentenceList: ISentence[] = []
+
+function stopPuzzleTimer() {
+  if (puzzleTimer) { clearInterval(puzzleTimer); puzzleTimer = null }
+}

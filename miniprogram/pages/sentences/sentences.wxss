@@ -700,3 +700,12 @@
 .dark-theme .pz-tip { color: #a090b0 !important; }
 .dark-theme .pz-drop-empty { color: #a090b0 !important; }
 .dark-theme .pz-timer-track { background: #2a2a4a !important; }
+.dark-theme .pz-progress { color: #a090b0 !important; }
+.dark-theme .pz-score { color: #fbbf24 !important; }
+.dark-theme .pz-combo { color: #f97316 !important; }
+.dark-theme .pz-drop-word { background: linear-gradient(135deg, #4a3a5a, #3a2a4a) !important; color: #e0d0e8 !important; }
+.dark-theme .pz-r-btn { background: #2a2a4a !important; color: #a090b0 !important; }
+.dark-theme .pz-r-btn.primary { background: linear-gradient(135deg, #7a5a3a, #6a4a2a) !important; color: #e0d0e8 !important; }
+.dark-theme .pz-star { color: #3a3a5a !important; }
+.dark-theme .pz-star.lit { color: #fbbf24 !important; }
+.dark-theme .pz-hint-en { color: #a090b0 !important; }
