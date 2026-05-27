@@ -7,10 +7,10 @@ const listening_generated_1 = __importDefault(require("../../data/listening_gene
 const checkin_1 = require("../../utils/checkin");
 const theme_1 = require("../../utils/theme");
 const API_BASE = (() => { try {
-    return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app';
+    return wx.getStorageSync('api_base') || 'http://localhost:3001';
 }
 catch (_) {
-    return 'https://cet4or6-app-production.up.railway.app';
+    return 'http://localhost:3001';
 } })();
 const LABELS = {
     sectionA: 'Section A  News Reports',
@@ -203,11 +203,12 @@ class AudioManager {
                 const code = res.errCode;
                 if (this.pageRef) {
                     const d = this.pageRef.data;
-                    if (!d._retried) {
-                        this.pageRef.setData({ _retried: true, loading: true });
+                    const rt = d._retryCount || 0;
+                    if (rt < 3) {
+                        this.pageRef.setData({ _retryCount: rt + 1, loading: true });
                         setTimeout(() => { if (this.ctx && this.ctx.src) {
                             this.ctx.play();
-                        } }, 2000);
+                        } }, (rt + 1) * 5000);
                         return;
                     }
                 }
@@ -233,7 +234,7 @@ class AudioManager {
         ctx.playbackRate = rate;
         ctx.play();
         if (this.pageRef)
-            this.pageRef.setData({ _retried: false });
+            this.pageRef.setData({ _retryCount: 0 });
     }
     resume(rate = 1) {
         if (!this.ctx)
@@ -365,7 +366,6 @@ Page({
                 ? passage.audioUrl
                 : `${API_BASE}${encodeURI(passage.audioUrl)}`;
             audio.stop();
-            this.setData({ loading: true });
             audio.play(audioUrl);
             const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {};
             const pages = buildPages(passage);
@@ -398,7 +398,7 @@ Page({
                 markedFlags: new Array(pages.length).fill(false),
                 loopSentence: fm,
                 speed: fm ? 0.8 : 1,
-                _retried: false,
+                _retryCount: 0,
             });
             audio.setRate(fm ? 0.8 : 1);
         }
