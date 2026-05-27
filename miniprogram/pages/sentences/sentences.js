@@ -232,14 +232,15 @@ Page({
         }
     },
     startPuzzle() {
-        const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3 && s.english.split(' ').length <= 12);
+        const sentences = this.data.filteredSentences.filter(s => !s.english.includes('"') && s.english.split(' ').length >= 3);
         if (sentences.length === 0) {
             wx.showToast({ title: '没有适合拼图的句子', icon: 'none' });
             this.setData({ viewMode: 'list' });
             return;
         }
+        const total = Math.min(sentences.length, 8);
         this.setData({
-            puzzleTotal: Math.min(sentences.length, 8),
+            puzzleTotal: total,
             puzzleIndex: 0,
             puzzleScore: 0,
             puzzleCombo: 0,

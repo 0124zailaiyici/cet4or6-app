@@ -169,7 +169,7 @@ Page({
         levels: [],
         hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []),
         words: [],
-        showHints: true,
+        showHints: false,
         todayItem: null, todayItems: [], todayReason: '',
         weakPoints: [],
     },
@@ -215,7 +215,6 @@ Page({
         /* 推荐理由 */
         let todayReason = '';
         if (todayItem) {
-            const doneTopics = [...new Set(completedIds.map(id => { const t = listItems.find(t => t.id === id); return t === null || t === void 0 ? void 0 : t._topic; }).filter(Boolean))];
             const weakTopic = (_a = listItems.find(t => t._topic && !doneSet.has(t.id))) === null || _a === void 0 ? void 0 : _a._topic;
             todayReason = weakTopic
                 ? `你的「${weakTopic}」主题还没练习过，今天就从这里开始吧！先用关键词搭框架，再组织成完整句子。`
@@ -255,7 +254,7 @@ Page({
         const id = e.currentTarget.dataset.id;
         const item = this.data.translations.find((t) => t.id === id) || null;
         const questionHistory = this.data.history.filter(r => r.id === id);
-        this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [], showHints: true });
+        this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [], showHints: false });
     },
     goStep(e) {
         const n = typeof e === 'number' ? e : parseInt(e.currentTarget.dataset.step);
@@ -327,7 +326,7 @@ Page({
             this.setData({ page: 'dashboard', currentItem: null, result: null });
             return;
         }
-        this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [], showHints: true });
+        this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [], showHints: false });
         wx.pageScrollTo({ scrollTop: 0 });
     },
     retry() { this.setData({ userAnswer: '', result: null, wordCount: 0, step: 'translate', words: [] }); },
