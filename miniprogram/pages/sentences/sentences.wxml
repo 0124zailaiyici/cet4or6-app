@@ -157,7 +157,7 @@
       </view>
       <view class="pz-r-stats">
         <view class="pz-rs-item"><text class="pz-rs-num">{{puzzleScore}}</text><text class="pz-rs-lbl">得分</text></view>
-        <view class="pz-rs-item"><text class="pz-rs-num">{{puzzleCombo}}</text><text class="pz-rs-lbl">最高连击</text></view>
+        <view class="pz-rs-item"><text class="pz-rs-num">{{puzzleMaxCombo}}</text><text class="pz-rs-lbl">最高连击</text></view>
       </view>
       <view class="pz-r-actions">
         <view class="pz-r-btn primary" catchtap="restartPuzzle">🔄 再来一次</view>

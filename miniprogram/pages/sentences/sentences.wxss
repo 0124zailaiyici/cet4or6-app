@@ -755,7 +755,6 @@
 .dark-theme .pz-drop { background: #1a2a1a !important; border-color: #2a5a3a !important; }
 .dark-theme .pz-drop-word { color: #c8e6c9 !important; }
 .dark-theme .pz-drop-word.hint-glow { color: #fbbf24 !important; }
-.dark-theme .pz-drop-word.hint-glow { background: linear-gradient(135deg, #5a4a1a, #4a3a0a) !important; color: #fbbf24 !important; box-shadow: 0 0 16rpx rgba(251,191,36,.2) !important; }
 .dark-theme .pz-drop-slot { border-bottom-color: #3a6a4a !important; }
 .dark-theme .pz-drop-skipped { color: #66bb6a !important; }
 .dark-theme .pz-error-text { color: #f43f5e !important; }
