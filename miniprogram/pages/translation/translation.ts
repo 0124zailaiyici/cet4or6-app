@@ -201,7 +201,6 @@ Page({
     /* 推荐理由 */
     let todayReason = ''
     if (todayItem) {
-      const doneTopics = [...new Set(completedIds.map(id => { const t = listItems.find(t => t.id === id); return t?._topic }).filter(Boolean))]
       const weakTopic = listItems.find(t => t._topic && !doneSet.has(t.id))?._topic
       todayReason = weakTopic
         ? `你的「${weakTopic}」主题还没练习过，今天就从这里开始吧！先用关键词搭框架，再组织成完整句子。`
@@ -297,7 +296,7 @@ Page({
     if (!next) next = translations.slice(idx + 1).find((t: any) => !t._done)
     if (!next) next = translations.find((t: any) => !t._done)
     if (!next) { wx.showToast({ title: '全部完成啦 🎉', icon: 'none' }); this.setData({ page: 'dashboard', currentItem: null, result: null }); return }
-    this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [], showHints: true })
+    this.setData({ currentItem: next, step: 'prepare', userAnswer: '', result: null, wordCount: 0, words: [], showHints: false })
     wx.pageScrollTo({ scrollTop: 0 })
   },
 

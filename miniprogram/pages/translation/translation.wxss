@@ -224,8 +224,11 @@
 .dark-theme .wi-i{background:#2d1a30}
 .dark-theme .wi-n{color:#e8d0e0}
 .dark-theme .wi-d{color:#7a4a6a}
+.dark-theme .wi-i{background:#2d1a30}
+.dark-theme .wi-bar{background:#3a2040}
 .dark-theme .wi-e{color:#7a4a6a}
 .dark-theme .rec-i{background:#201628}
+.dark-theme .rec-tag{background:#1a2a20;color:#81c784}
 .dark-theme .rec-t{color:#e8d0e0}
 .dark-theme .rec-arr{color:#7a4a6a}
 .dark-theme .empty-tip{color:#6a4a6a}
