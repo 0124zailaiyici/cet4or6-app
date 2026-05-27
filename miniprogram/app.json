@@ -10,7 +10,6 @@
     "pages/settings/settings",
     "pages/dictionary/dictionary",
     "pages/reading/reading",
-    "pages/errors/errors",
     "pages/guide/guide",
     "pages/reminder/reminder",
     "pages/feedback/feedback",
@@ -32,7 +31,6 @@
     "backgroundColor": "#fff5f7"
   },
   "style": "v2",
-  "componentFramework": "glass-easel",
   "tabBar": {
     "color": "#8a7a9a",
     "selectedColor": "#ff6b8a",
