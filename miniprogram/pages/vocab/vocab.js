@@ -821,7 +821,7 @@ Page({
                 stats.learning++;
             let pass = true;
             if (sq)
-                pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq) || w.phonetic.includes(sq);
+                pass = (w.word || '').includes(sq) || (w.chn || '').includes(sq) || (w.definition || '').includes(sq) || (w.phonetic || '').includes(sq);
             if (!pass)
                 continue;
             if (tab === 0 && w.status !== 'master')
@@ -843,7 +843,7 @@ Page({
         for (const w of words) {
             let pass = true;
             if (sq)
-                pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq);
+                pass = (w.word || '').includes(sq) || (w.chn || '').includes(sq) || (w.definition || '').includes(sq);
             if (!pass)
                 continue;
             if (tab === 0 && w.status !== 'master')
@@ -1303,7 +1303,7 @@ Page({
         for (const w of words) {
             let pass = true;
             if (sq)
-                pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq) || w.phonetic.includes(sq);
+                pass = (w.word || '').includes(sq) || (w.chn || '').includes(sq) || (w.definition || '').includes(sq) || (w.phonetic || '').includes(sq);
             if (!pass)
                 continue;
             if (tab === 0 && w.status !== 'master')

@@ -924,7 +924,7 @@ Page<IVocabData, IVocabMethods>({
       if (w.status === 'master') stats.mastered++
       else stats.learning++
       let pass = true
-      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq) || w.phonetic.includes(sq)
+      if (sq) pass = (w.word || '').includes(sq) || (w.chn || '').includes(sq) || (w.definition || '').includes(sq) || (w.phonetic || '').includes(sq)
       if (!pass) continue
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
@@ -947,7 +947,7 @@ Page<IVocabData, IVocabMethods>({
     const filtered: IVocabWord[] = []
     for (const w of words) {
       let pass = true
-      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq)
+      if (sq) pass = (w.word || '').includes(sq) || (w.chn || '').includes(sq) || (w.definition || '').includes(sq)
       if (!pass) continue
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
@@ -1365,7 +1365,7 @@ Page<IVocabData, IVocabMethods>({
     const filtered: IVocabWord[] = []
     for (const w of words) {
       let pass = true
-      if (sq) pass = w.word.includes(sq) || w.chn.includes(sq) || w.definition.includes(sq) || w.phonetic.includes(sq)
+      if (sq) pass = (w.word || '').includes(sq) || (w.chn || '').includes(sq) || (w.definition || '').includes(sq) || (w.phonetic || '').includes(sq)
       if (!pass) continue
       if (tab === 0 && w.status !== 'master') filtered.push(w)
       else if (tab === 1 && w.status === 'review') filtered.push(w)
