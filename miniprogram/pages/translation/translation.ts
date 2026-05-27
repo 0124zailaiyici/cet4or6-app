@@ -152,7 +152,7 @@ Page({
     levels: [] as { total: number; done: number; pct: number }[],
     hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
     words: [] as { word: string; ok: boolean }[],
-    showHints: true,
+    showHints: false,
     todayItem: null as any, todayItems: [] as any[], todayReason: '',
     weakPoints: [] as { key: string; label: string; avg: number; count: number }[],
   },
@@ -239,7 +239,7 @@ Page({
     const id = e.currentTarget.dataset.id as number
     const item = this.data.translations.find((t: any) => t.id === id) || null
     const questionHistory = this.data.history.filter(r => r.id === id)
-    this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [], showHints: true })
+    this.setData({ page: 'practice', step: 'prepare', currentItem: item, userAnswer: '', result: null, questionHistory, wordCount: 0, words: [], showHints: false })
   },
 
   goStep(e: any) {
