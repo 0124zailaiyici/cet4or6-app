@@ -110,8 +110,17 @@
 
         <view class="quest-zone" wx:if="{{current.sectionType === 'A' || (current.questions && current.questions.length > 0)}}">
           <block wx:if="{{current.sectionType === 'A'}}">
-            <view class="qz-label">📋 选词（15选10）<text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 请选词填入第{{activeBlank}}空</text></view>
-              <scroll-view class="qz-chip-scroll" scroll-y enhanced="{{true}}">
+            <view class="qz-label">
+              📋 选词（15选10）
+              <text wx:if="{{activeBlank}}" style="color:#ff6b8a"> · 请选词填入第{{activeBlank}}空</text>
+              <view class="hint-btn {{showHint ? 'on' : ''}}" catchtap="toggleHint">💡 提示</view>
+            </view>
+            <view class="hint-para-row" wx:if="{{showHint && aParaGroups.length}}">
+              <text class="hint-para-group" wx:for="{{aParaGroups}}" wx:key="locate" data-locate="{{item.locate}}" catchtap="jumpToParagraph">
+                📍 {{item.locate}}<text class="hint-para-blanks"> ({{item.display}})</text>
+              </text>
+            </view>
+            <scroll-view class="qz-chip-scroll" scroll-y enhanced="{{true}}">
               <view class="qz-chips">
                 <text class="qzc {{usedFlags[i] ? 'used' : ''}} {{submitted ? 'locked' : ''}}" wx:for="{{current.options}}" wx:key="*this" wx:for-index="i" data-idx="{{i}}" catchtap="onOptionTap">{{optionLetters[i]}}. {{item}}</text>
               </view>
@@ -119,11 +128,15 @@
           </block>
 
           <block wx:elif="{{current.sectionType === 'B'}}">
-            <view class="qz-label">📋 匹配陈述 {{matchCount}}/{{current.questions.length}}</view>
+            <view class="qz-label">
+              📋 匹配陈述 {{matchCount}}/{{current.questions.length}}
+              <view class="hint-btn {{showHint ? 'on' : ''}}" catchtap="toggleHint">💡 提示</view>
+            </view>
             <view class="qb-grid" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
               <view class="qb-item {{activeStmt === (i + bStmtPage * 5) ? 'active' : ''}}" wx:for="{{bStmtPages[bStmtPage]}}" wx:key="*this" wx:for-index="i" data-idx="{{i + bStmtPage * 5}}" catchtap="selectStmt">
                 <text class="qbi-num">{{i + bStmtPage * 5 + 1}}</text>
                 <text class="qbi-txt">{{item}}</text>
+                <text wx:if="{{showHint && bStmtKeywords[i + bStmtPage * 5]}}" class="kw-tag">🔑 {{bStmtKeywords[i + bStmtPage * 5]}}</text>
                 <view class="qbi-ans" wx:if="{{matchAnswers[i + bStmtPage * 5]}}" data-idx="{{i + bStmtPage * 5}}" catchtap="removeMatch">
                   <text>{{matchAnswers[i + bStmtPage * 5]}}</text>
                 </view>
@@ -140,9 +153,15 @@
           </block>
 
           <block wx:else>
-            <view class="qz-label">❓ 第{{currentQ + 1}}/{{current.questions.length}}题</view>
+            <view class="qz-label">
+              ❓ 第{{currentQ + 1}}/{{current.questions.length}}题
+              <view class="hint-btn {{showHint ? 'on' : ''}}" catchtap="toggleHint">💡 提示</view>
+            </view>
             <view class="qz-c-card" bindtouchstart="onTouchStart" bindtouchend="onQuestionTouchEnd">
-              <view class="qz-c-question">{{current.questions[currentQ]}}</view>
+              <view class="qz-c-hd">
+                <view class="qz-c-question">{{current.questions[currentQ]}}</view>
+                <text wx:if="{{showHint && currentQLocate}}" class="loc-tag" data-locate="{{currentQLocate}}" catchtap="jumpToParagraph">📍 {{currentQLocate}}</text>
+              </view>
               <view class="qz-opts {{compactOpts ? 'compact' : ''}}" wx:if="{{current.choices && current.choices[currentQ] && current.choices[currentQ].length > 0}}">
                 <view class="qzo {{cSelIdx === i ? 'on' : ''}} {{submitted ? 'locked' : ''}}" wx:for="{{current.choices[currentQ]}}" wx:key="*this" wx:for-index="i" data-letter="{{optionLetters[i]}}" catchtap="onChoiceTap">{{item}}</view>
               </view>

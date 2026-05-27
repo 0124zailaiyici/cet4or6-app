@@ -46,7 +46,12 @@ Page({
         pageParas: [],
         pageWordSegments: [],
         scrollToResult: '',
-        examMode: false
+        examMode: false,
+        showHint: false,
+        locateMap: {},
+        currentQLocate: '',
+        aParaGroups: [],
+        bStmtKeywords: []
     },
     onLoad(options) {
         if (options && options.examMode === '1')
@@ -98,6 +103,52 @@ Page({
             const isSubmitted = !!(saved && saved.submitted);
             const st = item.sectionType;
             const maxScore = st === 'A' ? 10 : st === 'B' ? 10 : 5;
+            const qLocate = annot && annot.qLocate || {};
+            const locateMap = Object.assign({}, qLocate);
+            const currentQLocate = st === 'C' ? (qLocate[String(0)] || '') : '';
+            const aParaGroups = [];
+            if (st === 'A') {
+                const blankKeys = item.correctAnswers ? Object.keys(item.correctAnswers) : [];
+                const re = /\b(\d{2})\b/g;
+                const groups = {};
+                for (let pi = 0; pi < paras.length; pi++) {
+                    const text = paras[pi];
+                    const localRe = new RegExp(re.source, 'g');
+                    let m;
+                    while ((m = localRe.exec(text)) !== null) {
+                        const num = m[1];
+                        if (blankKeys.includes(num)) {
+                            const key = 'P' + (pi + 1);
+                            if (!groups[key])
+                                groups[key] = [];
+                            if (!groups[key].includes(num))
+                                groups[key].push(num);
+                        }
+                    }
+                }
+                for (const [locate, blanks] of Object.entries(groups)) {
+                    const sorted = blanks.sort((a, b) => parseInt(a) - parseInt(b));
+                    aParaGroups.push({ locate, display: sorted.join(',') });
+                }
+            }
+            const stopWords = new Set(['this', 'that', 'these', 'those', 'from', 'with', 'have', 'been', 'were', 'will', 'more', 'some', 'than', 'about', 'which', 'their', 'there', 'would', 'what', 'when', 'where', 'because', 'after', 'into', 'other', 'also', 'then', 'them', 'they', 'very', 'just', 'such', 'each', 'well', 'most', 'only', 'over', 'much', 'many', 'even', 'make', 'made', 'like', 'long', 'same', 'both', 'between', 'under', 'before', 'while', 'still', 'through', 'though', 'might', 'could', 'should', 'shall', 'first', 'second', 'third', 'last', 'next', 'another', 'being', 'doing', 'having', 'does']);
+            const bStmtKeywords = [];
+            if (st === 'B') {
+                for (let i = 0; i < (item.questions || []).length; i++) {
+                    const locate = qLocate[String(i)] || '';
+                    if (locate) {
+                        const letter = locate.charAt(0);
+                        const pi = letter.charCodeAt(0) - 'A'.charCodeAt(0);
+                        const paraText = (paras[pi] || '').replace(/^[A-Z][\)）]\s*/, '');
+                        const words = paraText.toLowerCase().split(/\W+/).filter(w => w.length >= 4 && !stopWords.has(w));
+                        const unique = [...new Set(words)].slice(0, 3);
+                        bStmtKeywords.push(unique.join(', '));
+                    }
+                    else {
+                        bStmtKeywords.push('');
+                    }
+                }
+            }
             this.setData({
                 current: item, currentQ: 0, passagePage: 0, passagePages: pages,
                 formattedPages: [],
@@ -125,7 +176,12 @@ Page({
                 highlightedPara: -1,
                 fullTranslation,
                 showTrans: false,
-                scrollToResult: ''
+                scrollToResult: '',
+                showHint: false,
+                locateMap,
+                currentQLocate,
+                aParaGroups,
+                bStmtKeywords
             });
             this.updatePageParas();
             this.updateCompact();
@@ -143,6 +199,9 @@ Page({
     },
     toggleTrans() {
         this.setData({ showTrans: !this.data.showTrans });
+    },
+    toggleHint() {
+        this.setData({ showHint: !this.data.showHint });
     },
     onWordTap(e) {
         const ds = e.currentTarget.dataset;
@@ -545,7 +604,8 @@ Page({
         if (this.data.currentQ > 0) {
             const q = this.data.currentQ - 1;
             const sl = this.data.cAnswers[q];
-            this.setData({ currentQ: q, cSelIdx: sl ? 'ABCD'.indexOf(sl) : -1 });
+            const locate = this.data.locateMap[String(q)] || '';
+            this.setData({ currentQ: q, cSelIdx: sl ? 'ABCD'.indexOf(sl) : -1, currentQLocate: locate });
             this.updateCompact();
         }
     },
@@ -554,7 +614,8 @@ Page({
         if (this.data.currentQ < t - 1) {
             const q = this.data.currentQ + 1;
             const sl = this.data.cAnswers[q];
-            this.setData({ currentQ: q, cSelIdx: sl ? 'ABCD'.indexOf(sl) : -1 });
+            const locate = this.data.locateMap[String(q)] || '';
+            this.setData({ currentQ: q, cSelIdx: sl ? 'ABCD'.indexOf(sl) : -1, currentQLocate: locate });
             this.updateCompact();
         }
     },
