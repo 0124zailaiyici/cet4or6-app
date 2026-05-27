@@ -244,9 +244,16 @@ Page({
                     word,
                     phonetic: '',
                     definition: zh,
+                    chn: zh,
                     source: this.data.current && this.data.current.title || '阅读理解',
+                    context: '',
+                    contextCn: '',
+                    audioUrl: '',
                     status: 'new',
-                    correctStreak: 0
+                    correctStreak: 0,
+                    growth: 0,
+                    stars: 0,
+                    lastReviewDate: ''
                 });
                 app.globalData.studyData.vocabWords = vw;
                 wx.setStorageSync('studyData', app.globalData.studyData);
