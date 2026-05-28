@@ -505,7 +505,8 @@ Page<IListeningData, IListeningMethods>({
       const audioUrl = passage.audioUrl!.startsWith('http')
         ? passage.audioUrl!
         : API_BASE + encodeURI(passage.audioUrl!)
-      audio.stop()
+      audio.destroy()
+      audio.attach(this)
       audio.play(audioUrl)
 
       const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}
