@@ -93,6 +93,7 @@ interface IVocabMethods {
   confirmManualModal(): void
   cancelManualModal(): void
   swipeStart(e: WechatMiniprogram.TouchEvent): void
+  swipeMove(e: WechatMiniprogram.TouchEvent): void
   swipeEnd(e: WechatMiniprogram.TouchEvent): void
   deleteWord(e: WechatMiniprogram.TouchEvent): void
   closeSwipe(): void
@@ -1524,6 +1525,8 @@ Page<IVocabData, IVocabMethods>({
   swipeStart(e: WechatMiniprogram.TouchEvent) {
     _swipeStartX = e.touches[0].clientX
   },
+
+  swipeMove(_e: WechatMiniprogram.TouchEvent) {},
 
   swipeEnd(e: WechatMiniprogram.TouchEvent) {
     const idx = Number(e.currentTarget.dataset.idx)

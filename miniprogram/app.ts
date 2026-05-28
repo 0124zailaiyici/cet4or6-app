@@ -37,7 +37,7 @@ App<IAppOption>({
       applyTheme(true)
     }
     // 预唤醒 Railway（避免冷启动）
-    wx.request({ url: API_BASE + '/health', method: 'GET', timeout: 5000 })
+    wx.request({ url: API_BASE + '/health', method: 'GET', timeout: 5000, fail: () => {} })
     // 首次启动显示引导页
     if (!wx.getStorageSync('hasGuided')) {
       wx.reLaunch({ url: '/pages/guide/guide' })

@@ -223,6 +223,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
   }
 
   if (pages.every(p => p.type === 'dir')) return []
+  pages.forEach((p, i) => { (p as any)._key = 'p_' + i })
   return pages
 }
 

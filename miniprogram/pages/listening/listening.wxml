@@ -80,7 +80,7 @@
 
       <view class="sm-marked" wx:if="{{summaryMarked > 0}}">
         <view class="sm-subtitle">📌 标记需重听的题目</view>
-        <view class="sm-mitem" wx:for="{{pages}}" wx:key="type" wx:for-index="pi" wx:if="{{markedFlags[pi] && item.type === 'q'}}">
+        <view class="sm-mitem" wx:for="{{pages}}" wx:key="_key" wx:for-index="pi" wx:if="{{markedFlags[pi] && item.type === 'q'}}">
           <text class="smm-tag">{{item.stem}}</text>
           <view class="smm-opt {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:for-index="oi" wx:key="*this">
             <text>{{optionLetters[oi]}}. {{item}}</text>
@@ -140,7 +140,7 @@
         <view class="page-area">
           <view class="page-view" bindtouchstart="onPageTouchStart" bindtouchend="onPageTouchEnd">
             <view class="page-track" style="transform: translateX(-{{currentPage * 100}}%);">
-              <view class="page-card" wx:for="{{pages}}" wx:key="type" wx:for-index="pi">
+              <view class="page-card" wx:for="{{pages}}" wx:key="_key" wx:for-index="pi">
                 <!-- Directions -->
                 <view wx:if="{{item.type === 'dir'}}" class="p-dir">
                   <view class="p-section">{{item.section}}</view>
@@ -181,7 +181,7 @@
           <view class="bot-nav" catchtap="prevPage">⬅ 上一题</view>
           <view class="bot-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
           <view class="bot-dots">
-            <view class="bd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="*this" wx:for-index="i"></view>
+            <view class="bd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="_key" wx:for-index="i"></view>
           </view>
           <view class="bot-nav" catchtap="nextPage">下一题 ➔</view>
         </view>

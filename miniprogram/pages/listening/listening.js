@@ -58,7 +58,7 @@ function buildPages(passage) {
             stem: currentQ.stem,
             opts: currentQ.opts.map(o => o.t),
             transcriptText: sent ? sent.text : '',
-            transcriptUrl: sentIdx >= 0 && sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/split/${passage.id}_${sentIdx}.mp3` : undefined,
+            transcriptUrl: sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
         });
         currentQ = null;
     }
@@ -808,16 +808,19 @@ Page({
     toggleTranscript() {
         this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false });
     },
-    playTranscriptSentence(e) {
-        const url = e.currentTarget.dataset.url;
-        if (!url)
+    playTranscriptSentence(_e) {
+        const passage = this.data.currentPassage;
+        if (!passage || !passage.audioUrl)
             return;
+        const audioUrl = passage.audioUrl.startsWith('http')
+            ? passage.audioUrl
+            : `${API_BASE}${encodeURI(passage.audioUrl)}`;
         if (this.data.transcriptPlaying) {
             audio.pause();
             this.setData({ transcriptPlaying: false });
             return;
         }
-        audio.play(url, this.data.speed);
+        audio.play(audioUrl, this.data.speed);
         this.setData({ transcriptPlaying: true, isPlaying: true });
     },
     toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }); },

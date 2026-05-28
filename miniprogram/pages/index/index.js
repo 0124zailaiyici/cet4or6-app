@@ -23,6 +23,7 @@ const DAILY_SENTENCES = [
     { en: '"Current life structures, career paths, and social norms are out of tune with the emerging reality of longer lifespans."', zh: '当前的生活结构、职业道路和社会规范与寿命延长的新现实格格不入。' },
 ];
 let dailyPick = null;
+let _dailyCtx = null;
 Page({
     data: {
         greeting: '',
@@ -140,16 +141,29 @@ Page({
         }
     },
     playDailySentence() {
-        const text = this.data.dailyEn.replace(/['"]/g, '');
-        if (this.data.dailyPlaying)
+        if (this.data.dailyPlaying) {
+            if (_dailyCtx) {
+                _dailyCtx.stop();
+                _dailyCtx.destroy();
+                _dailyCtx = null;
+            }
+            this.setData({ dailyPlaying: false });
             return;
+        }
+        const text = this.data.dailyEn.replace(/['"]/g, '');
         this.setData({ dailyPlaying: true });
-        const ctx = wx.createInnerAudioContext();
-        ctx.obeyMuteSwitch = false;
-        ctx.autoplay = true;
-        ctx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`;
-        ctx.onEnded(() => { ctx.destroy(); this.setData({ dailyPlaying: false }); });
-        ctx.onError(() => { ctx.destroy(); this.setData({ dailyPlaying: false }); });
+        _dailyCtx = wx.createInnerAudioContext();
+        _dailyCtx.obeyMuteSwitch = false;
+        _dailyCtx.autoplay = true;
+        _dailyCtx.src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`;
+        _dailyCtx.onEnded(() => { if (_dailyCtx) {
+            _dailyCtx.destroy();
+            _dailyCtx = null;
+        } ; this.setData({ dailyPlaying: false }); });
+        _dailyCtx.onError(() => { if (_dailyCtx) {
+            _dailyCtx.destroy();
+            _dailyCtx = null;
+        } ; this.setData({ dailyPlaying: false }); });
     },
     quickListen() { wx.navigateTo({ url: '/pages/listening/listening' }); },
     quickVocab() { wx.switchTab({ url: '/pages/vocab/vocab' }); },
