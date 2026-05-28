@@ -83,6 +83,7 @@ interface IListeningData {
   focusSentenceMap: number[]
   focusPageIndices: number[]
   transcriptPlaying: boolean
+  transcriptPlayingIdx: number
   _retryCount?: number
 }
 
@@ -268,12 +269,15 @@ class AudioManager {
         }
       })
 
+      ctx.onPause(() => {
+        if (this.pageRef) this.pageRef.setData({ isPlaying: false })
+      })
+
       ctx.onEnded(() => {
         if (this.customOnEnded) {
           this.customOnEnded()
         } else if (this.pageRef) {
           const d = this.pageRef.data
-          if (!d.isPlaying) return
           if (d.audioMode) {
             if (d.loopSentence && this.ctx) {
               this.ctx.seek(0)
@@ -400,6 +404,7 @@ class AudioManager {
 }
 
 const audio = new AudioManager()
+let _tctx: any = null
 
 // ===== Page =====
 Page<IListeningData, IListeningMethods>({
@@ -444,6 +449,7 @@ Page<IListeningData, IListeningMethods>({
     focusSentenceMap: [],
     focusPageIndices: [],
     transcriptPlaying: false,
+    transcriptPlayingIdx: -1,
   },
 
   onLoad(options: { passageId?: string; examMode?: string }) {
@@ -475,10 +481,12 @@ Page<IListeningData, IListeningMethods>({
   onHide() {
     audio.pause()
     this.setData({ isPlaying: false })
+    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null; this.setData({ transcriptPlayingIdx: -1 }) }
   },
 
   onUnload() {
     audio.destroy()
+    if (_tctx) { try { _tctx.destroy() } catch (_) {} _tctx = null }
   },
 
   enterDetail(e: WechatMiniprogram.TouchEvent) {
@@ -493,9 +501,10 @@ Page<IListeningData, IListeningMethods>({
     const isAudio = !!passage.audioUrl
 
     if (isAudio) {
+      if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
       const audioUrl = passage.audioUrl!.startsWith('http')
         ? passage.audioUrl!
-        : `${API_BASE}${encodeURI(passage.audioUrl!)}`
+        : API_BASE + passage.audioUrl!
       audio.stop()
       audio.play(audioUrl)
 
@@ -531,6 +540,7 @@ Page<IListeningData, IListeningMethods>({
         loopSentence: fm,
         speed: fm ? 0.8 : 1,
         _retryCount: 0,
+        transcriptPlayingIdx: -1,
       })
       audio.setRate(fm ? 0.8 : 1)
     } else {
@@ -555,6 +565,7 @@ Page<IListeningData, IListeningMethods>({
   backToList() {
     if (this.data.examMode) { wx.navigateBack(); return }
     audio.stop()
+    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
     this.setData({
       mode: 'list',
       currentPassage: null,
@@ -566,6 +577,7 @@ Page<IListeningData, IListeningMethods>({
       focusMode: false,
       loopSentence: false,
       speed: 1,
+      transcriptPlayingIdx: -1,
     })
   },
 
@@ -668,6 +680,7 @@ Page<IListeningData, IListeningMethods>({
   toggleFocus() {
     const on = !this.data.focusMode
     if (on) {
+      if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
       audio.pause()
       this.setData({ isPlaying: false })
       const passage = this.data.currentPassage
@@ -770,7 +783,7 @@ Page<IListeningData, IListeningMethods>({
   playText(text: string, useAudioUrl?: string) {
     let src: string
     if (useAudioUrl) {
-      src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${encodeURI(useAudioUrl)}`
+      src = useAudioUrl.startsWith('http') ? useAudioUrl : API_BASE + useAudioUrl
     } else {
       src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
     }
@@ -908,18 +921,61 @@ Page<IListeningData, IListeningMethods>({
   },
 
   toggleTranscript() {
-    this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false })
+    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+    this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false, transcriptPlayingIdx: -1 })
   },
 
-  playTranscriptSentence(_e: WechatMiniprogram.TouchEvent) {
+  playTranscriptSentence(e: WechatMiniprogram.TouchEvent) {
+    const pi = parseInt(e.currentTarget.dataset.pi as string)
+    if (isNaN(pi)) return
     const passage = this.data.currentPassage
-    if (!passage || !passage.audioUrl) return
-    const audioUrl = passage.audioUrl.startsWith('http')
-      ? passage.audioUrl
-      : `${API_BASE}${encodeURI(passage.audioUrl)}`
-    if (this.data.transcriptPlaying) { audio.pause(); this.setData({ transcriptPlaying: false }); return }
-    audio.play(audioUrl, this.data.speed)
-    this.setData({ transcriptPlaying: true, isPlaying: true })
+    const page = this.data.pages[pi]
+    if (!passage || !page || page.type !== 'q') return
+    const qNum = parseInt((page.stem || '').replace(/^Q/i, ''))
+    if (isNaN(qNum)) return
+    const sentIdx = passage.sentences.findIndex((s: any) => {
+      const m = (s.text || '').match(/^(?:Q)?(\d+)\./)
+      return m && parseInt(m[1]) === qNum
+    })
+    if (sentIdx < 0) return
+    const sent = passage.sentences[sentIdx] as any
+    if (sent.start === 0 && sent.end === 0) return
+
+    const url = `${API_BASE}/audio/segment/${passage.id}/${sentIdx}`
+
+    if (this.data.transcriptPlayingIdx === pi) {
+      if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+      this.setData({ transcriptPlayingIdx: -1 })
+      if (this.data.audioMode) audio.resume(this.data.speed)
+      return
+    }
+
+    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+
+    const wasPlaying = this.data.isPlaying
+    if (this.data.audioMode && wasPlaying) audio.pause()
+
+    const ctx = wx.createInnerAudioContext()
+    ctx.obeyMuteSwitch = false
+    ctx.autoplay = true
+
+    let _done = false
+    const cleanup = () => {
+      if (_done) return
+      _done = true
+      try { ctx.destroy() } catch (_) {}
+      if (_tctx === ctx) _tctx = null
+      this.setData({ transcriptPlayingIdx: -1 })
+      if (this.data.audioMode && wasPlaying) { audio.resume(this.data.speed); this.setData({ isPlaying: true }) }
+    }
+
+    ctx.onEnded(cleanup)
+    ctx.onError((res: any) => { cleanup(); wx.showToast({ title: `seg fail ${res ? '(' + res.errCode + ')' : ''}`, icon: 'none' }) })
+    ctx.onCanplay(() => { if (!_done) this.setData({ transcriptPlayingIdx: pi }) })
+
+    ctx.src = url
+    ctx.playbackRate = this.data.speed
+    _tctx = ctx
   },
 
   toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }) },

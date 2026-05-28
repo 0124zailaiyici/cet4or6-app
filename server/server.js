@@ -36,8 +36,6 @@ const PASSAGE_DATA = (() => {
 app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
   const { passageId, sentenceIdx } = req.params;
   const idx = parseInt(sentenceIdx);
-  const segFile = path.join(SPLIT_DIR, `${passageId}_${idx}.mp3`);
-  if (fs.existsSync(segFile)) return res.sendFile(segFile);
 
   const passage = PASSAGE_DATA.find(p => p.id === passageId);
   if (!passage) return res.status(404).json({ error: 'passage not found' });
@@ -59,6 +57,7 @@ app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
   }
   if (start >= end) return res.status(400).json({ error: 'invalid range' });
 
+  const segFile = path.join(SPLIT_DIR, `${passageId}_${idx}.mp3`);
   try {
     execSync(`ffmpeg -y -i "${audioPath}" -ss ${start} -to ${end} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`,
       { timeout: 30000 });
