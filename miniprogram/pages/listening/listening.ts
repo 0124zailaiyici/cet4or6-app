@@ -504,7 +504,7 @@ Page<IListeningData, IListeningMethods>({
       if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
       const audioUrl = passage.audioUrl!.startsWith('http')
         ? passage.audioUrl!
-        : API_BASE + passage.audioUrl!
+        : API_BASE + encodeURI(passage.audioUrl!)
       audio.stop()
       audio.play(audioUrl)
 
@@ -783,7 +783,7 @@ Page<IListeningData, IListeningMethods>({
   playText(text: string, useAudioUrl?: string) {
     let src: string
     if (useAudioUrl) {
-      src = useAudioUrl.startsWith('http') ? useAudioUrl : API_BASE + useAudioUrl
+      src = useAudioUrl.startsWith('http') ? useAudioUrl : API_BASE + encodeURI(useAudioUrl)
     } else {
       src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`
     }
@@ -957,7 +957,6 @@ Page<IListeningData, IListeningMethods>({
 
     const ctx = wx.createInnerAudioContext()
     ctx.obeyMuteSwitch = false
-    ctx.autoplay = true
 
     let _done = false
     const cleanup = () => {
@@ -971,10 +970,14 @@ Page<IListeningData, IListeningMethods>({
 
     ctx.onEnded(cleanup)
     ctx.onError((res: any) => { cleanup(); wx.showToast({ title: `seg fail ${res ? '(' + res.errCode + ')' : ''}`, icon: 'none' }) })
-    ctx.onCanplay(() => { if (!_done) this.setData({ transcriptPlayingIdx: pi }) })
+    ctx.onCanplay(() => {
+      if (_done) return
+      ctx.playbackRate = this.data.speed
+      ctx.play()
+      this.setData({ transcriptPlayingIdx: pi })
+    })
 
     ctx.src = url
-    ctx.playbackRate = this.data.speed
     _tctx = ctx
   },
 
