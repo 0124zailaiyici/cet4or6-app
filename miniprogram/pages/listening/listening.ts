@@ -476,7 +476,7 @@ Page<IListeningData, IListeningMethods>({
   onHide() {
     audio.pause()
     this.setData({ isPlaying: false })
-    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null; this.setData({ transcriptPlayingIdx: -1 }) }
+    if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null; this.setData({ transcriptPlayingIdx: -1 }) }
   },
 
   onUnload() {
@@ -496,7 +496,7 @@ Page<IListeningData, IListeningMethods>({
     const isAudio = !!passage.audioUrl
 
     if (isAudio) {
-      if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+      if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null }
       const audioUrl = passage.audioUrl!.startsWith('http')
         ? passage.audioUrl!
         : API_BASE + encodeURI(passage.audioUrl!)
@@ -561,7 +561,7 @@ Page<IListeningData, IListeningMethods>({
   backToList() {
     if (this.data.examMode) { wx.navigateBack(); return }
     audio.destroy()
-    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+    if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null }
     this.setData({
       mode: 'list',
       currentPassage: null,
@@ -676,7 +676,7 @@ Page<IListeningData, IListeningMethods>({
   toggleFocus() {
     const on = !this.data.focusMode
     if (on) {
-      if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+      if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null }
       audio.pause()
       this.setData({ isPlaying: false })
       const passage = this.data.currentPassage
@@ -917,7 +917,7 @@ Page<IListeningData, IListeningMethods>({
   },
 
   toggleTranscript() {
-    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+    if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null }
     this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false, transcriptPlayingIdx: -1 })
   },
 
@@ -940,13 +940,13 @@ Page<IListeningData, IListeningMethods>({
     const url = `${API_BASE}/audio/segment/${passage.id}/${sentIdx}`
 
     if (this.data.transcriptPlayingIdx === pi) {
-      if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+      if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null }
       this.setData({ transcriptPlayingIdx: -1 })
       if (this.data.audioMode) audio.resume(this.data.speed)
       return
     }
 
-    if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
+    if (_tctx) { _tctx._stopped = true; try { _tctx.destroy() } catch (_) {} _tctx = null }
 
     const wasPlaying = this.data.isPlaying
     if (this.data.audioMode && wasPlaying) audio.pause()
@@ -956,7 +956,7 @@ Page<IListeningData, IListeningMethods>({
 
     let _done = false
     const cleanup = () => {
-      if (_done) return
+      if (_done || (ctx as any)._stopped) return
       _done = true
       try { ctx.destroy() } catch (_) {}
       if (_tctx === ctx) _tctx = null
