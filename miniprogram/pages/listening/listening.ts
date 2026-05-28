@@ -268,11 +268,6 @@ class AudioManager {
           this.pageRef.setData(d)
         }
       })
-
-      ctx.onPause(() => {
-        if (this.pageRef) this.pageRef.setData({ isPlaying: false })
-      })
-
       ctx.onEnded(() => {
         if (this.customOnEnded) {
           this.customOnEnded()
@@ -565,7 +560,7 @@ Page<IListeningData, IListeningMethods>({
 
   backToList() {
     if (this.data.examMode) { wx.navigateBack(); return }
-    audio.stop()
+    audio.destroy()
     if (_tctx) { try { _tctx.stop(); _tctx.destroy() } catch (_) {} _tctx = null }
     this.setData({
       mode: 'list',
