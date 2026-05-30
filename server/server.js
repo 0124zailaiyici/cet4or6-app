@@ -12,7 +12,7 @@ app.use('/audio', express.static(path.join(__dirname, 'audio')));
 app.use('/audio/split', express.static(path.join(__dirname, 'audio', 'split')));
 
 // Dynamic audio segment extraction
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const SPLIT_DIR = path.join(__dirname, 'audio', 'split');
 if (!fs.existsSync(SPLIT_DIR)) fs.mkdirSync(SPLIT_DIR, { recursive: true });
 
@@ -474,6 +474,30 @@ ${text.trim()}
     res.status(500).json({ error: '解析失败', detail: err.message });
   }
 });
+
+// Audio trimming: return audio from startTime to end (fast seek, no re-encode)
+app.get('/audio/from/:passageId/:startTime', (req, res) => {
+  const { passageId, startTime } = req.params
+  const start = parseFloat(startTime)
+  if (isNaN(start)) return res.status(400).json({ error: 'invalid startTime' })
+
+  const passage = PASSAGE_DATA.find(p => p.id === passageId)
+  if (!passage) return res.status(404).json({ error: 'passage not found' })
+
+  const audioPath = path.join(__dirname, passage.audioFile)
+  if (!fs.existsSync(audioPath)) return res.status(404).json({ error: 'audio file not found' })
+
+  const ffmpeg = spawn('ffmpeg', [
+    '-ss', String(start),
+    '-i', audioPath,
+    '-c', 'copy',
+    '-f', 'mp3',
+    'pipe:1'
+  ], { stdio: ['ignore', 'pipe', 'inherit'] })
+  res.set('Content-Type', 'audio/mpeg')
+  ffmpeg.stdout.pipe(res)
+  ffmpeg.on('error', () => { if (!res.headersSent) res.status(500).json({ error: 'extraction failed' }) })
+})
 
 app.get('/health', (_, res) => {
   res.json({ status: 'ok', deepseekKey: !!API_KEY, ollamaUrl: !!OLLAMA_URL });

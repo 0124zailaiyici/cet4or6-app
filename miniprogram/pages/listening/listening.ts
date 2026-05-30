@@ -246,14 +246,14 @@ class AudioManager {
   private pageRef: any
   private customOnEnded: (() => void) | null
   private _src: string
-  private _seekGuard: boolean
+  private _passageId: string | null
 
   constructor() {
     this.ctx = null
     this.pageRef = null
     this.customOnEnded = null
     this._src = ''
-    this._seekGuard = false
+    this._passageId = null
   }
 
   attach(page: any) {
@@ -374,106 +374,14 @@ class AudioManager {
 
   getSrc(): string { return this._src }
 
+  setPassageId(id: string | number) {
+    this._passageId = String(id)
+  }
+
   playFrom(time: number, rate: number = 1) {
-    if (!this._src) return
-
-    // 已有上下文且加载完毕 → 直接 seek（快路径）
-    if (this.ctx && this.ctx.src === this._src && this.ctx.duration > 0 && isFinite(this.ctx.duration)) {
-      this.ctx.seek(time)
-      this.ctx.playbackRate = rate
-      this.ctx.play()
-      return
-    }
-
-    // 上下文存在但未加载完 → 等加载后再 seek
-    if (this.ctx && this.ctx.src === this._src) {
-      const retry = () => {
-        if (this.ctx && this.ctx.duration > 0 && isFinite(this.ctx.duration)) {
-          this.ctx.seek(time)
-          this.ctx.playbackRate = rate
-          this.ctx.play()
-        } else {
-          setTimeout(retry, 300)
-        }
-      }
-      retry()
-      return
-    }
-
-    // 无上下文 → 重建，seek 后等缓冲再播
-    if (this.ctx) this.ctx.destroy()
-    this.ctx = null
-    this._seekGuard = false
-
-    const ctx = wx.createInnerAudioContext()
-    ctx.obeyMuteSwitch = false
-    ctx.volume = 1
-    ctx.autoplay = false
-
-    ctx.onPlay(() => {
-      if (this.pageRef) this.pageRef.setData({ loading: false })
-    })
-    ctx.onEnded(() => {
-      if (this.customOnEnded) {
-        this.customOnEnded()
-      } else if (this.pageRef) {
-        const d = this.pageRef.data
-        if (d.audioMode) {
-          if (d.loopSentence && this.ctx) {
-            this.ctx.seek(0)
-            this.ctx.play()
-            this.pageRef.setData({ isPlaying: true })
-          } else {
-            this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
-          }
-        } else if (d.loopSentence) {
-          this.pageRef.playCurrent()
-        } else if (d.currentIndex < d.currentPassage.sentences.length - 1) {
-          this.pageRef.nextSentence()
-        } else {
-          this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
-        }
-      }
-    })
-    ctx.onTimeUpdate(() => {
-      if (this.pageRef && this.pageRef.data.audioMode) {
-        const d = this.pageRef.data
-        const t = ctx.currentTime
-        const dur = ctx.duration
-        if (!isFinite(t) || !isFinite(dur)) return
-        const fmt = (v: number) => {
-          const m = Math.floor(v / 60)
-          const s = Math.floor(v % 60)
-          return `${m}:${s < 10 ? '0' : ''}${s}`
-        }
-        this.pageRef.setData({
-          audioTime: t, audioDuration: dur,
-          audioTimeStr: fmt(t), audioDurationStr: fmt(dur),
-        })
-        if (d.focusMode && d.loopSentence) {
-          const origIdx = d.focusSentenceMap[d.currentIndex] != null ? d.focusSentenceMap[d.currentIndex] : 0
-          const sent = d.currentPassage && d.currentPassage.sentences[origIdx]
-          if (sent && sent.end > 0 && ctx.currentTime >= sent.end) {
-            ctx.seek(sent.start || 0)
-          }
-        }
-      }
-    })
-    ctx.onError(() => {
-      wx.showToast({ title: '播放失败', icon: 'none' })
-      if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
-    })
-    ctx.onCanplay(() => {
-      if (this._seekGuard) return
-      this._seekGuard = true
-      ctx.seek(time)
-      setTimeout(() => {
-        ctx.playbackRate = rate
-        ctx.play()
-      }, 3000)
-    })
-    ctx.src = this._src
-    this.ctx = ctx
+    if (!this._passageId) return
+    const url = `${API_BASE}/audio/from/${this._passageId}/${time}`
+    this.play(url, rate)
   }
 
   resume(rate: number = 1) {
@@ -620,6 +528,7 @@ Page<IListeningData, IListeningMethods>({
         : API_BASE + encodeURI(passage.audioUrl!)
       audio.destroy()
       audio.attach(this)
+      audio.setPassageId(passage.id)
       audio.play(audioUrl)
 
       const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}
