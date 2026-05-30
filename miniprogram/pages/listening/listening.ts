@@ -22,6 +22,11 @@ interface IListeningItem {
   correctAnswers?: Record<string, string>
 }
 
+interface ITranscriptSegment {
+  t: string
+  h: boolean
+}
+
 interface IListeningPage {
   type: 'dir' | 'q'
   section: string
@@ -32,6 +37,7 @@ interface IListeningPage {
   sentenceStart?: number
   groupStartTime?: number
   transcriptHighlights?: string[]
+  transcriptSegments?: ITranscriptSegment[]
   answerKey?: string
 }
 
@@ -142,6 +148,36 @@ function sectionLabel(q: number): string {
   return ''
 }
 
+function buildTranscriptSegments(text: string, highlights: string[]): ITranscriptSegment[] {
+  if (!highlights || highlights.length === 0) return [{ t: text, h: false }]
+  let remaining = text
+  const segs: ITranscriptSegment[] = []
+  for (const hl of highlights) {
+    if (!hl) continue
+    let idx = remaining.indexOf(hl)
+    if (idx >= 0) {
+      if (idx > 0) segs.push({ t: remaining.slice(0, idx), h: false })
+      segs.push({ t: hl, h: true })
+      remaining = remaining.slice(idx + hl.length)
+      continue
+    }
+    const words = hl.split(/\s+/).filter((w: string) => w.length > 2)
+    if (words.length < 2) { segs.push({ t: remaining, h: false }); break }
+    const fw = words[0]
+    const lw = words[words.length - 1]
+    const si = remaining.indexOf(fw)
+    if (si < 0) { segs.push({ t: remaining, h: false }); break }
+    const ei = remaining.lastIndexOf(lw)
+    if (ei <= si) { segs.push({ t: remaining, h: false }); break }
+    const end = ei + lw.length
+    if (si > 0) segs.push({ t: remaining.slice(0, si), h: false })
+    segs.push({ t: remaining.slice(si, end), h: true })
+    remaining = remaining.slice(end)
+  }
+  if (remaining.length > 0) segs.push({ t: remaining, h: false })
+  return segs
+}
+
 function buildPages(passage: IListeningItem): IListeningPage[] {
   const pages: IListeningPage[] = []
   const lines = passage.sentences.map(s => s.text.trim()).filter(Boolean)
@@ -176,6 +212,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
       stem: currentQ.stem,
       opts: currentQ.opts.map(o => o.t),
       transcriptText: hasTranscript ? sent!.transcript! : (sent ? sent.text : ''),
+      transcriptSegments: hasTranscript ? buildTranscriptSegments(sent!.transcript!, sent!.highlights || []) : undefined,
       transcriptUrl: sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
       sentenceStart: sent ? sent.start : 0,
       transcriptHighlights: hasTranscript ? (sent!.highlights || []) : undefined,
@@ -299,10 +336,22 @@ class AudioManager {
           this.pageRef.setData(d)
         }
         if (this._pendingSeek >= 0) {
-          ctx.seek(this._pendingSeek)
+          const t = this._pendingSeek
           this._pendingSeek = -1
+          setTimeout(() => ctx.seek(t), 30)
         }
       })
+
+      ctx.onPlay(() => {
+        if (this.pageRef) this.pageRef.setData({ isPlaying: true, loading: false })
+      })
+      ctx.onPause(() => {
+        if (this.pageRef) this.pageRef.setData({ isPlaying: false })
+      })
+      ctx.onStop(() => {
+        if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
+      })
+
       ctx.onEnded(() => {
         if (this.customOnEnded) {
           this.customOnEnded()
@@ -375,10 +424,6 @@ class AudioManager {
         }
         wx.showToast({ title: `播放失败${code ? '(' + code + ')' : ''}`, icon: 'none' })
         if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
-      })
-
-      ctx.onPlay(() => {
-        if (this.pageRef) this.pageRef.setData({ loading: false })
       })
 
       this.ctx = ctx
@@ -564,7 +609,6 @@ Page<IListeningData, IListeningMethods>({
       audio.destroy()
       audio.attach(this)
       audio.setPassageId(passage.id)
-      audio.play(audioUrl)
 
       const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {}
       const pages = buildPages(passage)
@@ -681,7 +725,7 @@ Page<IListeningData, IListeningMethods>({
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
       if (this.data.liteMode && wasPlaying && p && p.sentenceStart != null && p.sentenceStart >= 0) {
-        audio.seek(p.sentenceStart)
+        setTimeout(() => audio.seek(p.sentenceStart), 30)
       }
     }
   },
@@ -702,7 +746,7 @@ Page<IListeningData, IListeningMethods>({
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
       if (this.data.liteMode && wasPlaying && p && p.sentenceStart != null && p.sentenceStart >= 0) {
-        audio.seek(p.sentenceStart)
+        setTimeout(() => audio.seek(p.sentenceStart), 30)
       }
     } else if (this.data.currentPage >= lastIdx && this.data.audioMode) {
       this.viewSummary()
@@ -832,7 +876,21 @@ Page<IListeningData, IListeningMethods>({
   },
 
   toggleLiteMode() {
-    this.setData({ liteMode: !this.data.liteMode, showTranscript: true })
+    const lm = !this.data.liteMode
+    const wasPlaying = this.data.isPlaying
+    const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null
+    const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0
+    this.setData({
+      liteMode: lm,
+      showTranscript: true,
+      isPlaying: lm ? false : wasPlaying,
+    })
+    if (wasPlaying) {
+      audio.pause()
+    }
+    if (lm) {
+      setTimeout(() => audio.playFrom(st, this.data.speed), 50)
+    }
   },
 
   toggleTiny() {
@@ -901,14 +959,11 @@ Page<IListeningData, IListeningMethods>({
       if (this.data.isPlaying) {
         audio.pause()
         this.setData({ isPlaying: false })
-      } else if (audio.hasSource()) {
-        audio.resume(this.data.speed)
-        this.setData({ isPlaying: true })
       } else {
         const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null
         const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0
         audio.playFrom(st, this.data.speed)
-        this.setData({ isPlaying: true })
+        setTimeout(() => this.setData({ isPlaying: true }), 30)
       }
     } else if (this.data.isPlaying) {
       audio.pause()
@@ -1029,7 +1084,7 @@ Page<IListeningData, IListeningMethods>({
     }
 
     audio.playFrom(t, this.data.speed)
-    this.setData({ transcriptPlayingIdx: pi, isPlaying: true })
+    setTimeout(() => this.setData({ transcriptPlayingIdx: pi, isPlaying: true }), 30)
   },
 
   toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }) },
