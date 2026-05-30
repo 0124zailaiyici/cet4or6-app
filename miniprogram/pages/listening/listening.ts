@@ -8,6 +8,9 @@ interface ISentence {
   text: string
   start: number
   end: number
+  transcript?: string
+  highlights?: string[]
+  answerKey?: string
 }
 
 interface IListeningItem {
@@ -28,6 +31,8 @@ interface IListeningPage {
   transcriptUrl?: string
   sentenceStart?: number
   groupStartTime?: number
+  transcriptHighlights?: string[]
+  answerKey?: string
 }
 
 interface IQuestionResult {
@@ -119,6 +124,9 @@ interface IListeningMethods {
   toggleFocus(): void
   seekFocusCurrent(): void
   playTranscriptSentence(e: WechatMiniprogram.TouchEvent): void
+  toggleLiteMode(): void
+  toggleTiny(): void
+  replayCurrent(): void
 }
 
 const LABELS: Record<string, string> = {
@@ -161,14 +169,17 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
       return m && parseInt(m[1]) === qNum
     })
     const sent = sentIdx >= 0 ? passage.sentences[sentIdx] : null
+    const hasTranscript = sent && sent.transcript && sent.transcript.length > 0
     pages.push({
       type: 'q',
       section: currentQ.section,
       stem: currentQ.stem,
       opts: currentQ.opts.map(o => o.t),
-      transcriptText: sent ? sent.text : '',
+      transcriptText: hasTranscript ? sent!.transcript! : (sent ? sent.text : ''),
       transcriptUrl: sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
       sentenceStart: sent ? sent.start : 0,
+      transcriptHighlights: hasTranscript ? (sent!.highlights || []) : undefined,
+      answerKey: hasTranscript ? (sent!.answerKey || '') : undefined,
     })
     currentQ = null
   }
@@ -247,6 +258,8 @@ class AudioManager {
   private customOnEnded: (() => void) | null
   private _src: string
   private _passageId: string | null
+  private _fullAudioUrl: string
+  private _pendingSeek: number
 
   constructor() {
     this.ctx = null
@@ -254,6 +267,8 @@ class AudioManager {
     this.customOnEnded = null
     this._src = ''
     this._passageId = null
+    this._fullAudioUrl = ''
+    this._pendingSeek = -1
   }
 
   attach(page: any) {
@@ -282,6 +297,10 @@ class AudioManager {
             d.audioDurationStr = `${m}:${s < 10 ? '0' : ''}${s}`
           }
           this.pageRef.setData(d)
+        }
+        if (this._pendingSeek >= 0) {
+          ctx.seek(this._pendingSeek)
+          this._pendingSeek = -1
         }
       })
       ctx.onEnded(() => {
@@ -329,6 +348,15 @@ class AudioManager {
             const sent = d.currentPassage && d.currentPassage.sentences[origIdx]
             if (sent && sent.end > 0 && ctx.currentTime >= sent.end) {
               ctx.seek(sent.start || 0)
+            }
+          }
+          if (d.liteMode) {
+            const curPage = d.currentPassage && d.pages ? d.pages[d.currentPage] : null
+            if (curPage && curPage.type === 'q' && curPage.sentenceStart != null && curPage.sentenceStart > 0) {
+              const endT = d.currentPassage.sentences.find(s => s.start === curPage.sentenceStart)
+              if (endT && endT.end > 0 && t >= endT.end) {
+                this.pageRef.setData({ isPlaying: false })
+              }
             }
           }
         }
@@ -380,8 +408,15 @@ class AudioManager {
 
   playFrom(time: number, rate: number = 1) {
     if (!this._passageId) return
-    const url = `${API_BASE}/audio/from/${this._passageId}/${time}`
-    this.play(url, rate)
+    const url = `${API_BASE}/audio/full/${this._passageId}`
+    if (this._fullAudioUrl !== url || !this.ctx) {
+      this._fullAudioUrl = url
+      this._pendingSeek = time
+      this.play(url, rate)
+    } else {
+      this.resume(rate)
+      if (time > 0) this.ctx.seek(time)
+    }
   }
 
   resume(rate: number = 1) {
@@ -547,7 +582,7 @@ Page<IListeningData, IListeningMethods>({
         mode: 'detail',
         currentPassage: passage,
         currentIndex: 0,
-        isPlaying: true,
+        isPlaying: false,
         hardSentences: localHard,
         sentenceHardStatus,
         audioMode: true,
@@ -645,6 +680,9 @@ Page<IListeningData, IListeningMethods>({
         isCurrentMarked: this.data.markedFlags[cp] || false,
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
+      if (this.data.liteMode && wasPlaying && p && p.sentenceStart != null && p.sentenceStart >= 0) {
+        audio.seek(p.sentenceStart)
+      }
     }
   },
 
@@ -663,6 +701,9 @@ Page<IListeningData, IListeningMethods>({
         isCurrentMarked: this.data.markedFlags[cp] || false,
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
+      if (this.data.liteMode && wasPlaying && p && p.sentenceStart != null && p.sentenceStart >= 0) {
+        audio.seek(p.sentenceStart)
+      }
     } else if (this.data.currentPage >= lastIdx && this.data.audioMode) {
       this.viewSummary()
     }
@@ -734,7 +775,9 @@ Page<IListeningData, IListeningMethods>({
         loopSentence: true,
         speed: 0.8,
         isPlaying: false,
-        showTranscript: true,
+    showTranscript: true,
+    liteMode: false,
+    tinyOptions: false,
         focusSentences: lines,
         focusSentenceMap: sentMap,
         focusPageIndices: pageIdx,
@@ -788,6 +831,26 @@ Page<IListeningData, IListeningMethods>({
     this.setData({ markedPages: m, markedFlags: flags, isCurrentMarked: flags[cp] })
   },
 
+  toggleLiteMode() {
+    this.setData({ liteMode: !this.data.liteMode, showTranscript: true })
+  },
+
+  toggleTiny() {
+    this.setData({ tinyOptions: !this.data.tinyOptions })
+  },
+
+  replayCurrent() {
+    if (!this.data.audioMode || !this.data.currentPassage) return
+    const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null
+    if (curPage && curPage.sentenceStart != null && curPage.sentenceStart >= 0) {
+      audio.seek(curPage.sentenceStart)
+      if (this.data.isPlaying || this.data.liteMode) {
+        audio.resume(this.data.speed)
+        this.setData({ isPlaying: true })
+      }
+    }
+  },
+
   // ===== Audio controls =====
   playCurrent() {
     if (this.data.focusMode) {
@@ -838,8 +901,13 @@ Page<IListeningData, IListeningMethods>({
       if (this.data.isPlaying) {
         audio.pause()
         this.setData({ isPlaying: false })
-      } else {
+      } else if (audio.hasSource()) {
         audio.resume(this.data.speed)
+        this.setData({ isPlaying: true })
+      } else {
+        const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null
+        const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0
+        audio.playFrom(st, this.data.speed)
         this.setData({ isPlaying: true })
       }
     } else if (this.data.isPlaying) {

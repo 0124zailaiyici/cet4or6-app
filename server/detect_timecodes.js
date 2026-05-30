@@ -38,7 +38,7 @@ function detectBigSilences(mp3Path) {
   )
 
   const boundaries = [0]
-  const regex = /silence_start:\s*([\d.]+)/g
+  const regex = /silence_end:\s*([\d.]+)/g
   let match
   while ((match = regex.exec(result)) !== null) {
     boundaries.push(parseFloat(match[1]))
@@ -60,7 +60,7 @@ function mapToParagraphs(boundaries, totalDuration) {
   // 合并靠近的边界（<15秒）
   const merged = [unique[0]]
   for (let i = 1; i < unique.length; i++) {
-    if (unique[i] - merged[merged.length - 1] < 15) {
+    if (unique[i] - merged[merged.length - 1] < 22) {
       merged[merged.length - 1] = unique[i]
     } else {
       merged.push(unique[i])

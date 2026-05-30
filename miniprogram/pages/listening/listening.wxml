@@ -131,6 +131,12 @@
           <view class="ctl-pill {{loopSentence ? 'on' : ''}}" catchtap="toggleLoop">{{loopSentence ? '🔁' : '循环'}}</view>
         </view>
 
+        <!-- 模式切换 -->
+        <view class="mode-tabs">
+          <view class="mtab {{liteMode ? 'on' : ''}}" catchtap="toggleLiteMode">📄 原文精听</view>
+          <view class="mtab {{!liteMode ? 'on' : ''}}" catchtap="toggleLiteMode">📝 题目模式</view>
+        </view>
+
         <!-- 数据警告 -->
         <view class="dwarn" wx:if="{{dataWarning}}">
           <text user-select>{{dataWarning}}</text>
@@ -147,29 +153,56 @@
                   <view class="p-dir-text">{{item.stem}}</view>
                 </view>
                 <!-- Question -->
-                <view wx:else class="p-q">
+                <view wx:else class="p-q {{liteMode ? 'lite' : ''}}">
                   <view class="p-section">{{item.section}}<text wx:if="{{focusMode && markedFlags[pi]}}" style="color:var(--rose);font-size:18rpx;margin-left:6rpx"> 📌</text></view>
-                  <view class="p-stem">{{item.stem}}</view>
-                  <view class="p-opts">
-                    <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
-                      <view class="po-l">{{optionLetters[oi]}}</view>
-                      <view class="po-t">{{item}}</view>
-                    </view>
-                  </view>
-                  <!-- Transcript -->
-                  <view wx:if="{{item.transcriptText}}" class="ts-area">
-                    <view class="ts-toggle {{showTranscript ? 'open' : ''}}" catchtap="toggleTranscript">
-                      <text class="ts-label">📄 原文</text>
-                      <text class="ts-arrow">▼</text>
-                    </view>
-                    <view class="ts-body {{showTranscript ? 'open' : ''}}">
-                      <view class="ts-text">{{item.transcriptText}}</view>
-                      <view class="ts-play {{transcriptPlayingIdx === pi ? 'on' : ''}}" data-pi="{{pi}}" catchtap="playTranscriptSentence" wx:if="{{item.groupStartTime}}">
-                        <text wx:if="{{transcriptPlayingIdx === pi}}">⏸</text>
-                        <text wx:else>▶</text>
+
+                  <!-- Lite mode: transcript as primary view -->
+                  <block wx:if="{{liteMode && item.transcriptText}}">
+                    <view class="lite-transcript" catchtap="toggleTranscript">
+                      <view class="lt-body" style="-webkit-line-clamp: {{showTranscript ? '10' : '4'}}">
+                        <text class="lt-text">{{item.transcriptText}}</text>
+                      </view>
+                      <view class="lt-foot">
+                        <text class="lt-expand">{{showTranscript ? '收起' : '展开全文'}} {{showTranscript ? '▲' : '▼'}}</text>
+                        <text class="lt-anki" wx:if="{{item.answerKey}}">答案: {{item.answerKey}}</text>
                       </view>
                     </view>
-                  </view>
+                    <view class="opts-row">
+                      <view class="p-stem" style="margin:0;font-size:26rpx">{{item.stem}}</view>
+                      <view class="tiny-btn {{tinyOptions ? 'on' : ''}}" catchtap="toggleTiny">TINY</view>
+                    </view>
+                    <view class="p-opts {{tinyOptions ? 'tiny' : ''}}">
+                      <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
+                        <view class="po-l">{{optionLetters[oi]}}</view>
+                        <view class="po-t">{{item}}</view>
+                      </view>
+                    </view>
+                  </block>
+
+                  <!-- Normal mode / direction pages -->
+                  <block wx:else>
+                    <view class="p-stem">{{item.stem}}</view>
+                    <view class="p-opts {{liteMode ? 'tiny' : ''}}">
+                      <view class="po {{selectedAnswers[pi] === oi ? 'on' : ''}}" wx:for="{{item.opts}}" wx:key="*this" wx:for-index="oi" data-i="{{pi}}" data-oi="{{oi}}" catchtap="onOptionTap">
+                        <view class="po-l">{{optionLetters[oi]}}</view>
+                        <view class="po-t">{{item}}</view>
+                      </view>
+                    </view>
+                    <!-- Transcript collapsible (normal mode) -->
+                    <view wx:if="{{item.transcriptText}}" class="ts-area">
+                      <view class="ts-toggle {{showTranscript ? 'open' : ''}}" catchtap="toggleTranscript">
+                        <text class="ts-label">📄 原文</text>
+                        <text class="ts-arrow">▼</text>
+                      </view>
+                      <view class="ts-body {{showTranscript ? 'open' : ''}}">
+                        <view class="ts-text">{{item.transcriptText}}</view>
+                        <view class="ts-play {{transcriptPlayingIdx === pi ? 'on' : ''}}" data-pi="{{pi}}" catchtap="playTranscriptSentence" wx:if="{{item.groupStartTime}}">
+                          <text wx:if="{{transcriptPlayingIdx === pi}}">⏸</text>
+                          <text wx:else>▶</text>
+                        </view>
+                      </view>
+                    </view>
+                  </block>
                 </view>
               </view>
             </view>
@@ -179,6 +212,7 @@
         <!-- 底栏 -->
         <view class="bottom-bar">
           <view class="bot-nav" catchtap="prevPage">⬅ 上一题</view>
+          <view class="bot-replay" catchtap="replayCurrent">↺</view>
           <view class="bot-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
           <view class="bot-dots">
             <view class="bd {{i === currentPage ? 'on' : ''}}" wx:for="{{pages}}" wx:key="_key" wx:for-index="i"></view>

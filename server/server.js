@@ -478,6 +478,15 @@ ${text.trim()}
 });
 
 // Audio trimming: return audio from startTime to end
+app.get('/audio/full/:passageId', (req, res) => {
+  const { passageId } = req.params
+  const passage = PASSAGE_DATA.find(p => p.id === passageId)
+  if (!passage) return res.status(404).json({ error: 'passage not found' })
+  const audioPath = path.join(__dirname, passage.audioFile)
+  if (!fs.existsSync(audioPath)) return res.status(404).json({ error: 'audio file not found' })
+  res.sendFile(audioPath)
+})
+
 app.get('/audio/from/:passageId/:startTime', (req, res) => {
   const { passageId, startTime } = req.params
   const start = parseFloat(startTime)
@@ -494,7 +503,6 @@ app.get('/audio/from/:passageId/:startTime', (req, res) => {
     execSync(`ffmpeg -y -i "${audioPath}" -ss ${start} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`, { timeout: 30000 })
     res.sendFile(segFile)
   } catch {
-    // 退回到输出 seek（慢但准）
     try {
       const ffmpeg = spawn('ffmpeg', ['-i', audioPath, '-ss', String(start), '-c', 'copy', '-f', 'mp3', 'pipe:1'], { stdio: ['ignore', 'pipe', 'inherit'] })
       res.set('Content-Type', 'audio/mpeg')
