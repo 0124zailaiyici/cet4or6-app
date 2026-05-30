@@ -420,7 +420,15 @@ class AudioManager {
           const rt = d._retryCount || 0
           if (rt < 3) {
             this.pageRef.setData({ _retryCount: rt + 1, loading: true })
-            setTimeout(() => { if (this.ctx && this.ctx.src) { this.ctx.play() } }, (rt + 1) * 5000)
+            const delay = [10, 15, 20][rt] || 20000
+            setTimeout(() => {
+              if (this.ctx && this._src) {
+                this.ctx.stop()
+                this.ctx.src = this._src
+                this.ctx.playbackRate = this.pageRef.data.speed
+                this.ctx.play()
+              }
+            }, delay * 1000)
             return
           }
         }
