@@ -374,6 +374,15 @@ class AudioManager {
 
   playFrom(time: number, rate: number = 1) {
     if (!this._src) return
+
+    // 同一音频且在播/已缓冲 → 直接 seek（快路径）
+    if (this.ctx && this.ctx.src === this._src && this.ctx.duration > 0) {
+      this.ctx.seek(time)
+      this.ctx.playbackRate = rate
+      this.ctx.play()
+      return
+    }
+
     if (this.ctx) this.ctx.destroy()
     this.ctx = null
 
@@ -435,7 +444,10 @@ class AudioManager {
       wx.showToast({ title: '播放失败', icon: 'none' })
       if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
     })
+    let sought = false
     ctx.onCanplay(() => {
+      if (sought) return
+      sought = true
       if (this.pageRef) {
         const d: any = { loading: false }
         if (ctx.duration > 0 && isFinite(ctx.duration)) {
