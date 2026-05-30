@@ -475,7 +475,7 @@ ${text.trim()}
   }
 });
 
-// Audio trimming: return audio from startTime to end (fast seek, no re-encode)
+// Audio trimming: return audio from startTime to end
 app.get('/audio/from/:passageId/:startTime', (req, res) => {
   const { passageId, startTime } = req.params
   const start = parseFloat(startTime)
@@ -487,16 +487,13 @@ app.get('/audio/from/:passageId/:startTime', (req, res) => {
   const audioPath = path.join(__dirname, passage.audioFile)
   if (!fs.existsSync(audioPath)) return res.status(404).json({ error: 'audio file not found' })
 
-  const ffmpeg = spawn('ffmpeg', [
-    '-ss', String(start),
-    '-i', audioPath,
-    '-c', 'copy',
-    '-f', 'mp3',
-    'pipe:1'
-  ], { stdio: ['ignore', 'pipe', 'inherit'] })
-  res.set('Content-Type', 'audio/mpeg')
-  ffmpeg.stdout.pipe(res)
-  ffmpeg.on('error', () => { if (!res.headersSent) res.status(500).json({ error: 'extraction failed' }) })
+  const segFile = path.join(SPLIT_DIR, `${passageId}_from_${start}.mp3`)
+  try {
+    execSync(`ffmpeg -y -i "${audioPath}" -ss ${start} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`, { timeout: 30000 })
+    res.sendFile(segFile)
+  } catch {
+    res.status(500).json({ error: 'extraction failed' })
+  }
 })
 
 app.get('/health', (_, res) => {
