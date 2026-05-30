@@ -15,6 +15,8 @@ app.use('/audio/split', express.static(path.join(__dirname, 'audio', 'split')));
 const { execSync, spawn } = require('child_process');
 const SPLIT_DIR = path.join(__dirname, 'audio', 'split');
 if (!fs.existsSync(SPLIT_DIR)) fs.mkdirSync(SPLIT_DIR, { recursive: true });
+// Clean stale from- cache (command changed), will be re-generated on demand
+for (const f of fs.readdirSync(SPLIT_DIR)) { if (f.includes('_from_')) fs.unlinkSync(path.join(SPLIT_DIR, f)) }
 
 const PASSAGE_DATA = (() => {
   try {
@@ -489,7 +491,9 @@ app.get('/audio/from/:passageId/:startTime', (req, res) => {
 
   const segFile = path.join(SPLIT_DIR, `${passageId}_from_${start}.mp3`)
   try {
-    execSync(`ffmpeg -y -i "${audioPath}" -ss ${start} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`, { timeout: 30000 })
+    // Two-ss seek: fast input seek near target + accurate output seek to exact position
+    const preSeek = Math.max(0, start - 2)
+    execSync(`ffmpeg -y -ss ${preSeek} -i "${audioPath}" -ss ${start - preSeek} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`, { timeout: 30000 })
     res.sendFile(segFile)
   } catch {
     res.status(500).json({ error: 'extraction failed' })
