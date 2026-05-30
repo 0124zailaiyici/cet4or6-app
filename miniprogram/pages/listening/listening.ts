@@ -885,20 +885,15 @@ Page<IListeningData, IListeningMethods>({
 
   toggleLiteMode() {
     const lm = !this.data.liteMode
-    const wasPlaying = this.data.isPlaying
     const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null
     const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0
+    audio.pause()
     this.setData({
       liteMode: lm,
       showTranscript: true,
-      isPlaying: lm ? false : wasPlaying,
+      isPlaying: false,
     })
-    if (wasPlaying) {
-      audio.pause()
-    }
-    if (lm) {
-      setTimeout(() => audio.playFrom(st, this.data.speed), 50)
-    }
+    setTimeout(() => audio.playFrom(st, this.data.speed), 50)
   },
 
   toggleTiny() {
@@ -915,6 +910,15 @@ Page<IListeningData, IListeningMethods>({
         this.setData({ isPlaying: true })
       }
     }
+  },
+
+  resetPlayback() {
+    if (!this.data.audioMode || !this.data.currentPassage) return
+    const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null
+    const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0
+    audio.pause()
+    this.setData({ isPlaying: false })
+    setTimeout(() => audio.playFrom(st, this.data.speed), 30)
   },
 
   // ===== Audio controls =====

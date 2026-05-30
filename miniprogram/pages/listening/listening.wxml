@@ -201,7 +201,7 @@
             <view class="ctl-pill {{speed === item ? 'on' : ''}}" wx:for="{{speedOptions}}" wx:key="*this" data-speed="{{item}}" catchtap="setSpeed">{{item}}x</view>
           </view>
           <view class="bb-ctrl">
-            <view class="bot-replay" catchtap="replayCurrent">↺</view>
+            <view class="bb-reset" catchtap="resetPlayback">重置</view>
             <view class="bot-play" catchtap="playPause">{{loading ? '...' : (isPlaying ? '⏸' : '▶')}}</view>
           </view>
         </view>
