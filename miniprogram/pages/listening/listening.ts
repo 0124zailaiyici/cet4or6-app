@@ -26,6 +26,8 @@ interface IListeningPage {
   opts?: string[]
   transcriptText?: string
   transcriptUrl?: string
+  sentenceStart?: number
+  groupStartTime?: number
 }
 
 interface IQuestionResult {
@@ -166,6 +168,7 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
       opts: currentQ.opts.map(o => o.t),
       transcriptText: sent ? sent.text : '',
       transcriptUrl: sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
+      sentenceStart: sent ? sent.start : 0,
     })
     currentQ = null
   }
@@ -223,6 +226,15 @@ function buildPages(passage: IListeningItem): IListeningPage[] {
     p.opts = p.opts.filter(o => o.length > 0)
   }
 
+  let prevStart = -1
+  for (const p of pages) {
+    if (p.type !== 'q') continue
+    if (p.sentenceStart !== prevStart) {
+      prevStart = p.sentenceStart || 0
+      if (prevStart > 0) p.groupStartTime = prevStart
+    }
+  }
+
   if (pages.every(p => p.type === 'dir')) return []
   pages.forEach((p, i) => { (p as any)._key = 'p_' + i })
   return pages
@@ -233,11 +245,13 @@ class AudioManager {
   private ctx: WechatMiniprogram.InnerAudioContext | null
   private pageRef: any
   private customOnEnded: (() => void) | null
+  private _src: string
 
   constructor() {
     this.ctx = null
     this.pageRef = null
     this.customOnEnded = null
+    this._src = ''
   }
 
   attach(page: any) {
@@ -347,12 +361,97 @@ class AudioManager {
   }
 
   play(src: string, rate: number = 1) {
+    this._src = src
     const ctx = this.getCtx()
     ctx.stop()
     ctx.src = src
     ctx.playbackRate = rate
     ctx.play()
     if (this.pageRef) this.pageRef.setData({ _retryCount: 0 })
+  }
+
+  getSrc(): string { return this._src }
+
+  playFrom(time: number, rate: number = 1) {
+    if (!this._src) return
+    if (this.ctx) this.ctx.destroy()
+    this.ctx = null
+
+    const ctx = wx.createInnerAudioContext()
+    ctx.obeyMuteSwitch = false
+    ctx.volume = 1
+    ctx.autoplay = false
+
+    ctx.onPlay(() => {
+      if (this.pageRef) this.pageRef.setData({ loading: false })
+    })
+    ctx.onEnded(() => {
+      if (this.customOnEnded) {
+        this.customOnEnded()
+      } else if (this.pageRef) {
+        const d = this.pageRef.data
+        if (d.audioMode) {
+          if (d.loopSentence && this.ctx) {
+            this.ctx.seek(0)
+            this.ctx.play()
+            this.pageRef.setData({ isPlaying: true })
+          } else {
+            this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
+          }
+        } else if (d.loopSentence) {
+          this.pageRef.playCurrent()
+        } else if (d.currentIndex < d.currentPassage.sentences.length - 1) {
+          this.pageRef.nextSentence()
+        } else {
+          this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
+        }
+      }
+    })
+    ctx.onTimeUpdate(() => {
+      if (this.pageRef && this.pageRef.data.audioMode) {
+        const d = this.pageRef.data
+        const t = ctx.currentTime
+        const dur = ctx.duration
+        if (!isFinite(t) || !isFinite(dur)) return
+        const fmt = (v: number) => {
+          const m = Math.floor(v / 60)
+          const s = Math.floor(v % 60)
+          return `${m}:${s < 10 ? '0' : ''}${s}`
+        }
+        this.pageRef.setData({
+          audioTime: t, audioDuration: dur,
+          audioTimeStr: fmt(t), audioDurationStr: fmt(dur),
+        })
+        if (d.focusMode && d.loopSentence) {
+          const origIdx = d.focusSentenceMap[d.currentIndex] != null ? d.focusSentenceMap[d.currentIndex] : 0
+          const sent = d.currentPassage && d.currentPassage.sentences[origIdx]
+          if (sent && sent.end > 0 && ctx.currentTime >= sent.end) {
+            ctx.seek(sent.start || 0)
+          }
+        }
+      }
+    })
+    ctx.onError(() => {
+      wx.showToast({ title: '播放失败', icon: 'none' })
+      if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
+    })
+    ctx.onCanplay(() => {
+      if (this.pageRef) {
+        const d: any = { loading: false }
+        if (ctx.duration > 0 && isFinite(ctx.duration)) {
+          const m = Math.floor(ctx.duration / 60)
+          const s = Math.floor(ctx.duration % 60)
+          d.audioDuration = ctx.duration
+          d.audioDurationStr = `${m}:${s < 10 ? '0' : ''}${s}`
+        }
+        this.pageRef.setData(d)
+      }
+      ctx.seek(time)
+      ctx.playbackRate = rate
+      ctx.play()
+    })
+    ctx.src = this._src
+    this.ctx = ctx
   }
 
   resume(rate: number = 1) {
@@ -918,22 +1017,12 @@ Page<IListeningData, IListeningMethods>({
   playTranscriptSentence(e: WechatMiniprogram.TouchEvent) {
     const pi = parseInt(e.currentTarget.dataset.pi as string)
     if (isNaN(pi)) return
-    const passage = this.data.currentPassage
     const page = this.data.pages[pi]
-    if (!passage || !page || page.type !== 'q') return
-    const qNum = parseInt((page.stem || '').replace(/^Q/i, ''))
-    if (isNaN(qNum)) return
-    const sentIdx = passage.sentences.findIndex((s: any) => {
-      const m = (s.text || '').match(/^(?:Q)?(\d+)\./)
-      return m && parseInt(m[1]) === qNum
-    })
-    if (sentIdx < 0) return
-    const sent = passage.sentences[sentIdx] as any
-    if (sent.start === 0 && sent.end === 0) return
+    if (!page || page.type !== 'q') return
+    const t = page.groupStartTime || page.sentenceStart
+    if (!t) return
 
-    if (!audio.hasSource()) return
-    audio.seek(sent.start)
-    audio.resume(this.data.speed)
+    audio.playFrom(t, this.data.speed)
     this.setData({ transcriptPlayingIdx: pi, isPlaying: true })
   },
 
