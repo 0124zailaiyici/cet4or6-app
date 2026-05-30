@@ -21,18 +21,20 @@ for (const f of fs.readdirSync(SPLIT_DIR)) { if (f.includes('_from_')) fs.unlink
 const PASSAGE_DATA = (() => {
   try {
     const raw = fs.readFileSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'), 'utf8');
-    const objs = [];
-    const re = /\{\s*"id":\s*(\d+)[\s\S]*?"audioUrl":\s*"([^"]+)"[\s\S]*?"sentences":\s*\[([\s\S]*?)\]\s*,\s*"fullText":/g;
-    let m;
-    while ((m = re.exec(raw)) !== null) {
-      const sents = [];
-      const sr = /"start":\s*(\d+)\s*,\s*"end":\s*(\d+)/g;
-      let sm;
-      while ((sm = sr.exec(m[3])) !== null) sents.push({ start: parseInt(sm[1]), end: parseInt(sm[2]) });
-      objs.push({ id: m[1], audioFile: m[2].replace(/^\//, ''), sentences: sents });
-    }
-    return objs;
-  } catch { return [] }
+    const start = raw.indexOf('[')
+    const end = raw.lastIndexOf(']') + 1
+    if (start < 0 || end < 0) throw new Error('Could not find JSON array in data file')
+    const json = raw.slice(start, end)
+    const parsed = JSON.parse(json)
+    return parsed.map((p: any) => ({
+      id: String(p.id),
+      audioFile: (p.audioUrl || '').replace(/^\//, ''),
+      sentences: (p.sentences || []).map((s: any) => ({ start: s.start || 0, end: s.end || 0 })),
+    }))
+  } catch (e) {
+    console.error('Failed to parse passage data:', e.message)
+    return []
+  }
 })();
 
 app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
