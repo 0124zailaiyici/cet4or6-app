@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = "... ffmpeg"
+nixPkgs = ["ffmpeg"]
 
 [phases.install]
 cmds = ["cd server && npm install"]
