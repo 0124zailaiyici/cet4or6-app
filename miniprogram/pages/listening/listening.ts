@@ -279,15 +279,14 @@ class AudioManager {
               this.ctx.play()
               this.pageRef.setData({ isPlaying: true })
             } else {
-              this.pageRef.setData({ isPlaying: false })
+              this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
             }
           } else if (d.loopSentence) {
             this.pageRef.playCurrent()
           } else if (d.currentIndex < d.currentPassage.sentences.length - 1) {
             this.pageRef.nextSentence()
-            } else {
-              this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
-            }
+          } else {
+            this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
           }
         }
       })
