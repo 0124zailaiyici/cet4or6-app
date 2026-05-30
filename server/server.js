@@ -516,7 +516,21 @@ app.get('/audio/from/:passageId/:startTime', (req, res) => {
 })
 
 app.get('/health', (_, res) => {
-  res.json({ status: 'ok', deepseekKey: !!API_KEY, ollamaUrl: !!OLLAMA_URL });
+  res.json({ status: 'ok', deepseekKey: !!API_KEY, ollamaUrl: !!OLLAMA_URL, passages: PASSAGE_DATA.length });
+});
+
+app.get('/debug', (_, res) => {
+  const audioDir = path.join(__dirname, 'audio')
+  let files: string[] = []
+  try { files = fs.readdirSync(audioDir).filter((f: string) => f.endsWith('.mp3')) } catch {}
+  res.json({
+    cwd: process.cwd(),
+    dirname: __dirname,
+    audioFiles: files,
+    passages: PASSAGE_DATA.map((p: any) => ({ id: p.id, file: p.audioFile })),
+    dataPath: path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'),
+    dataExists: fs.existsSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts')),
+  });
 });
 
 app.listen(PORT, () => {
