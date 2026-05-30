@@ -390,6 +390,7 @@ class AudioManager {
     ctx.obeyMuteSwitch = false
     ctx.volume = 1
     ctx.autoplay = false
+    ctx.startTime = time
 
     ctx.onPlay(() => {
       if (this.pageRef) this.pageRef.setData({ loading: false })
@@ -444,21 +445,7 @@ class AudioManager {
       wx.showToast({ title: '播放失败', icon: 'none' })
       if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
     })
-    let sought = false
     ctx.onCanplay(() => {
-      if (sought) return
-      sought = true
-      if (this.pageRef) {
-        const d: any = { loading: false }
-        if (ctx.duration > 0 && isFinite(ctx.duration)) {
-          const m = Math.floor(ctx.duration / 60)
-          const s = Math.floor(ctx.duration % 60)
-          d.audioDuration = ctx.duration
-          d.audioDurationStr = `${m}:${s < 10 ? '0' : ''}${s}`
-        }
-        this.pageRef.setData(d)
-      }
-      ctx.seek(time)
       ctx.playbackRate = rate
       ctx.play()
     })
