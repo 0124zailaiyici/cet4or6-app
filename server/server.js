@@ -27,10 +27,10 @@ const PASSAGE_DATA = (() => {
     let json = raw.slice(start, end)
     json = json.replace(/,(\s*[}\]])/g, '$1')
     const parsed = JSON.parse(json)
-    return parsed.map((p: any) => ({
+    return parsed.map((p) => ({
       id: String(p.id),
       audioFile: (p.audioUrl || '').replace(/^\//, ''),
-      sentences: (p.sentences || []).map((s: any) => ({ start: s.start || 0, end: s.end || 0 })),
+      sentences: (p.sentences || []).map((s) => ({ start: s.start || 0, end: s.end || 0 })),
     }))
   } catch (e) {
     console.error('Failed to parse passage data:', e.message)
@@ -521,13 +521,13 @@ app.get('/health', (_, res) => {
 
 app.get('/debug', (_, res) => {
   const audioDir = path.join(__dirname, 'audio')
-  let files: string[] = []
-  try { files = fs.readdirSync(audioDir).filter((f: string) => f.endsWith('.mp3')) } catch {}
+  let files = []
+  try { files = fs.readdirSync(audioDir).filter((f) => f.endsWith('.mp3')) } catch {}
   res.json({
     cwd: process.cwd(),
     dirname: __dirname,
     audioFiles: files,
-    passages: PASSAGE_DATA.map((p: any) => ({ id: p.id, file: p.audioFile })),
+    passages: PASSAGE_DATA.map((p) => ({ id: p.id, file: p.audioFile })),
     dataPath: path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'),
     dataExists: fs.existsSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts')),
   });
