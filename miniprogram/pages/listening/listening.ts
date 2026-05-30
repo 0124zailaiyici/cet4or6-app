@@ -246,12 +246,14 @@ class AudioManager {
   private pageRef: any
   private customOnEnded: (() => void) | null
   private _src: string
+  private _seekGuard: boolean
 
   constructor() {
     this.ctx = null
     this.pageRef = null
     this.customOnEnded = null
     this._src = ''
+    this._seekGuard = false
   }
 
   attach(page: any) {
@@ -398,15 +400,15 @@ class AudioManager {
       return
     }
 
-    // 无上下文 → 重建
+    // 无上下文 → 重建，seek 后等缓冲再播
     if (this.ctx) this.ctx.destroy()
     this.ctx = null
+    this._seekGuard = false
 
     const ctx = wx.createInnerAudioContext()
     ctx.obeyMuteSwitch = false
     ctx.volume = 1
-    ctx.autoplay = true
-    ctx.startTime = time
+    ctx.autoplay = false
 
     ctx.onPlay(() => {
       if (this.pageRef) this.pageRef.setData({ loading: false })
@@ -436,7 +438,7 @@ class AudioManager {
     ctx.onTimeUpdate(() => {
       if (this.pageRef && this.pageRef.data.audioMode) {
         const d = this.pageRef.data
-        const t = ctx.currentTime + time
+        const t = ctx.currentTime
         const dur = ctx.duration
         if (!isFinite(t) || !isFinite(dur)) return
         const fmt = (v: number) => {
@@ -460,6 +462,15 @@ class AudioManager {
     ctx.onError(() => {
       wx.showToast({ title: '播放失败', icon: 'none' })
       if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
+    })
+    ctx.onCanplay(() => {
+      if (this._seekGuard) return
+      this._seekGuard = true
+      ctx.seek(time)
+      setTimeout(() => {
+        ctx.playbackRate = rate
+        ctx.play()
+      }, 3000)
     })
     ctx.src = this._src
     this.ctx = ctx
