@@ -375,21 +375,37 @@ class AudioManager {
   playFrom(time: number, rate: number = 1) {
     if (!this._src) return
 
-    // 同一音频且在播/已缓冲 → 直接 seek（快路径）
-    if (this.ctx && this.ctx.src === this._src && this.ctx.duration > 0) {
+    // 已有上下文且加载完毕 → 直接 seek（快路径）
+    if (this.ctx && this.ctx.src === this._src && this.ctx.duration > 0 && isFinite(this.ctx.duration)) {
       this.ctx.seek(time)
       this.ctx.playbackRate = rate
       this.ctx.play()
       return
     }
 
+    // 上下文存在但未加载完 → 等加载后再 seek
+    if (this.ctx && this.ctx.src === this._src) {
+      const retry = () => {
+        if (this.ctx && this.ctx.duration > 0 && isFinite(this.ctx.duration)) {
+          this.ctx.seek(time)
+          this.ctx.playbackRate = rate
+          this.ctx.play()
+        } else {
+          setTimeout(retry, 300)
+        }
+      }
+      retry()
+      return
+    }
+
+    // 无上下文 → 重建
     if (this.ctx) this.ctx.destroy()
     this.ctx = null
 
     const ctx = wx.createInnerAudioContext()
     ctx.obeyMuteSwitch = false
     ctx.volume = 1
-    ctx.autoplay = false
+    ctx.autoplay = true
     ctx.startTime = time
 
     ctx.onPlay(() => {
@@ -444,10 +460,6 @@ class AudioManager {
     ctx.onError(() => {
       wx.showToast({ title: '播放失败', icon: 'none' })
       if (this.pageRef) this.pageRef.setData({ isPlaying: false, loading: false })
-    })
-    ctx.onCanplay(() => {
-      ctx.playbackRate = rate
-      ctx.play()
     })
     ctx.src = this._src
     this.ctx = ctx
@@ -1020,6 +1032,13 @@ Page<IListeningData, IListeningMethods>({
     if (!page || page.type !== 'q') return
     const t = page.groupStartTime || page.sentenceStart
     if (!t) return
+
+    // 正在播这组 → 暂停
+    if (this.data.transcriptPlayingIdx === pi && this.data.isPlaying) {
+      audio.pause()
+      this.setData({ isPlaying: false, transcriptPlayingIdx: -1 })
+      return
+    }
 
     audio.playFrom(t, this.data.speed)
     this.setData({ transcriptPlayingIdx: pi, isPlaying: true })
