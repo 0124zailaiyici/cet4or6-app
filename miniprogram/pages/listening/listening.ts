@@ -308,7 +308,7 @@ class AudioManager {
       ctx.onTimeUpdate(() => {
         if (this.pageRef && this.pageRef.data.audioMode && this.ctx) {
           const d = this.pageRef.data
-        const t = ctx.currentTime + time
+        const t = ctx.currentTime
           const dur = ctx.duration
           if (!isFinite(t) || !isFinite(dur)) return
           const fmt = (v: number) => {
@@ -420,7 +420,7 @@ class AudioManager {
     ctx.onTimeUpdate(() => {
       if (this.pageRef && this.pageRef.data.audioMode) {
         const d = this.pageRef.data
-        const t = ctx.currentTime
+        const t = ctx.currentTime + time
         const dur = ctx.duration
         if (!isFinite(t) || !isFinite(dur)) return
         const fmt = (v: number) => {
