@@ -20,11 +20,12 @@ for (const f of fs.readdirSync(SPLIT_DIR)) { if (f.includes('_from_')) fs.unlink
 
 const PASSAGE_DATA = (() => {
   try {
-    const raw = fs.readFileSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'), 'utf8');
+    let raw = fs.readFileSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'), 'utf8');
     const start = raw.indexOf('[')
     const end = raw.lastIndexOf(']') + 1
     if (start < 0 || end < 0) throw new Error('Could not find JSON array in data file')
-    const json = raw.slice(start, end)
+    let json = raw.slice(start, end)
+    json = json.replace(/,(\s*[}\]])/g, '$1')
     const parsed = JSON.parse(json)
     return parsed.map((p: any) => ({
       id: String(p.id),
