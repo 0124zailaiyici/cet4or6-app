@@ -201,7 +201,8 @@ Page({
     /* 推荐理由 */
     let todayReason = ''
     if (todayItem) {
-      const weakTopic = listItems.find(t => t._topic && !doneSet.has(t.id))?._topic
+      const found = listItems.find(t => t._topic && !doneSet.has(t.id))
+      const weakTopic = found ? found._topic : undefined
       todayReason = weakTopic
         ? `你的「${weakTopic}」主题还没练习过，今天就从这里开始吧！先用关键词搭框架，再组织成完整句子。`
         : `今天推荐这题是因为你之前做过类似的，巩固一下会记得更牢～`

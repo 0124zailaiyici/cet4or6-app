@@ -304,14 +304,14 @@ Page<IReadingData, IReadingMethods>({
 
   getBlankGrammarHint(num: string): string {
     const paras = this.data.passageParas
-    const annot = readingAnnotations[this.data.current?.id || 0]
-    const qHint = annot?.qHint || {}
+    const annot = readingAnnotations[this.data.current && this.data.current.id || 0]
+    const qHint = annot && annot.qHint || {}
     if (qHint[num]) return qHint[num]
     for (const para of paras) {
       const idx = para.indexOf(num)
       if (idx < 0) continue
       const before = para.slice(0, idx).trim().split(/\s+/)
-      const b1 = before[before.length - 1]?.replace(/[^a-zA-Z]/g, '').toLowerCase() || ''
+      const b1 = before[before.length - 1] ? before[before.length - 1].replace(/[^a-zA-Z]/g, '').toLowerCase() : ''
       if (['a', 'an'].includes(b1)) return '需要: 名词 (前面有 ' + b1 + ')'
       if (b1 === 'the') return '需要: 名词 (前面有 the)'
       if (['has', 'have', 'had'].includes(b1)) return '需要: 过去分词 (前面有 ' + b1 + ')'
