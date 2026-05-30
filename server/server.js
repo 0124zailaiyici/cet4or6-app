@@ -491,12 +491,16 @@ app.get('/audio/from/:passageId/:startTime', (req, res) => {
 
   const segFile = path.join(SPLIT_DIR, `${passageId}_from_${start}.mp3`)
   try {
-    // Two-ss seek: fast input seek near target + accurate output seek to exact position
-    const preSeek = Math.max(0, start - 2)
-    execSync(`ffmpeg -y -ss ${preSeek} -i "${audioPath}" -ss ${start - preSeek} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`, { timeout: 30000 })
+    execSync(`ffmpeg -y -i "${audioPath}" -ss ${start} -c copy -avoid_negative_ts 1 "${segFile}" 2>nul`, { timeout: 30000 })
     res.sendFile(segFile)
   } catch {
-    res.status(500).json({ error: 'extraction failed' })
+    // 退回到输出 seek（慢但准）
+    try {
+      const ffmpeg = spawn('ffmpeg', ['-i', audioPath, '-ss', String(start), '-c', 'copy', '-f', 'mp3', 'pipe:1'], { stdio: ['ignore', 'pipe', 'inherit'] })
+      res.set('Content-Type', 'audio/mpeg')
+      ffmpeg.stdout.pipe(res)
+      ffmpeg.on('error', () => { if (!res.headersSent) res.status(500).end() })
+    } catch { res.status(500).json({ error: 'extraction failed' }) }
   }
 })
 
