@@ -297,6 +297,7 @@ class AudioManager {
   private _passageId: string | null
   private _fullAudioUrl: string
   private _pendingSeek: number
+  private _advanceGuard: number
 
   constructor() {
     this.ctx = null
@@ -306,6 +307,7 @@ class AudioManager {
     this._passageId = null
     this._fullAudioUrl = ''
     this._pendingSeek = -1
+    this._advanceGuard = -1
   }
 
   attach(page: any) {
@@ -714,6 +716,7 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage > 0) {
       const cp = this.data.currentPage - 1
       const p = this.data.pages[cp]
+      const curP = this.data.pages[this.data.currentPage]
       const wasPlaying = this.data.isPlaying
       if (this.data.focusMode && wasPlaying) {
         audio.pause()
@@ -724,8 +727,10 @@ Page<IListeningData, IListeningMethods>({
         isCurrentMarked: this.data.markedFlags[cp] || false,
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
-      if (this.data.liteMode && wasPlaying && p && p.sentenceStart != null && p.sentenceStart >= 0) {
-        setTimeout(() => audio.seek(p.sentenceStart), 30)
+      if (p && p.sentenceStart != null && p.sentenceStart >= 0) {
+        if (p.sentenceStart !== curP.sentenceStart) {
+          setTimeout(() => audio.playFrom(p.sentenceStart, this.data.speed), 30)
+        }
       }
     }
   },
@@ -735,6 +740,7 @@ Page<IListeningData, IListeningMethods>({
     if (this.data.currentPage < lastIdx) {
       const cp = this.data.currentPage + 1
       const p = this.data.pages[cp]
+      const curP = this.data.pages[this.data.currentPage]
       const wasPlaying = this.data.isPlaying
       if (this.data.focusMode && wasPlaying) {
         audio.pause()
@@ -745,8 +751,10 @@ Page<IListeningData, IListeningMethods>({
         isCurrentMarked: this.data.markedFlags[cp] || false,
         isPlaying: this.data.focusMode ? false : wasPlaying,
       })
-      if (this.data.liteMode && wasPlaying && p && p.sentenceStart != null && p.sentenceStart >= 0) {
-        setTimeout(() => audio.seek(p.sentenceStart), 30)
+      if (p && p.sentenceStart != null && p.sentenceStart >= 0) {
+        if (p.sentenceStart !== curP.sentenceStart) {
+          setTimeout(() => audio.playFrom(p.sentenceStart, this.data.speed), 30)
+        }
       }
     } else if (this.data.currentPage >= lastIdx && this.data.audioMode) {
       this.viewSummary()
