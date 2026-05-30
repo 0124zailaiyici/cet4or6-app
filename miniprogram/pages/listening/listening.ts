@@ -2,7 +2,7 @@ import listeningData from '../../data/listening_generated'
 import { doCheckIn } from '../../utils/checkin'
 import { applyTheme, getDarkMode } from '../../utils/theme'
 
-const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
+const API_BASE = (() => { try { const v = wx.getStorageSync('api_base'); if (v && v.includes('railway')) return v; return 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
 
 interface ISentence {
   text: string

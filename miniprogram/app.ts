@@ -1,6 +1,6 @@
 import { applyTheme } from './utils/theme'
 
-const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app' } catch(e) { return 'https://cet4or6-app-production.up.railway.app' } })()
+const API_BASE = (() => { try { const v = wx.getStorageSync('api_base'); if (v && v.includes('railway')) return v; return 'https://cet4or6-app-production.up.railway.app' } catch(e) { return 'https://cet4or6-app-production.up.railway.app' } })()
 
 const defaults = {
   completedListens: [] as number[],

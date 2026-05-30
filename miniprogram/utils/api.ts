@@ -1,6 +1,6 @@
 // 部署到公网后改成你的 Railway 地址：
 // wx.setStorageSync('api_base', 'https://cet4or6-app-production.up.railway.app')
-const API_BASE = (() => { try { return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
+const API_BASE = (() => { try { const v = wx.getStorageSync('api_base'); if (v && v.includes('railway')) return v; return 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
 
 interface CorrectionResult {
   score: number
