@@ -55,11 +55,11 @@
           </block>
           <rich-text wx:elif="{{formattedPages.length > 0}}" nodes="{{formattedPages[passagePage]}}"></rich-text>
           <text wx:else class="pz-text">{{passagePages[passagePage]}}</text>
-          <view class="para-tl-bar" wx:if="{{fullTranslation}}" catchtap="toggleTrans">
-            <text>{{showTrans ? '🔼 收起翻译' : '🌐 全文翻译'}}</text>
+          <view class="para-tl-bar" wx:if="{{pageTranslation}}" catchtap="toggleTrans">
+            <text>{{showTrans ? '🔼 收起翻译' : '🌐 本段翻译'}}</text>
           </view>
           <view class="para-tl-body {{showTrans ? 'open' : ''}}">
-            <text class="para-tl-cn">{{fullTranslation}}</text>
+            <text class="para-tl-cn">{{pageTranslation}}</text>
           </view>
         </scroll-view>
         <view class="pz-nav" wx:if="{{passagePages.length > 1}}">

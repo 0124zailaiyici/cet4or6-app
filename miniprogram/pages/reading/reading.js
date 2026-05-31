@@ -42,6 +42,7 @@ Page({
         passageParas: [],
         highlightedPara: -1,
         fullTranslation: '',
+        pageTranslation: '',
         showTrans: false,
         pageParas: [],
         pageWordSegments: [],
@@ -104,7 +105,7 @@ Page({
             const st = item.sectionType;
             const maxScore = st === 'A' ? 10 : st === 'B' ? 10 : 5;
             const qLocate = annot && annot.qLocate || {};
-            const locateMap = Object.assign({}, qLocate);
+            const locateMap = { ...qLocate };
             const currentQLocate = st === 'C' ? (qLocate[String(0)] || '') : '';
             const stopWords = new Set(['this', 'that', 'these', 'those', 'from', 'with', 'have', 'been', 'were', 'will', 'more', 'some', 'than', 'about', 'which', 'their', 'there', 'would', 'what', 'when', 'where', 'because', 'after', 'into', 'other', 'also', 'then', 'them', 'they', 'very', 'just', 'such', 'each', 'well', 'most', 'only', 'over', 'much', 'many', 'even', 'make', 'made', 'like', 'long', 'same', 'both', 'between', 'under', 'before', 'while', 'still', 'through', 'though', 'might', 'could', 'should', 'shall', 'first', 'second', 'third', 'last', 'next', 'another', 'being', 'doing', 'having', 'does']);
             const bStmtKeywords = [];
@@ -151,6 +152,7 @@ Page({
                 passageParas: paras,
                 highlightedPara: -1,
                 fullTranslation,
+                pageTranslation: '',
                 showTrans: false,
                 scrollToResult: '',
                 showHint: false,
@@ -161,6 +163,7 @@ Page({
             });
             this.updatePageParas();
             this.updateCompact();
+            this.setData({ pageTranslation: this.computePageTranslation() });
         }
     },
     back() {
@@ -168,23 +171,45 @@ Page({
             wx.navigateBack();
             return;
         }
-        this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [], scrollToResult: '' });
+        this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', pageTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [], scrollToResult: '' });
     },
     toggleVocab() {
         this.setData({ showVocab: !this.data.showVocab });
     },
     toggleTrans() {
-        this.setData({ showTrans: !this.data.showTrans });
+        const pt = this.data.pageTranslation || this.computePageTranslation();
+        this.setData({ showTrans: !this.data.showTrans, pageTranslation: pt });
+    },
+    computePageTranslation() {
+        const annot = reading_annotations_1.default[this.data.current && this.data.current.id || 0];
+        const full = annot && annot.translation || '';
+        if (!full)
+            return '';
+        const pt = annot && annot.paraTranslations;
+        if (pt && pt.length > 0) {
+            const st = this.data.current && this.data.current.sectionType;
+            const step = st === 'B' ? 1 : 2;
+            const start = this.data.passagePage * step;
+            const parts = [];
+            for (let i = 0; i < step; i++) {
+                const idx = start + i;
+                if (pt[idx])
+                    parts.push(pt[idx]);
+            }
+            const joined = parts.join('\n').trim();
+            if (joined)
+                return joined;
+        }
+        return full;
     },
     toggleHint() {
         const on = !this.data.showHint;
         this.setData({ showHint: on, highlightedPara: on ? this.data.highlightedPara : -1 });
     },
     getBlankGrammarHint(num) {
-        var _a, _b;
         const paras = this.data.passageParas;
-        const annot = reading_annotations_1.default[((_a = this.data.current) === null || _a === void 0 ? void 0 : _a.id) || 0];
-        const qHint = (annot === null || annot === void 0 ? void 0 : annot.qHint) || {};
+        const annot = reading_annotations_1.default[this.data.current && this.data.current.id || 0];
+        const qHint = annot && annot.qHint || {};
         if (qHint[num])
             return qHint[num];
         for (const para of paras) {
@@ -192,7 +217,7 @@ Page({
             if (idx < 0)
                 continue;
             const before = para.slice(0, idx).trim().split(/\s+/);
-            const b1 = ((_b = before[before.length - 1]) === null || _b === void 0 ? void 0 : _b.replace(/[^a-zA-Z]/g, '').toLowerCase()) || '';
+            const b1 = before[before.length - 1] ? before[before.length - 1].replace(/[^a-zA-Z]/g, '').toLowerCase() : '';
             if (['a', 'an'].includes(b1))
                 return '需要: 名词 (前面有 ' + b1 + ')';
             if (b1 === 'the')
@@ -246,7 +271,13 @@ Page({
                     definition: zh,
                     chn: zh,
                     source: this.data.current && this.data.current.title || '阅读理解',
-                    context: '',
+                    context: (() => {
+                        const p = this.data.current && this.data.current.passage;
+                        if (!p)
+                            return '';
+                        const sents = p.split(/(?<=[.?!])\s+/);
+                        return (sents.find(s => s.toLowerCase().includes(word.toLowerCase())) || '').replace(/[\s\u00A0]+/g, ' ').trim();
+                    })(),
                     contextCn: '',
                     audioUrl: '',
                     status: 'new',
@@ -455,7 +486,7 @@ Page({
             existing.totalScore = totalCount;
             app.globalData.studyData.readingAnswers[id] = existing;
             wx.setStorageSync('studyData', app.globalData.studyData);
-            const map = Object.assign({}, this.data.completionMap);
+            const map = { ...this.data.completionMap };
             map[id] = { submitted: true, score: correctCount, totalScore: totalCount };
             this.setData({ completionMap: map });
         }
@@ -503,6 +534,7 @@ Page({
             highlightedPara: paraIdx
         });
         this.updatePageParas();
+        this.setData({ pageTranslation: this.computePageTranslation() });
     },
     resetCurrent() {
         wx.showModal({
@@ -516,7 +548,7 @@ Page({
                     const app = getApp();
                     delete app.globalData.studyData.readingAnswers[id];
                     wx.setStorageSync('studyData', app.globalData.studyData);
-                    const map = Object.assign({}, this.data.completionMap);
+                    const map = { ...this.data.completionMap };
                     delete map[id];
                     this.setData({ completionMap: map });
                 }
@@ -569,7 +601,7 @@ Page({
         if (this.data.submitted)
             return;
         const num = e.currentTarget.dataset.num;
-        const ba = Object.assign({}, this.data.blankAnswers);
+        const ba = { ...this.data.blankAnswers };
         if (ba[num]) {
             const word = ba[num];
             delete ba[num];
@@ -596,7 +628,7 @@ Page({
             wx.showToast({ title: '请先点击文章中要填入的空白编号', icon: 'none' });
             return;
         }
-        const ba = Object.assign({}, this.data.blankAnswers);
+        const ba = { ...this.data.blankAnswers };
         const used = [...this.data.usedFlags];
         for (const k of Object.keys(ba)) {
             if (ba[k] === word) {
@@ -622,7 +654,13 @@ Page({
             return;
         const app = getApp();
         const existing = app.globalData.studyData.readingAnswers[id] || {};
-        app.globalData.studyData.readingAnswers[id] = Object.assign({ blankAnswers: Object.assign({}, this.data.blankAnswers), usedFlags: [...this.data.usedFlags], matchAnswers: existing.matchAnswers || {}, cAnswers: existing.cAnswers || {} }, existing.submitted !== undefined ? { submitted: existing.submitted, score: existing.score, totalScore: existing.totalScore } : {});
+        app.globalData.studyData.readingAnswers[id] = {
+            blankAnswers: { ...this.data.blankAnswers },
+            usedFlags: [...this.data.usedFlags],
+            matchAnswers: existing.matchAnswers || {},
+            cAnswers: existing.cAnswers || {},
+            ...existing.submitted !== undefined ? { submitted: existing.submitted, score: existing.score, totalScore: existing.totalScore } : {}
+        };
         wx.setStorageSync('studyData', app.globalData.studyData);
     },
     // ===== Section C navigation =====
@@ -649,12 +687,14 @@ Page({
         if (this.data.passagePage > 0) {
             this.setData({ passagePage: this.data.passagePage - 1, highlightedPara: -1 });
             this.updatePageParas();
+            this.setData({ pageTranslation: this.computePageTranslation() });
         }
     },
     nextPassage() {
         if (this.data.passagePage < this.data.passagePages.length - 1) {
             this.setData({ passagePage: this.data.passagePage + 1, highlightedPara: -1 });
             this.updatePageParas();
+            this.setData({ pageTranslation: this.computePageTranslation() });
         }
     },
     onTouchStart(e) {
@@ -698,7 +738,7 @@ Page({
             wx.showToast({ title: '请先点击一条陈述', icon: 'none' });
             return;
         }
-        const ma = Object.assign({}, this.data.matchAnswers);
+        const ma = { ...this.data.matchAnswers };
         if (ma[stmt] === letter) {
             delete ma[stmt];
         }
@@ -713,7 +753,7 @@ Page({
         if (this.data.submitted)
             return;
         const idx = parseInt(e.currentTarget.dataset.idx);
-        const ma = Object.assign({}, this.data.matchAnswers);
+        const ma = { ...this.data.matchAnswers };
         delete ma[idx];
         const avail = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'].filter(l => !Object.values(ma).includes(l));
         this.setData({ matchAnswers: ma, availLetters: avail, matchCount: Object.keys(ma).length });
@@ -725,7 +765,7 @@ Page({
             return;
         const app = getApp();
         const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] };
-        existing.matchAnswers = Object.assign({}, this.data.matchAnswers);
+        existing.matchAnswers = { ...this.data.matchAnswers };
         app.globalData.studyData.readingAnswers[id] = existing;
         wx.setStorageSync('studyData', app.globalData.studyData);
     },
@@ -740,7 +780,7 @@ Page({
         const ci = 'ABCD'.indexOf(choice);
         if (ci === -1)
             return;
-        const ca = Object.assign({}, this.data.cAnswers);
+        const ca = { ...this.data.cAnswers };
         if (ca[idx] === choice) {
             delete ca[idx];
             this.setData({ cAnswers: ca, cSelIdx: -1 });
@@ -766,7 +806,7 @@ Page({
             return;
         const app = getApp();
         const existing = app.globalData.studyData.readingAnswers[id] || { blankAnswers: {}, usedFlags: [] };
-        existing.cAnswers = Object.assign({}, this.data.cAnswers);
+        existing.cAnswers = { ...this.data.cAnswers };
         app.globalData.studyData.readingAnswers[id] = existing;
         wx.setStorageSync('studyData', app.globalData.studyData);
     },

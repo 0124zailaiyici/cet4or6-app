@@ -70,6 +70,7 @@ interface IReadingData {
   passageParas: string[]
   highlightedPara: number
   fullTranslation: string
+  pageTranslation: string
   showTrans: boolean
   pageParas: Array<{ text: string; paraIdx: number }>
   pageWordSegments: ISegment[]
@@ -124,6 +125,7 @@ interface IReadingMethods {
   scrollToResultItem(e: WechatMiniprogram.TouchEvent): void
   toggleHint(): void
   getBlankGrammarHint(num: string): string
+  computePageTranslation(): string
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -161,6 +163,7 @@ Page<IReadingData, IReadingMethods>({
     passageParas: [],
     highlightedPara: -1,
     fullTranslation: '',
+    pageTranslation: '',
     showTrans: false,
     pageParas: [],
     pageWordSegments: [],
@@ -271,6 +274,7 @@ Page<IReadingData, IReadingMethods>({
         passageParas: paras,
         highlightedPara: -1,
         fullTranslation,
+        pageTranslation: '',
         showTrans: false,
         scrollToResult: '',
         showHint: false,
@@ -281,12 +285,13 @@ Page<IReadingData, IReadingMethods>({
       })
       this.updatePageParas()
       this.updateCompact()
+      this.setData({ pageTranslation: this.computePageTranslation() })
     }
   },
 
   back() {
     if (this.data.examMode) { wx.navigateBack(); return }
-    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [], scrollToResult: '' })
+    this.setData({ current: null, currentQ: 0, passagePage: 0, passagePages: [], submitted: false, score: 0, showResult: false, resultItems: [], showVocab: false, vocabList: [], passageParas: [], highlightedPara: -1, fullTranslation: '', pageTranslation: '', showTrans: false, pageParas: [], pageWordSegments: [], scrollToResult: '' })
   },
 
   toggleVocab() {
@@ -294,7 +299,30 @@ Page<IReadingData, IReadingMethods>({
   },
 
   toggleTrans() {
-    this.setData({ showTrans: !this.data.showTrans })
+    const pt = this.data.pageTranslation || this.computePageTranslation()
+    this.setData({ showTrans: !this.data.showTrans, pageTranslation: pt })
+  },
+
+  computePageTranslation(): string {
+    const annot = readingAnnotations[this.data.current && this.data.current.id || 0]
+    const full = annot && annot.translation || ''
+    if (!full) return ''
+
+    const pt = annot && annot.paraTranslations
+    if (pt && pt.length > 0) {
+      const st = this.data.current && this.data.current.sectionType
+      const step = st === 'B' ? 1 : 2
+      const start = this.data.passagePage * step
+      const parts: string[] = []
+      for (let i = 0; i < step; i++) {
+        const idx = start + i
+        if (pt[idx]) parts.push(pt[idx])
+      }
+      const joined = parts.join('\n').trim()
+      if (joined) return joined
+    }
+
+    return full
   },
 
   toggleHint() {
@@ -611,6 +639,7 @@ Page<IReadingData, IReadingMethods>({
       highlightedPara: paraIdx
     })
     this.updatePageParas()
+    this.setData({ pageTranslation: this.computePageTranslation() })
   },
 
   resetCurrent() {
@@ -754,12 +783,14 @@ Page<IReadingData, IReadingMethods>({
     if (this.data.passagePage > 0) {
       this.setData({ passagePage: this.data.passagePage - 1, highlightedPara: -1 })
       this.updatePageParas()
+      this.setData({ pageTranslation: this.computePageTranslation() })
     }
   },
   nextPassage() {
     if (this.data.passagePage < this.data.passagePages.length - 1) {
       this.setData({ passagePage: this.data.passagePage + 1, highlightedPara: -1 })
       this.updatePageParas()
+      this.setData({ pageTranslation: this.computePageTranslation() })
     }
   },
 
