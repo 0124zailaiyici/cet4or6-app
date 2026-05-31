@@ -2,34 +2,44 @@
 
 ## TypeScript
 
-1. **接口定义落后于实际数据**：`IListeningData` 缺 `liteMode`/`tinyOptions`，`IListeningMethods` 缺 `resetPlayback`。接口没加，但 WXML 和 TS 方法已经在用，导致编译报错。教训：加功能前先更新接口定义。
+1. **接口定义必须跟实际数据一致**：`IListeningData` 缺 `liteMode`/`tinyOptions`，`IListeningMethods` 缺 `resetPlayback`，但 WXML 和 TS 已经在用了一编译就报错。加功能前先更新接口定义。
 
-2. **声明了不用就是垃圾**：`_advanceGuard` 字段、`audioUrl` 局部变量声明了但没读 → `tsc --noEmit` 报 TS6133。保留未使用的声明只会增加噪音。
+2. **声明的变量/字段必须被使用**：`_advanceGuard` 字段、`audioUrl` 局部变量声明了没读 → `tsc --noEmit` 报 TS6133（`noUnusedLocals`）。删除或加下划线前缀。
 
-3. **`undefined` 不能赋值给 `number`**：`IListeningPage.sentenceStart?` 是 `number | undefined`，但 `audio.playFrom()` 强要求 `number`。用 `!` 断言（已在前面 `if` guard 过）。
+3. **可选参数不能直接传给强类型函数**：`IListeningPage.sentenceStart?` 是 `number | undefined`，但 `audio.playFrom()` 强要求 `number`。用 `!` 断言（前提是前面已有 null guard）。
 
-## WXML
+## WXML 模板
 
-4. **不要在 WXML 里调方法**：`.indexOf()`、`Math.min()`、`?.` 都不支持。必须预计算为布尔数组或字符串，然后直接引用数据字段。`translation.wxml` 的图标映射和 `sentences.wxml` 的高亮标记都犯了这错。
+4. **不要在 WXML 表达式里调方法**：`.indexOf()`、`?.`、`??`、`Math.min()`、`Math.max()` 全不支持。必须预计算为布尔数组/字符串，然后直接引用数据字段。
 
-## 微信开发者工具
+5. **WXML 没有 HTML 标签**：`<h1>`、`<p>`、`<div>` 等会导致 500 编译错误。只能用微信原生组件：`<view>`、`<text>`、`<image>`、`<scroll-view>`、`<swiper>`、`<rich-text>`。
 
-5. **新版本可能重置配置**：DevTools 更新到 2.01.2510260 后重写了 `project.private.config.json`，加上 `libVersion: "3.15.2"`。如果网络连不上微信 CDN，基础库下载失败导致内部 `WAServiceMainContext.js` 崩溃。解决：删 private config 的 libVersion，把 project.config.json 的设为 `"trial"`。
+6. **动态事件名不支持**：`catchtap="{{condition ? 'fn1' : 'fn2'}}"` 会报错。改为始终绑定一个函数名，函数内部用 `if` 判断。
 
-6. **`wx.request` 必须传 `fail` 回调**：新 DevTools 版本对未处理的请求失败更敏感。不传 `fail` 回调可能触发内部 `TypeError: i is not a function`。
+7. **`catchtap` vs `bindtap`**：`catchtap` 阻止事件冒泡（子元素点击不触发父级），`bindtap` 不阻止。需要阻止冒泡的场景用 `catchtap`。
 
-## 翻译数据
+## 微信开发者工具 / 基础库
 
-7. **CN/EN 字符比 25-35% 即自然翻译**：不要追求 60-80%。地道中文比英文精炼，覆盖关键信息即达标。段落级最低阈值设在 15%。
+8. **DevTools 更新会覆写 `project.private.config.json`**：升级到 2.01.2510260 后自动加了 `libVersion: "3.15.2"`。如果本地网络连不上微信 CDN，基础库下载失败导致 `WAServiceMainContext.js` 内部崩溃（`TypeError: i is not a function` / `Error: timeout`）。
 
-8. **`paraTranslations` 索引必须与 `splitPassage`/`formatBPassage` 输出精确对齐**：段落索引差一位就导致翻译内容错位。每次改切段逻辑后必须逐一验证索引映射。
+   **修复**：删 private config 的 libVersion，project.config.json 的 libVersion 设为 `"trial"`（用本地缓存的库，不下载）。
 
-9. **官方历年真题 PDF 含权威参考译文**：`answer_keys/*.pdf` 中有官方阅卷标准译文。人名（康沃尔/科沃尔）、机构名（来福车/Lyft）、引语归属等手动扩写容易出错，应优先使用官方译文。
+9. **基础库 3.15.1 / 3.15.2 有已知 bug**：微信社区确认这两个版本会在 WAServiceMainContext 里报 `TypeError/Error: timeout`，降级到 3.15.0 或升级到 3.16+ 解决。如果 CDN 被屏蔽，用 `"trial"` 让 DevTools 自行选择可用版本。
 
-## WXML
+10. **`wx.request` 必须传 `fail` 回调**：新 DevTools 对未处理的请求失败更敏感。不传 fail 回调可能触发内部错误。
 
-10. **`text` 嵌套 `text` 阻断子元素 tap 事件**：用 `view > text` 结构替代。WXML 不允许 `String()`、`join()`、`map()` 等——预计算好再绑定。
+11. **`project.private.config.json` 的代理设置会被重置**：DevTools 更新后，代理设置可能从"不使用系统代理"变回默认值，导致网络请求超时。每次更新后检查 设置 → 代理。
 
-## Railway 部署
+## 音频播放
 
-11. **大文件上传可能失败**：22.6MB 的 mp3 在上次部署时被跳过。重新 push 触发自动部署即可。注意 Railway 免费版 500MB 存储限制。
+12. **`InnerAudioContext` 设置顺序**：必须先设 `src` 再设 `playbackRate`，否则部分版本会静音。
+
+13. **Railway 冷启动超时**：Railway 免费实例空闲后进入休眠，首次请求需要 30+ 秒。解决：app 启动时发一次 `/health` 预唤醒；音频播放失败后 2s 自动重试。
+
+## 设计模式
+
+14. **WXML 的 `wx:for` 必须配 `wx:key`**：不配 `wx:key` 时 DevTools 报 warning。如果遍历的是对象数组，在构建时给每个对象加唯一 `_key` 字段，然后用 `wx:key="_key"`。
+
+15. **`IStudyData` 等持久化数据结构必须向后兼容**：storage 里的旧数据可能缺字段（如 `hardSentences`、`readingAnswers`），初始化时 `{...defaults, ...stored, missingField: stored.missingField || []}`。
+
+16. **说明书类文档要先读源码再写**：凭猜测写的 UI 描述跟实际差距很大，每个模块的 WXML 都 100-270 行，事件函数 10-33 个。必须逐文件分析后再落笔。

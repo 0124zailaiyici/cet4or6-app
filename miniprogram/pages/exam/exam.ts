@@ -78,10 +78,27 @@ Page<IExamData, IExamMethods>({
     applyTheme(getDarkMode())
     this.setData({ darkMode: getDarkMode() })
     const sets: IExamSet[] = []
-    const listeningIds = (listeningData as any[]).filter((l: any) => l.audioUrl).map((l: any) => l.id)
-    const readingIds = (readingsData as any[]).map((r: any) => r.id)
-    if (readingIds.length > 0) sets.push({ id: '2019061', label: '2019年6月 第1套', readingIds: readingIds.slice(0, 4), listeningId: listeningIds[0] || null })
-    if (readingIds.length > 4) sets.push({ id: '2019062', label: '2019年6月 第2套', readingIds: readingIds.slice(4, 8), listeningId: listeningIds[1] || null })
+    const lData = listeningData as any[]
+    const rData = readingsData as any[]
+    // Build exam sets from available listening data
+    for (const l of lData) {
+      if (!l.audioUrl || !l.correctAnswers) continue
+      // Extract year-month-set from title
+      const m = l.title.match(/(\d{4})(\d{2})(\d)/)
+      if (!m) continue
+      const y = m[1], mo = m[2], s = m[3]
+      const prefix = `${y}${mo}${s}`
+      const label = `${y}年${mo}月 第${s}套`
+      // Find matching reading entries by title
+      const rIds = rData.filter((r: any) => r.title && r.title.includes(prefix)).map((r: any) => r.id)
+      // If no reading match found, still try to include the set (with empty reading)
+      const setId = prefix
+      if (!sets.find((x: IExamSet) => x.id === setId)) {
+        sets.push({ id: setId, label, readingIds: rIds, listeningId: l.id })
+      }
+    }
+    // Sort by year descending (newest first)
+    sets.sort((a: IExamSet, b: IExamSet) => b.id.localeCompare(a.id))
     this.setData({ examSets: sets, _takenSets: this.computeTakenSets(sets) })
   },
 
