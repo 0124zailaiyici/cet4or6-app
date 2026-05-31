@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs: {{fs}}">
   <view class="topbar"><view class="h1">写作</view><view class="tb-back" catchtap="goBack">返回</view></view>
   <scroll-view class="scroll" scroll-y>
     <view class="sec-label">题目</view>
@@ -7,4 +7,19 @@
     <textarea class="ta" value="{{answer}}" bindinput="onInput" placeholder="在此输入..." maxlength="-1" />
     <view class="btn-row"><view class="btn" catchtap="save">保存并返回</view></view>
   </scroll-view>
+
+<!-- 字号调节 -->
+<view class="fs-ctrl {{fsOpen ? 'fs-show' : ''}}">
+  <view class="fs-btn-box" catchtap="toggleFs">
+    <text class="fs-btn-icon">Aa</text>
+  </view>
+  <view class="fs-slider" wx:if="{{fsOpen}}">
+    <text class="fs-label fs-dec" catchtap="changeFs" data-d="-2">A−</text>
+    <view class="fs-track">
+      <view class="fs-fill" style="width: {{(fs - 12) / 14 * 100}}%"></view>
+      <view class="fs-thumb" style="left: {{(fs - 12) / 14 * 100}}%"></view>
+    </view>
+    <text class="fs-label fs-inc" catchtap="changeFs" data-d="2">A+</text>
+  </view>
+</view>
 </view>

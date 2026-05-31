@@ -80,7 +80,8 @@ interface IReadingData {
   locateMap: Record<string, string>
   currentQLocate: string
   bStmtKeywords: string[]
-  activeBlankHint: string
+  activeBlankHint: string  [key: string]: any
+
 }
 
 interface IReadingMethods {
@@ -125,7 +126,8 @@ interface IReadingMethods {
   scrollToResultItem(e: WechatMiniprogram.TouchEvent): void
   toggleHint(): void
   getBlankGrammarHint(num: string): string
-  computePageTranslation(): string
+  computePageTranslation(): string  [key: string]: any
+
 }
 
 Page<IReadingData, IReadingMethods>({
@@ -139,6 +141,10 @@ Page<IReadingData, IReadingMethods>({
     blankAnswers: {},
     usedFlags: [],
     activeBlank: null,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reading'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     optionLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
     touchStartX: 0,
@@ -905,5 +911,18 @@ Page<IReadingData, IReadingMethods>({
       if (dx > 50) this.prevQ()
       else if (dx < -50) this.nextQ()
     }
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['reading'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

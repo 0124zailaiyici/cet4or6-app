@@ -9,6 +9,10 @@ interface IQItem {
 Page({
   data: {
     step: 0,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     questions: [
       { q: '"The center of American automobile innovation has in the past decade moved 2,000 miles away."\n这句话的大意是？', opts: ['美国汽车价格涨了', '汽车创新中心转移了', '汽车工厂倒闭了', '高速公路修好了'], answer: 1 },
@@ -65,5 +69,18 @@ Page({
   finish() {
     wx.setStorageSync('hasGuided', true)
     wx.reLaunch({ url: '/pages/index/index' })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['guide'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

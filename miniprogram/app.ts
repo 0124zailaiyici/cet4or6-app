@@ -23,6 +23,8 @@ App<IAppOption>({
     darkMode: wx.getStorageSync('darkMode') || false,
     examDeadline: 0,
     examSet: '',
+    fontSize: wx.getStorageSync('fontSize') || 16,
+    fontSizes: wx.getStorageSync('fontSizes') || {},
     studyData: (() => {
       const stored = wx.getStorageSync('studyData')
       return stored ? { ...defaults, ...stored, hardSentences: stored.hardSentences || [], readingAnswers: stored.readingAnswers || {} } : { ...defaults }

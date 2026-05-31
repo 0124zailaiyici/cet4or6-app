@@ -148,6 +148,10 @@ Page({
     userAnswer: '', result: null as { score: number; dimensions: IDimensions; suggestions: string; reference: string; show: boolean } | null,
     history: [] as ITranslationRecord[], questionHistory: [] as ITranslationRecord[], completedIds: [] as number[],
     submitting: false, aiAvailable: false, aiEnabled: wx.getStorageSync('translationAiEnabled') !== false,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['translation'] || 16,
+
+    fsOpen: false,
+
     darkMode: false, wordCount: 0, pct: 0, ringDeg: 0, todayCount: 0, streakDays: 0,
     levels: [] as { total: number; done: number; pct: number }[],
     hMax: 0, hMin: 0, hTrend: 'up', favIds: (wx.getStorageSync('translationFavIds') || []) as number[],
@@ -315,4 +319,17 @@ Page({
 
   toggleAi() { const v = !this.data.aiEnabled; this.setData({ aiEnabled: v }); wx.setStorageSync('translationAiEnabled', v) },
   toggleHints() { this.setData({ showHints: !this.data.showHints }) },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['translation'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
+  },
 })

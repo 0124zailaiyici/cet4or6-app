@@ -31,7 +31,8 @@ interface IExamData {
   listeningResults: { title: string; score: number; total: number }[]
   writingResults: { title: string; score: number; total: number }[]
   translationResults: { title: string; score: number; total: number }[]
-  darkMode: boolean
+  darkMode: boolean  [key: string]: any
+
 }
 
 interface IExamMethods {
@@ -46,7 +47,8 @@ interface IExamMethods {
   goBack(): void
   recalcProgress(): void
   startTimer(): void
-  computeTakenSets(sets: IExamSet[]): Record<string, boolean>
+  computeTakenSets(sets: IExamSet[]): Record<string, boolean>  [key: string]: any
+
 }
 
 let timerInterval: any = null
@@ -71,6 +73,10 @@ Page<IExamData, IExamMethods>({
     listeningResults: [],
     writingResults: [],
     translationResults: [],
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
   },
 
@@ -423,6 +429,19 @@ Page<IExamData, IExamMethods>({
     const app = getApp<IAppOption>()
     app.globalData.examDeadline = 0
     this.setData({ phase: 'list', currentSet: null, _takenSets: this.computeTakenSets(this.data.examSets) })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['exam'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })
 

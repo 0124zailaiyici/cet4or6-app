@@ -9,6 +9,10 @@ Page({
     morningSub: false,
     eveningSub: false,
     weeklySub: false,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
   },
 
@@ -42,5 +46,18 @@ Page({
   setEveningTime(e: WechatMiniprogram.TouchEvent) {
     this.setData({ eveningTime: e.currentTarget.dataset.time as string })
     wx.showToast({ title: '已设为 ' + (e.currentTarget.dataset.time as string), icon: 'none' })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['reminder'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

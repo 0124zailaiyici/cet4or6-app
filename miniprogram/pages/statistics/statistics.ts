@@ -15,12 +15,14 @@ interface IStatData {
   calendar: { day: number | null; level: number; isToday: boolean }[][]
   monthLabel: string
   darkMode: boolean
-  achievements: { emoji: string; name: string; unlocked: boolean }[]
+  achievements: { emoji: string; name: string; unlocked: boolean }[]  [key: string]: any
+
 }
 
 interface IStatMethods {
   refresh(): void
-  clearData(): void
+  clearData(): void  [key: string]: any
+
 }
 
 Page<IStatData, IStatMethods>({
@@ -29,6 +31,10 @@ Page<IStatData, IStatMethods>({
     weekBars: [], modules: [],
     totalCorrect: 0, totalWrong: 0,
     calendar: [], monthLabel: '',
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['statistics'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     achievements: [],
   },
@@ -175,6 +181,19 @@ Page<IStatData, IStatMethods>({
         }
       },
     })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['statistics'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })
 

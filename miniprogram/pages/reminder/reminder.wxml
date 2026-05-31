@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs: {{fs}}">
   <view class="topbar">
     <view class="h1">学习提醒</view>
     <text class="tag">📱 订阅消息</text>
@@ -37,4 +37,19 @@
   <view class="tip">
     <text class="tip-t">💡 提醒将通过微信服务通知推送，请确保已开启通知权限</text>
   </view>
+
+<!-- 字号调节 -->
+<view class="fs-ctrl {{fsOpen ? 'fs-show' : ''}}">
+  <view class="fs-btn-box" catchtap="toggleFs">
+    <text class="fs-btn-icon">Aa</text>
+  </view>
+  <view class="fs-slider" wx:if="{{fsOpen}}">
+    <text class="fs-label fs-dec" catchtap="changeFs" data-d="-2">A−</text>
+    <view class="fs-track">
+      <view class="fs-fill" style="width: {{(fs - 12) / 14 * 100}}%"></view>
+      <view class="fs-thumb" style="left: {{(fs - 12) / 14 * 100}}%"></view>
+    </view>
+    <text class="fs-label fs-inc" catchtap="changeFs" data-d="2">A+</text>
+  </view>
+</view>
 </view>

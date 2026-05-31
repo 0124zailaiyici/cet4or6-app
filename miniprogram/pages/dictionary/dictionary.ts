@@ -28,7 +28,8 @@ interface IDictData {
   aiAvailable: boolean
   aiEnabled: boolean
   exampleCount: number
-  adding: boolean
+  adding: boolean  [key: string]: any
+
 }
 
 const POS_MAP: Record<string, string> = {
@@ -49,6 +50,10 @@ Page<IDictData, Record<string, any>>({
     error: '',
     loading: false,
     history: [],
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     aiAvailable: false,
     aiEnabled: false,
@@ -183,5 +188,18 @@ Page<IDictData, Record<string, any>>({
     const ctx = wx.createInnerAudioContext()
     ctx.src = audioSrc
     ctx.play()
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['dictionary'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

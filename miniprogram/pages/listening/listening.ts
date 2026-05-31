@@ -99,7 +99,8 @@ interface IListeningData {
   transcriptPlayingIdx: number
   liteMode: boolean
   tinyOptions: boolean
-  _retryCount?: number
+  _retryCount?: number  [key: string]: any
+
 }
 
 interface IListeningMethods {
@@ -135,7 +136,8 @@ interface IListeningMethods {
   toggleLiteMode(): void
   toggleTiny(): void
   replayCurrent(): void
-  resetPlayback(): void
+  resetPlayback(): void  [key: string]: any
+
 }
 
 const LABELS: Record<string, string> = {
@@ -536,6 +538,10 @@ Page<IListeningData, IListeningMethods>({
     sentenceHardStatus: [],
     completedPassages: [],
     loading: false,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['listening'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     audioMode: false,
     audioTime: 0,
@@ -1156,4 +1162,17 @@ Page<IListeningData, IListeningMethods>({
     }
   },
 
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['listening'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
+  },
 })

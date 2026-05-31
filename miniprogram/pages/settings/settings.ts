@@ -7,7 +7,8 @@ interface ISettingsData {
   writing: number
   darkMode: boolean
   version: string
-  cacheSize: string
+  cacheSize: string  [key: string]: any
+
 }
 
 interface ISettingsMethods {
@@ -18,7 +19,8 @@ interface ISettingsMethods {
   goReminder(): void
   goFeedback(): void
   exportData(): void
-  importData(): void
+  importData(): void  [key: string]: any
+
 }
 
 Page<ISettingsData, ISettingsMethods>({
@@ -27,6 +29,10 @@ Page<ISettingsData, ISettingsMethods>({
     sentence: 5,
     translation: 1,
     writing: 1,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     version: '1.0.0',
     cacheSize: '',
@@ -152,5 +158,18 @@ Page<ISettingsData, ISettingsMethods>({
         }
       },
     })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['settings'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

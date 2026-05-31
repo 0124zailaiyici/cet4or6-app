@@ -246,14 +246,17 @@ interface IWritingData {
 
   /* shared */
   showResult: boolean; result: string | null
-  submitting: boolean; aiAvailable: boolean; aiEnabled: boolean
+  submitting: boolean; aiAvailable: boolean; aiEnabled: boolean  [key: string]: any
+
 }
 
 Page<IWritingData, Record<string, any>>({
   data: {
     tab: 0, tabs: ['句型急救包', '中英写作助手', '写作速查'],
     patterns: [], writings: [],
-    detailMode: false, darkMode: false,
+    detailMode: false, fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['writing'] || 16,
+ fsOpen: false,
+ darkMode: false,
 
     expandedPattern: null, selectedPattern: null,
     userSentence: '', sentenceWordCount: 0,
@@ -609,5 +612,18 @@ Page<IWritingData, Record<string, any>>({
     const val = !this.data.aiEnabled
     this.setData({ aiEnabled: val })
     wx.setStorageSync('writingAiEnabled', val)
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['writing'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

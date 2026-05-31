@@ -22,7 +22,8 @@ interface IFavoritesData {
   favSentences: (ISentence & { mastered: boolean })[]
   hardListens: IHardSentence[]
   scrollTop: number
-  darkMode: boolean
+  darkMode: boolean  [key: string]: any
+
 }
 
 interface IFavoritesMethods {
@@ -31,7 +32,8 @@ interface IFavoritesMethods {
   removeHard(e: WechatMiniprogram.TouchEvent): void
   gotoSentence(e: WechatMiniprogram.TouchEvent): void
   goToListening(e: WechatMiniprogram.TouchEvent): void
-  refresh(): void
+  refresh(): void  [key: string]: any
+
 }
 
 Page<IFavoritesData, IFavoritesMethods>({
@@ -41,6 +43,10 @@ Page<IFavoritesData, IFavoritesMethods>({
     favSentences: [],
     hardListens: [],
     scrollTop: 0,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
   },
 
@@ -121,5 +127,18 @@ Page<IFavoritesData, IFavoritesMethods>({
   goToListening(e: WechatMiniprogram.TouchEvent) {
     const passageId = e.currentTarget.dataset.passageid as number
     wx.navigateTo({ url: `/pages/listening/listening?passageId=${passageId}` })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['favorites'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

@@ -5,6 +5,10 @@ Page({
     fbType: '功能异常',
     fbText: '',
     types: ['功能异常', '功能建议', '体验评价', '其他'],
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
   },
 
@@ -56,5 +60,18 @@ Page({
       showCancel: false,
       confirmText: '我知道了',
     })
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['feedback'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

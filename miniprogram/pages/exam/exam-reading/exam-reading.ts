@@ -4,12 +4,18 @@ import { applyTheme, getDarkMode } from '../../../utils/theme'
 Page({
   data: {
     passages: [] as any[],
+    fs: getApp<IAppOption>().globalData.fontSize || 16,
+
+    fsOpen: false,
+
     darkMode: false,
   },
 
   onLoad() {
     applyTheme(getDarkMode())
-    this.setData({ darkMode: getDarkMode() })
+    this.setData({ fs: getApp<IAppOption>().globalData.fontSize || 16,
+ fsOpen: false,
+ darkMode: getDarkMode() })
     const app = getApp<IAppOption>()
     const rData = readingsData as any[]
     const ids = (app.globalData.examSet === '2019062') ? rData.slice(4, 8).map((r: any) => r.id) : rData.slice(0, 4).map((r: any) => r.id)
@@ -26,4 +32,16 @@ Page({
   },
 
   goBack() { wx.navigateBack() },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    app.globalData.fontSize = v
+    wx.setStorageSync('fontSize', v)
+  },
 })

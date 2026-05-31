@@ -1,8 +1,8 @@
 .page { min-height: 100vh; background: #f3eeed; display: flex; flex-direction: column; }
 
 .header { display: flex; align-items: center; gap: 16rpx; padding: 12rpx 20rpx 6rpx; flex-shrink: 0; background: #fff; }
-.hd-back { padding: 6rpx 20rpx; height: 52rpx; border-radius: 12rpx; background: rgba(84,110,122,0.08); font-size: 24rpx; color: #546e7a; display: flex; align-items: center; flex-shrink: 0; }
-.hd-title { flex: 1; font-size: 30rpx; font-weight: 700; color: #2d2d4e; }
+.hd-back { padding: 6rpx 20rpx; height: 52rpx; border-radius: 12rpx; background: rgba(84,110,122,0.08); font-size: calc(24 * var(--fs) / 16 * 1rpx); color: #546e7a; display: flex; align-items: center; flex-shrink: 0; }
+.hd-title { flex: 1; font-size: calc(30 * var(--fs) / 16 * 1rpx); font-weight: 700; color: #2d2d4e; }
 .b-A { background: linear-gradient(135deg, #90a4ae, #607d8b); }
 .b-B { background: linear-gradient(135deg, #64b5f6, #1e88e5); }
 .b-C { background: linear-gradient(135deg, #81c784, #388e3c); }
@@ -10,11 +10,11 @@
 .list { flex: 1; padding: 16rpx 20rpx; }
 
 .card { display: flex; align-items: center; gap: 16rpx; background: #fff; border-radius: 18rpx; padding: 20rpx; margin-bottom: 12rpx; box-shadow: 0 2rpx 12rpx rgba(84,110,122,0.04); }
-.badge { width: 80rpx; height: 80rpx; border-radius: 16rpx; font-size: 24rpx; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.badge { width: 80rpx; height: 80rpx; border-radius: 16rpx; font-size: calc(24 * var(--fs) / 16 * 1rpx); font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .body { flex: 1; }
-.title { display: block; font-size: 28rpx; font-weight: 600; color: #2d2d4e; }
-.meta { display: block; font-size: 22rpx; color: #8a7a9a; margin-top: 4rpx; }
-.arrow { font-size: 40rpx; color: #ccc; }
+.title { display: block; font-size: calc(28 * var(--fs) / 16 * 1rpx); font-weight: 600; color: #2d2d4e; }
+.meta { display: block; font-size: calc(22 * var(--fs) / 16 * 1rpx); color: #8a7a9a; margin-top: 4rpx; }
+.arrow { font-size: calc(40 * var(--fs) / 16 * 1rpx); color: #ccc; }
 
 .dark-theme.page { background: #12121f !important; }
 .dark-theme .header { background: #12121f !important; }

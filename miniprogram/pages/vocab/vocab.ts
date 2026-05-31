@@ -71,7 +71,8 @@ interface IVocabData {
   manualModalValue: string
   swipedIdx: number
   celebrateShow: boolean
-  _tick: number
+  _tick: number  [key: string]: any
+
 }
 
 interface IVocabMethods {
@@ -135,7 +136,8 @@ interface IVocabMethods {
   _incrAch(key: string): void
   _refreshAchProgress(): void
   _updateAchFromWords(): void
-  goReading(): void
+  goReading(): void  [key: string]: any
+
 }
 
 const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
@@ -828,6 +830,10 @@ Page<IVocabData, IVocabMethods>({
     streak: 0,
     mode: 'battle',
     combo: 0,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['vocab'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     gameWord: null,
     gameWordIdx: 0,
@@ -1093,7 +1099,7 @@ Page<IVocabData, IVocabMethods>({
       wx.showToast({ title: '正在获取发音…', icon: 'loading' })
       await this._fetchAudioUrl(this.data.words.find(v => v.word === w.word) || w)
       wx.hideToast()
-      const au = this.data.gameWord?.audioUrl
+      const au = this.data.gameWord && this.data.gameWord.audioUrl
       if (au) {
         this._playAudio(au)
       } else {
@@ -1681,5 +1687,18 @@ Page<IVocabData, IVocabMethods>({
       } catch {}
       this._saveAddedWord(w, phonetic, chn, context, contextCn, words)
     } catch (e) { wx.showToast({ title: '添加失败', icon: 'none' }) }
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['vocab'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

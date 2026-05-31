@@ -61,7 +61,8 @@ interface ISentencesData {
   puzzleHintGlows: boolean[]
   puzzleInitialSelected: (number | null)[]
   puzzleSentences: ISentence[]
-  puzzleDone: boolean
+  puzzleDone: boolean  [key: string]: any
+
 }
 
 interface ISentencesMethods {
@@ -94,7 +95,8 @@ interface ISentencesMethods {
   openPasteModal(): void
   closePasteModal(): void
   onPasteInput(e: WechatMiniprogram.Input): void
-  doParse(): void
+  doParse(): void  [key: string]: any
+
 }
 
 Page<ISentencesData, ISentencesMethods>({
@@ -107,6 +109,10 @@ Page<ISentencesData, ISentencesMethods>({
     masteredIds: [],
     favoriteIds: [],
     searchQuery: '',
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['sentences'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     viewMode: 'list',
     immersionIndex: 0,
@@ -738,5 +744,18 @@ Page<ISentencesData, ISentencesMethods>({
       title: `💬 语境句子 — 已掌握 ${this.data.masteredIds.length} 句！`,
       path: '/pages/sentences/sentences',
     }
+  },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['sentences'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

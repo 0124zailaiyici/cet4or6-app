@@ -17,13 +17,19 @@ Page({
     _qResults: {} as Record<number, string>,
     _resultItems: [] as any[],
     _scrollToResult: '',
+    fs: getApp<IAppOption>().globalData.fontSize || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     touchX: 0,
   },
 
   onLoad(opts: any) {
     applyTheme(getDarkMode())
-    this.setData({ darkMode: getDarkMode() })
+    this.setData({ fs: getApp<IAppOption>().globalData.fontSize || 16,
+ fsOpen: false,
+ darkMode: getDarkMode() })
     const id = Number(opts.id)
     const rData = readingsData as any[]
     const p = rData.find((r: any) => r.id === id)
@@ -117,6 +123,18 @@ Page({
   },
 
   goBack() { wx.navigateBack() },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    app.globalData.fontSize = v
+    wx.setStorageSync('fontSize', v)
+  },
 })
 
 function splitIntoParas(text: string): string[] {

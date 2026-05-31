@@ -24,6 +24,10 @@ Page({
     _resultItems: [] as any[],
     _availLetters: [] as string[],
     _scrollToResult: '',
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam-reading-b'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     letters: 'ABCDEFGHIJKLMN'.split(''),
   },
@@ -173,6 +177,18 @@ Page({
   },
 
   goBack() { wx.navigateBack() },
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['exam-reading-b'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
+  },
 })
 
 function fmtBPassage(text: string): { letter: string; text: string }[] {

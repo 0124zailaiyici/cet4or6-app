@@ -2,40 +2,44 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes">
 <title>四级备考助手 · 使用说明书</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;font-size:16px}
+html{scroll-behavior:smooth;font-size:var(--fs, 16px)}
 body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#0d0d14;color:#e4e0eb;line-height:1.7;overflow-x:hidden}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:#ff6b8a44;border-radius:3px}
-:root{--pink:#ff6b8a;--pink-dim:#ff6b8a88;--pink-glow:#ff6b8a22;--bg:#0d0d14;--card:#16161f;--card-hover:#1e1e2a;--border:#2a2a3a;--text:#e4e0eb;--text-dim:#8a7a9a;--radius:10px}
+:root{--pink:#ff6b8a;--pink-dim:#ff6b8a88;--pink-glow:#ff6b8a22;--bg:#0d0d14;--card:#16161f;--card-hover:#1e1e2a;--border:#2a2a3a;--text:#e4e0eb;--text-dim:#8a7a9a;--radius:10px;--fs:16px}
 
-header{position:sticky;top:0;z-index:100;background:#0d0d14ee;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:10px}
-header h1{font-size:17px;font-weight:700;color:#fff;white-space:nowrap}
-header span{color:var(--text-dim);font-size:13px}
-header .badge{background:var(--pink);color:#fff;font-size:10px;padding:2px 10px;border-radius:99px;margin-left:auto;white-space:nowrap}
+header{position:sticky;top:0;z-index:100;background:#0d0d14ee;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+header h1{font-size:calc(1em + 3px);font-weight:700;color:#fff;white-space:nowrap}
+header span{color:var(--text-dim);font-size:calc(1em * 0.8)}
+header .badge{background:var(--pink);color:#fff;font-size:calc(1em * 0.65);padding:2px 10px;border-radius:99px;margin-left:auto;white-space:nowrap}
+.fs-ctrl{display:flex;align-items:center;gap:2px;margin-left:auto}
+.fs-ctrl button{background:var(--card-hover);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:6px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.fs-ctrl button:active{background:var(--pink-glow);color:var(--pink)}
+.fs-ctrl .fs-val{font-size:11px;color:var(--text-dim);min-width:28px;text-align:center}
 
 .wrap{max-width:960px;margin:0 auto;padding:24px 16px 80px}
 
 /* module navigation */
 .mod-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px;background:var(--card);padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border)}
-.mod-nav a{font-size:12px;padding:4px 12px;border-radius:99px;color:var(--text-dim);transition:.2s;white-space:nowrap}
+.mod-nav a{font-size:calc(1em * 0.75);padding:4px 12px;border-radius:99px;color:var(--text-dim);transition:.2s;white-space:nowrap}
 .mod-nav a:hover,.mod-nav a.active{background:var(--pink-glow);color:var(--pink)}
 
 /* section */
 section{margin-bottom:48px;scroll-margin-top:70px}
-section h2{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:10px}
-section h2 .num{font-size:12px;background:var(--pink);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-section .desc{color:var(--text-dim);font-size:13px;margin-bottom:20px;border-left:3px solid var(--pink-dim);padding-left:14px}
+section h2{font-size:calc(1em + 6px);font-weight:700;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+section h2 .num{font-size:calc(1em * 0.55);background:var(--pink);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+section .desc{color:var(--text-dim);font-size:calc(1em * 0.8);margin-bottom:20px;border-left:3px solid var(--pink-dim);padding-left:14px}
 
 /* section sub */
-.sub{font-size:15px;font-weight:600;color:#fff;margin:20px 0 8px;padding-left:8px;border-left:3px solid var(--pink)}
+.sub{font-size:calc(1em * 0.9);font-weight:600;color:#fff;margin:20px 0 8px;padding-left:8px;border-left:3px solid var(--pink)}
 
 /* mockup phone */
 .mockup{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;max-width:360px;width:100%;box-shadow:0 20px 60px #00000055;flex-shrink:0}
-.mockup-bar{background:var(--card-hover);padding:8px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim)}
+.mockup-bar{background:var(--card-hover);padding:8px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);font-size:calc(1em * 0.7);color:var(--text-dim)}
 .mockup-bar .dot{width:7px;height:7px;border-radius:50%;background:#ff5f57}
 .mockup-bar .dot:nth-child(2){background:#febc2e}
 .mockup-bar .dot:nth-child(3){background:#28c840}
@@ -47,7 +51,7 @@ section .desc{color:var(--text-dim);font-size:13px;margin-bottom:20px;border-lef
 .annotate{position:relative}
 .annotate .arr{position:absolute;z-index:5;font-size:20px;color:var(--pink);filter:drop-shadow(0 0 5px #ff6b8a66);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
-.annotate .tip{position:absolute;z-index:5;background:var(--pink);color:#fff;font-size:10px;padding:3px 9px;border-radius:5px;max-width:180px;line-height:1.4;font-weight:500}
+.annotate .tip{position:absolute;z-index:5;background:var(--pink);color:#fff;font-size:calc(1em * 0.6);padding:3px 9px;border-radius:5px;max-width:180px;line-height:1.4;font-weight:500}
 .annotate .tip.lf::after{content:'';position:absolute;right:-8px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-left-color:var(--pink)}
 .annotate .tip.rt::after{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-right-color:var(--pink)}
 .annotate .tip.dn::after{content:'';position:absolute;top:-8px;left:14px;border:5px solid transparent;border-bottom-color:var(--pink)}
@@ -56,47 +60,39 @@ section .desc{color:var(--text-dim);font-size:13px;margin-bottom:20px;border-lef
 /* step cards */
 .steps{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .step{display:flex;gap:12px;align-items:flex-start;background:var(--card);padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border)}
-.step .sn{background:var(--pink-glow);color:var(--pink);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
-.step .sb{font-size:13px;color:var(--text)}
+.step .sn{background:var(--pink-glow);color:var(--pink);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:calc(1em * 0.75);font-weight:700;flex-shrink:0;margin-top:2px}
+.step .sb{font-size:calc(1em * 0.82);color:var(--text)}
 .step .sb strong{color:#fff}
-.tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:4px;background:var(--pink-glow);color:var(--pink);margin:0 2px}
+.tag{display:inline-block;font-size:calc(1em * 0.62);padding:1px 7px;border-radius:4px;background:var(--pink-glow);color:var(--pink);margin:0 2px}
 
 /* tip box */
-.tip-box{background:var(--card);border:1px solid var(--pink-dim);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--text-dim);margin-bottom:14px}
+.tip-box{background:var(--card);border:1px solid var(--pink-dim);border-radius:var(--radius);padding:12px 16px;font-size:calc(1em * 0.75);color:var(--text-dim);margin-bottom:14px}
 .tip-box strong{color:var(--pink)}
 
 /* tabbar mock */
 .tabbar{display:flex;background:var(--card-hover);border-top:1px solid var(--border);padding:5px 0}
-.tabbar .tab{flex:1;text-align:center;font-size:9px;color:var(--text-dim);padding:3px 0}
+.tabbar .tab{flex:1;text-align:center;font-size:calc(1em * 0.55);color:var(--text-dim);padding:3px 0}
 .tabbar .tab.active{color:var(--pink)}
-.tabbar .tab .ti{font-size:16px;display:block;margin-bottom:1px}
+.tabbar .tab .ti{font-size:calc(1em);display:block;margin-bottom:1px}
 
 /* inline ui elements */
-.ui-btn{display:inline-flex;align-items:center;gap:3px;background:var(--pink);color:#fff;font-size:11px;padding:3px 12px;border-radius:99px;white-space:nowrap}
-.ui-pill{display:inline-block;font-size:10px;padding:1px 8px;border-radius:99px;background:var(--card-hover);color:var(--text-dim);border:1px solid var(--border);margin:1px}
+.ui-btn{display:inline-flex;align-items:center;gap:3px;background:var(--pink);color:#fff;font-size:calc(1em * 0.7);padding:3px 12px;border-radius:99px;white-space:nowrap}
+.ui-pill{display:inline-block;font-size:calc(1em * 0.62);padding:1px 8px;border-radius:99px;background:var(--card-hover);color:var(--text-dim);border:1px solid var(--border);margin:1px}
 
 /* element list */
 .els{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.els .el{background:var(--card-hover);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);border:1px solid var(--border)}
+.els .el{background:var(--card-hover);padding:4px 10px;border-radius:6px;font-size:calc(1em * 0.7);color:var(--text);border:1px solid var(--border)}
 
 @media(max-width:640px){
   .wrap{padding:12px 8px 60px}
   header{padding:8px 10px}
-  header h1{font-size:14px}
-  header span{display:none}
-  section h2{font-size:16px}
   section{margin-bottom:32px}
   .mockup{max-width:100%}
   .mockup-body{padding:8px!important}
   .annotate .arr,.annotate .tip{display:none}
   .step{padding:8px 10px}
-  .step .sb{font-size:12px}
   .steps{gap:6px}
-  .sub{font-size:13px}
-  section .desc{font-size:12px}
   .mod-nav{gap:4px;padding:6px 8px}
-  .mod-nav a{font-size:11px;padding:3px 8px}
-  .tip-box{font-size:11px;padding:8px 10px}
 }
 </style>
 </head>
@@ -105,6 +101,11 @@ section .desc{color:var(--text-dim);font-size:13px;margin-bottom:20px;border-lef
 <header>
   <h1>📘 四级备考助手</h1>
   <span>使用说明书</span>
+  <div class="fs-ctrl">
+    <button id="fsDec" title="缩小">A−</button>
+    <span class="fs-val" id="fsVal">100%</span>
+    <button id="fsInc" title="放大">A+</button>
+  </div>
   <div class="badge">v1.0</div>
 </header>
 
@@ -880,5 +881,22 @@ section .desc{color:var(--text-dim);font-size:13px;margin-bottom:20px;border-lef
 </div>
 
 </div>
+
+<script>
+(function(){
+  const key = 'cet4_manual_fs';
+  const min = 12, max = 28, step = 2;
+  let cur = parseInt(localStorage.getItem(key)) || 16;
+  function apply(v) {
+    cur = Math.max(min, Math.min(max, v));
+    document.documentElement.style.setProperty('--fs', cur + 'px');
+    document.getElementById('fsVal').textContent = Math.round(cur / 16 * 100) + '%';
+    localStorage.setItem(key, cur);
+  }
+  apply(cur);
+  document.getElementById('fsDec').onclick = function(){ apply(cur - step) };
+  document.getElementById('fsInc').onclick = function(){ apply(cur + step) };
+})();
+</script>
 </body>
 </html>

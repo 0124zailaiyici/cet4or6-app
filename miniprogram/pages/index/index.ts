@@ -22,7 +22,8 @@ interface IHomeData {
   todaySentence: number
   todayTrans: number
   todayWrite: number
-  statusBarHeight: number
+  statusBarHeight: number  [key: string]: any
+
 }
 
 interface IHomeMethods {
@@ -33,7 +34,8 @@ interface IHomeMethods {
   playDailySentence(): void
   quickListen(): void
   quickVocab(): void
-  quickReading(): void
+  quickReading(): void  [key: string]: any
+
 }
 
 // Pool of daily sentences
@@ -56,6 +58,10 @@ Page<IHomeData, IHomeMethods>({
     greeting: '',
     checkedIn: false,
     streak: 0,
+    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['index'] || 16,
+
+    fsOpen: false,
+
     darkMode: false,
     missionTitle: '开始学习',
     missionSub: '今天第一件事，从这里开始',
@@ -187,4 +193,17 @@ Page<IHomeData, IHomeMethods>({
   quickListen() { wx.navigateTo({ url: '/pages/listening/listening' }) },
   quickVocab() { wx.switchTab({ url: '/pages/vocab/vocab' }) },
   quickReading() { wx.navigateTo({ url: '/pages/reading/reading' }) },
+
+  toggleFs() {
+    this.setData({ fsOpen: !this.data.fsOpen })
+  },
+  changeFs(e: WechatMiniprogram.TouchEvent) {
+    const d = parseInt(e.currentTarget.dataset.d as string) || 0
+    let v = Math.max(12, Math.min(26, this.data.fs + d))
+    this.setData({ fs: v })
+    const app = getApp<IAppOption>()
+    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
+    app.globalData.fontSizes['index'] = v
+    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
+  },
 })

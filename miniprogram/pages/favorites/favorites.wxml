@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs: {{fs}}">
   <view class="f-header">
     <view class="fh-bg"></view>
     <view class="fh-content">
@@ -50,4 +50,19 @@
       </view>
     </block>
   </scroll-view>
+
+<!-- 字号调节 -->
+<view class="fs-ctrl {{fsOpen ? 'fs-show' : ''}}">
+  <view class="fs-btn-box" catchtap="toggleFs">
+    <text class="fs-btn-icon">Aa</text>
+  </view>
+  <view class="fs-slider" wx:if="{{fsOpen}}">
+    <text class="fs-label fs-dec" catchtap="changeFs" data-d="-2">A−</text>
+    <view class="fs-track">
+      <view class="fs-fill" style="width: {{(fs - 12) / 14 * 100}}%"></view>
+      <view class="fs-thumb" style="left: {{(fs - 12) / 14 * 100}}%"></view>
+    </view>
+    <text class="fs-label fs-inc" catchtap="changeFs" data-d="2">A+</text>
+  </view>
+</view>
 </view>
