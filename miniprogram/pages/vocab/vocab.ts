@@ -106,10 +106,11 @@ interface IVocabMethods {
   toggleSaveSent(e: WechatMiniprogram.TouchEvent): void
   sentFontUp(): void
   sentFontDown(): void
-  speakWord(): void
+  speakWord(): Promise<void>
+  _playAudio(url: string): void
   markKnown(): void
   markHard(): void
-  _fetchAudioUrl(word: IVocabWord): Promise<void>
+  _fetchAudioUrl(word: IVocabWord): Promise<boolean>
   startConfetti(): void
   stopConfetti(): void
   closeCelebrate(): void
@@ -1083,16 +1084,28 @@ Page<IVocabData, IVocabMethods>({
     this.setData({ gameFlipped: !this.data.gameFlipped })
   },
 
-  speakWord() {
+  async speakWord() {
     const w = this.data.gameWord
     if (!w) return
     if (w.audioUrl) {
-      const ac = wx.createInnerAudioContext()
-      ac.src = w.audioUrl
-      ac.play()
+      this._playAudio(w.audioUrl)
     } else {
-      wx.showToast({ title: '暂无发音', icon: 'none' })
+      wx.showToast({ title: '正在获取发音…', icon: 'loading' })
+      await this._fetchAudioUrl(this.data.words.find(v => v.word === w.word) || w)
+      wx.hideToast()
+      const au = this.data.gameWord?.audioUrl
+      if (au) {
+        this._playAudio(au)
+      } else {
+        wx.showToast({ title: '暂无发音', icon: 'none' })
+      }
     }
+  },
+  _playAudio(url: string) {
+    const ac = wx.createInnerAudioContext()
+    ac.src = url
+    ac.onError(() => wx.showToast({ title: '发音加载失败', icon: 'none' }))
+    ac.play()
   },
 
   markKnown() {
@@ -1414,12 +1427,22 @@ Page<IVocabData, IVocabMethods>({
   },
 
   async _fetchAudioUrl(word: IVocabWord) {
+    let ok = false
     try {
       const result = await lookupWord(word.word)
       const entry = Array.isArray(result) ? result[0] : result
       const au = entry && entry.phonetics && (entry.phonetics.find((p: any) => p && p.audio) || {}).audio
-      if (au) { word.audioUrl = au; const app = getApp<IAppOption>(); wx.setStorageSync('studyData', app.globalData.studyData) }
+      if (au) {
+        word.audioUrl = au
+        if (this.data.gameWord && this.data.gameWord.word === word.word) {
+          this.setData({ 'gameWord.audioUrl': au })
+        }
+        const app = getApp<IAppOption>()
+        wx.setStorageSync('studyData', app.globalData.studyData)
+        ok = true
+      }
     } catch {}
+    return ok
   },
 
   startConfetti() {
