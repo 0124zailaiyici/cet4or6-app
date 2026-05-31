@@ -5,7 +5,11 @@ Page({
     fbType: '功能异常',
     fbText: '',
     types: ['功能异常', '功能建议', '体验评价', '其他'],
-    fs: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].title || 16,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].body || 16,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].opt || 16,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].btn || 16,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].sm || 16,
 
     fsOpen: false,
 
@@ -66,12 +70,16 @@ Page({
     this.setData({ fsOpen: !this.data.fsOpen })
   },
   changeFs(e: WechatMiniprogram.TouchEvent) {
+    const cat = e.currentTarget.dataset.cat as string || 'body'
     const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    let v = Math.max(12, Math.min(26, this.data.fs + d))
-    this.setData({ fs: v })
+    const key = 'feedback'
+    const old = this.data[cat as keyof typeof this.data] as number || 16
+    let v = Math.max(10, Math.min(28, old + d))
+    this.setData({ [cat]: v })
     const app = getApp<IAppOption>()
     if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    app.globalData.fontSizes['feedback'] = v
+    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
+    app.globalData.fontSizes[key][cat] = v
     wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

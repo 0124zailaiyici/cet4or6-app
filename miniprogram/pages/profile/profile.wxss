@@ -1,26 +1,26 @@
 .page { min-height: 100vh; display: flex; flex-direction: column; background: #f3eeed; }
 .prof-h { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 56rpx 24rpx 24rpx; color: #fff; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-.avatar { width: 100rpx; height: 100rpx; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: calc(48 * var(--fs) / 16 * 1rpx); margin-bottom: 12rpx; }
-.pn { font-size: calc(34 * var(--fs) / 16 * 1rpx); font-weight: 700; }
-.pd { font-size: calc(22 * var(--fs) / 16 * 1rpx); opacity: 0.75; margin-top: 4rpx; }
+.avatar { width: 100rpx; height: 100rpx; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: calc(48 * var(--fs-body) / 16 * 1rpx); margin-bottom: 12rpx; }
+.pn { font-size: calc(34 * var(--fs-body) / 16 * 1rpx); font-weight: 700; }
+.pd { font-size: calc(22 * var(--fs-body) / 16 * 1rpx); opacity: 0.75; margin-top: 4rpx; }
 
 .body { flex: 1; overflow-y: auto; padding: 16rpx 20rpx 10rpx; }
 .sum { display: flex; gap: 12rpx; margin-bottom: 16rpx; }
 .s { flex: 1; background: #fff; border-radius: 18rpx; padding: 20rpx 12rpx; text-align: center; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); }
-.s .n { display: block; font-size: calc(40 * var(--fs) / 16 * 1rpx); font-weight: 800; color: #ff6b8a; }
-.s .l { display: block; font-size: calc(20 * var(--fs) / 16 * 1rpx); color: #8a7a9a; margin-top: 4rpx; }
+.s .n { display: block; font-size: calc(40 * var(--fs-body) / 16 * 1rpx); font-weight: 800; color: #ff6b8a; }
+.s .l { display: block; font-size: calc(20 * var(--fs-body) / 16 * 1rpx); color: #8a7a9a; margin-top: 4rpx; }
 
 .card { background: #fff; border-radius: 20rpx; padding: 20rpx; margin-bottom: 16rpx; box-shadow: 0 2rpx 16rpx rgba(255,158,181,0.04); }
-.cst { font-size: calc(26 * var(--fs) / 16 * 1rpx); font-weight: 700; color: #2d2d4e; margin-bottom: 12rpx; }
+.cst { font-size: calc(26 * var(--fs-body) / 16 * 1rpx); font-weight: 700; color: #2d2d4e; margin-bottom: 12rpx; }
 .ac { flex: 1; text-align: center; padding: 14rpx 8rpx; border-radius: 14rpx; border: 2rpx solid #fff0f3; }
-.ac .ae { display: block; font-size: calc(40 * var(--fs) / 16 * 1rpx); margin-bottom: 4rpx; }
-.ac .an { display: block; font-size: calc(20 * var(--fs) / 16 * 1rpx); color: #8a7a9a; }
+.ac .ae { display: block; font-size: calc(40 * var(--fs-body) / 16 * 1rpx); margin-bottom: 4rpx; }
+.ac .an { display: block; font-size: calc(20 * var(--fs-body) / 16 * 1rpx); color: #8a7a9a; }
 .ac.lock { opacity: 0.35; }
 
 .cal-h { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4rpx; margin-bottom: 6rpx; }
-.cal-h text { text-align: center; font-size: calc(20 * var(--fs) / 16 * 1rpx); color: #8a7a9a; }
+.cal-h text { text-align: center; font-size: calc(20 * var(--fs-body) / 16 * 1rpx); color: #8a7a9a; }
 .cal-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4rpx; margin-bottom: 4rpx; }
-.cc { aspect-ratio: 1; border-radius: 8rpx; display: flex; align-items: center; justify-content: center; font-size: calc(22 * var(--fs) / 16 * 1rpx); color: #2d2d4e; }
+.cc { aspect-ratio: 1; border-radius: 8rpx; display: flex; align-items: center; justify-content: center; font-size: calc(22 * var(--fs-body) / 16 * 1rpx); color: #2d2d4e; }
 .cc.cl1 { background: rgba(255,107,138,0.06); }
 .cc.cl2 { background: rgba(255,107,138,0.15); }
 .cc.cl3 { background: rgba(255,107,138,0.35); color: #fff; font-weight: 600; }
@@ -29,9 +29,9 @@
 
 .entry { display: flex; align-items: center; gap: 14rpx; padding: 16rpx 0; border-bottom: 2rpx solid #fff0f3; }
 .entry:last-child { border-bottom: none; }
-.ei { font-size: calc(32 * var(--fs) / 16 * 1rpx); }
-.el { flex: 1; font-size: calc(26 * var(--fs) / 16 * 1rpx); color: #2d2d4e; }
-.en { font-size: calc(30 * var(--fs) / 16 * 1rpx); color: #ccc; }
+.ei { font-size: calc(32 * var(--fs-body) / 16 * 1rpx); }
+.el { flex: 1; font-size: calc(26 * var(--fs-body) / 16 * 1rpx); color: #2d2d4e; }
+.en { font-size: calc(30 * var(--fs-body) / 16 * 1rpx); color: #ccc; }
 
 /* Dark */
 .dark-theme.page { background: #12121f !important; }
