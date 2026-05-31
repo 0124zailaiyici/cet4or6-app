@@ -113,7 +113,7 @@
         <block wx:if="{{!puzzleSkipped}}">
           <block wx:for="{{puzzleSelected}}" wx:for-index="pos">
             <view wx:if="{{item !== null}}"
-              class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintIndices.indexOf(item) >= 0 ? 'hint-glow' : ''}}"
+              class="pz-drop-word {{puzzleFinished ? 'done' : ''}} {{puzzleHintGlows[pos] ? 'hint-glow' : ''}}"
               data-pos="{{pos}}" catchtap="untapPuzzleWord"
             >{{puzzleWords[item]}}</view>
             <view wx:else class="pz-drop-slot"></view>

@@ -3,6 +3,10 @@ import { applyTheme, getDarkMode } from '../../utils/theme'
 import { doCheckIn } from '../../utils/checkin'
 import { generateSentence, parseSentences } from '../../utils/api'
 
+function computeHintGlows(selected: (number | null)[], hints: number[]): boolean[] {
+  return selected.map(function(item) { return item !== null && hints.indexOf(item) >= 0 })
+}
+
 interface ISentence {
   id: number
   english: string
@@ -54,6 +58,7 @@ interface ISentencesData {
   puzzleRevealed: boolean
   puzzleSkipped: boolean
   puzzleHintIndices: number[]
+  puzzleHintGlows: boolean[]
   puzzleInitialSelected: (number | null)[]
   puzzleSentences: ISentence[]
   puzzleDone: boolean
@@ -136,6 +141,7 @@ Page<ISentencesData, ISentencesMethods>({
     puzzleSkipped: false,
     puzzleDone: false,
     puzzleHintIndices: [],
+    puzzleHintGlows: [],
     puzzleInitialSelected: [],
     puzzleSentences: [],
   },
@@ -422,6 +428,7 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleRevealed: false,
       puzzleSkipped: false,
       puzzleHintIndices: hintIndices,
+      puzzleHintGlows: computeHintGlows(selected, hintIndices),
       puzzleInitialSelected: [...selected],
     } as any)
   },
@@ -436,7 +443,7 @@ Page<ISentencesData, ISentencesMethods>({
     if (emptyIdx < 0) return
     selected[emptyIdx] = wi
     used[wi] = true
-    this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
+    this.setData({ puzzleSelected: selected, puzzleWordUsed: used, puzzleHintGlows: computeHintGlows(selected, this.data.puzzleHintIndices) } as any)
 
     if (selected.indexOf(null) < 0) {
       this.checkPuzzleAnswer()
@@ -453,7 +460,7 @@ Page<ISentencesData, ISentencesMethods>({
     const used = [...this.data.puzzleWordUsed]
     selected[pos] = null
     used[wi] = false
-    this.setData({ puzzleSelected: selected, puzzleWordUsed: used } as any)
+    this.setData({ puzzleSelected: selected, puzzleWordUsed: used, puzzleHintGlows: computeHintGlows(selected, this.data.puzzleHintIndices) } as any)
   },
 
   checkPuzzleAnswer() {
@@ -537,6 +544,7 @@ Page<ISentencesData, ISentencesMethods>({
       puzzleRevealed: true,
       puzzleFinished: true,
       puzzleHintIndices: answers,
+      puzzleHintGlows: computeHintGlows(answers, answers),
       puzzleCombo: 0,
     } as any)
     wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 })

@@ -2,7 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const theme_1 = require("./utils/theme");
 const API_BASE = (() => { try {
-    return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app';
+    const v = wx.getStorageSync('api_base');
+    if (v && v.includes('railway'))
+        return v;
+    return 'https://cet4or6-app-production.up.railway.app';
 }
 catch (e) {
     return 'https://cet4or6-app-production.up.railway.app';
@@ -29,7 +32,7 @@ App({
         examSet: '',
         studyData: (() => {
             const stored = wx.getStorageSync('studyData');
-            return stored ? Object.assign(Object.assign(Object.assign({}, defaults), stored), { hardSentences: stored.hardSentences || [], readingAnswers: stored.readingAnswers || {} }) : Object.assign({}, defaults);
+            return stored ? { ...defaults, ...stored, hardSentences: stored.hardSentences || [], readingAnswers: stored.readingAnswers || {} } : { ...defaults };
         })()
     },
     onLaunch() {
@@ -40,8 +43,7 @@ App({
         if (this.globalData.darkMode) {
             (0, theme_1.applyTheme)(true);
         }
-        // 预唤醒 Railway（避免冷启动）
-        wx.request({ url: API_BASE + '/health', method: 'GET', timeout: 5000 });
+        wx.request({ url: API_BASE + '/health', method: 'GET', timeout: 5000, fail: () => { } });
         // 首次启动显示引导页
         if (!wx.getStorageSync('hasGuided')) {
             wx.reLaunch({ url: '/pages/guide/guide' });

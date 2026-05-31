@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,6 +7,9 @@ const sentences_1 = __importDefault(require("../../data/sentences"));
 const theme_1 = require("../../utils/theme");
 const checkin_1 = require("../../utils/checkin");
 const api_1 = require("../../utils/api");
+function computeHintGlows(selected, hints) {
+    return selected.map(function (item) { return item !== null && hints.indexOf(item) >= 0; });
+}
 Page({
     data: {
         allSentences: [],
@@ -60,6 +54,7 @@ Page({
         puzzleSkipped: false,
         puzzleDone: false,
         puzzleHintIndices: [],
+        puzzleHintGlows: [],
         puzzleInitialSelected: [],
         puzzleSentences: [],
     },
@@ -171,7 +166,7 @@ Page({
             masterTexts,
             masterStatus,
             immMasterStatus,
-            topicCounts: Object.assign(Object.assign({}, this.data.topicCounts), { '已掌握': masteredArr.length, '未掌握': this.data.allSentences.length - masteredArr.length }),
+            topicCounts: { ...this.data.topicCounts, '已掌握': masteredArr.length, '未掌握': this.data.allSentences.length - masteredArr.length },
         });
         this.doFilter();
         const app = getApp();
@@ -337,6 +332,7 @@ Page({
             puzzleRevealed: false,
             puzzleSkipped: false,
             puzzleHintIndices: hintIndices,
+            puzzleHintGlows: computeHintGlows(selected, hintIndices),
             puzzleInitialSelected: [...selected],
         });
     },
@@ -353,7 +349,7 @@ Page({
             return;
         selected[emptyIdx] = wi;
         used[wi] = true;
-        this.setData({ puzzleSelected: selected, puzzleWordUsed: used });
+        this.setData({ puzzleSelected: selected, puzzleWordUsed: used, puzzleHintGlows: computeHintGlows(selected, this.data.puzzleHintIndices) });
         if (selected.indexOf(null) < 0) {
             this.checkPuzzleAnswer();
         }
@@ -371,7 +367,7 @@ Page({
         const used = [...this.data.puzzleWordUsed];
         selected[pos] = null;
         used[wi] = false;
-        this.setData({ puzzleSelected: selected, puzzleWordUsed: used });
+        this.setData({ puzzleSelected: selected, puzzleWordUsed: used, puzzleHintGlows: computeHintGlows(selected, this.data.puzzleHintIndices) });
     },
     checkPuzzleAnswer() {
         const selected = this.data.puzzleSelected;
@@ -456,6 +452,7 @@ Page({
             puzzleRevealed: true,
             puzzleFinished: true,
             puzzleHintIndices: answers,
+            puzzleHintGlows: computeHintGlows(answers, answers),
             puzzleCombo: 0,
         });
         wx.showToast({ title: '👁 正确答案如上', icon: 'none', duration: 1500 });
@@ -509,66 +506,64 @@ Page({
             this.setData({ genCount: next });
         }
     },
-    doGenerate() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const input = this.data.genInput.trim();
-            if (!input) {
-                wx.showToast({ title: '请输入单词或话题', icon: 'none' });
-                return;
+    async doGenerate() {
+        const input = this.data.genInput.trim();
+        if (!input) {
+            wx.showToast({ title: '请输入单词或话题', icon: 'none' });
+            return;
+        }
+        this.setData({ generating: true });
+        try {
+            const params = {
+                count: this.data.genCount,
+            };
+            if (this.data.genType === 'word') {
+                params.word = input;
             }
-            this.setData({ generating: true });
-            try {
-                const params = {
-                    count: this.data.genCount,
-                };
-                if (this.data.genType === 'word') {
-                    params.word = input;
-                }
-                else {
-                    params.topic = input;
-                }
-                const results = yield (0, api_1.generateSentence)(params);
-                const maxId = Math.max(0, ...this.data.allSentences.map(s => s.id));
-                const newSentences = results.map((item, i) => ({
-                    id: maxId + i + 1,
-                    english: item.english,
-                    chinese: item.chinese,
-                    keywords: item.keywords,
-                    topic: item.topic,
-                }));
-                const allSentences = [...this.data.allSentences, ...newSentences];
-                const topics = [...new Set(allSentences.map(s => s.topic))];
-                topics.unshift('全部');
-                topics.push('已掌握', '未掌握');
-                const topicCounts = {};
-                allSentences.forEach(s => {
-                    topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1;
-                });
-                topicCounts['已掌握'] = this.data.masteredIds.length;
-                topicCounts['未掌握'] = allSentences.length - this.data.masteredIds.length;
-                const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏');
-                const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握');
-                const favStatus = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0);
-                const masterStatus = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0);
-                this.setData({
-                    allSentences,
-                    topics,
-                    topicCounts,
-                    favTexts,
-                    masterTexts,
-                    favStatus,
-                    masterStatus,
-                    showGenModal: false,
-                    generating: false,
-                });
-                this.doFilter();
-                wx.showToast({ title: `已生成 ${results.length} 个句子`, icon: 'success' });
+            else {
+                params.topic = input;
             }
-            catch (err) {
-                wx.showToast({ title: err.message || '生成失败', icon: 'none' });
-                this.setData({ generating: false });
-            }
-        });
+            const results = await (0, api_1.generateSentence)(params);
+            const maxId = Math.max(0, ...this.data.allSentences.map(s => s.id));
+            const newSentences = results.map((item, i) => ({
+                id: maxId + i + 1,
+                english: item.english,
+                chinese: item.chinese,
+                keywords: item.keywords,
+                topic: item.topic,
+            }));
+            const allSentences = [...this.data.allSentences, ...newSentences];
+            const topics = [...new Set(allSentences.map(s => s.topic))];
+            topics.unshift('全部');
+            topics.push('已掌握', '未掌握');
+            const topicCounts = {};
+            allSentences.forEach(s => {
+                topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1;
+            });
+            topicCounts['已掌握'] = this.data.masteredIds.length;
+            topicCounts['未掌握'] = allSentences.length - this.data.masteredIds.length;
+            const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏');
+            const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握');
+            const favStatus = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0);
+            const masterStatus = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0);
+            this.setData({
+                allSentences,
+                topics,
+                topicCounts,
+                favTexts,
+                masterTexts,
+                favStatus,
+                masterStatus,
+                showGenModal: false,
+                generating: false,
+            });
+            this.doFilter();
+            wx.showToast({ title: `已生成 ${results.length} 个句子`, icon: 'success' });
+        }
+        catch (err) {
+            wx.showToast({ title: err.message || '生成失败', icon: 'none' });
+            this.setData({ generating: false });
+        }
     },
     openPasteModal() {
         this.setData({ showPasteModal: true, pasteText: '' });
@@ -579,57 +574,55 @@ Page({
     onPasteInput(e) {
         this.setData({ pasteText: e.detail.value });
     },
-    doParse() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const text = this.data.pasteText.trim();
-            if (text.length < 10) {
-                wx.showToast({ title: '文本太短，至少10个字符', icon: 'none' });
-                return;
-            }
-            this.setData({ parsing: true });
-            try {
-                const results = yield (0, api_1.parseSentences)(text);
-                const maxId = Math.max(0, ...this.data.allSentences.map(s => s.id));
-                const newSentences = results.map((item, i) => ({
-                    id: maxId + i + 1,
-                    english: item.english,
-                    chinese: item.chinese,
-                    keywords: item.keywords,
-                    topic: item.topic,
-                }));
-                const allSentences = [...this.data.allSentences, ...newSentences];
-                const topics = [...new Set(allSentences.map(s => s.topic))];
-                topics.unshift('全部');
-                topics.push('已掌握', '未掌握');
-                const tc = {};
-                allSentences.forEach(s => {
-                    tc[s.topic] = (tc[s.topic] || 0) + 1;
-                });
-                tc['已掌握'] = this.data.masteredIds.length;
-                tc['未掌握'] = allSentences.length - this.data.masteredIds.length;
-                const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏');
-                const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握');
-                const favStatus = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0);
-                const masterStatus = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0);
-                this.setData({
-                    allSentences,
-                    topics,
-                    topicCounts: tc,
-                    favTexts,
-                    masterTexts,
-                    favStatus,
-                    masterStatus,
-                    showPasteModal: false,
-                    parsing: false,
-                });
-                this.doFilter();
-                wx.showToast({ title: `已导入 ${results.length} 个句子`, icon: 'success' });
-            }
-            catch (err) {
-                wx.showToast({ title: err.message || '解析失败', icon: 'none' });
-                this.setData({ parsing: false });
-            }
-        });
+    async doParse() {
+        const text = this.data.pasteText.trim();
+        if (text.length < 10) {
+            wx.showToast({ title: '文本太短，至少10个字符', icon: 'none' });
+            return;
+        }
+        this.setData({ parsing: true });
+        try {
+            const results = await (0, api_1.parseSentences)(text);
+            const maxId = Math.max(0, ...this.data.allSentences.map(s => s.id));
+            const newSentences = results.map((item, i) => ({
+                id: maxId + i + 1,
+                english: item.english,
+                chinese: item.chinese,
+                keywords: item.keywords,
+                topic: item.topic,
+            }));
+            const allSentences = [...this.data.allSentences, ...newSentences];
+            const topics = [...new Set(allSentences.map(s => s.topic))];
+            topics.unshift('全部');
+            topics.push('已掌握', '未掌握');
+            const tc = {};
+            allSentences.forEach(s => {
+                tc[s.topic] = (tc[s.topic] || 0) + 1;
+            });
+            tc['已掌握'] = this.data.masteredIds.length;
+            tc['未掌握'] = allSentences.length - this.data.masteredIds.length;
+            const favTexts = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0 ? '已收藏' : '收藏');
+            const masterTexts = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0 ? '已掌握' : '掌握');
+            const favStatus = allSentences.map(s => this.data.favoriteIds.indexOf(s.id) >= 0);
+            const masterStatus = allSentences.map(s => this.data.masteredIds.indexOf(s.id) >= 0);
+            this.setData({
+                allSentences,
+                topics,
+                topicCounts: tc,
+                favTexts,
+                masterTexts,
+                favStatus,
+                masterStatus,
+                showPasteModal: false,
+                parsing: false,
+            });
+            this.doFilter();
+            wx.showToast({ title: `已导入 ${results.length} 个句子`, icon: 'success' });
+        }
+        catch (err) {
+            wx.showToast({ title: err.message || '解析失败', icon: 'none' });
+            this.setData({ parsing: false });
+        }
     },
     onShareAppMessage() {
         return {

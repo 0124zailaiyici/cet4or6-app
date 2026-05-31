@@ -154,7 +154,7 @@ Page({
     words: [] as { word: string; ok: boolean }[],
     showHints: false,
     todayItem: null as any, todayItems: [] as any[], todayReason: '',
-    weakPoints: [] as { key: string; label: string; avg: number; count: number }[],
+    weakPoints: [] as { key: string; label: string; avg: number; count: number; _icon: string }[],
   },
 
   onLoad() {
@@ -217,9 +217,10 @@ Page({
         if (!dimScores[k]) dimScores[k] = []; dimScores[k].push(v)
       }
     }
+    const iconMap: Record<string, string> = { vocabulary: '📖', grammar: '🔗', semantics: '🎯', expression: '✍️' }
     const weakPoints = Object.entries(dimScores).map(([k, vals]) => {
       const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
-      return { key: k, label: dimNames[k] || k, avg, count: vals.length }
+      return { key: k, label: dimNames[k] || k, avg, count: vals.length, _icon: iconMap[k] || '📝' }
     }).sort((a, b) => a.avg - b.avg)
 
     this.setData({

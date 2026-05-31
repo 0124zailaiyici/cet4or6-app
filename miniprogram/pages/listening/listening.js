@@ -7,7 +7,10 @@ const listening_generated_1 = __importDefault(require("../../data/listening_gene
 const checkin_1 = require("../../utils/checkin");
 const theme_1 = require("../../utils/theme");
 const API_BASE = (() => { try {
-    return wx.getStorageSync('api_base') || 'https://cet4or6-app-production.up.railway.app';
+    const v = wx.getStorageSync('api_base');
+    if (v && v.includes('railway'))
+        return v;
+    return 'https://cet4or6-app-production.up.railway.app';
 }
 catch (_) {
     return 'https://cet4or6-app-production.up.railway.app';
@@ -25,6 +28,49 @@ function sectionLabel(q) {
     if (q >= 16 && q <= 25)
         return LABELS.sectionC;
     return '';
+}
+function buildTranscriptSegments(text, highlights) {
+    if (!highlights || highlights.length === 0)
+        return [{ t: text, h: false }];
+    let remaining = text;
+    const segs = [];
+    for (const hl of highlights) {
+        if (!hl)
+            continue;
+        let idx = remaining.indexOf(hl);
+        if (idx >= 0) {
+            if (idx > 0)
+                segs.push({ t: remaining.slice(0, idx), h: false });
+            segs.push({ t: hl, h: true });
+            remaining = remaining.slice(idx + hl.length);
+            continue;
+        }
+        const words = hl.split(/\s+/).filter((w) => w.length > 2);
+        if (words.length < 2) {
+            segs.push({ t: remaining, h: false });
+            break;
+        }
+        const fw = words[0];
+        const lw = words[words.length - 1];
+        const si = remaining.indexOf(fw);
+        if (si < 0) {
+            segs.push({ t: remaining, h: false });
+            break;
+        }
+        const ei = remaining.lastIndexOf(lw);
+        if (ei <= si) {
+            segs.push({ t: remaining, h: false });
+            break;
+        }
+        const end = ei + lw.length;
+        if (si > 0)
+            segs.push({ t: remaining.slice(0, si), h: false });
+        segs.push({ t: remaining.slice(si, end), h: true });
+        remaining = remaining.slice(end);
+    }
+    if (remaining.length > 0)
+        segs.push({ t: remaining, h: false });
+    return segs;
 }
 function buildPages(passage) {
     const pages = [];
@@ -52,13 +98,18 @@ function buildPages(passage) {
             return m && parseInt(m[1]) === qNum;
         });
         const sent = sentIdx >= 0 ? passage.sentences[sentIdx] : null;
+        const hasTranscript = sent && sent.transcript && sent.transcript.length > 0;
         pages.push({
             type: 'q',
             section: currentQ.section,
             stem: currentQ.stem,
             opts: currentQ.opts.map(o => o.t),
-            transcriptText: sent ? sent.text : '',
+            transcriptText: hasTranscript ? sent.transcript : (sent ? sent.text : ''),
+            transcriptSegments: hasTranscript ? buildTranscriptSegments(sent.transcript, sent.highlights || []) : undefined,
             transcriptUrl: sent && (sent.start > 0 || sent.end > 0) ? `${API_BASE}/audio/segment/${passage.id}/${sentIdx}` : undefined,
+            sentenceStart: sent ? sent.start : 0,
+            transcriptHighlights: hasTranscript ? (sent.highlights || []) : undefined,
+            answerKey: hasTranscript ? (sent.answerKey || '') : undefined,
         });
         currentQ = null;
     }
@@ -115,8 +166,19 @@ function buildPages(passage) {
             continue;
         p.opts = p.opts.filter(o => o.length > 0);
     }
+    let prevStart = -1;
+    for (const p of pages) {
+        if (p.type !== 'q')
+            continue;
+        if (p.sentenceStart !== prevStart) {
+            prevStart = p.sentenceStart || 0;
+            if (prevStart > 0)
+                p.groupStartTime = prevStart;
+        }
+    }
     if (pages.every(p => p.type === 'dir'))
         return [];
+    pages.forEach((p, i) => { p._key = 'p_' + i; });
     return pages;
 }
 // ===== AudioManager =====
@@ -125,6 +187,10 @@ class AudioManager {
         this.ctx = null;
         this.pageRef = null;
         this.customOnEnded = null;
+        this._src = '';
+        this._passageId = null;
+        this._fullAudioUrl = '';
+        this._pendingSeek = -1;
     }
     attach(page) {
         this.pageRef = page;
@@ -150,6 +216,23 @@ class AudioManager {
                     }
                     this.pageRef.setData(d);
                 }
+                if (this._pendingSeek >= 0) {
+                    const t = this._pendingSeek;
+                    this._pendingSeek = -1;
+                    setTimeout(() => ctx.seek(t), 30);
+                }
+            });
+            ctx.onPlay(() => {
+                if (this.pageRef)
+                    this.pageRef.setData({ isPlaying: true, loading: false });
+            });
+            ctx.onPause(() => {
+                if (this.pageRef)
+                    this.pageRef.setData({ isPlaying: false });
+            });
+            ctx.onStop(() => {
+                if (this.pageRef)
+                    this.pageRef.setData({ isPlaying: false, loading: false });
             });
             ctx.onEnded(() => {
                 if (this.customOnEnded) {
@@ -157,8 +240,6 @@ class AudioManager {
                 }
                 else if (this.pageRef) {
                     const d = this.pageRef.data;
-                    if (!d.isPlaying)
-                        return;
                     if (d.audioMode) {
                         if (d.loopSentence && this.ctx) {
                             this.ctx.seek(0);
@@ -166,7 +247,7 @@ class AudioManager {
                             this.pageRef.setData({ isPlaying: true });
                         }
                         else {
-                            this.pageRef.setData({ isPlaying: false });
+                            this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 });
                         }
                     }
                     else if (d.loopSentence) {
@@ -176,7 +257,7 @@ class AudioManager {
                         this.pageRef.nextSentence();
                     }
                     else {
-                        this.pageRef.setData({ isPlaying: false });
+                        this.pageRef.setData({ isPlaying: false, transcriptPlayingIdx: -1 });
                     }
                 }
             });
@@ -205,6 +286,15 @@ class AudioManager {
                             ctx.seek(sent.start || 0);
                         }
                     }
+                    if (d.liteMode) {
+                        const curPage = d.currentPassage && d.pages ? d.pages[d.currentPage] : null;
+                        if (curPage && curPage.type === 'q' && curPage.sentenceStart != null && curPage.sentenceStart > 0) {
+                            const endT = d.currentPassage.sentences.find((s) => s.start === curPage.sentenceStart);
+                            if (endT && endT.end > 0 && t >= endT.end) {
+                                this.pageRef.setData({ isPlaying: false });
+                            }
+                        }
+                    }
                 }
             });
             ctx.onError((res) => {
@@ -214,19 +304,21 @@ class AudioManager {
                     const rt = d._retryCount || 0;
                     if (rt < 3) {
                         this.pageRef.setData({ _retryCount: rt + 1, loading: true });
-                        setTimeout(() => { if (this.ctx && this.ctx.src) {
-                            this.ctx.play();
-                        } }, (rt + 1) * 5000);
+                        const delay = [10, 15, 20][rt] || 20000;
+                        setTimeout(() => {
+                            if (this.ctx && this._src) {
+                                this.ctx.stop();
+                                this.ctx.src = this._src;
+                                this.ctx.playbackRate = this.pageRef.data.speed;
+                                this.ctx.play();
+                            }
+                        }, delay * 1000);
                         return;
                     }
                 }
                 wx.showToast({ title: `播放失败${code ? '(' + code + ')' : ''}`, icon: 'none' });
                 if (this.pageRef)
                     this.pageRef.setData({ isPlaying: false, loading: false });
-            });
-            ctx.onPlay(() => {
-                if (this.pageRef)
-                    this.pageRef.setData({ loading: false });
             });
             this.ctx = ctx;
         }
@@ -236,6 +328,7 @@ class AudioManager {
         this.customOnEnded = handler;
     }
     play(src, rate = 1) {
+        this._src = src;
         const ctx = this.getCtx();
         ctx.stop();
         ctx.src = src;
@@ -243,6 +336,25 @@ class AudioManager {
         ctx.play();
         if (this.pageRef)
             this.pageRef.setData({ _retryCount: 0 });
+    }
+    getSrc() { return this._src; }
+    setPassageId(id) {
+        this._passageId = String(id);
+    }
+    playFrom(time, rate = 1) {
+        if (!this._passageId)
+            return;
+        const url = `${API_BASE}/audio/full/${this._passageId}`;
+        if (this._fullAudioUrl !== url || !this.ctx) {
+            this._fullAudioUrl = url;
+            this._pendingSeek = time;
+            this.play(url, rate);
+        }
+        else {
+            this.resume(rate);
+            if (time > 0)
+                this.ctx.seek(time);
+        }
     }
     resume(rate = 1) {
         if (!this.ctx)
@@ -327,6 +439,9 @@ Page({
         focusSentenceMap: [],
         focusPageIndices: [],
         transcriptPlaying: false,
+        transcriptPlayingIdx: -1,
+        liteMode: false,
+        tinyOptions: false,
     },
     onLoad(options) {
         if (options && options.examMode === '1')
@@ -356,6 +471,7 @@ Page({
     onHide() {
         audio.pause();
         this.setData({ isPlaying: false });
+        this.setData({ isPlaying: false, transcriptPlayingIdx: -1 });
     },
     onUnload() {
         audio.destroy();
@@ -371,11 +487,9 @@ Page({
         const localHard = stored.filter(h => h.passageId === passage.id).map(h => h.sentenceIndex);
         const isAudio = !!passage.audioUrl;
         if (isAudio) {
-            const audioUrl = passage.audioUrl.startsWith('http')
-                ? passage.audioUrl
-                : `${API_BASE}${encodeURI(passage.audioUrl)}`;
-            audio.stop();
-            audio.play(audioUrl);
+            audio.destroy();
+            audio.attach(this);
+            audio.setPassageId(passage.id);
             const saved = app.globalData.studyData.listeningAnswers && app.globalData.studyData.listeningAnswers[passage.id] || {};
             const pages = buildPages(passage);
             let warns = [];
@@ -392,7 +506,7 @@ Page({
                 mode: 'detail',
                 currentPassage: passage,
                 currentIndex: 0,
-                isPlaying: true,
+                isPlaying: false,
                 hardSentences: localHard,
                 sentenceHardStatus,
                 audioMode: true,
@@ -408,6 +522,7 @@ Page({
                 loopSentence: fm,
                 speed: fm ? 0.8 : 1,
                 _retryCount: 0,
+                transcriptPlayingIdx: -1,
             });
             audio.setRate(fm ? 0.8 : 1);
         }
@@ -434,7 +549,7 @@ Page({
             wx.navigateBack();
             return;
         }
-        audio.stop();
+        audio.destroy();
         this.setData({
             mode: 'list',
             currentPassage: null,
@@ -446,6 +561,7 @@ Page({
             focusMode: false,
             loopSentence: false,
             speed: 1,
+            transcriptPlayingIdx: -1,
         });
     },
     // ===== Page navigation (audio mode) =====
@@ -462,7 +578,7 @@ Page({
     onOptionTap(e) {
         const i = parseInt(e.currentTarget.dataset.i);
         const oi = parseInt(e.currentTarget.dataset.oi);
-        const sa = Object.assign({}, this.data.selectedAnswers);
+        const sa = { ...this.data.selectedAnswers };
         if (sa[i] === oi)
             delete sa[i];
         else
@@ -481,6 +597,7 @@ Page({
         if (this.data.currentPage > 0) {
             const cp = this.data.currentPage - 1;
             const p = this.data.pages[cp];
+            const curP = this.data.pages[this.data.currentPage];
             const wasPlaying = this.data.isPlaying;
             if (this.data.focusMode && wasPlaying) {
                 audio.pause();
@@ -491,6 +608,11 @@ Page({
                 isCurrentMarked: this.data.markedFlags[cp] || false,
                 isPlaying: this.data.focusMode ? false : wasPlaying,
             });
+            if (p && p.sentenceStart != null && p.sentenceStart >= 0) {
+                if (p.sentenceStart !== curP.sentenceStart) {
+                    setTimeout(() => audio.playFrom(p.sentenceStart, this.data.speed), 30);
+                }
+            }
         }
     },
     nextPage() {
@@ -498,6 +620,7 @@ Page({
         if (this.data.currentPage < lastIdx) {
             const cp = this.data.currentPage + 1;
             const p = this.data.pages[cp];
+            const curP = this.data.pages[this.data.currentPage];
             const wasPlaying = this.data.isPlaying;
             if (this.data.focusMode && wasPlaying) {
                 audio.pause();
@@ -508,6 +631,11 @@ Page({
                 isCurrentMarked: this.data.markedFlags[cp] || false,
                 isPlaying: this.data.focusMode ? false : wasPlaying,
             });
+            if (p && p.sentenceStart != null && p.sentenceStart >= 0) {
+                if (p.sentenceStart !== curP.sentenceStart) {
+                    setTimeout(() => audio.playFrom(p.sentenceStart, this.data.speed), 30);
+                }
+            }
         }
         else if (this.data.currentPage >= lastIdx && this.data.audioMode) {
             this.viewSummary();
@@ -585,6 +713,8 @@ Page({
                 speed: 0.8,
                 isPlaying: false,
                 showTranscript: true,
+                liteMode: false,
+                tinyOptions: false,
                 focusSentences: lines,
                 focusSentenceMap: sentMap,
                 focusPageIndices: pageIdx,
@@ -636,6 +766,42 @@ Page({
         }
         this.setData({ markedPages: m, markedFlags: flags, isCurrentMarked: flags[cp] });
     },
+    toggleLiteMode() {
+        const lm = !this.data.liteMode;
+        const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null;
+        const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0;
+        audio.pause();
+        this.setData({
+            liteMode: lm,
+            showTranscript: true,
+            isPlaying: false,
+        });
+        setTimeout(() => audio.playFrom(st, this.data.speed), 50);
+    },
+    toggleTiny() {
+        this.setData({ tinyOptions: !this.data.tinyOptions });
+    },
+    replayCurrent() {
+        if (!this.data.audioMode || !this.data.currentPassage)
+            return;
+        const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null;
+        if (curPage && curPage.sentenceStart != null && curPage.sentenceStart >= 0) {
+            audio.seek(curPage.sentenceStart);
+            if (this.data.isPlaying || this.data.liteMode) {
+                audio.resume(this.data.speed);
+                this.setData({ isPlaying: true });
+            }
+        }
+    },
+    resetPlayback() {
+        if (!this.data.audioMode || !this.data.currentPassage)
+            return;
+        const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null;
+        const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0;
+        audio.pause();
+        this.setData({ isPlaying: false });
+        setTimeout(() => audio.playFrom(st, this.data.speed), 30);
+    },
     // ===== Audio controls =====
     playCurrent() {
         if (this.data.focusMode) {
@@ -653,7 +819,7 @@ Page({
     playText(text, useAudioUrl) {
         let src;
         if (useAudioUrl) {
-            src = useAudioUrl.startsWith('http') ? useAudioUrl : `${API_BASE}${encodeURI(useAudioUrl)}`;
+            src = useAudioUrl.startsWith('http') ? useAudioUrl : API_BASE + encodeURI(useAudioUrl);
         }
         else {
             src = `${API_BASE}/tts?text=${encodeURIComponent(text)}&lang=en`;
@@ -692,8 +858,10 @@ Page({
                 this.setData({ isPlaying: false });
             }
             else {
-                audio.resume(this.data.speed);
-                this.setData({ isPlaying: true });
+                const curPage = this.data.pages ? this.data.pages[this.data.currentPage] : null;
+                const st = curPage && curPage.sentenceStart != null ? curPage.sentenceStart : 0;
+                audio.playFrom(st, this.data.speed);
+                setTimeout(() => this.setData({ isPlaying: true }), 30);
             }
         }
         else if (this.data.isPlaying) {
@@ -806,22 +974,26 @@ Page({
         audio.setRate(speed);
     },
     toggleTranscript() {
-        this.setData({ showTranscript: !this.data.showTranscript, transcriptPlaying: false });
+        this.setData({ showTranscript: !this.data.showTranscript, transcriptPlayingIdx: -1 });
     },
-    playTranscriptSentence(_e) {
-        const passage = this.data.currentPassage;
-        if (!passage || !passage.audioUrl)
+    playTranscriptSentence(e) {
+        const pi = parseInt(e.currentTarget.dataset.pi);
+        if (isNaN(pi))
             return;
-        const audioUrl = passage.audioUrl.startsWith('http')
-            ? passage.audioUrl
-            : `${API_BASE}${encodeURI(passage.audioUrl)}`;
-        if (this.data.transcriptPlaying) {
+        const page = this.data.pages[pi];
+        if (!page || page.type !== 'q')
+            return;
+        const t = page.groupStartTime || page.sentenceStart;
+        if (!t)
+            return;
+        // 正在播这组 → 暂停
+        if (this.data.transcriptPlayingIdx === pi && this.data.isPlaying) {
             audio.pause();
-            this.setData({ transcriptPlaying: false });
+            this.setData({ isPlaying: false, transcriptPlayingIdx: -1 });
             return;
         }
-        audio.play(audioUrl, this.data.speed);
-        this.setData({ transcriptPlaying: true, isPlaying: true });
+        audio.playFrom(t, this.data.speed);
+        setTimeout(() => this.setData({ transcriptPlayingIdx: pi, isPlaying: true }), 30);
     },
     toggleLoop() { this.setData({ loopSentence: !this.data.loopSentence }); },
     toggleHard(e) {

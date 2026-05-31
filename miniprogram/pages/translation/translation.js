@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -187,7 +178,6 @@ Page({
         this.loadData();
     },
     loadData() {
-        var _a;
         const app = getApp();
         const items = translations_1.default.filter(t => t && t.chinese);
         const history = (app.globalData.studyData.translationRecords || []);
@@ -198,7 +188,10 @@ Page({
         const favSet = new Set(this.data.favIds);
         const listItems = items.map(t => {
             const lv = getLevel(t.chinese);
-            return Object.assign(Object.assign({}, t), { _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese, _emoji: getEmoji(t.chinese), _tag: getTag(t), _level: lv, _topic: getTopic(t.chinese), _done: doneSet.has(t.id), _fav: favSet.has(t.id), _hint: getHints(t.chinese) });
+            return { ...t, _display: t.chinese.length > 40 ? t.chinese.slice(0, 40) + '…' : t.chinese,
+                _emoji: getEmoji(t.chinese), _tag: getTag(t), _level: lv, _topic: getTopic(t.chinese),
+                _done: doneSet.has(t.id), _fav: favSet.has(t.id), _hint: getHints(t.chinese),
+            };
         });
         const levels = [1, 2, 3, 4].map(lv => {
             const total = items.filter(t => getLevel(t.chinese) === lv).length;
@@ -215,7 +208,8 @@ Page({
         /* 推荐理由 */
         let todayReason = '';
         if (todayItem) {
-            const weakTopic = (_a = listItems.find(t => t._topic && !doneSet.has(t.id))) === null || _a === void 0 ? void 0 : _a._topic;
+            const found = listItems.find(t => t._topic && !doneSet.has(t.id));
+            const weakTopic = found ? found._topic : undefined;
             todayReason = weakTopic
                 ? `你的「${weakTopic}」主题还没练习过，今天就从这里开始吧！先用关键词搭框架，再组织成完整句子。`
                 : `今天推荐这题是因为你之前做过类似的，巩固一下会记得更牢～`;
@@ -232,9 +226,10 @@ Page({
                 dimScores[k].push(v);
             }
         }
+        const iconMap = { vocabulary: '📖', grammar: '🔗', semantics: '🎯', expression: '✍️' };
         const weakPoints = Object.entries(dimScores).map(([k, vals]) => {
             const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
-            return { key: k, label: dimNames[k] || k, avg, count: vals.length };
+            return { key: k, label: dimNames[k] || k, avg, count: vals.length, _icon: iconMap[k] || '📝' };
         }).sort((a, b) => a.avg - b.avg);
         this.setData({
             translations: listItems, history, completedIds, pct, ringDeg: Math.round(pct / 100 * 360),
@@ -261,53 +256,51 @@ Page({
         this.setData({ step: ['prepare', 'translate', 'compare'][n - 1] });
     },
     onInput(e) { this.setData({ userAnswer: e.detail.value, wordCount: e.detail.value.length }); },
-    submit() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { userAnswer, currentItem, submitting } = this.data;
-            if (submitting)
-                return;
-            if (!userAnswer.trim() || !currentItem) {
-                wx.showToast({ title: '写点内容再提交吧～', icon: 'none' });
-                return;
+    async submit() {
+        const { userAnswer, currentItem, submitting } = this.data;
+        if (submitting)
+            return;
+        if (!userAnswer.trim() || !currentItem) {
+            wx.showToast({ title: '写点内容再提交吧～', icon: 'none' });
+            return;
+        }
+        this.setData({ submitting: true });
+        const answer = userAnswer.trim();
+        const local = (0, scorer_1.scoreTranslation)(answer, currentItem);
+        let score = local.total, dimensions = local.dimensions, suggestions = genSuggestions(local), reference = currentItem.reference;
+        if (this.data.aiAvailable && this.data.aiEnabled) {
+            try {
+                const ai = await Promise.race([(0, api_1.correctTranslation)(currentItem.chinese, answer), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000))]);
+                if (ai.dimensions)
+                    dimensions = ai.dimensions;
+                if (ai.suggestions)
+                    suggestions = ai.suggestions;
+                if (ai.reference)
+                    reference = ai.reference;
+                if (ai.score && Math.abs(ai.score - score) > 15)
+                    score = Math.round((score + ai.score) / 2);
             }
-            this.setData({ submitting: true });
-            const answer = userAnswer.trim();
-            const local = (0, scorer_1.scoreTranslation)(answer, currentItem);
-            let score = local.total, dimensions = local.dimensions, suggestions = genSuggestions(local), reference = currentItem.reference;
-            if (this.data.aiAvailable && this.data.aiEnabled) {
-                try {
-                    const ai = yield Promise.race([(0, api_1.correctTranslation)(currentItem.chinese, answer), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000))]);
-                    if (ai.dimensions)
-                        dimensions = ai.dimensions;
-                    if (ai.suggestions)
-                        suggestions = ai.suggestions;
-                    if (ai.reference)
-                        reference = ai.reference;
-                    if (ai.score && Math.abs(ai.score - score) > 15)
-                        score = Math.round((score + ai.score) / 2);
-                }
-                catch (_a) { }
-            }
-            const words = wordCompare(answer, reference);
-            const record = { id: currentItem.id, userAnswer: answer, score, dimensions, suggestions, reference, date: new Date().toISOString().slice(0, 10) };
-            const app = getApp();
-            const records = [...(app.globalData.studyData.translationRecords || []), record];
-            app.globalData.studyData.translationRecords = records;
-            wx.setStorageSync('studyData', app.globalData.studyData);
-            (0, checkin_1.doCheckIn)('translation');
-            const validIds = new Set(this.data.translations.map((t) => t.id));
-            const allIds = [...new Set(records.map(r => r.id))].filter(id => validIds.has(id));
-            const doneSet = new Set(allIds);
-            const questionHistory = records.filter(r => r.id === currentItem.id);
-            const hScores = questionHistory.map(r => r.score);
-            this.setData({
-                result: { score, dimensions, suggestions, reference, show: true },
-                submitting: false, step: 'compare', history: records, completedIds: allIds, questionHistory,
-                hMax: Math.max(...hScores, score), hMin: Math.min(...hScores, score),
-                hTrend: questionHistory.length >= 1 && score >= hScores[hScores.length - 1] ? 'up' : 'down',
-                translations: this.data.translations.map((t) => (Object.assign(Object.assign({}, t), { _done: doneSet.has(t.id) }))),
-                words,
-            });
+            catch { }
+        }
+        const words = wordCompare(answer, reference);
+        const record = { id: currentItem.id, userAnswer: answer, score, dimensions, suggestions, reference, date: new Date().toISOString().slice(0, 10) };
+        const app = getApp();
+        const records = [...(app.globalData.studyData.translationRecords || []), record];
+        app.globalData.studyData.translationRecords = records;
+        wx.setStorageSync('studyData', app.globalData.studyData);
+        (0, checkin_1.doCheckIn)('translation');
+        const validIds = new Set(this.data.translations.map((t) => t.id));
+        const allIds = [...new Set(records.map(r => r.id))].filter(id => validIds.has(id));
+        const doneSet = new Set(allIds);
+        const questionHistory = records.filter(r => r.id === currentItem.id);
+        const hScores = questionHistory.map(r => r.score);
+        this.setData({
+            result: { score, dimensions, suggestions, reference, show: true },
+            submitting: false, step: 'compare', history: records, completedIds: allIds, questionHistory,
+            hMax: Math.max(...hScores, score), hMin: Math.min(...hScores, score),
+            hTrend: questionHistory.length >= 1 && score >= hScores[hScores.length - 1] ? 'up' : 'down',
+            translations: this.data.translations.map((t) => ({ ...t, _done: doneSet.has(t.id) })),
+            words,
         });
     },
     nextQ() {
@@ -340,7 +333,7 @@ Page({
             favIds.push(id);
         wx.setStorageSync('translationFavIds', favIds);
         const favSet = new Set(favIds);
-        this.setData({ favIds, translations: this.data.translations.map((t) => (Object.assign(Object.assign({}, t), { _fav: favSet.has(t.id) }))) });
+        this.setData({ favIds, translations: this.data.translations.map((t) => ({ ...t, _fav: favSet.has(t.id) })) });
     },
     toggleAi() { const v = !this.data.aiEnabled; this.setData({ aiEnabled: v }); wx.setStorageSync('translationAiEnabled', v); },
     toggleHints() { this.setData({ showHints: !this.data.showHints }); },

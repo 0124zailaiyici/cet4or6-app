@@ -97,6 +97,8 @@ interface IListeningData {
   focusPageIndices: number[]
   transcriptPlaying: boolean
   transcriptPlayingIdx: number
+  liteMode: boolean
+  tinyOptions: boolean
   _retryCount?: number
 }
 
@@ -133,6 +135,7 @@ interface IListeningMethods {
   toggleLiteMode(): void
   toggleTiny(): void
   replayCurrent(): void
+  resetPlayback(): void
 }
 
 const LABELS: Record<string, string> = {
@@ -297,7 +300,6 @@ class AudioManager {
   private _passageId: string | null
   private _fullAudioUrl: string
   private _pendingSeek: number
-  private _advanceGuard: number
 
   constructor() {
     this.ctx = null
@@ -307,7 +309,6 @@ class AudioManager {
     this._passageId = null
     this._fullAudioUrl = ''
     this._pendingSeek = -1
-    this._advanceGuard = -1
   }
 
   attach(page: any) {
@@ -404,7 +405,7 @@ class AudioManager {
           if (d.liteMode) {
             const curPage = d.currentPassage && d.pages ? d.pages[d.currentPage] : null
             if (curPage && curPage.type === 'q' && curPage.sentenceStart != null && curPage.sentenceStart > 0) {
-              const endT = d.currentPassage.sentences.find(s => s.start === curPage.sentenceStart)
+              const endT = d.currentPassage.sentences.find((s: ISentence) => s.start === curPage.sentenceStart)
               if (endT && endT.end > 0 && t >= endT.end) {
                 this.pageRef.setData({ isPlaying: false })
               }
@@ -563,6 +564,8 @@ Page<IListeningData, IListeningMethods>({
     focusPageIndices: [],
     transcriptPlaying: false,
     transcriptPlayingIdx: -1,
+    liteMode: false,
+    tinyOptions: false,
   },
 
   onLoad(options: { passageId?: string; examMode?: string }) {
@@ -613,9 +616,6 @@ Page<IListeningData, IListeningMethods>({
     const isAudio = !!passage.audioUrl
 
     if (isAudio) {
-      const audioUrl = passage.audioUrl!.startsWith('http')
-        ? passage.audioUrl!
-        : API_BASE + encodeURI(passage.audioUrl!)
       audio.destroy()
       audio.attach(this)
       audio.setPassageId(passage.id)
@@ -737,7 +737,7 @@ Page<IListeningData, IListeningMethods>({
       })
       if (p && p.sentenceStart != null && p.sentenceStart >= 0) {
         if (p.sentenceStart !== curP.sentenceStart) {
-          setTimeout(() => audio.playFrom(p.sentenceStart, this.data.speed), 30)
+          setTimeout(() => audio.playFrom(p.sentenceStart!, this.data.speed), 30)
         }
       }
     }
@@ -761,7 +761,7 @@ Page<IListeningData, IListeningMethods>({
       })
       if (p && p.sentenceStart != null && p.sentenceStart >= 0) {
         if (p.sentenceStart !== curP.sentenceStart) {
-          setTimeout(() => audio.playFrom(p.sentenceStart, this.data.speed), 30)
+          setTimeout(() => audio.playFrom(p.sentenceStart!, this.data.speed), 30)
         }
       }
     } else if (this.data.currentPage >= lastIdx && this.data.audioMode) {
