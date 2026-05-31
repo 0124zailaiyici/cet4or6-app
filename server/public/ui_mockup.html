@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>听力精听 UI 原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e13;
+    --surface: #15181f;
+    --surface2: #1e2230;
+    --border: #2a2f42;
+    --text: #e8eaed;
+    --text-dim: #8b8fa3;
+    --accent: #6c8cff;
+    --accent-glow: rgba(108,140,255,0.15);
+    --rose: #ff6b8a;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', 'Outfit', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    background: var(--surface);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .header .back { font-size: 20px; cursor:pointer; opacity:.7; transition:.2s; }
+  .header .back:hover { opacity:1; }
+  .header .title { font-size: 14px; font-weight: 600; letter-spacing:.3px; }
+  .header .actions { display: flex; gap: 12px; font-size: 13px; }
+  .header .actions span { opacity:.6; cursor:pointer; transition:.2s; }
+  .header .actions span:hover { opacity:1; }
+
+  /* Seek bar */
+  .seek-bar {
+    padding: 12px 16px 8px;
+  }
+  .seek-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+  }
+  .seek-fill {
+    width: 28%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--rose));
+    border-radius: 4px;
+    position: relative;
+  }
+  .seek-fill::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: -3px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .seek-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-family: 'Outfit', monospace;
+  }
+
+  /* Controls row */
+  .ctl-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .ctl-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: .2s;
+    color: var(--text-dim);
+  }
+  .ctl-pill.on { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+  /* Section label */
+  .section-label {
+    padding: 0 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  /* ===== TRANSCRIPT ===== */
+  .ts-area {
+    margin: 0 12px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .ts-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: .2s;
+  }
+  .ts-header:hover { background: rgba(255,255,255,.03); }
+  .ts-header .ts-label {
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ts-header .ts-label .icon { font-size: 15px; }
+  .ts-header .ts-arrow {
+    font-size: 11px;
+    transition: transform .3s ease;
+    color: var(--text-dim);
+  }
+  .ts-header .ts-arrow.open { transform: rotate(180deg); }
+  .ts-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .4s ease, padding .3s ease;
+  }
+  .ts-body.open {
+    max-height: 500px;
+    padding: 0 14px 14px;
+  }
+  .ts-text {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--text);
+    letter-spacing: .3px;
+  }
+  .ts-text .hl {
+    background: linear-gradient(180deg, transparent 55%, rgba(251,191,36,.25) 55%);
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .ts-text .hl2 {
+    background: linear-gradient(180deg, transparent 55%, rgba(108,140,255,.2) 55%);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .ts-text .qmark {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--rose);
+    background: rgba(255,107,138,.12);
+    padding: 0 6px;
+    border-radius: 4px;
+    margin: 0 2px;
+    vertical-align: text-top;
+    line-height: 1.6;
+  }
+
+  /* Options */
+  .opts-area {
+    padding: 12px 12px 8px;
+  }
+  .opts-area .size-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+  .size-toggle .btn {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: .2s;
+  }
+  .size-toggle .btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+  .opts-list { display: flex; flex-direction: column; gap: 6px; }
+  .opt-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: .2s;
+  }
+  .opt-item:hover { border-color: rgba(255,255,255,.15); }
+  .opt-item.on { border-color: var(--accent); background: var(--accent-glow); }
+  .opt-item .letter {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    transition: .2s;
+  }
+  .opt-item.on .letter { background: var(--accent); color: #fff; }
+  .opt-item .text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+    flex: 1;
+  }
+
+  /* TINY mode */
+  .opts-area.tiny .opt-item { padding: 5px 10px; gap: 8px; }
+  .opts-area.tiny .opt-item .letter { width: 18px; height: 18px; font-size: 10px; }
+  .opts-area.tiny .opt-item .text { font-size: 11.5px; }
+
+  /* Bottom bar */
+  .bot-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .bot-bar .nav { font-size: 13px; color: var(--text-dim); cursor: pointer; transition:.2s; }
+  .bot-bar .nav:hover { color: var(--text); }
+  .bot-bar .play {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--accent-glow);
+    transition: .2s;
+  }
+  .bot-bar .play:hover { transform: scale(1.05); }
+  .bot-bar .replay {
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    transition: .2s;
+  }
+  .bot-bar .replay:hover { border-color: var(--accent); color: var(--accent); }
+  .bot-bar .dots { display: flex; gap: 5px; }
+  .bot-bar .dots .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .bot-bar .dots .dot.on { background: var(--accent); }
+
+  /* Mode switch */
+  .mode-switch {
+    display: flex;
+    padding: 8px 16px 0;
+    gap: 8px;
+  }
+  .mode-switch .tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: .2s;
+  }
+  .mode-switch .tab.on { background: var(--surface2); border-color: var(--border); color: var(--text); }
+  .mode-switch .tab:hover { border-color: var(--border); }
+
+  /* Spacer */
+  .spacer { height: 12px; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- Header -->
+  <div class="header">
+    <span class="back">←</span>
+    <span class="title">2019.06 四级真题第1套</span>
+    <div class="actions">
+      <span>📊</span>
+      <span>✓</span>
+    </div>
+  </div>
+
+  <!-- Seek bar -->
+  <div class="seek-bar">
+    <div class="seek-track">
+      <div class="seek-fill" style="width: 22%;"></div>
+    </div>
+    <div class="seek-time">
+      <span>05:23</span>
+      <span>23:27</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="ctl-row">
+    <span class="ctl-pill">0.8x</span>
+    <span class="ctl-pill on">1.0x</span>
+    <span class="ctl-pill">1.2x</span>
+    <span class="ctl-pill">🔁 循环</span>
+  </div>
+
+  <!-- Mode tabs -->
+  <div class="mode-switch">
+    <span class="tab on">📄 原文精听</span>
+    <span class="tab">📝 题目模式</span>
+  </div>
+
+  <!-- Section label -->
+  <div class="section-label" style="margin-top:10px">Section A · News Report 3</div>
+
+  <!-- ===== TRANSCRIPT ===== -->
+  <div class="ts-area" id="tsArea">
+    <div class="ts-header" onclick="toggleTranscript()">
+      <span class="ts-label">
+        <span class="icon">📄</span>
+        <span>听力原文</span>
+        <span style="font-size:11px;color:var(--text-dim);font-weight:400;margin-left:4px">(含答案定位)</span>
+      </span>
+      <span class="ts-arrow" id="tsArrow">▼</span>
+    </div>
+    <div class="ts-body" id="tsBody">
+      <div class="ts-text">
+        <span class="qmark">6</span>
+        <span class="hl2">Everyone loves a good house party, but the cleaning-up the next morning isn't as enjoyable.</span>
+        <span class="qmark">5</span>
+        Now, however, a New Zealand-based start-up company aims to bring messy homes — and even splitting headaches — back to normal. The properly-named start-up Morning-After Maids was launched about a month ago in Auckland by roommates Rebecca Foley and Catherine Ashurst. Aside from cleaning-up, the two will also cook breakfast and even get coffee and painkillers for recovering merrymakers. Although they are both gainfully employed, they fit cleaning jobs into their nights and weekends, which is when their service is in most demand anyway. Besides being flooded with requests from across the country, Foley and Ashurst have also received requests from the U.S. and Canada to provide services there.
+        <span class="qmark">7</span>
+        <span class="hl">They are reportedly meeting with lawyers to see how best to take the business forward.</span>
+      </div>
+      <!-- Answer hint -->
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);line-height:1.6">
+        <span style="color:var(--amber);font-weight:600;">Q5 C</span> 保洁公司应运而生 · 
+        <span style="color:var(--accent);font-weight:600;">Q6 B</span> 聚会后家里乱糟糟 · 
+        <span style="color:var(--rose);font-weight:600;">Q7 D</span> 与律师洽谈拓展业务
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OPTIONS ===== -->
+  <div class="opts-area" id="optsArea">
+    <div class="size-toggle">
+      <span class="btn" id="tinyBtn" onclick="toggleTiny()">TINY 缩小选项</span>
+    </div>
+    <div class="opts-list">
+      <div class="opt-item on" data-letter="A">
+        <span class="letter">A</span>
+        <span class="text">Cleaning service in great demand all over the world.</span>
+      </div>
+      <div class="opt-item" data-letter="B">
+        <span class="letter">B</span>
+        <span class="text">Two ladies giving up well-paid jobs to do cleaning.</span>
+      </div>
+      <div class="opt-item" data-letter="C">
+        <span class="letter">C</span>
+        <span class="text">A new company to clean up the mess after parties.</span>
+      </div>
+      <div class="opt-item" data-letter="D">
+        <span class="letter">D</span>
+        <span class="text">Cleaners gainfully employed at nights and weekends.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM ===== -->
+  <div class="bot-bar">
+    <span class="nav">⬅ 上一题</span>
+    <span class="replay">↺ 重听</span>
+    <span class="play">▶</span>
+    <div class="dots">
+      <span class="dot"></span>
+      <span class="dot on"></span>
+      <span class="dot"></span>
+    </div>
+    <span class="nav">下一题 ➔</span>
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<script>
+function toggleTranscript() {
+  const body = document.getElementById('tsBody');
+  const arrow = document.getElementById('tsArrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+function toggleTiny() {
+  const area = document.getElementById('optsArea');
+  const btn = document.getElementById('tinyBtn');
+  area.classList.toggle('tiny');
+  btn.classList.toggle('on');
+  btn.textContent = area.classList.contains('tiny') ? 'NORMAL 恢复大小' : 'TINY 缩小选项';
+}
+// Default: transcript collapsed, nothing selected
+document.getElementById('tsBody').classList.remove('open');
+</script>
+
+</body>
+</html>
