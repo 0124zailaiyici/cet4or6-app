@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>四级备考助手 · 使用说明书</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#0d0d14;color:#e4e0eb;line-height:1.7;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#ff6b8a44;border-radius:3px}
+:root{--pink:#ff6b8a;--pink-dim:#ff6b8a88;--pink-glow:#ff6b8a22;--bg:#0d0d14;--card:#16161f;--card-hover:#1e1e2a;--border:#2a2a3a;--text:#e4e0eb;--text-dim:#8a7a9a;--radius:10px}
+
+header{position:sticky;top:0;z-index:100;background:#0d0d14ee;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:10px}
+header h1{font-size:17px;font-weight:700;color:#fff;white-space:nowrap}
+header span{color:var(--text-dim);font-size:13px}
+header .badge{background:var(--pink);color:#fff;font-size:10px;padding:2px 10px;border-radius:99px;margin-left:auto;white-space:nowrap}
+
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px 80px}
+
+/* module navigation */
+.mod-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px;background:var(--card);padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border)}
+.mod-nav a{font-size:12px;padding:4px 12px;border-radius:99px;color:var(--text-dim);transition:.2s;white-space:nowrap}
+.mod-nav a:hover,.mod-nav a.active{background:var(--pink-glow);color:var(--pink)}
+
+/* section */
+section{margin-bottom:48px;scroll-margin-top:70px}
+section h2{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+section h2 .num{font-size:12px;background:var(--pink);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+section .desc{color:var(--text-dim);font-size:13px;margin-bottom:20px;border-left:3px solid var(--pink-dim);padding-left:14px}
+
+/* section sub */
+.sub{font-size:15px;font-weight:600;color:#fff;margin:20px 0 8px;padding-left:8px;border-left:3px solid var(--pink)}
+
+/* mockup phone */
+.mockup{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;max-width:360px;width:100%;box-shadow:0 20px 60px #00000055;flex-shrink:0}
+.mockup-bar{background:var(--card-hover);padding:8px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim)}
+.mockup-bar .dot{width:7px;height:7px;border-radius:50%;background:#ff5f57}
+.mockup-bar .dot:nth-child(2){background:#febc2e}
+.mockup-bar .dot:nth-child(3){background:#28c840}
+.mockup-bar .time{margin-left:auto}
+.mockup-body{padding:12px;position:relative}
+.mockup-row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+
+/* annotation arrows */
+.annotate{position:relative}
+.annotate .arr{position:absolute;z-index:5;font-size:20px;color:var(--pink);filter:drop-shadow(0 0 5px #ff6b8a66);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+.annotate .tip{position:absolute;z-index:5;background:var(--pink);color:#fff;font-size:10px;padding:3px 9px;border-radius:5px;max-width:180px;line-height:1.4;font-weight:500}
+.annotate .tip.lf::after{content:'';position:absolute;right:-8px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-left-color:var(--pink)}
+.annotate .tip.rt::after{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-right-color:var(--pink)}
+.annotate .tip.dn::after{content:'';position:absolute;top:-8px;left:14px;border:5px solid transparent;border-bottom-color:var(--pink)}
+.annotate .tip.up::after{content:'';position:absolute;bottom:-8px;left:14px;border:5px solid transparent;border-top-color:var(--pink)}
+
+/* step cards */
+.steps{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.step{display:flex;gap:12px;align-items:flex-start;background:var(--card);padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border)}
+.step .sn{background:var(--pink-glow);color:var(--pink);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
+.step .sb{font-size:13px;color:var(--text)}
+.step .sb strong{color:#fff}
+.tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:4px;background:var(--pink-glow);color:var(--pink);margin:0 2px}
+
+/* tip box */
+.tip-box{background:var(--card);border:1px solid var(--pink-dim);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--text-dim);margin-bottom:14px}
+.tip-box strong{color:var(--pink)}
+
+/* tabbar mock */
+.tabbar{display:flex;background:var(--card-hover);border-top:1px solid var(--border);padding:5px 0}
+.tabbar .tab{flex:1;text-align:center;font-size:9px;color:var(--text-dim);padding:3px 0}
+.tabbar .tab.active{color:var(--pink)}
+.tabbar .tab .ti{font-size:16px;display:block;margin-bottom:1px}
+
+/* inline ui elements */
+.ui-btn{display:inline-flex;align-items:center;gap:3px;background:var(--pink);color:#fff;font-size:11px;padding:3px 12px;border-radius:99px;white-space:nowrap}
+.ui-pill{display:inline-block;font-size:10px;padding:1px 8px;border-radius:99px;background:var(--card-hover);color:var(--text-dim);border:1px solid var(--border);margin:1px}
+
+/* element list */
+.els{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.els .el{background:var(--card-hover);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);border:1px solid var(--border)}
+
+@media(max-width:640px){
+  .wrap{padding:16px 10px 80px}
+  header{padding:10px 14px}
+  header h1{font-size:14px}
+  header span{display:none}
+  section h2{font-size:18px}
+  .mockup{max-width:100%}
+  .step{padding:10px 12px}
+  .step .sb{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📘 四级备考助手</h1>
+  <span>使用说明书</span>
+  <div class="badge">v1.0</div>
+</header>
+
+<div class="wrap">
+
+<nav class="mod-nav">
+  <a href="#start">🚀 入门</a>
+  <a href="#home">🏠 首页</a>
+  <a href="#listen">🎧 听力</a>
+  <a href="#read">📖 阅读</a>
+  <a href="#trans">🌍 翻译</a>
+  <a href="#write">✍️ 写作</a>
+  <a href="#sent">💬 句子</a>
+  <a href="#vocab">📚 单词本</a>
+  <a href="#exam">📝 模考</a>
+  <a href="#stats">📊 统计</a>
+  <a href="#profile">👤 个人</a>
+</nav>
+
+<!-- ═══════════════ 0 快速入门 ═══════════════ -->
+<section id="start">
+<h2><span class="num">0</span> 快速入门</h2>
+<div class="desc">认识小程序的整体结构和导航方式</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="time">14:28</span></div>
+    <div class="mockup-body" style="min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px 16px 0">
+      <div style="font-size:12px;color:var(--text-dim)">底部导航栏（4 个 Tab）</div>
+      <div class="tabbar" style="width:100%;max-width:320px;border-radius:8px;overflow:hidden">
+        <div class="tab active"><span class="ti">🏠</span>首页</div>
+        <div class="tab"><span class="ti">📊</span>学习</div>
+        <div class="tab"><span class="ti">📚</span>单词本</div>
+        <div class="tab"><span class="ti">👤</span>我的</div>
+      </div>
+      <span class="arr" style="position:static;display:block;text-align:center;font-size:22px;animation:none">⬇️</span>
+      <div class="tip" style="position:static;margin-top:0;text-align:center;max-width:280px;background:var(--card);color:var(--text);border:1px solid var(--pink-dim)">底部 4 个 Tab 切换核心页面，其他功能从首页进入</div>
+    </div>
+  </div>
+  <div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">微信搜索 <strong>"四级备考助手"</strong> 或扫码进入小程序</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">首次启动进 <strong>引导页</strong>，浏览后自动跳转首页</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">底部 4 个 Tab：<span class="tag">🏠 首页</span> <span class="tag">📊 学习</span> <span class="tag">📚 单词本</span> <span class="tag">👤 我的</span>，点击切换</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb">所有学习模块从首页 <strong>9 宫格</strong> 进入：听力、阅读、翻译、写作、句子、单词本、词典、统计、模拟考</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 1 首页 ═══════════════ -->
+<section id="home">
+<h2><span class="num">1</span> 🏠 首页</h2>
+<div class="desc">问候打卡 + 今日指标 + 每日一句 + 快捷入口 + 9 宫格导航</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>首页</span></div>
+    <div class="mockup-body" style="padding:14px">
+      <!-- greeting + checkin -->
+      <div style="display:flex;align-items:flex-start;margin-bottom:10px">
+        <div style="font-size:15px;font-weight:600;color:#fff;flex:1">早上好 🌤</div>
+        <div style="background:var(--pink);color:#fff;padding:3px 12px;border-radius:99px;font-size:11px">📌 打卡</div>
+      </div>
+      <span class="arr" style="top:14px;right:0;font-size:16px">👈</span>
+      <span class="tip rt" style="top:14px;right:-175px;width:160px">点击打卡, 连续天数增加🔥</span>
+
+      <!-- 4 metrics -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:var(--pink)">2</div>
+          <div style="font-size:9px;color:var(--text-dim)">听力</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#febc2e">5</div>
+          <div style="font-size:9px;color:var(--text-dim)">句子</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#28c840">1</div>
+          <div style="font-size:9px;color:var(--text-dim)">翻译</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#5b9aff">0</div>
+          <div style="font-size:9px;color:var(--text-dim)">写作</div>
+        </div>
+      </div>
+      <span class="arr" style="top:70px;left:-8px;font-size:16px">👉</span>
+      <span class="tip lf" style="top:66px;left:-178px;width:165px">今日四项学习完成数，自动刷新</span>
+
+      <!-- mission card -->
+      <div style="background:linear-gradient(135deg,#ff6b8a33,#ff6b8a11);border-radius:8px;padding:12px;margin-bottom:12px;display:flex;align-items:center">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#fff">开始学习</div>
+          <div style="font-size:11px;color:var(--text-dim)">今天第一件事，从这里开始</div>
+        </div>
+        <span class="ui-btn">开始</span>
+      </div>
+      <span class="arr" style="top:130px;right:-6px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:124px;right:-185px;width:170px">今日任务推荐卡片：未打卡→打卡、未听力→听力，全完成→休息</span>
+
+      <!-- daily sentence -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">💬</span>
+        <div style="flex:1;font-size:12px">
+          <div style="color:var(--text);font-weight:500">The only way to do great work is to love what you do.</div>
+          <div style="color:var(--text-dim);font-size:10px;margin-top:2px">— Steve Jobs</div>
+        </div>
+        <span style="font-size:18px;color:var(--pink)">{{dailyPlaying ? '⏹' : '▶️'}}</span>
+      </div>
+      <span class="arr" style="bottom:132px;right:-4px;font-size:16px">👆<span class="tip" style="position:relative;display:inline-block;margin-left:4px;font-size:10px;background:var(--card);color:var(--text);border:1px solid var(--pink-dim)">点击播放每日一句, 再点停止</span></span>
+
+      <!-- 3 quick actions -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:12px">🎧 听一句</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:12px">📖 背一词</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:12px">📝 读一篇</div>
+      </div>
+      <span class="arr" style="bottom:86px;left:-6px;font-size:16px">👉</span>
+      <span class="tip lf" style="bottom:80px;left:-165px;width:150px">快捷操作: 听一句→听力、背一词→单词本、读一篇→阅读</span>
+
+      <!-- 9-grid -->
+      <div style="font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:6px">📚 真题训练</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">🎵 听力</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid var(--pink-dim)">📖 阅读</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">✏️ 翻译</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">📝 写作</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">💬 句子</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">📕 单词本</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">📖 词典</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">📊 统计</div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center;font-size:11px">📋 模拟考</div>
+      </div>
+      <span class="arr" style="bottom:18px;right:0;font-size:16px">👈</span>
+      <span class="tip rt" style="bottom:14px;right:-178px;width:165px">9 个入口, 点击跳转到对应模块</span>
+    </div>
+    <div class="tabbar">
+      <div class="tab active"><span class="ti">🏠</span>首页</div>
+      <div class="tab"><span class="ti">📊</span>学习</div>
+      <div class="tab"><span class="ti">📚</span>单词本</div>
+      <div class="tab"><span class="ti">👤</span>我的</div>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">查看 <strong>时段问候语</strong>（早/午/晚自动切换），点击右上角 <span class="tag">📌 打卡</span> 完成每日签到，连续天数 +1</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">查看 <strong>4 个今日指标</strong>（听力/句子/翻译/写作完成数），了解今日学习进度</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">点击 <strong>今日任务卡片</strong>（系统推荐：未打卡→打卡、未听力→听力页、未句子→句子页），完成为止</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb">点击 <strong>每日一句</strong> 播放/暂停语音，跟读练习；下方 <strong>3 个快捷按钮</strong> 直达常用模块</div></div>
+      <div class="step"><span class="sn">5</span><div class="sb">底部 <strong>9 宫格</strong> 覆盖所有功能：🎵听力 📖阅读 ✏️翻译 📝写作 💬句子 📕单词本 📖词典 📊统计 📋模拟考</div></div>
+    </div>
+    <div class="tip-box">💡 <strong>每日习惯：</strong>打开首页→打卡→完成任务卡片→9 宫格选一个模块学习，10 分钟搞定</div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 2 听力 ═══════════════ -->
+<section id="listen">
+<h2><span class="num">2</span> 🎧 听力</h2>
+<div class="desc">四级听力真题精听 + 逐句模式 + 答题 + 总结回顾</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>听力列表</span></div>
+    <div class="mockup-body" style="padding:12px">
+      <!-- welcome -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:24px">🐱</span>
+        <div><div style="font-size:13px;font-weight:600;color:#fff">今天也要加油喔！</div>
+        <div style="font-size:10px;color:var(--text-dim)"><span class="tag">1</span>/2 篇已完成</div></div>
+      </div>
+      <!-- passage cards -->
+      <div style="font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:6px">📚 我的听力 · 2 篇材料</div>
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:6px;border:1px solid var(--pink-dim);display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">🎵</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#fff">2019.06 四级真题第1套</div>
+          <div style="font-size:10px;color:var(--text-dim)">25 句 · 约 25 分钟</div>
+        </div>
+        <span class="tag">🎧 精听</span>
+        <span style="font-size:10px;background:var(--pink);color:#fff;padding:1px 6px;border-radius:4px">NEW</span>
+      </div>
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">🎵</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#fff">2019.06 四级真题第2套</div>
+          <div style="font-size:10px;color:var(--text-dim)">25 句 · 约 25 分钟</div>
+        </div>
+        <span class="tag">🎧 精听</span>
+      </div>
+      <span class="arr" style="top:125px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:118px;right:-175px;width:160px">点击卡片进入详情。有 <span class="tag">NEW</span> 标记是新题</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">列表页</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">进入听力页，顶部显示已完成篇数，下方是 <strong>真题列表</strong></div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">点击卡片进入该套题，页面自动判断是否有音频，有则进入 <strong>MP3 翻页模式</strong></div></div>
+    </div>
+
+    <div class="sub">详情页 — MP3 翻页模式</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">顶部导航栏：<span class="tag">←</span>返回列表、<span class="tag">📊 总结</span> 查看答题结果、<span class="tag">✓ 完成</span> 标记已学完</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>音频进度条</strong>：显示时间进度，<strong>点击进度条</strong> 跳转到对应位置</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">中间是题目区，<strong>左右滑动</strong> 切换上一题/下一题。每题显示选项 A/B/C/D，点击选中答案</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb">切换 <span class="tag">📄 原文精听</span> / <span class="tag">📝 题目模式</span>：原文模式显示全文和高亮关键句</div></div>
+      <div class="step"><span class="sn">5</span><div class="sb">底部控制栏：<span class="tag">速度 0.6x~1.3x</span> 调节语速、<span class="tag">重置</span> 从当前页重播、<span class="tag">▶️/⏸</span> 播放暂停</div></div>
+      <div class="step"><span class="sn">6</span><div class="sb">Lite 模式下点击 <span class="tag">查看选项</span> 展开/收起选项面板</div></div>
+    </div>
+
+    <div class="sub">详情页 — 逐句精听模式</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">句子列表，每条显示序号。点击 <span class="tag">▶</span> 播放该句，<span class="tag">!</span> 标记为难句</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">底部播放条：<span class="tag">◀</span> 上一句、<span class="tag">▶/⏸</span> 播放暂停、<span class="tag">▶</span> 下一句</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">顶部控制：<span class="tag">原文</span> 切换是否显示文本、<span class="tag">🔁/单句</span> 切换循环模式</div></div>
+    </div>
+
+    <div class="sub">总结页</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">统计卡片：已作答数 / 总题数 / 已标记数</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">逐题显示 ✓/✗ 和你的选择 vs 正确答案。标记重听的题目单独列出</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb"><span class="tag">继续做题</span> 返回原文重做、<span class="tag">返回列表</span> 回听力列表</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 3 阅读 ═══════════════ -->
+<section id="read">
+<h2><span class="num">3</span> 📖 阅读</h2>
+<div class="desc">三大题型：Section A 选词填空（15选10）、Section B 长篇阅读匹配、Section C 仔细阅读</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>阅读列表</span></div>
+    <div class="mockup-body" style="padding:12px">
+      <!-- passage cards -->
+      <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:8px">📖 阅读理解</div>
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:6px;border-left:3px solid var(--pink)">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:2px"><span class="tag">选词填空</span></div>
+        <div style="font-size:13px;font-weight:600;color:#fff">Innovation and Change</div>
+        <div style="font-size:10px;color:var(--text-dim)">10 题 · 约 10 分钟</div>
+      </div>
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:6px;border-left:3px solid #febc2e">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:2px"><span class="tag" style="background:#febc2e22;color:#febc2e">段落匹配</span></div>
+        <div style="font-size:13px;font-weight:600;color:#fff">Population Growth</div>
+        <div style="font-size:10px;color:var(--text-dim)">10 题 · 约 15 分钟</div>
+      </div>
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;border-left:3px solid #5b9aff">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:2px"><span class="tag" style="background:#5b9aff22;color:#5b9aff">仔细阅读</span></div>
+        <div style="font-size:13px;font-weight:600;color:#fff">The Power of Reading</div>
+        <div style="font-size:10px;color:var(--text-dim)">10 题 · 约 20 分钟</div>
+      </div>
+      <span class="arr" style="top:70px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:64px;right:-175px;width:160px">点击卡片进入答题。左侧色条标识题型</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">进入答题后</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">顶部导航：<span class="tag">←</span>返回、题型名 + 题型徽章、<span class="tag">提交</span> 交卷、<span class="tag">重来</span> 重置</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>文章区</strong>：支持 <strong>点击生词</strong> 弹出释义，<strong>填空格</strong>（Section A 选词填空区域）、<strong>段落翻译</strong> 折叠</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb"><strong>Section A 选词填空</strong>：15 个选项芯片，点击选中后填入文章空格。底部有 <span class="tag">💡 提示</span></div></div>
+      <div class="step"><span class="sn">4</span><div class="sb"><strong>Section B 段落匹配</strong>：10 个陈述句，点击选中，再到底部字母栏点击对应段落字母分配答案。已匹配的答案标签可点击移除</div></div>
+      <div class="step"><span class="sn">5</span><div class="sb"><strong>Section C 仔细阅读</strong>：题干 + 4 个选项，<span class="tag">📍定位</span> 标注文中出处，<span class="tag">💡提示</span> 显示解题线索</div></div>
+      <div class="step"><span class="sn">6</span><div class="sb">题数较多时底部有 <strong>分页圆点</strong>，左右滑动切换题目。提交后显示结果：✓(正确) ✗(错误) 及解析</div></div>
+    </div>
+    <div class="tip-box">📖 <strong>做题顺序：</strong>Section C(142分/20min) → Section B(71分/15min) → Section A(35分/10min)，按分值从高到低</div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 4 翻译 ═══════════════ -->
+<section id="trans">
+<h2><span class="num">4</span> 🌍 翻译</h2>
+<div class="desc">四级翻译练习 + AI 四维度评分 + 弱项诊断 + 等级进度</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>翻译</span></div>
+    <div class="mockup-body" style="padding:12px">
+      <!-- bottom tabs visual -->
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <div style="background:var(--pink);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px">📊 仪表盘</div>
+        <div style="background:var(--card-hover);padding:4px 10px;border-radius:4px;font-size:10px;color:var(--text-dim)">✏️ 答题</div>
+        <div style="background:var(--card-hover);padding:4px 10px;border-radius:4px;font-size:10px;color:var(--text-dim)">📈 报告</div>
+        <div style="background:var(--card-hover);padding:4px 10px;border-radius:4px;font-size:10px;color:var(--text-dim)">⭐ 收藏</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:8px">📊 仪表盘</div>
+      <!-- progress ring -->
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="width:60px;height:60px;border-radius:50%;border:4px solid var(--pink);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--pink)">12</div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--text-dim)">今日 <span style="color:#fff">3</span> · 连续 <span style="color:#febc2e">5</span> · 完成率 <span style="color:#28c840">68%</span></div>
+          <!-- today task -->
+          <div style="background:var(--card-hover);border-radius:6px;padding:8px;margin-top:6px;font-size:11px;display:flex;align-items:center">
+            <span>📝</span>
+            <span style="flex:1;color:var(--text);margin-left:4px">L2 · 中国传统文化...</span>
+            <span style="color:var(--pink)">→</span>
+          </div>
+        </div>
+      </div>
+      <!-- question list -->
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">全部题目</div>
+      <div style="background:var(--card-hover);border-radius:6px;padding:8px;display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <span>📝</span><span style="flex:1;font-size:12px;color:var(--text)">L1 · 中国春节习俗</span><span style="color:var(--pink)">⭐</span><span style="color:#28c840;font-size:11px">✓</span>
+      </div>
+      <div style="background:var(--card-hover);border-radius:6px;padding:8px;display:flex;align-items:center;gap:6px">
+        <span>📝</span><span style="flex:1;font-size:12px;color:var(--text)">L2 · 环境保护措施</span><span style="color:var(--text-dim)">☆</span>
+      </div>
+      <span class="arr" style="top:50px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:44px;right:-175px;width:160px">底部 4 个 Tab 切换视图</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">底部 4 个 Tab</div>
+    <div class="steps">
+      <div class="step"><span class="sn">📊</span><div class="sb"><strong>仪表盘</strong>：进度环（已做/总数）、今日/连续/完成率、今日推荐题目、全部题目列表（带收藏⭐和完成✓标记）</div></div>
+      <div class="step"><span class="sn">✏️</span><div class="sb"><strong>答题</strong>：三步流程 Step 1 准备（关键词/句式/时态提示）→ Step 2 翻译（输入框+提示折叠）→ Step 3 对比（四维度评分+逐词对照+建议+参考译文）</div></div>
+      <div class="step"><span class="sn">📈</span><div class="sb"><strong>报告</strong>：总完成/今日/连续/完成率4卡片、L1-L4等级进度（🌱🌿🌳🏔️）、弱项诊断（各维度平均分+练习次数）、推荐下一题</div></div>
+      <div class="step"><span class="sn">⭐</span><div class="sb"><strong>收藏</strong>：已收藏的翻译题目列表</div></div>
+    </div>
+    <div class="sub">答题三步流程</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb"><strong>准备</strong>：查看关键词标签、句式拆解、时态提示。点击 <span class="tag">准备好了 →</span></div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>翻译</strong>：在输入框中写译文，可展开提示。点击 <span class="tag">✨ 提交评分</span> 后 AI 评分</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb"><strong>对比</strong>：查看四维度得分（词汇/语法/语义/表达 各/5）、逐词对照、修改建议、参考译文。<span class="tag">🔄 重做</span> 或 <span class="tag">➡ 下一题</span></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 5 写作 ═══════════════ -->
+<section id="write">
+<h2><span class="num">5</span> ✍️ 写作</h2>
+<div class="desc">三大 Tab：句型急救包 + 中英写作助手 + 写作速查</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>写作</span></div>
+    <div class="mockup-body" style="padding:12px">
+      <!-- 3 tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <div style="background:var(--pink);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px">🆘 句型急救包</div>
+        <div style="background:var(--card-hover);padding:4px 10px;border-radius:4px;font-size:10px;color:var(--text-dim)">🇨🇳 中英写作助手</div>
+        <div style="background:var(--card-hover);padding:4px 10px;border-radius:4px;font-size:10px;color:var(--text-dim)">📚 写作速查</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:6px">🆘 句型急救包</div>
+      <!-- search -->
+      <div style="background:var(--card-hover);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text-dim);margin-bottom:6px">🔍 搜索句型</div>
+      <!-- category pills -->
+      <div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:8px;padding-bottom:4px">
+        <span class="tag" style="background:var(--pink);color:#fff">全部</span>
+        <span class="ui-pill">观点</span>
+        <span class="ui-pill">因果</span>
+        <span class="ui-pill">对比</span>
+        <span class="ui-pill">举例</span>
+        <span class="ui-pill">总结</span>
+      </div>
+      <!-- sentence card -->
+      <div style="background:var(--card-hover);border-radius:6px;padding:8px;font-size:12px;margin-bottom:6px">
+        <div style="color:var(--text)">From my perspective, ...</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">在我看来... · <span class="tag">选用</span></div>
+      </div>
+      <div style="background:var(--card-hover);border-radius:6px;padding:8px;font-size:12px">
+        <div style="color:var(--text)">There is no denying that ...</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">不可否认... · <span class="tag">选用</span></div>
+      </div>
+      <span class="arr" style="top:45px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:38px;right:-175px;width:160px">3 个 Tab 切换不同写作功能</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">Tab 0: 句型急救包</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">搜索框 + <strong>分类标签</strong>（全部/观点/因果/对比/举例/总结）筛选句型</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">点击句型卡片展开例句，点击 <span class="tag">✅ 选用此句型</span> 记录到右侧</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">底部 <strong>造句练习</strong>：参考例句写一个句子，<span class="tag">提交练习</span> 获取反馈</div></div>
+    </div>
+
+    <div class="sub">Tab 1: 中英写作助手（4 步骤）</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb"><strong>写中文</strong>：选择话题标签（环境/教育/科技...），输入中文要点提纲</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>逐句翻译</strong>：每句中→英翻译，参考推荐词汇和句型标签，逐句完成后统一提交</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb"><strong>组装卡片</strong>：拖动排序 ↑↓/删除 ✕/设置连接词（Firstly/Moreover/Finally 等 9 种），可追加要点</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb"><strong>润色检查</strong>：查看分数、词数/句子数/句型数统计、检查项列表（语法/拼写/逻辑），可回编辑修改</div></div>
+    </div>
+
+    <div class="sub">Tab 2: 写作速查</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb"><strong>题目列表</strong>：所有写作题目（含字数范围、考试类型）</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>详情</strong>：查看题目卡片、参考词汇标签+句型标签提示条、多行输入框写作文（含词数进度条），点击 <span class="tag">📤 交卷评分</span></div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">AI 从内容/结构/语言 3 维度评分，显示修改建议和参考范文</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 6 句子 ═══════════════ -->
+<section id="sent">
+<h2><span class="num">6</span> 💬 句子</h2>
+<div class="desc">语境句子学习 + 3 种学习模式 + 拼图游戏 + AI 生成</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>语境句子</span></div>
+    <div class="mockup-body" style="padding:12px">
+      <!-- header -->
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <div style="flex:1;background:var(--card-hover);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px">🔍 搜索句子</div>
+        <span style="background:var(--card-hover);border-radius:6px;padding:6px 8px;font-size:14px">📖</span>
+        <span style="background:var(--card-hover);border-radius:6px;padding:6px 8px;font-size:14px">📋</span>
+        <span style="background:var(--card-hover);border-radius:6px;padding:6px 8px;font-size:14px">✨</span>
+      </div>
+      <!-- topic filter -->
+      <div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:8px">
+        <span class="tag" style="background:var(--pink);color:#fff">全部</span>
+        <span class="ui-pill">环保</span>
+        <span class="ui-pill">科技</span>
+        <span class="ui-pill">生活</span>
+        <span class="ui-pill">教育</span>
+        <span class="ui-pill">社会</span>
+      </div>
+      <!-- mode switcher -->
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--pink);font-weight:600">📋 列表</span>
+        <span style="font-size:12px;color:var(--text-dim)">🎯 沉浸</span>
+        <span style="font-size:12px;color:var(--text-dim)">🧩 拼图</span>
+      </div>
+      <!-- sentence card -->
+      <div style="background:var(--card-hover);border-radius:6px;padding:10px;margin-bottom:4px">
+        <div style="font-size:12px;color:#fff;font-weight:500">From my perspective, social media has both advantages and disadvantages.</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:3px">在我看来，社交媒体既有优点也有缺点。</div>
+        <div style="display:flex;gap:4px;margin-top:4px">
+          <span class="tag">from my perspective</span>
+          <span class="tag">social media</span>
+          <span style="font-size:12px;margin-left:auto">☆ ✔</span>
+        </div>
+      </div>
+      <span class="arr" style="top:50px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:44px;right:-175px;width:160px">3 种学习模式切换: 列表/沉浸/拼图</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">3 种学习模式</div>
+    <div class="steps">
+      <div class="step"><span class="sn">📋</span><div class="sb"><strong>列表模式</strong>：纵向句子卡片列表，每条显示英文/中文/关键词标签，可收藏 ⭐、掌握 ✔、筛选话题、搜索关键词</div></div>
+      <div class="step"><span class="sn">🎯</span><div class="sb"><strong>沉浸模式</strong>：单句大卡片，<span class="tag">‹</span> 上一句 <span class="tag">›</span> 下一句 逐句浏览，同样支持收藏和掌握标记</div></div>
+      <div class="step"><span class="sn">🧩</span><div class="sb"><strong>拼图模式</strong>：打乱的单词，按顺序点击填入空槽。有连击加分（combo）、星级评价、错误计数。支持 <span class="tag">👁 答案</span> 和 <span class="tag">⏭ 跳过</span></div></div>
+    </div>
+    <div class="sub">其他功能</div>
+    <div class="steps">
+      <div class="step"><span class="sn">✨</span><div class="sb"><strong>AI 生成</strong>：按「单词」或「话题」生成新句子，可选生成数量，自动按四级大纲难度</div></div>
+      <div class="step"><span class="sn">📋</span><div class="sb"><strong>文本导入</strong>：粘贴英文段落，AI 自动拆分为句子并标注翻译</div></div>
+      <div class="step"><span class="sn">📖</span><div class="sb"><strong>查词</strong>：点击 <span class="tag">📖</span> 按钮跳转到词典页面</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 7 单词本 ═══════════════ -->
+<section id="vocab">
+<h2><span class="num">7</span> 📚 单词本</h2>
+<div class="desc">单词管理 + 3 种背词主题（战斗/花园/集卡）+ 翻卡游戏 + 5 套配色 + 成就系统</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>单词本</span></div>
+    <div class="mockup-body" style="padding:12px">
+      <!-- title + mode select -->
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <span style="font-size:14px;font-weight:700;color:#fff">单词本</span>
+        <span style="font-size:11px;background:var(--pink);color:#fff;padding:2px 8px;border-radius:4px">⚔️ 战斗</span>
+        <span style="font-size:11px;background:var(--card-hover);padding:2px 8px;border-radius:4px;color:var(--text-dim)">🌸 花园</span>
+        <span style="font-size:11px;background:var(--card-hover);padding:2px 8px;border-radius:4px;color:var(--text-dim)">🎴 集卡</span>
+      </div>
+      <!-- quick entry + colors -->
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <span class="ui-pill">🎴 卡包</span>
+        <span class="ui-pill">⚡ 每日挑战</span>
+        <span class="ui-pill">💌 故事</span>
+        <span style="margin-left:auto;display:flex;gap:3px">
+          <span style="width:12px;height:12px;border-radius:50%;background:var(--pink)"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:#4a9eff"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:#ff8a4a"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:#4acf7a"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:#b47aff"></span>
+        </span>
+      </div>
+      <!-- stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px">
+        <div style="background:var(--card-hover);border-radius:4px;padding:4px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#28c840">12</div>
+          <div style="font-size:9px;color:var(--text-dim)">已掌握</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:4px;padding:4px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:var(--pink)">8</div>
+          <div style="font-size:9px;color:var(--text-dim)">学习中</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:4px;padding:4px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#febc2e">5🔥</div>
+          <div style="font-size:9px;color:var(--text-dim)">连胜</div>
+        </div>
+      </div>
+      <!-- tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--pink)">📖 单词</span>
+        <span style="font-size:11px;color:var(--text-dim)">🏆 成就</span>
+        <span style="font-size:11px;color:var(--text-dim)">📝 例句</span>
+      </div>
+      <!-- word list item -->
+      <div style="background:var(--card-hover);border-radius:6px;padding:8px;display:flex;align-items:center;gap:6px;border-left:3px solid var(--pink)">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--pink-glow);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--pink);font-weight:700">I</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#fff">innovation <span style="font-size:10px;color:var(--text-dim);font-weight:400">/ˌɪnəˈveɪʃn/</span></div>
+          <div style="font-size:10px;color:var(--text-dim)">n. 创新，革新 · 阅读 · 学习中</div>
+        </div>
+        <span style="font-size:11px;background:var(--pink-glow);color:var(--pink);padding:2px 8px;border-radius:4px">✓ 已掌握</span>
+      </div>
+      <span class="arr" style="top:30px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:24px;right:-175px;width:160px">3 种背词主题 + 5 套配色 + 卡包/挑战/故事系统</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">日常用词</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb"><strong>搜索框</strong> 查找单词或音标。三个标签：<span class="tag">学习中</span> <span class="tag">待复习</span> <span class="tag">已掌握</span> 筛选列表</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>单词卡片</strong>：显示首字母/单词/音标/释义/来源（阅读/听力）/状态。左滑露出 <span class="tag">删除</span> 按钮</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb"><strong>翻卡游戏</strong>：点击单词进入翻卡，正面显示英文+音标+上下文，点击翻转显示中文释义。<span class="tag">🔊</span> 发音、<span class="tag">✅ 认识</span> / <span class="tag">😵 不认识</span></div></div>
+      <div class="step"><span class="sn">4</span><div class="sb"><strong>二级导航</strong>：<span class="tag">🏆 成就</span> 网格展示（含进度）、<span class="tag">📝 例句</span> 收藏例句列表（字体 A−/A+ 调节、🗑️ 删除）</div></div>
+    </div>
+    <div class="sub">3 种背词主题</div>
+    <div class="steps">
+      <div class="step"><span class="sn">⚔️</span><div class="sb"><strong>战斗</strong>：打怪风格，单词有 HP 和成长值，认识扣 HP，不认识减成长</div></div>
+      <div class="step"><span class="sn">🌸</span><div class="sb"><strong>花园</strong>：种植风格，生长阶段 🌱🌿🌹🌳，每次认识让单词成长</div></div>
+      <div class="step"><span class="sn">🎴</span><div class="sb"><strong>集卡</strong>：卡牌风格，稀有度 ⭐N/R/SR/SSR，可收集卡包、解锁故事章节</div></div>
+    </div>
+    <div class="sub">补充功能</div>
+    <div class="steps">
+      <div class="step"><span class="sn">🎴</span><div class="sb"><strong>卡包</strong>：按来源（阅读/听力/手动添加）分组，显示收集进度条，集齐后 ✅ 标记</div></div>
+      <div class="step"><span class="sn">⚡</span><div class="sb"><strong>每日挑战</strong>：每天限一次的单词挑战任务，完成后标记"今日已挑战"</div></div>
+      <div class="step"><span class="sn">💌</span><div class="sb"><strong>故事</strong>：通过背词/集卡解锁章节，弹窗展示故事内容</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 8 模拟考试 ═══════════════ -->
+<section id="exam">
+<h2><span class="num">8</span> 📝 模拟考试</h2>
+<div class="desc">全真四级模拟 + 125 分钟倒计时 + 四模块逐项答题 + 自动评分</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>模拟考</span></div>
+    <div class="mockup-body" style="padding:14px">
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px">📋 模拟考试</div>
+      <!-- exam card -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:12px;border:1px solid var(--pink-dim)">
+        <div style="font-size:13px;font-weight:600;color:#fff">2024年12月 四级真题</div>
+        <div style="font-size:10px;color:var(--text-dim);margin:4px 0 8px">
+          ✍️写作 · 🎧听力 · 📖阅读 · 🌐翻译 · 约125分钟
+        </div>
+        <div style="display:flex;gap:6px">
+          <span class="ui-btn">开始考试</span>
+          <span style="background:var(--card);color:var(--text-dim);padding:4px 10px;border-radius:99px;font-size:11px">清除</span>
+        </div>
+      </div>
+      <!-- exam in progress -->
+      <div style="margin-top:10px;background:var(--card-hover);border-radius:8px;padding:12px">
+        <div style="text-align:center;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--text-dim)">⏱ 剩余时间</div>
+          <div style="font-size:24px;font-weight:700;color:var(--pink)">01:45:30</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">
+          <div style="background:var(--card);border-radius:6px;padding:8px;font-size:11px">✍️ 写作</div>
+          <div style="background:var(--card);border-radius:6px;padding:8px;font-size:11px;display:flex;align-items:center;gap:4px">🎧 听力 <span style="font-size:9px;background:var(--pink-glow);color:var(--pink);padding:0 5px;border-radius:3px">3/25</span></div>
+          <div style="background:var(--card);border-radius:6px;padding:8px;font-size:11px">📖 阅读</div>
+          <div style="background:var(--card);border-radius:6px;padding:8px;font-size:11px">🌐 翻译</div>
+        </div>
+        <div style="text-align:center;margin-top:8px"><span class="tag" style="background:var(--pink);color:#fff;padding:4px 16px">交卷</span></div>
+      </div>
+      <span class="arr" style="top:60px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:54px;right:-175px;width:160px">已考完的试卷可「查看答题」「清除」重新做</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">3 个阶段</div>
+    <div class="steps">
+      <div class="step"><span class="sn">📋</span><div class="sb"><strong>考试列表</strong>：真题卡片，显示题型标签和时长。<span class="tag">开始考试</span> 进入、<span class="tag">查看答题</span> 回顾已考、<span class="tag">清除</span> 重置</div></div>
+      <div class="step"><span class="sn">📝</span><div class="sb"><strong>考试进行中</strong>：大屏幕倒计时（最后 5 分钟变红），4 个模块入口卡片（带进度条），底部 <span class="tag">交卷</span> 按钮</div></div>
+      <div class="step"><span class="sn">📊</span><div class="sb"><strong>考试结果</strong>：总分 + 各模块分数明细（📖阅读/🎧听力/✍️写作/🌐翻译），满分绿色 0 分红色</div></div>
+    </div>
+    <div class="sub">考试流程</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">在列表中选择一套题，点击 <strong>开始考试</strong></div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">按 <strong>写作 → 听力 → 阅读 → 翻译</strong> 顺序逐模块作答（与四级真实顺序一致）</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">各模块入口卡片显示进度（如听力 3/25 题），随时可切换模块</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb">全部完成后点击 <strong>交卷</strong>，系统自动评分</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 9 学习统计 ═══════════════ -->
+<section id="stats">
+<h2><span class="num">9</span> 📊 学习统计</h2>
+<div class="desc">学习数据仪表盘 + 周趋势图 + 模块正确率 + 日历热力图 + 成就</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>学习统计</span></div>
+    <div class="mockup-body" style="padding:14px">
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px">📊 学习统计</div>
+      <!-- 4 summary cards -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:var(--pink)">5</div>
+          <div style="font-size:8px;color:var(--text-dim)">🔥连续学习</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:#febc2e">42</div>
+          <div style="font-size:8px;color:var(--text-dim)">📝累计题数</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:#28c840">76%</div>
+          <div style="font-size:8px;color:var(--text-dim)">✅正确率</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:#5b9aff">18</div>
+          <div style="font-size:8px;color:var(--text-dim)">📅本月学习</div>
+        </div>
+      </div>
+      <!-- weekly chart -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="font-size:11px;color:#fff;margin-bottom:6px">📈 本周趋势</div>
+        <div style="display:flex;gap:3px;align-items:flex-end;height:50px">
+          <div style="flex:1;border-radius:3px 3px 0 0;background:var(--pink);height:16px;text-align:center;font-size:8px;padding-top:2px">一</div>
+          <div style="flex:1;border-radius:3px 3px 0 0;background:var(--pink);height:28px;text-align:center;font-size:8px;padding-top:2px">二</div>
+          <div style="flex:1;border-radius:3px 3px 0 0;background:var(--pink);height:40px;text-align:center;font-size:8px;padding-top:2px">三</div>
+          <div style="flex:1;border-radius:3px 3px 0 0;background:#5b9aff;height:50px;text-align:center;font-size:8px;padding-top:2px">四</div>
+          <div style="flex:1;border-radius:3px 3px 0 0;background:var(--pink);height:22px;text-align:center;font-size:8px;padding-top:2px">五</div>
+          <div style="flex:1;border-radius:3px 3px 0 0;background:var(--card);height:8px;text-align:center;font-size:8px;color:var(--text-dim)">六</div>
+          <div style="flex:1;border-radius:3px 3px 0 0;background:var(--card);height:8px;text-align:center;font-size:8px;color:var(--text-dim)">日</div>
+        </div>
+      </div>
+      <!-- calendar heatmap mini -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="font-size:11px;color:#fff;margin-bottom:4px">🔥 学习日历</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:8px">
+          <span style="color:var(--text-dim)">日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+          <span></span><span></span><span></span>
+          <span style="background:var(--pink-glow);border-radius:2px">1</span>
+          <span style="background:var(--pink-glow);border-radius:2px">2</span>
+          <span style="background:var(--pink);color:#fff;border-radius:2px">3</span>
+          <span style="background:var(--pink);color:#fff;border-radius:2px">4</span>
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <!-- achievements -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px">
+        <div style="font-size:11px;color:#fff;margin-bottom:4px">🏆 成就</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;font-size:10px">
+          <div><span style="font-size:16px">🎯</span><br>初出茅庐</div>
+          <div><span style="font-size:16px;filter:grayscale(1)">🔥</span><br>坚持一周</div>
+          <div><span style="font-size:16px">📚</span><br>词汇达人</div>
+          <div><span style="font-size:16px;filter:grayscale(1)">⚡</span><br>听力满分</div>
+        </div>
+      </div>
+      <span class="arr" style="top:20px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:14px;right:-175px;width:160px">纯展示仪表盘, 唯一交互是底部「清除所有记录」</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb"><strong>摘要卡片</strong>：连续学习天数 / 累计题数 / 正确率 / 本月学习天数</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb"><strong>本周趋势</strong>：柱状图显示每日学习量，今日高亮蓝色</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb"><strong>模块正确率</strong>：各模块图标+进度条+百分比（听力/阅读/翻译/写作）</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb"><strong>学习日历</strong>：月度热力图，颜色深浅表示学习强度（level 0-3），今日高亮</div></div>
+      <div class="step"><span class="sn">5</span><div class="sb"><strong>成就</strong>：解锁/未解锁网格展示。底部 <span class="tag">清除所有记录</span> 按钮</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════ 10 个人中心 ═══════════════ -->
+<section id="profile">
+<h2><span class="num">10</span> 👤 个人中心</h2>
+<div class="desc">个人信息聚合 + 设置/提醒/反馈入口</div>
+
+<div class="mockup-row">
+  <div class="mockup annotate">
+    <div class="mockup-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>我的</span></div>
+    <div class="mockup-body" style="padding:14px">
+      <div style="background:linear-gradient(135deg,#ff6b8a33,#ff6b8a11);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--pink-glow);display:flex;align-items:center;justify-content:center;font-size:22px">👤</div>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:#fff">学习者</div>
+          <div style="font-size:11px;color:var(--text-dim)">已学习 18 天</div>
+        </div>
+      </div>
+      <!-- 3 stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:var(--pink)">18</div>
+          <div style="font-size:9px;color:var(--text-dim)">📅学习天数</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:#febc2e">42</div>
+          <div style="font-size:9px;color:var(--text-dim)">📝总题数</div>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:8px;text-align:center">
+          <div style="font-size:14px;font-weight:700;color:#28c840">76%</div>
+          <div style="font-size:9px;color:var(--text-dim)">✅正确率</div>
+        </div>
+      </div>
+      <!-- achievements -->
+      <div style="background:var(--card-hover);border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="font-size:11px;color:#fff;margin-bottom:6px">🏆 成就</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;font-size:10px">
+          <div><span style="font-size:14px">🎯</span><br>初出茅庐</div>
+          <div><span style="font-size:14px;filter:grayscale(1)">🔥</span><br>坚持一周</div>
+          <div><span style="font-size:14px">📚</span><br>词汇达人</div>
+          <div><span style="font-size:14px;filter:grayscale(1)">⚡</span><br>听力满分</div>
+        </div>
+      </div>
+      <!-- settings list -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="background:var(--card-hover);border-radius:6px;padding:10px;display:flex;align-items:center;gap:8px">
+          <span>⚙️</span><span style="flex:1;font-size:12px;color:#fff">设置</span><span style="color:var(--text-dim)">›</span>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:10px;display:flex;align-items:center;gap:8px">
+          <span>🔔</span><span style="flex:1;font-size:12px;color:#fff">学习提醒</span><span style="color:var(--text-dim)">›</span>
+        </div>
+        <div style="background:var(--card-hover);border-radius:6px;padding:10px;display:flex;align-items:center;gap:8px">
+          <span>💬</span><span style="flex:1;font-size:12px;color:#fff">帮助与反馈</span><span style="color:var(--text-dim)">›</span>
+        </div>
+      </div>
+      <span class="arr" style="top:20px;right:-2px;font-size:16px">👈</span>
+      <span class="tip rt" style="top:14px;right:-175px;width:160px">3 个入口跳转到设置/提醒/反馈页面</span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="sub">页面结构</div>
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><div class="sb">顶部用户信息：头像 + 用户名 "学习者" + 学习天数</div></div>
+      <div class="step"><span class="sn">2</span><div class="sb">统计卡片：📅 学习天数 / 📝 总题数 / ✅ 正确率（与统计页共享数据）</div></div>
+      <div class="step"><span class="sn">3</span><div class="sb">🏆 成就网格（解锁彩色展示，未解锁灰色）</div></div>
+      <div class="step"><span class="sn">4</span><div class="sb">3 个设置入口（点击跳转）：<br>
+      <span class="tag">⚙️ 设置</span> → 设置页（每日目标、夜间模式、关于）<br>
+      <span class="tag">🔔 学习提醒</span> → 提醒页（定时学习提醒）<br>
+      <span class="tag">💬 帮助与反馈</span> → 反馈页（提交意见/问题）</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- footer -->
+<div style="text-align:center;padding:32px 0 20px;color:var(--text-dim);font-size:12px;border-top:1px solid var(--border)">
+  <p>📘 四级备考助手 · CET-4 Exam Prep</p>
+  <p style="margin-top:4px">祝大家四级顺利通过 🎉</p>
+</div>
+
+</div>
+</body>
+</html>
