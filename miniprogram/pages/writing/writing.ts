@@ -246,21 +246,14 @@ interface IWritingData {
 
   /* shared */
   showResult: boolean; result: string | null
-  submitting: boolean; aiAvailable: boolean; aiEnabled: boolean  [key: string]: any
-
+  submitting: boolean; aiAvailable: boolean; aiEnabled: boolean
 }
 
 Page<IWritingData, Record<string, any>>({
   data: {
     tab: 0, tabs: ['句型急救包', '中英写作助手', '写作速查'],
     patterns: [], writings: [],
-    detailMode: false, fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['writing'] && getApp<IAppOption>().globalData.fontSizes['writing'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['writing'] && getApp<IAppOption>().globalData.fontSizes['writing'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['writing'] && getApp<IAppOption>().globalData.fontSizes['writing'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['writing'] && getApp<IAppOption>().globalData.fontSizes['writing'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['writing'] && getApp<IAppOption>().globalData.fontSizes['writing'].sm || 16,
- fsOpen: false,
- darkMode: false,
+    detailMode: false, darkMode: false,
 
     expandedPattern: null, selectedPattern: null,
     userSentence: '', sentenceWordCount: 0,
@@ -616,22 +609,5 @@ Page<IWritingData, Record<string, any>>({
     const val = !this.data.aiEnabled
     this.setData({ aiEnabled: val })
     wx.setStorageSync('writingAiEnabled', val)
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'writing'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

@@ -28,8 +28,7 @@ interface IDictData {
   aiAvailable: boolean
   aiEnabled: boolean
   exampleCount: number
-  adding: boolean  [key: string]: any
-
+  adding: boolean
 }
 
 const POS_MAP: Record<string, string> = {
@@ -50,14 +49,6 @@ Page<IDictData, Record<string, any>>({
     error: '',
     loading: false,
     history: [],
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].title || 20,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].body || 18,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].opt || 17,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].btn || 19,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].sm || 15,
-
-    fsOpen: false,
-
     darkMode: false,
     aiAvailable: false,
     aiEnabled: false,
@@ -192,22 +183,5 @@ Page<IDictData, Record<string, any>>({
     const ctx = wx.createInnerAudioContext()
     ctx.src = audioSrc
     ctx.play()
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'dictionary'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

@@ -22,8 +22,6 @@ Page({
     _letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
     _scrollToResult: '',
     darkMode: false,
-    fs: getApp<IAppOption>().globalData.fontSize || 16,
-    fsOpen: false,
   },
 
   onLoad(opts: any) {
@@ -123,17 +121,6 @@ Page({
   },
 
   goBack() { wx.navigateBack() },
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    let v = Math.max(12, Math.min(26, this.data.fs + d))
-    this.setData({ fs: v })
-    const app = getApp<IAppOption>()
-    app.globalData.fontSize = v
-    wx.setStorageSync('fontSize', v)
-  },
 })
 
 function parseSegments(text: string, keys: string[]): any[] {

@@ -1,13 +1,13 @@
 .page { min-height: 100vh; background: #f3eeed; display: flex; flex-direction: column; }
 .topbar { background: linear-gradient(135deg, #ffb3c6, #ff8fab); padding: 48rpx 24rpx 16rpx; color: #fff; flex-shrink: 0; display: flex; align-items: center; gap: 12rpx; }
-.topbar .h1 { font-size: calc(34 * var(--fs-title) / 16 * 1rpx); font-weight: 800; flex: 1; }
-.tb-back { padding: 0 16rpx; height: 48rpx; border-radius: 12rpx; background: rgba(255,255,255,0.2); display: flex; align-items: center; font-size: calc(24 * var(--fs-body) / 16 * 1rpx); color: #fff; }
+.topbar .h1 { font-size: 34rpx; font-weight: 800; flex: 1; }
+.tb-back { padding: 0 16rpx; height: 48rpx; border-radius: 12rpx; background: rgba(255,255,255,0.2); display: flex; align-items: center; font-size: 24rpx; color: #fff; }
 .scroll { flex: 1; }
-.sec-label { font-size: calc(24 * var(--fs-sm) / 16 * 1rpx); font-weight: 600; color: #8a7a9a; padding: 16rpx 24rpx 8rpx; }
-.src { background: #fff; margin: 0 20rpx; border-radius: 14rpx; padding: 20rpx; font-size: calc(28 * var(--fs-body) / 16 * 1rpx); color: #2d2d4e; line-height: 1.6; }
-.ta { display: block; width: auto; margin: 8rpx 20rpx; padding: 20rpx; border-radius: 14rpx; background: #fff; font-size: calc(26 * var(--fs-body) / 16 * 1rpx); min-height: 200rpx; }
+.sec-label { font-size: 24rpx; font-weight: 600; color: #8a7a9a; padding: 16rpx 24rpx 8rpx; }
+.src { background: #fff; margin: 0 20rpx; border-radius: 14rpx; padding: 20rpx; font-size: 28rpx; color: #2d2d4e; line-height: 1.6; }
+.ta { display: block; width: auto; margin: 8rpx 20rpx; padding: 20rpx; border-radius: 14rpx; background: #fff; font-size: 26rpx; min-height: 200rpx; }
 .btn-row { padding: 20rpx 20rpx 40rpx; }
-.btn { padding: 18rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; text-align: center; font-size: calc(28 * var(--fs-btn) / 16 * 1rpx); font-weight: 700; }
+.btn { padding: 18rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; text-align: center; font-size: 28rpx; font-weight: 700; }
 .dark-theme.page { background: #12121f !important; }
 .dark-theme .topbar { background: linear-gradient(135deg, #2a2a4a, #1a1a38) !important; }
 .dark-theme .src, .dark-theme .ta { background: #1e1e38 !important; color: #e0d0e8 !important; }

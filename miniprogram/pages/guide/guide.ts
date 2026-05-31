@@ -9,14 +9,6 @@ interface IQItem {
 Page({
   data: {
     step: 0,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].title || 20,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].body || 18,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].opt || 17,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].btn || 19,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].sm || 15,
-
-    fsOpen: false,
-
     darkMode: false,
     questions: [
       { q: '"The center of American automobile innovation has in the past decade moved 2,000 miles away."\n这句话的大意是？', opts: ['美国汽车价格涨了', '汽车创新中心转移了', '汽车工厂倒闭了', '高速公路修好了'], answer: 1 },
@@ -73,22 +65,5 @@ Page({
   finish() {
     wx.setStorageSync('hasGuided', true)
     wx.reLaunch({ url: '/pages/index/index' })
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'guide'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

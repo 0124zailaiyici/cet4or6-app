@@ -5,18 +5,12 @@ Page({
   data: {
     prompt: null as any,
     answer: '',
-    fs: getApp<IAppOption>().globalData.fontSize || 16,
-
-    fsOpen: false,
-
     darkMode: false,
   },
 
   onLoad() {
     applyTheme(getDarkMode())
-    this.setData({ fs: getApp<IAppOption>().globalData.fontSize || 16,
- fsOpen: false,
- darkMode: getDarkMode() })
+    this.setData({ darkMode: getDarkMode() })
     const writings = writingsData as any[]
     const prompt = writings[0] || null
     const saved = ((getApp<IAppOption>().globalData.studyData as any).writingAnswers || {})[prompt && prompt.id || 0] || ''
@@ -39,16 +33,4 @@ Page({
   },
 
   goBack() { wx.navigateBack() },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    let v = Math.max(12, Math.min(26, this.data.fs + d))
-    this.setData({ fs: v })
-    const app = getApp<IAppOption>()
-    app.globalData.fontSize = v
-    wx.setStorageSync('fontSize', v)
-  },
 })

@@ -23,17 +23,6 @@ App<IAppOption>({
     darkMode: wx.getStorageSync('darkMode') || false,
     examDeadline: 0,
     examSet: '',
-    fontSize: wx.getStorageSync('fontSize') || 16,
-    fontSizes: (() => {
-      const raw = wx.getStorageSync('fontSizes')
-      if (!raw || typeof raw !== 'object') return {}
-      const result: Record<string, any> = {}
-      for (const [page, val] of Object.entries(raw)) {
-        if (typeof val === 'number') result[page] = { title: val, body: val, opt: val, btn: val, sm: val }
-        else result[page] = val
-      }
-      return result
-    })(),
     studyData: (() => {
       const stored = wx.getStorageSync('studyData')
       return stored ? { ...defaults, ...stored, hardSentences: stored.hardSentences || [], readingAnswers: stored.readingAnswers || {} } : { ...defaults }

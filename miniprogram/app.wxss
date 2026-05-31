@@ -7,28 +7,7 @@ page, .page {
   --card-bg: #ffffff;
   --tag-bg: #fff0f3;
   --pink: #ff6b8a;
-  --fs: 1;
-  --fs-title: 20;
-  --fs-body: 18;
-  --fs-opt: 17;
-  --fs-btn: 19;
-  --fs-sm: 15;
 }
-
-/* 字号浮动调节 */
-.fs-ctrl{position:fixed;right:16rpx;bottom:30rpx;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10rpx}
-.fs-btn-box{width:80rpx;height:80rpx;border-radius:50%;background:linear-gradient(135deg,var(--pink),#ff4770);display:flex;align-items:center;justify-content:center;box-shadow:0 4rpx 20rpx rgba(255,107,138,0.4)}
-.fs-btn-icon{font-size:calc(26 * var(--fs-btn) / 16 * 1rpx);font-weight:700;color:#fff;font-style:italic}
-.fs-panel{background:var(--card-bg);border:1px solid var(--border);border-radius:16rpx;padding:12rpx 16rpx;box-shadow:0 8rpx 30rpx rgba(0,0,0,0.15);margin-bottom:4rpx;min-width:200rpx}
-.fs-row{display:flex;align-items:center;justify-content:space-between;padding:6rpx 0}
-.fs-row+.fs-row{border-top:1px solid var(--border)}
-.fs-row-label{font-size:calc(22 * var(--fs-sm) / 16 * 1rpx);color:var(--text-primary);min-width:60rpx}
-.fs-row-ctrl{display:flex;align-items:center;gap:8rpx}
-.fs-btn-sub,.fs-btn-add{width:44rpx;height:44rpx;border-radius:50%;background:var(--tag-bg);display:flex;align-items:center;justify-content:center;font-size:calc(24 * var(--fs-btn) / 16 * 1rpx);color:var(--text-primary);font-weight:700}
-.fs-btn-sub:active,.fs-btn-add:active{background:var(--pink);color:#fff}
-.fs-btn-val{font-size:calc(20 * var(--fs-sm) / 16 * 1rpx);color:var(--text-secondary);min-width:30rpx;text-align:center}
-.dark-theme .fs-panel{background:var(--card-bg);border-color:var(--border)}
-.dark-theme .fs-row-label{color:var(--text-primary)}
 
 .dark-theme {
   --shadow: rgba(0, 0, 0, 0.3);
@@ -257,10 +236,10 @@ view, text, scroll-view { box-sizing: border-box; }
 .skeleton { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 200rpx 0; }
 .skel-spin { width: 60rpx; height: 60rpx; border: 6rpx solid #fff0f3; border-top-color: #ff6b8a; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20rpx; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.skel-text { font-size: calc(26 * var(--fs-body) / 16 * 1rpx); color: #8a7a9a; }
+.skel-text { font-size: 26rpx; color: #8a7a9a; }
 
 /* Empty state action button */
-.empty-btn { margin-top: 24rpx; padding: 14rpx 36rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; font-size: calc(26 * var(--fs-btn) / 16 * 1rpx); font-weight: 600; }
+.empty-btn { margin-top: 24rpx; padding: 14rpx 36rpx; border-radius: 14rpx; background: linear-gradient(135deg, #ff8fab, #ff6b8a); color: #fff; font-size: 26rpx; font-weight: 600; }
 .dark-theme .empty-btn { background: linear-gradient(135deg, #4a4a7a, #3a3a6a) !important; }
 
 .dark-theme .skel-spin { border-color: #2a2a4a; border-top-color: #ff8fab; }

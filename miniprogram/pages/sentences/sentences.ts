@@ -61,8 +61,7 @@ interface ISentencesData {
   puzzleHintGlows: boolean[]
   puzzleInitialSelected: (number | null)[]
   puzzleSentences: ISentence[]
-  puzzleDone: boolean  [key: string]: any
-
+  puzzleDone: boolean
 }
 
 interface ISentencesMethods {
@@ -95,8 +94,7 @@ interface ISentencesMethods {
   openPasteModal(): void
   closePasteModal(): void
   onPasteInput(e: WechatMiniprogram.Input): void
-  doParse(): void  [key: string]: any
-
+  doParse(): void
 }
 
 Page<ISentencesData, ISentencesMethods>({
@@ -109,14 +107,6 @@ Page<ISentencesData, ISentencesMethods>({
     masteredIds: [],
     favoriteIds: [],
     searchQuery: '',
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['sentences'] && getApp<IAppOption>().globalData.fontSizes['sentences'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['sentences'] && getApp<IAppOption>().globalData.fontSizes['sentences'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['sentences'] && getApp<IAppOption>().globalData.fontSizes['sentences'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['sentences'] && getApp<IAppOption>().globalData.fontSizes['sentences'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['sentences'] && getApp<IAppOption>().globalData.fontSizes['sentences'].sm || 16,
-
-    fsOpen: false,
-
     darkMode: false,
     viewMode: 'list',
     immersionIndex: 0,
@@ -748,22 +738,5 @@ Page<ISentencesData, ISentencesMethods>({
       title: `💬 语境句子 — 已掌握 ${this.data.masteredIds.length} 句！`,
       path: '/pages/sentences/sentences',
     }
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'sentences'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

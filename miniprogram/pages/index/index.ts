@@ -22,8 +22,7 @@ interface IHomeData {
   todaySentence: number
   todayTrans: number
   todayWrite: number
-  statusBarHeight: number  [key: string]: any
-
+  statusBarHeight: number
 }
 
 interface IHomeMethods {
@@ -34,8 +33,7 @@ interface IHomeMethods {
   playDailySentence(): void
   quickListen(): void
   quickVocab(): void
-  quickReading(): void  [key: string]: any
-
+  quickReading(): void
 }
 
 // Pool of daily sentences
@@ -58,14 +56,6 @@ Page<IHomeData, IHomeMethods>({
     greeting: '',
     checkedIn: false,
     streak: 0,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['index'] && getApp<IAppOption>().globalData.fontSizes['index'].title || 20,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['index'] && getApp<IAppOption>().globalData.fontSizes['index'].body || 18,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['index'] && getApp<IAppOption>().globalData.fontSizes['index'].opt || 17,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['index'] && getApp<IAppOption>().globalData.fontSizes['index'].btn || 19,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['index'] && getApp<IAppOption>().globalData.fontSizes['index'].sm || 15,
-
-    fsOpen: false,
-
     darkMode: false,
     missionTitle: '开始学习',
     missionSub: '今天第一件事，从这里开始',
@@ -197,21 +187,4 @@ Page<IHomeData, IHomeMethods>({
   quickListen() { wx.navigateTo({ url: '/pages/listening/listening' }) },
   quickVocab() { wx.switchTab({ url: '/pages/vocab/vocab' }) },
   quickReading() { wx.navigateTo({ url: '/pages/reading/reading' }) },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'index'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
-  },
 })

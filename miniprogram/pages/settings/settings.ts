@@ -7,8 +7,7 @@ interface ISettingsData {
   writing: number
   darkMode: boolean
   version: string
-  cacheSize: string  [key: string]: any
-
+  cacheSize: string
 }
 
 interface ISettingsMethods {
@@ -19,8 +18,7 @@ interface ISettingsMethods {
   goReminder(): void
   goFeedback(): void
   exportData(): void
-  importData(): void  [key: string]: any
-
+  importData(): void
 }
 
 Page<ISettingsData, ISettingsMethods>({
@@ -29,14 +27,6 @@ Page<ISettingsData, ISettingsMethods>({
     sentence: 5,
     translation: 1,
     writing: 1,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].title || 20,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].body || 18,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].opt || 17,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].btn || 19,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].sm || 15,
-
-    fsOpen: false,
-
     darkMode: false,
     version: '1.0.0',
     cacheSize: '',
@@ -162,22 +152,5 @@ Page<ISettingsData, ISettingsMethods>({
         }
       },
     })
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'settings'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

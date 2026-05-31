@@ -71,8 +71,7 @@ interface IVocabData {
   manualModalValue: string
   swipedIdx: number
   celebrateShow: boolean
-  _tick: number  [key: string]: any
-
+  _tick: number
 }
 
 interface IVocabMethods {
@@ -136,8 +135,7 @@ interface IVocabMethods {
   _incrAch(key: string): void
   _refreshAchProgress(): void
   _updateAchFromWords(): void
-  goReading(): void  [key: string]: any
-
+  goReading(): void
 }
 
 const WORD_BANK: Record<string, { phonetic: string; definition: string }> = {
@@ -830,14 +828,6 @@ Page<IVocabData, IVocabMethods>({
     streak: 0,
     mode: 'battle',
     combo: 0,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['vocab'] && getApp<IAppOption>().globalData.fontSizes['vocab'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['vocab'] && getApp<IAppOption>().globalData.fontSizes['vocab'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['vocab'] && getApp<IAppOption>().globalData.fontSizes['vocab'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['vocab'] && getApp<IAppOption>().globalData.fontSizes['vocab'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['vocab'] && getApp<IAppOption>().globalData.fontSizes['vocab'].sm || 16,
-
-    fsOpen: false,
-
     darkMode: false,
     gameWord: null,
     gameWordIdx: 0,
@@ -1103,7 +1093,7 @@ Page<IVocabData, IVocabMethods>({
       wx.showToast({ title: '正在获取发音…', icon: 'loading' })
       await this._fetchAudioUrl(this.data.words.find(v => v.word === w.word) || w)
       wx.hideToast()
-      const au = this.data.gameWord && this.data.gameWord.audioUrl
+      const au = this.data.gameWord?.audioUrl
       if (au) {
         this._playAudio(au)
       } else {
@@ -1691,22 +1681,5 @@ Page<IVocabData, IVocabMethods>({
       } catch {}
       this._saveAddedWord(w, phonetic, chn, context, contextCn, words)
     } catch (e) { wx.showToast({ title: '添加失败', icon: 'none' }) }
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'vocab'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

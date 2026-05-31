@@ -9,14 +9,6 @@ Page({
     achievements: [] as { emoji: string; name: string; unlocked: boolean }[],
     calendar: [] as { day: number | null; level: number; isToday: boolean }[][],
     monthLabel: '',
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].title || 20,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].body || 18,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].opt || 17,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].btn || 19,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].sm || 15,
-
-    fsOpen: false,
-
     darkMode: false,
   },
 
@@ -102,22 +94,5 @@ Page({
   goPage(e: WechatMiniprogram.TouchEvent) {
     const url = e.currentTarget.dataset.url as string
     wx.navigateTo({ url })
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const cat = e.currentTarget.dataset.cat as string || 'body'
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    const key = 'profile'
-    const old = this.data[cat as keyof typeof this.data] as number || 16
-    let v = Math.max(10, Math.min(28, old + d))
-    this.setData({ [cat]: v })
-    const app = getApp<IAppOption>()
-    if (!app.globalData.fontSizes) app.globalData.fontSizes = {}
-    if (!app.globalData.fontSizes[key]) app.globalData.fontSizes[key] = { title: 16, body: 16, opt: 16, btn: 16, sm: 16 }
-    app.globalData.fontSizes[key][cat] = v
-    wx.setStorageSync('fontSizes', app.globalData.fontSizes)
   },
 })

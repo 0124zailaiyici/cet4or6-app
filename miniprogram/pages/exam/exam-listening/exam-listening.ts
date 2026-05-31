@@ -23,18 +23,12 @@ Page({
     _results: {} as Record<number, boolean>,
     _correctIdxs: {} as Record<number, number>,
     _letters: ['A','B','C','D'],
-    fs: getApp<IAppOption>().globalData.fontSize || 16,
-
-    fsOpen: false,
-
     darkMode: false,
   },
 
   onLoad() {
     applyTheme(getDarkMode())
-    this.setData({ fs: getApp<IAppOption>().globalData.fontSize || 16,
- fsOpen: false,
- darkMode: getDarkMode() })
+    this.setData({ darkMode: getDarkMode() })
     const app = getApp<IAppOption>()
     const setId = app.globalData.examSet
     const passages = (listeningData as any[]).filter((l: any) => l.audioUrl)
@@ -119,17 +113,5 @@ Page({
   goBack() {
     if (audioCtx) { audioCtx.stop(); audioCtx.destroy(); audioCtx = null }
     wx.navigateBack()
-  },
-
-  toggleFs() {
-    this.setData({ fsOpen: !this.data.fsOpen })
-  },
-  changeFs(e: WechatMiniprogram.TouchEvent) {
-    const d = parseInt(e.currentTarget.dataset.d as string) || 0
-    let v = Math.max(12, Math.min(26, this.data.fs + d))
-    this.setData({ fs: v })
-    const app = getApp<IAppOption>()
-    app.globalData.fontSize = v
-    wx.setStorageSync('fontSize', v)
   },
 })

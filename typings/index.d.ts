@@ -27,8 +27,6 @@ interface IAppOption {
     studyData: IStudyData
     examDeadline: number
     examSet: string
-    fontSize: number
-    fontSizes: Record<string, any>
   }
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback,
 }
