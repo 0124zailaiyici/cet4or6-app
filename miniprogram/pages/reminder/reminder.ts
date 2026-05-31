@@ -9,11 +9,11 @@ Page({
     morningSub: false,
     eveningSub: false,
     weeklySub: false,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['reminder'] && getApp<IAppOption>().globalData.fontSizes['reminder'].sm || 15,
 
     fsOpen: false,
 

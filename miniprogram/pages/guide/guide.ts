@@ -9,11 +9,11 @@ interface IQItem {
 Page({
   data: {
     step: 0,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['guide'] && getApp<IAppOption>().globalData.fontSizes['guide'].sm || 15,
 
     fsOpen: false,
 

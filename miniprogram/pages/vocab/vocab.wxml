@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark dark-theme' : ''}} theme-{{theme}} mode-{{mode}}" style="--fs-title:{{fsTitle}};--fs-body:{{fsBody}};--fs-opt:{{fsOpt}};--fs-btn:{{fsBtn}};--fs-sm:{{fsSm}}">
+<view class="page {{darkMode ? 'dark dark-theme' : ''}} theme-{{theme}} mode-{{mode}}">
   <view class="tb">
     <view class="ttl">单词本</view>
     <view class="sub">背词模式 · {{mode === 'battle' ? '战斗' : mode === 'garden' ? '花园' : '集卡'}}</view>

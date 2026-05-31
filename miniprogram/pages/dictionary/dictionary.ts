@@ -50,11 +50,11 @@ Page<IDictData, Record<string, any>>({
     error: '',
     loading: false,
     history: [],
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['dictionary'] && getApp<IAppOption>().globalData.fontSizes['dictionary'].sm || 15,
 
     fsOpen: false,
 

@@ -43,11 +43,11 @@ Page<IFavoritesData, IFavoritesMethods>({
     favSentences: [],
     hardListens: [],
     scrollTop: 0,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['favorites'] && getApp<IAppOption>().globalData.fontSizes['favorites'].sm || 15,
 
     fsOpen: false,
 

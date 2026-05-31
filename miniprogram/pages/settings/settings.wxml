@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs-title:{{fsTitle}};--fs-body:{{fsBody}};--fs-opt:{{fsOpt}};--fs-btn:{{fsBtn}};--fs-sm:{{fsSm}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="page-header">
     <text class="page-title">学习目标</text>
     <text class="page-subtitle">设定每日学习任务量</text>

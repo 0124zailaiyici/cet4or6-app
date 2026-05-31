@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs-title:{{fsTitle}};--fs-body:{{fsBody}};--fs-opt:{{fsOpt}};--fs-btn:{{fsBtn}};--fs-sm:{{fsSm}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar"><view class="h1">学习统计</view><view class="p">你的进步，一清二楚</view></view>
 
   <view class="body" scroll-y scroll-with-animation>

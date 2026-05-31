@@ -9,11 +9,11 @@ Page({
     achievements: [] as { emoji: string; name: string; unlocked: boolean }[],
     calendar: [] as { day: number | null; level: number; isToday: boolean }[][],
     monthLabel: '',
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['profile'] && getApp<IAppOption>().globalData.fontSizes['profile'].sm || 15,
 
     fsOpen: false,
 

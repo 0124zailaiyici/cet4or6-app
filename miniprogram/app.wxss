@@ -8,11 +8,11 @@ page, .page {
   --tag-bg: #fff0f3;
   --pink: #ff6b8a;
   --fs: 1;
-  --fs-title: 16;
-  --fs-body: 16;
-  --fs-opt: 16;
-  --fs-btn: 16;
-  --fs-sm: 16;
+  --fs-title: 20;
+  --fs-body: 18;
+  --fs-opt: 17;
+  --fs-btn: 19;
+  --fs-sm: 15;
 }
 
 /* 字号浮动调节 */

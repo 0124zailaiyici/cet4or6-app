@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs-title:{{fsTitle}};--fs-body:{{fsBody}};--fs-opt:{{fsOpt}};--fs-btn:{{fsBtn}};--fs-sm:{{fsSm}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="page-header">
     <text class="page-title">英语词典</text>
     <view class="ai-badge {{aiAvailable ? '' : 'hidden'}} {{aiEnabled ? '' : 'off'}}" catchtap="toggleAi">

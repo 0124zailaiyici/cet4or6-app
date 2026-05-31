@@ -29,11 +29,11 @@ Page<ISettingsData, ISettingsMethods>({
     sentence: 5,
     translation: 1,
     writing: 1,
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['settings'] && getApp<IAppOption>().globalData.fontSizes['settings'].sm || 15,
 
     fsOpen: false,
 

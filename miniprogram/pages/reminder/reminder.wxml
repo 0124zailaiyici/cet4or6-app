@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs-title:{{fsTitle}};--fs-body:{{fsBody}};--fs-opt:{{fsOpt}};--fs-btn:{{fsBtn}};--fs-sm:{{fsSm}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
   <view class="topbar">
     <view class="h1">学习提醒</view>
     <text class="tag">📱 订阅消息</text>

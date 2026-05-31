@@ -1,4 +1,4 @@
-<view class="page {{darkMode ? 'dark-theme' : ''}}" style="--fs-title:{{fsTitle}};--fs-body:{{fsBody}};--fs-opt:{{fsOpt}};--fs-btn:{{fsBtn}};--fs-sm:{{fsSm}}">
+<view class="page {{darkMode ? 'dark-theme' : ''}}">
 
   <block wx:if="{{phase === 'list'}}">
     <view class="topbar"><view class="h1">模拟考试</view><text class="sub">选一套真题，计时模拟真实考场</text></view>

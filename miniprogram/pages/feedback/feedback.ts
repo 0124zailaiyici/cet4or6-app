@@ -5,11 +5,11 @@ Page({
     fbType: '功能异常',
     fbText: '',
     types: ['功能异常', '功能建议', '体验评价', '其他'],
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['feedback'] && getApp<IAppOption>().globalData.fontSizes['feedback'].sm || 15,
 
     fsOpen: false,
 

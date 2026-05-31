@@ -73,11 +73,11 @@ Page<IExamData, IExamMethods>({
     listeningResults: [],
     writingResults: [],
     translationResults: [],
-    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].title || 16,
-    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].body || 16,
-    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].opt || 16,
-    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].btn || 16,
-    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].sm || 16,
+    fsTitle: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].title || 20,
+    body: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].body || 18,
+    opt: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].opt || 17,
+    btn: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].btn || 19,
+    sm: getApp<IAppOption>().globalData.fontSizes && getApp<IAppOption>().globalData.fontSizes['exam'] && getApp<IAppOption>().globalData.fontSizes['exam'].sm || 15,
 
     fsOpen: false,
 
