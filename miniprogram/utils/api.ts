@@ -1,6 +1,18 @@
 // 部署到公网后改成你的 Railway 地址：
 // wx.setStorageSync('api_base', 'https://cet4or6-app-production.up.railway.app')
 const API_BASE = (() => { try { const v = wx.getStorageSync('api_base'); if (v && v.includes('railway')) return v; return 'https://cet4or6-app-production.up.railway.app' } catch(_) { return 'https://cet4or6-app-production.up.railway.app' } })()
+function getToken(): string {
+  try { return wx.getStorageSync('api_token') || '' } catch { return '' }
+}
+const API_TOKEN = getToken()
+function hdrs(): Record<string, string> {
+  const t = API_TOKEN || getToken()
+  return t ? { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
+}
+function hdrsGet(): Record<string, string> {
+  const t = API_TOKEN || getToken()
+  return t ? { 'Authorization': `Bearer ${t}` } : {}
+}
 
 interface CorrectionResult {
   score: number
@@ -31,7 +43,7 @@ function request<T>(url: string, data: Record<string, unknown>): Promise<T> {
       url: `${API_BASE}${url}`,
       method: 'POST',
       data,
-      header: { 'Content-Type': 'application/json' },
+      header: hdrs(),
       success: (res) => {
         if (res.statusCode === 200) {
           resolve(res.data as T)
@@ -78,6 +90,7 @@ export function aiTranslateWord(word: string): Promise<{ chinese: string }> {
     wx.request({
       url: `${API_BASE}/dictionary/ai?word=${encodeURIComponent(word)}`,
       method: 'GET',
+      header: hdrsGet(),
       success: (res) => {
         if (res.statusCode === 200) resolve(res.data as { chinese: string })
         else reject(new Error(`翻译失败 ${res.statusCode}`))
@@ -92,6 +105,7 @@ export function aiFullDict(word: string): Promise<any> {
     wx.request({
       url: `${API_BASE}/dictionary/ai?word=${encodeURIComponent(word)}&full=true`,
       method: 'GET',
+      header: hdrsGet(),
       success: (res) => {
         if (res.statusCode === 200) resolve(res.data)
         else reject(new Error(`AI词典失败 ${res.statusCode}`))
@@ -125,6 +139,7 @@ export function translateText(text: string): Promise<{ chinese: string }> {
     wx.request({
       url: `${API_BASE}/translate?text=${encodeURIComponent(text)}`,
       method: 'GET',
+      header: hdrsGet(),
       success: (res) => { if (res.statusCode === 200) resolve(res.data as { chinese: string }); else reject(new Error(`翻译失败 ${res.statusCode}`)) },
       fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
     })
@@ -137,7 +152,7 @@ export function translateTextBatch(texts: string[]): Promise<{ results: string[]
       url: `${API_BASE}/translate_batch`,
       method: 'POST',
       data: { texts },
-      header: { 'Content-Type': 'application/json' },
+      header: hdrs(),
       success: (res) => { if (res.statusCode === 200) resolve(res.data as { results: string[] }); else reject(new Error(`批量翻译失败 ${res.statusCode}`)) },
       fail: (err) => reject(new Error(`请求失败: ${err.errMsg}`)),
     })

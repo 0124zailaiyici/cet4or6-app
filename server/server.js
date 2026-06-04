@@ -72,6 +72,23 @@ app.get('/audio/segment/:passageId/:sentenceIdx', (req, res) => {
   }
 });
 
+/* ═══ Auth Middleware ═══ */
+const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN || '';
+const PROTECTED_PATHS = [
+  '/correct_translation', '/correct_writing', '/correct_paragraph',
+  '/teach_sentence', '/tts', '/translate', '/translate_batch',
+  '/generate_sentence', '/parse_sentences', '/dictionary/ai',
+  '/audio/segment/', '/audio/full/', '/audio/from/',
+]
+app.use((req, res, next) => {
+  if (!API_ACCESS_TOKEN) return next()
+  const needsAuth = PROTECTED_PATHS.some(p => req.path.startsWith(p))
+  if (!needsAuth) return next()
+  const auth = req.headers.authorization || ''
+  if (auth === `Bearer ${API_ACCESS_TOKEN}`) return next()
+  res.status(401).json({ error: '未授权，请配置 API_ACCESS_TOKEN' })
+})
+
 const PORT = process.env.PORT || 3001;
 const API_KEY = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_APIKEY;
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
@@ -517,20 +534,6 @@ app.get('/audio/from/:passageId/:startTime', (req, res) => {
 
 app.get('/health', (_, res) => {
   res.json({ status: 'ok', deepseekKey: !!API_KEY, ollamaUrl: !!OLLAMA_URL, passages: PASSAGE_DATA.length });
-});
-
-app.get('/debug', (_, res) => {
-  const audioDir = path.join(__dirname, 'audio')
-  let files = []
-  try { files = fs.readdirSync(audioDir).filter((f) => f.endsWith('.mp3')) } catch {}
-  res.json({
-    cwd: process.cwd(),
-    dirname: __dirname,
-    audioFiles: files,
-    passages: PASSAGE_DATA.map((p) => ({ id: p.id, file: p.audioFile })),
-    dataPath: path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts'),
-    dataExists: fs.existsSync(path.join(__dirname, '..', 'miniprogram', 'data', 'listening_generated.ts')),
-  });
 });
 
 app.listen(PORT, () => {
