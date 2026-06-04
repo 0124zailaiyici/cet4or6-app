@@ -16,3 +16,7 @@ transcript-*.html
 miniprogram/pages/reading/data/
 miniprogram/pages/reading/utils/
 miniprogram/pages/reading/pages/
+
+# Server logs
+server_stdout.txt
+server_stderr.txt

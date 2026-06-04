@@ -1,2 +1,0 @@
-CET-4 代理服务器运行在 http://localhost:3001
-API Key 已未配置，请复制 server/.env.example 为 .env 并填入密钥
