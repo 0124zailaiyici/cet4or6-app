@@ -20,3 +20,6 @@ miniprogram/pages/reading/pages/
 # Server logs
 server_stdout.txt
 server_stderr.txt
+
+# Generated preview
+preview_readme.html

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>四级备考助手 - Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══ Reset & Variables ═══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff5f7;
+  --card:#fff;
+  --primary:#ff6b8a;
+  --primary-light:#ff8fab;
+  --primary-bg:#fff0f3;
+  --text:#2d2d4e;
+  --text-secondary:#8a7a9a;
+  --text-dim:#b0a0b0;
+  --border:#ffd9e0;
+  --shadow:0 4px 20px rgba(200,160,180,0.08);
+  --shadow-strong:0 6px 24px rgba(200,160,180,0.12);
+  --radius:20px;
+  --radius-sm:14px;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;
+  --font-display:'Outfit',var(--font-sans);
+  --phone-w:420px;
+}
+body{background:#1a1a2e;font-family:var(--font-sans);display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--text);-webkit-tap-highlight-color:transparent;user-select:none}
+
+/* ═══ Phone Frame ═══ */
+.phone{
+  width:var(--phone-w);height:812px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 20px 80px rgba(0,0,0,.5),0 0 40px rgba(0,0,0,.3);
+  display:flex;flex-direction:column;
+}
+.notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:30px;
+  background:#1a1a2e;border-radius:0 0 18px 18px;z-index:100;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.notch::after{content:'📍';font-size:10px;opacity:.5}
+.status-bar{display:flex;justify-content:space-between;padding:12px 28px 6px;font-size:12px;font-weight:700;color:var(--text);flex-shrink:0;z-index:99}
+
+/* ═══ Header ═══ */
+.header{
+  padding:4px 20px 12px;flex-shrink:0;position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-icon{width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,var(--primary-light),var(--primary));display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;box-shadow:0 4px 12px rgba(255,107,138,.25)}
+.header-title{font-size:18px;font-weight:800;color:var(--text)}
+.header-sub{font-size:11px;font-weight:600;color:var(--text-secondary)}
+.header-btn{padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,var(--primary-light),var(--primary));font-size:13px;font-weight:700;color:#fff;box-shadow:0 4px 12px rgba(255,107,138,.2);cursor:pointer;transition:transform .15s}
+.header-btn:active{transform:scale(.94)}
+
+/* ═══ Page Container (scrollable) ═══ */
+.pages-container{flex:1;overflow:hidden;position:relative}
+.page{
+  position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;
+  padding:0 20px 80px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;
+  transform:translateY(8px);-webkit-overflow-scrolling:touch;
+}
+.page.active{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+/* ═══ Tab Bar ═══ */
+.tab-bar{
+  display:flex;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding:6px 0 calc(6px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid var(--border);
+  position:relative;z-index:50;
+}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;transition:transform .15s}
+.tab-item:active{transform:scale(.9)}
+.tab-icon{font-size:22px;line-height:1}
+.tab-label{font-size:10px;font-weight:700;color:var(--text-dim);transition:color .2s}
+.tab-item.active .tab-label{color:var(--primary)}
+.tab-item.active .tab-icon{filter:none}
+
+/* ═══ Components ═══ */
+/* Hero */
+.hero{position:relative;margin:0 -20px;padding:0 20px 20px;overflow:hidden}
+.hero-bg{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#fff0f3 0%,var(--bg) 100%);border-radius:0 0 36px 36px}
+.hero-content{position:relative;z-index:1}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;padding:4px 4px 16px}
+.hero-greeting{font-size:24px;font-weight:900;color:var(--text);line-height:1.3;display:block}
+.hero-streak{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:4px 14px 4px 10px;border-radius:20px;background:linear-gradient(135deg,#fff0f3,#fff5f7);font-size:13px;font-weight:700;color:#e86a8a}
+.hero-checkin{
+  padding:10px 24px;border-radius:22px;background:linear-gradient(135deg,var(--primary-light),var(--primary));
+  font-size:14px;font-weight:700;color:#fff;box-shadow:0 4px 14px rgba(255,107,138,.2);cursor:pointer;transition:transform .15s;flex-shrink:0
+}
+.hero-checkin:active{transform:scale(.94)}
+.hero-checkin.done{background:#e8dce2;color:#8a7a82;box-shadow:none}
+
+/* Metrics */
+.metrics{
+  display:flex;align-items:center;background:var(--card);border-radius:var(--radius);padding:16px 0;margin-top:4px;
+  box-shadow:var(--shadow)
+}
+.metric-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.metric-v{font-size:22px;font-weight:900;color:var(--text);line-height:1.2;font-family:var(--font-display)}
+.metric-l{font-size:12px;font-weight:600;color:var(--text-dim)}
+.metric-div{width:1px;height:28px;background:#f5eef0;flex-shrink:0}
+
+/* Mission Card */
+.mission{border-radius:var(--radius);overflow:hidden;margin-bottom:16px;cursor:pointer;transition:transform .15s}
+.mission:active{transform:scale(.97)}
+.mission-inner{
+  padding:24px 24px 20px;background:linear-gradient(135deg,var(--primary-light),#f06292);position:relative
+}
+.mission-inner::after{content:'🎯';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:48px;opacity:.12}
+.mission-label{font-size:12px;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:1px;display:block;margin-bottom:4px}
+.mission-title{font-size:24px;font-weight:900;color:#fff;display:block;line-height:1.2}
+.mission-sub{font-size:14px;font-weight:600;color:rgba(255,255,255,.85);display:block;margin-top:4px}
+.mission-btn{display:inline-flex;align-items:center;gap:4px;margin-top:14px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,.2);font-size:14px;font-weight:700;color:#fff;cursor:pointer}
+
+/* Daily Sentence */
+.ds-card{
+  padding:18px 20px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);
+  margin-bottom:16px;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s
+}
+.ds-card:active{transform:scale(.98)}
+.ds-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ds-tag{font-size:12px;font-weight:700;color:#e86a8a;letter-spacing:.5px}
+.ds-play{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary-light),#d4b5ff);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;box-shadow:0 4px 12px rgba(255,143,171,.2);cursor:pointer;transition:transform .12s}
+.ds-play:active{transform:scale(.88)}
+.ds-en{font-size:16px;font-weight:700;color:var(--text);line-height:1.6;display:block}
+.ds-zh{font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:4px;display:block;line-height:1.5}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.grid-item{
+  border-radius:var(--radius);padding:22px 8px 18px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;gap:6px;cursor:pointer;transition:transform .15s,opacity .15s;box-shadow:0 4px 16px rgba(0,0,0,.06)
+}
+.grid-item:active{transform:scale(.9);opacity:.85}
+.grid-icon{font-size:30px;line-height:1}
+.grid-name{font-size:13px;font-weight:700;color:#fff}
+.gc-listening{background:linear-gradient(135deg,#4fc3f7,#2196f3)}
+.gc-reading{background:linear-gradient(135deg,#78909c,#455a64)}
+.gc-translation{background:linear-gradient(135deg,#ffb74d,#ff9800)}
+.gc-writing{background:linear-gradient(135deg,#ce93d8,#9c27b0)}
+.gc-sentences{background:linear-gradient(135deg,#81c784,#4caf50)}
+.gc-vocab{background:linear-gradient(135deg,#7c4dff,#651fff)}
+.gc-dictionary{background:linear-gradient(135deg,#e57373,#d32f2f)}
+.gc-stats{background:linear-gradient(135deg,#4db6ac,#00897b)}
+.gc-exam{background:linear-gradient(135deg,#4fc3f7,#0288d1)}
+
+/* Section Header */
+.sec-h{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:0 2px}
+.sec-h-text{font-size:14px;font-weight:700;color:var(--text)}
+.sec-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);margin-left:8px}
+
+/* Quick Actions */
+.qa-row{display:flex;gap:12px;margin-bottom:24px}
+.qa-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 0;border-radius:var(--radius);background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);border:1px solid #f0e8ea;cursor:pointer;transition:transform .12s}
+.qa-item:active{transform:scale(.94)}
+.qa-e{font-size:26px}
+.qa-t{font-size:13px;font-weight:700;color:#4a3a4a}
+
+/* ═══ Listening Page ═══ */
+.l-header{padding:16px 0 12px}
+.welcome-card{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--radius);background:linear-gradient(135deg,#fff0f3,var(--card));border:1px solid var(--border)}
+.wc-avatar{font-size:32px}
+.wc-title{font-size:16px;font-weight:800;color:var(--text);display:block}
+.wc-sub{font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.sec-title{display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px}
+.sec-title-text{font-size:16px;font-weight:800;color:var(--text)}
+.sec-title-count{font-size:12px;font-weight:600;color:var(--text-dim)}
+.lcard{padding:16px;border-radius:var(--radius);background:var(--card);margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s;position:relative}
+.lcard:active{transform:scale(.97)}
+.lc-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;flex-shrink:0}
+.lc-icon.s1{background:linear-gradient(135deg,#fff0f3,#ffd9e0)}
+.lc-icon.s2{background:linear-gradient(135deg,#e8f4fd,#bbdefb)}
+.lc-icon.s3{background:linear-gradient(135deg,#f3e5f5,#e1bee7)}
+.lc-sticker{position:absolute;top:-4px;right:-4px;font-size:10px}
+.lc-info{flex:1;min-width:0}
+.lc-title{font-size:14px;font-weight:700;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-meta{font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:2px;display:block}
+.lc-tag{padding:4px 12px;border-radius:10px;background:var(--primary-bg);font-size:11px;font-weight:700;color:var(--primary);flex-shrink:0}
+.lc-badge{position:absolute;top:12px;right:12px;padding:2px 8px;border-radius:8px;font-size:9px;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff}
+.lc-badge.hot{background:linear-gradient(135deg,#ff8a65,#ff5722)}
+
+/* ═══ Reading Page ═══ */
+.rh-header{position:relative;margin:0 -20px;padding:20px 20px 16px;overflow:hidden}
+.rh-bg{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#e8f4fd 0%,var(--bg) 100%);border-radius:0 0 36px 36px}
+.rh-content{position:relative;z-index:1}
+.rh-title{font-size:22px;font-weight:900;color:var(--text);display:block}
+.rh-sub{font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.rcard{padding:16px;border-radius:var(--radius);background:var(--card);margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s}
+.rcard:active{transform:scale(.97)}
+.rc-badge{padding:4px 10px;border-radius:10px;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.rc-A{background:linear-gradient(135deg,#4fc3f7,#2196f3)}
+.rc-B{background:linear-gradient(135deg,#ffb74d,#ff9800)}
+.rc-C{background:linear-gradient(135deg,#ce93d8,#9c27b0)}
+.rc-body{flex:1;min-width:0}
+.rc-title{font-size:14px;font-weight:700;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-meta{font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:2px;display:block}
+.rc-arrow{font-size:20px;color:var(--text-dim);flex-shrink:0}
+
+/* ═══ Writing Page ═══ */
+.writing-prompt{padding:18px 20px;border-radius:var(--radius);background:linear-gradient(135deg,#f3e5f5,var(--card));border:1px solid #e1bee7;margin-bottom:16px}
+.writing-prompt-label{font-size:12px;font-weight:700;color:#9c27b0;margin-bottom:6px;display:block}
+.writing-prompt-text{font-size:14px;font-weight:600;color:var(--text);line-height:1.6}
+.writing-area{border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
+.writing-area-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--border)}
+.writing-area-label{font-size:13px;font-weight:700;color:var(--text)}
+.writing-area-hint{font-size:11px;font-weight:600;color:var(--text-dim)}
+.writing-ta{width:100%;min-height:140px;padding:16px 18px;border:none;outline:none;resize:none;font-size:14px;font-family:var(--font-sans);line-height:1.7;color:var(--text);background:var(--card)}
+.writing-ta::placeholder{color:#c0b0c0}
+.wc-bar{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--card);border-top:1px solid var(--border);font-size:11px;color:var(--text-dim)}
+.wc-track{flex:1;height:4px;border-radius:2px;background:#f0e8ea;overflow:hidden}
+.wc-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--primary-light),var(--primary));transition:width .2s}
+.wc-fill.under{background:linear-gradient(90deg,#ffb74d,#ff9800)}
+.wc-fill.over{background:linear-gradient(90deg,#e57373,#d32f2f)}
+.wc-num{font-weight:800;color:var(--text)}
+.action-row{display:flex;gap:12px;margin-bottom:16px}
+.btn{flex:1;padding:14px;border-radius:var(--radius-sm);text-align:center;font-size:14px;font-weight:700;cursor:pointer;transition:transform .12s}
+.btn-primary{background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;box-shadow:0 4px 14px rgba(255,107,138,.2)}
+.btn-primary:active{transform:scale(.96)}
+.btn-outline{padding:14px 24px;border-radius:var(--radius-sm);border:1px solid var(--border);text-align:center;font-size:14px;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:transform .12s}
+.btn-outline:active{transform:scale(.96)}
+
+/* AI Result */
+.result-card{padding:20px;border-radius:var(--radius);background:linear-gradient(135deg,#f3e5f5,var(--card));border:1px solid #e1bee7;margin-bottom:16px}
+.result-score{font-size:40px;font-weight:900;color:var(--primary);font-family:var(--font-display);text-align:center}
+.result-score-label{font-size:14px;font-weight:600;color:var(--text-secondary);text-align:center;display:block;margin-bottom:16px}
+.result-dims{display:flex;gap:10px;margin-bottom:14px}
+.dim-item{flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.6)}
+.dim-num{font-size:18px;font-weight:900;color:var(--text);font-family:var(--font-display);display:block}
+.dim-label{font-size:11px;font-weight:600;color:var(--text-secondary)}
+.result-suggestions{padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.5);font-size:13px;line-height:1.7;color:var(--text);white-space:pre-line}
+
+/* ═══ Vocab Page ═══ */
+.vocab-stats{display:flex;gap:10px;margin:16px 0}
+.vocab-stat{flex:1;padding:14px;border-radius:var(--radius-sm);text-align:center;background:var(--card);box-shadow:var(--shadow)}
+.vocab-stat-n{font-size:20px;font-weight:900;color:var(--text);font-family:var(--font-display)}
+.vocab-stat-l{font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.vocab-stat-n.g{color:#4caf50}
+.mode-select{display:flex;gap:8px;margin-bottom:16px}
+.mode-btn{flex:1;padding:12px;border-radius:var(--radius-sm);text-align:center;font-size:13px;font-weight:700;background:var(--card);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all .15s}
+.mode-btn.on{background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(255,107,138,.2)}
+.word-card{padding:20px;border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-strong);margin-bottom:12px;text-align:center}
+.word-card-en{font-size:24px;font-weight:900;color:var(--text);display:block;line-height:1.3}
+.word-card-phonetic{font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:4px;display:block}
+.word-card-cn{font-size:16px;font-weight:700;color:var(--primary);margin-top:12px;display:block}
+.word-card-example{margin-top:12px;padding:12px;border-radius:10px;background:#faf5f7;font-size:13px;color:var(--text-secondary);line-height:1.5;font-style:italic}
+
+/* ═══ Exam Page ═══ */
+.exam-header{background:linear-gradient(135deg,#e8f4fd,var(--card));border-radius:0 0 36px 36px;padding:20px 20px 24px;margin:0 -20px 16px}
+.exam-header-title{font-size:22px;font-weight:900;color:var(--text)}
+.exam-header-sub{font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.exam-card{padding:16px;border-radius:var(--radius);background:var(--card);margin-bottom:10px;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s}
+.exam-card:active{transform:scale(.97)}
+.exam-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.exam-card-year{font-size:18px;font-weight:900;color:var(--text);font-family:var(--font-display)}
+.exam-card-set{padding:2px 10px;border-radius:8px;font-size:10px;font-weight:800;background:var(--primary-bg);color:var(--primary)}
+.exam-card-bottom{display:flex;gap:8px;flex-wrap:wrap}
+.exam-card-tag{padding:4px 10px;border-radius:8px;font-size:10px;font-weight:700;background:#faf5f7;color:var(--text-secondary)}
+
+/* ═══ Responsive ═══ */
+@media(max-width:480px){
+  body{background:var(--bg);align-items:stretch}
+  .phone{width:100%;height:100vh;border-radius:0;box-shadow:none}
+}
+@media(min-width:481px)and(max-width:900px){
+  .phone{height:90vh;max-height:812px}
+}
+
+/* ═══ Scrollbar ═══ */
+.page::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status-bar"><span>9:41</span><span>🔋 ████░ 78%</span></div>
+
+  <!-- ═══ Pages Container ═══ -->
+  <div class="pages-container">
+
+    <!-- ════════ PAGE 0: Home ════════ -->
+    <div class="page active" data-page="home">
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+          <div class="hero-top">
+            <div>
+              <span class="hero-greeting">👋 下午好<br>继续备考吧！</span>
+              <div class="hero-streak">🔥 连续 5 天</div>
+            </div>
+            <div class="hero-checkin">📌 打卡</div>
+          </div>
+          <div class="metrics">
+            <div class="metric-item"><span class="metric-v">3</span><span class="metric-l">听力</span></div>
+            <div class="metric-div"></div>
+            <div class="metric-item"><span class="metric-v">5</span><span class="metric-l">句子</span></div>
+            <div class="metric-div"></div>
+            <div class="metric-item"><span class="metric-v">2</span><span class="metric-l">翻译</span></div>
+            <div class="metric-div"></div>
+            <div class="metric-item"><span class="metric-v">1</span><span class="metric-l">写作</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mission" onclick="switchPage('exam')">
+        <div class="mission-inner">
+          <span class="mission-label">📌 今日任务</span>
+          <span class="mission-title">2024.06 真题模拟</span>
+          <span class="mission-sub">听力 · 阅读 · 翻译 · 写作</span>
+          <div class="mission-btn">开始做题 →</div>
+        </div>
+      </div>
+
+      <div class="ds-card" onclick="switchPage('listening')">
+        <div class="ds-hd">
+          <span class="ds-tag">💬 每日一句</span>
+          <div class="ds-play">▶</div>
+        </div>
+        <span class="ds-en">The only limit to our realization of tomorrow will be our doubts of today.</span>
+        <span class="ds-zh">实现明天理想的唯一障碍是今天的疑虑。</span>
+      </div>
+
+      <div class="sec-h"><span class="sec-h-text">📚 全部模块</span></div>
+      <div class="grid">
+        <div class="grid-item gc-listening" onclick="switchPage('listening')"><span class="grid-icon">🎧</span><span class="grid-name">听力训练</span></div>
+        <div class="grid-item gc-reading" onclick="switchPage('reading')"><span class="grid-icon">📖</span><span class="grid-name">阅读理解</span></div>
+        <div class="grid-item gc-translation"><span class="grid-icon">✍️</span><span class="grid-name">翻译练习</span></div>
+        <div class="grid-item gc-writing" onclick="switchPage('writing')"><span class="grid-icon">📝</span><span class="grid-name">写作训练</span></div>
+        <div class="grid-item gc-sentences"><span class="grid-icon">💬</span><span class="grid-name">每日一句</span></div>
+        <div class="grid-item gc-vocab" onclick="switchPage('vocab')"><span class="grid-icon">📚</span><span class="grid-name">词汇学习</span></div>
+        <div class="grid-item gc-dictionary"><span class="grid-icon">🔍</span><span class="grid-name">词典</span></div>
+        <div class="grid-item gc-stats"><span class="grid-icon">📊</span><span class="grid-name">学习统计</span></div>
+        <div class="grid-item gc-exam" onclick="switchPage('exam')"><span class="grid-icon">🧪</span><span class="grid-name">真题模拟</span></div>
+      </div>
+    </div>
+
+    <!-- ════════ PAGE 1: Listening ════════ -->
+    <div class="page" data-page="listening">
+      <div class="l-header">
+        <div class="welcome-card">
+          <div class="wc-avatar">🐱</div>
+          <div>
+            <span class="wc-title">今天也要加油喔！</span>
+            <span class="wc-sub">12/33 篇已完成</span>
+          </div>
+        </div>
+      </div>
+      <div class="sec-title">
+        <span class="sec-title-text">📚 我的听力</span>
+        <span class="sec-title-count">33 篇材料</span>
+      </div>
+      <div class="lcard">
+        <div class="lc-icon s1"><span>🎵</span><span class="lc-sticker">✨</span></div>
+        <div class="lc-info"><span class="lc-title">2025年06月 英语四级听力（第1套）</span><span class="lc-meta">25 句 · 约 25 分钟</span></div>
+        <span class="lc-tag">🎧 精听</span>
+        <span class="lc-badge">NEW</span>
+      </div>
+      <div class="lcard">
+        <div class="lc-icon s2"><span>🎵</span><span class="lc-sticker">⭐</span></div>
+        <div class="lc-info"><span class="lc-title">2025年06月 英语四级听力（第2套）</span><span class="lc-meta">22 句 · 约 23 分钟</span></div>
+        <span class="lc-tag">🎧 精听</span>
+        <span class="lc-badge hot">🔥 热门</span>
+      </div>
+      <div class="lcard">
+        <div class="lc-icon s3"><span>🎵</span><span class="lc-sticker">🌸</span></div>
+        <div class="lc-info"><span class="lc-title">2024年12月 英语四级听力（第1套）</span><span class="lc-meta">24 句 · 约 25 分钟</span></div>
+        <span class="lc-tag">🎧 精听</span>
+      </div>
+      <div class="lcard">
+        <div class="lc-icon s1"><span>🎵</span></div>
+        <div class="lc-info"><span class="lc-title">2024年12月 英语四级听力（第2套）</span><span class="lc-meta">23 句 · 约 24 分钟</span></div>
+        <span class="lc-tag">🎧 精听</span>
+      </div>
+      <div class="lcard">
+        <div class="lc-icon s2"><span>🎵</span></div>
+        <div class="lc-info"><span class="lc-title">2024年06月 英语四级听力（第1套）</span><span class="lc-meta">25 句 · 约 25 分钟</span></div>
+        <span class="lc-tag">🎧 精听</span>
+      </div>
+    </div>
+
+    <!-- ════════ PAGE 2: Reading ════════ -->
+    <div class="page" data-page="reading">
+      <div class="rh-header">
+        <div class="rh-bg"></div>
+        <div class="rh-content">
+          <span class="rh-title">📖 阅读理解</span>
+          <span class="rh-sub">148 篇阅读材料</span>
+        </div>
+      </div>
+      <div class="rcard">
+        <span class="rc-badge rc-A">选词</span>
+        <div class="rc-body"><span class="rc-title">The Benefits of Bilingual Education</span><span class="rc-meta">10空 · 15选项</span></div>
+        <span class="rc-arrow">›</span>
+      </div>
+      <div class="rcard">
+        <span class="rc-badge rc-B">匹配</span>
+        <div class="rc-body"><span class="rc-title">How to Build a Sustainable Lifestyle</span><span class="rc-meta">10题匹配</span></div>
+        <span class="rc-arrow">›</span>
+      </div>
+      <div class="rcard">
+        <span class="rc-badge rc-C">精读</span>
+        <div class="rc-body"><span class="rc-title">The Impact of Social Media on Mental Health</span><span class="rc-meta">5题 · 4选项</span></div>
+        <span class="rc-arrow">›</span>
+      </div>
+      <div class="rcard">
+        <span class="rc-badge rc-A">选词</span>
+        <div class="rc-body"><span class="rc-title">The Importance of Financial Literacy</span><span class="rc-meta">10空 · 15选项</span></div>
+        <span class="rc-arrow">›</span>
+      </div>
+      <div class="rcard">
+        <span class="rc-badge rc-C">精读</span>
+        <div class="rc-body"><span class="rc-title">Climate Change and Its Economic Consequences</span><span class="rc-meta">5题 · 4选项</span></div>
+        <span class="rc-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- ════════ PAGE 3: Writing ════════ -->
+    <div class="page" data-page="writing">
+      <div style="padding:16px 0 12px"><span style="font-size:22px;font-weight:900;color:var(--text)">✍️ 写作训练</span><span style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-left:8px">AI 批改</span></div>
+
+      <div class="writing-prompt">
+        <span class="writing-prompt-label">📋 题目</span>
+        <div class="writing-prompt-text">Directions: For this part, you are allowed 30 minutes to write a composition on the topic "The Importance of Time Management for College Students". You should write at least 120 words but no more than 180 words.</div>
+      </div>
+
+      <div class="writing-area">
+        <div class="writing-area-hd">
+          <span class="writing-area-label">✍️ 你的作文</span>
+          <span class="writing-area-hint">120–180 词</span>
+        </div>
+        <textarea class="writing-ta" placeholder="在此输入作文……" id="writingInput" oninput="updateWc(this)">Time management is very important for college students. Firstly, good time management helps students balance study and life. With proper planning, they can finish their homework and also have time for fun. Secondly, managing time well can reduce stress. Students who plan their time well can finish tasks before deadlines. In my opinion, college students should learn to manage their time.</textarea>
+        <div class="wc-bar">
+          <span>词数</span>
+          <div class="wc-track"><div class="wc-fill" id="wcFill" style="width:67%"></div></div>
+          <span><span class="wc-num" id="wcNum">121</span> / 180</span>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="btn btn-primary" onclick="showWritingResult()">📤 交卷评分</div>
+        <div class="btn-outline">重置</div>
+      </div>
+
+      <div class="result-card" id="writingResult" style="display:none">
+        <div style="font-size:40px;font-weight:900;color:#9c27b0;text-align:center;font-family:var(--font-display)">78</div>
+        <span class="result-score-label">/ 100</span>
+        <div class="result-dims">
+          <div class="dim-item"><span class="dim-num">80</span><span class="dim-label">内容</span></div>
+          <div class="dim-item"><span class="dim-num">75</span><span class="dim-label">结构</span></div>
+          <div class="dim-item"><span class="dim-num">78</span><span class="dim-label">语言</span></div>
+        </div>
+        <div class="result-suggestions" style="margin-bottom:12px">
+✅ 词数符合四级要求（121词）<br>
+✅ 分为3段，结构清晰<br>
+💡 建议使用更多高级句型（如定语从句、倒装句）<br>
+💡 可添加结尾连接词：In conclusion / To sum up<br>
+✅ 包含一般现在时和情态动词，语法基本正确
+        </div>
+        <div class="result-suggestions">
+📖 参考范文：Time management is of great importance for college students. Firstly, effective time management helps students to balance their academic studies and extracurricular activities. With proper planning, they can ensure that they have enough time for both learning and relaxation.
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ PAGE 4: Vocab ════════ -->
+    <div class="page" data-page="vocab">
+      <div style="padding:16px 0 12px">
+        <span style="font-size:22px;font-weight:900;color:var(--text)">📚 单词本</span>
+        <span style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-left:8px">背词模式</span>
+      </div>
+
+      <div class="mode-select">
+        <div class="mode-btn on">⚔️ 战斗</div>
+        <div class="mode-btn">🌸 花园</div>
+        <div class="mode-btn">🎴 集卡</div>
+      </div>
+
+      <div class="vocab-stats">
+        <div class="vocab-stat"><span class="vocab-stat-n g">128</span><span class="vocab-stat-l">✓ 已掌握</span></div>
+        <div class="vocab-stat"><span class="vocab-stat-n">46</span><span class="vocab-stat-l">📝 学习中</span></div>
+        <div class="vocab-stat"><span class="vocab-stat-n">7</span><span class="vocab-stat-l">🔥 连胜</span></div>
+      </div>
+
+      <div class="word-card">
+        <span class="word-card-en">significant</span>
+        <span class="word-card-phonetic">/sɪɡˈnɪfɪkənt/</span>
+        <span class="word-card-cn">adj. 重要的；有意义的</span>
+        <div class="word-card-example">"Participating in volunteer work has a significant impact on personal growth."</div>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <div class="btn btn-primary" style="flex:1">✓ 记住了</div>
+        <div class="btn-outline" style="flex:1;text-align:center">✕ 再背一次</div>
+      </div>
+    </div>
+
+    <!-- ════════ PAGE 5: Exam ════════ -->
+    <div class="page" data-page="exam">
+      <div class="exam-header">
+        <span class="exam-header-title">🧪 真题模拟</span>
+        <span class="exam-header-sub">2015–2025 · 全真模拟考试</span>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-card-top">
+          <span class="exam-card-year">2025.06</span>
+          <span class="exam-card-set">第1套</span>
+        </div>
+        <div class="exam-card-bottom">
+          <span class="exam-card-tag">🎧 听力</span>
+          <span class="exam-card-tag">📖 阅读</span>
+          <span class="exam-card-tag">✍️ 翻译</span>
+          <span class="exam-card-tag">📝 写作</span>
+        </div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-top">
+          <span class="exam-card-year">2024.12</span>
+          <span class="exam-card-set">第1套</span>
+        </div>
+        <div class="exam-card-bottom">
+          <span class="exam-card-tag">🎧 听力</span>
+          <span class="exam-card-tag">📖 阅读</span>
+          <span class="exam-card-tag">✍️ 翻译</span>
+          <span class="exam-card-tag">📝 写作</span>
+        </div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-top">
+          <span class="exam-card-year">2024.12</span>
+          <span class="exam-card-set">第2套</span>
+        </div>
+        <div class="exam-card-bottom">
+          <span class="exam-card-tag">🎧 听力</span>
+          <span class="exam-card-tag">📖 阅读</span>
+          <span class="exam-card-tag">✍️ 翻译</span>
+        </div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-top">
+          <span class="exam-card-year">2024.06</span>
+          <span class="exam-card-set">第1套</span>
+        </div>
+        <div class="exam-card-bottom">
+          <span class="exam-card-tag">🎧 听力</span>
+          <span class="exam-card-tag">📖 阅读</span>
+          <span class="exam-card-tag">✍️ 翻译</span>
+          <span class="exam-card-tag">📝 写作</span>
+        </div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-top">
+          <span class="exam-card-year">2024.06</span>
+          <span class="exam-card-set">第2套</span>
+        </div>
+        <div class="exam-card-bottom">
+          <span class="exam-card-tag">🎧 听力</span>
+          <span class="exam-card-tag">📖 阅读</span>
+          <span class="exam-card-tag">✍️ 翻译</span>
+        </div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-top">
+          <span class="exam-card-year">2023.12</span>
+          <span class="exam-card-set">第1套</span>
+        </div>
+        <div class="exam-card-bottom">
+          <span class="exam-card-tag">🎧 听力</span>
+          <span class="exam-card-tag">📖 阅读</span>
+          <span class="exam-card-tag">✍️ 翻译</span>
+          <span class="exam-card-tag">📝 写作</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Tab Bar ═══ -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab(0)">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">首页</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(1)">
+      <span class="tab-icon">🎧</span>
+      <span class="tab-label">听力</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(2)">
+      <span class="tab-icon">📖</span>
+      <span class="tab-label">阅读</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(3)">
+      <span class="tab-icon">📝</span>
+      <span class="tab-label">写作</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(4)">
+      <span class="tab-icon">📚</span>
+      <span class="tab-label">单词</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(5)">
+      <span class="tab-icon">🧪</span>
+      <span class="tab-label">真题</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGES = ['home','listening','reading','writing','vocab','exam'];
+const pageEls = {};
+let currentTab = 0;
+
+PAGES.forEach((id,i)=>{
+  const el = document.querySelector(`[data-page="${id}"]`);
+  if(el) pageEls[i]=el;
+});
+
+function switchTab(idx){
+  currentTab = idx;
+  document.querySelectorAll('.tab-item').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  if(pageEls[idx]) pageEls[idx].classList.add('active');
+  document.querySelector('.phone').scrollTo?.({top:0});
+}
+
+function switchPage(id){
+  const idx = PAGES.indexOf(id);
+  if(idx>=0) switchTab(idx);
+}
+
+function updateWc(el){
+  const wc = el.value.trim() ? el.value.trim().split(/\s+/).length : 0;
+  const fill = document.getElementById('wcFill');
+  const num = document.getElementById('wcNum');
+  num.textContent = wc;
+  const pct = Math.min(100, wc/180*100);
+  fill.style.width = pct+'%';
+  fill.className = 'wc-fill' + (wc>0&&wc<120?' under':'') + (wc>180?' over':'');
+}
+
+function showWritingResult(){
+  const r = document.getElementById('writingResult');
+  r.style.display = 'block';
+  r.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// Tab bar labels
+const TAB_LABELS = ['首页','听力','阅读','写作','单词','真题'];
+</script>
+</body>
+</html>
