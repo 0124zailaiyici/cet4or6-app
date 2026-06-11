@@ -136,9 +136,9 @@ wx.setStorageSync('api_base', 'http://localhost:3001')
 
 项目部署在 [Railway](https://railway.app)，使用 **nixpacks** 自动构建。
 
-**线上地址：** [https://cet4or6-app-production.up.railway.app](https://cet4or6-app-production.up.railway.app)
+**线上地址：** [https://47.106.126.50/cet4](https://47.106.126.50/cet4)
 
-**健康检查：** [https://cet4or6-app-production.up.railway.app/health](https://cet4or6-app-production.up.railway.app/health)
+**健康检查：** [https://47.106.126.50/cet4/health](https://47.106.126.50/cet4/health)
 
 部署配置（`nixpacks.toml`）：
 
